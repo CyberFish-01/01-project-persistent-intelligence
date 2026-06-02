@@ -742,6 +742,26 @@ task_hub:
       lifecycle:
         status: "active"
         review_status: "approved"
+  cautionary_lifecycle_decisions:
+    - decision_id: "cautionary_lifecycle_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      memory_id: "caution_mem_0001"
+      workflow: "tool_use"
+      source_reflection_id: "failure_reflection_0001"
+      reviewer: "manual_review"
+      action: "archive"
+      result: "archived"
+      decision_note: "Superseded by a more specific warning."
+      memory_status_before: "active"
+      snapshot_id: "snapshot_0004"
+      risk: "medium"
+      confidence: 0.6
+      evidence:
+        - "caution_mem_0001"
+        - "failure_reflection_0001"
+      executable_policy_created: false
+      rollback:
+        reversible: true
   procedural_memory:
     - memory_id: "proc_mem_0001"
       timestamp: "ISO-8601 timestamp"
@@ -810,6 +830,8 @@ P17 adds explicit failure reflection. `record-failure-reflection` records a fail
 P18 adds procedural lifecycle retention. `procedural-lifecycle` can archive, discard, or quarantine reviewed `task_hub.procedural_memory` entries. It writes snapshot, audit, trace, update log, lifecycle history, and `task_hub.procedural_lifecycle_decisions`, but it still does not execute workflow policy. Context packages only expose active procedural memory.
 
 P19 adds cautionary procedural review. `review-cautionary-procedural-candidate` can approve, reject, archive, or quarantine warning candidates. Approval creates active `task_hub.cautionary_procedural_memory`, which enters future context as an active warning. It explicitly records `executable_policy: false`, writes snapshot, audit, trace, update log, review decision, rollback metadata, and still does not execute workflow policy.
+
+P20 adds cautionary warning lifecycle retention. `cautionary-warning-lifecycle` can archive, discard, or quarantine active `task_hub.cautionary_procedural_memory`. It writes snapshot, audit, trace, update log, lifecycle history, `task_hub.cautionary_lifecycle_decisions`, and preserves `executable_policy: false`. Context packages only expose active cautionary warnings.
 
 ## 14. Identity Update Gate
 
@@ -1094,6 +1116,7 @@ state_transfer_package:
     procedural_candidates: []
     cautionary_procedural_candidates: []
     cautionary_procedural_memory: []
+    cautionary_lifecycle_decisions: []
     procedural_memory: []
     procedural_lifecycle_decisions: []
   active_tasks: []
@@ -1102,6 +1125,7 @@ state_transfer_package:
   procedural_candidates: []
   cautionary_procedural_candidates: []
   cautionary_procedural_memory: []
+  cautionary_lifecycle_decisions: []
   procedural_memory: []
   procedural_lifecycle_decisions: []
   identity_update_gate:
@@ -1176,6 +1200,7 @@ A valid 01 state must satisfy:
 - every procedural candidate has workflow, evidence, and pending review status,
 - every cautionary procedural candidate has a source reflection, avoid guidance, evidence, and pending or reviewed status with review history,
 - every cautionary procedural memory has evidence, lifecycle metadata, provenance, update history, and `executable_policy: false`,
+- every cautionary lifecycle decision has memory id, workflow, reviewer, action, result, snapshot metadata, and `executable_policy_created: false`,
 - every procedural lifecycle decision has memory id, workflow, reviewer, action, result, and snapshot metadata,
 - every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,
 - P11 must not directly patch `identity_core`; approval can only append identity_memory,

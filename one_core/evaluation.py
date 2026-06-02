@@ -64,6 +64,9 @@ def run_scenario_evaluation() -> dict:
             check_cautionary_procedural_review(
                 root / "cautionary_procedural_review"
             ),
+            check_cautionary_warning_lifecycle(
+                root / "cautionary_warning_lifecycle"
+            ),
             check_procedural_lifecycle_retention(
                 root / "procedural_lifecycle_retention"
             ),
@@ -729,6 +732,105 @@ def check_cautionary_procedural_review(state_dir: Path) -> EvaluationCheck:
                 ),
                 "cautionary_active_context_count": len(active_context),
                 "cautionary_identity_mutation_count": 0
+                if state["identity_core"] == before_identity
+                else 1,
+            },
+        },
+    )
+
+
+def check_cautionary_warning_lifecycle(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    state = store.load()
+    store.record_trace(
+        workflow="tool_use",
+        nodes=[
+            {
+                "id": "failed_tool",
+                "type": "Action",
+                "summary": "Tool failed because required input was missing.",
+            }
+        ],
+        errors=[
+            {
+                "error": "missing_input",
+                "message": "Required input was missing.",
+            }
+        ],
+        summary="Tool workflow failed because input was missing.",
+        state=state,
+        status="failed",
+    )
+    store.save(state)
+    failed_action = state["task_hub"]["action_trace"][-1]
+    reflection = store.record_failure_reflection(
+        workflow="tool_use",
+        action_id=failed_action["action_id"],
+        summary="Tried a tool workflow before collecting required input.",
+        lesson="Check required inputs before tool execution.",
+        next_action="Ask for or infer required input first.",
+        reviewer="scenario_eval",
+    )
+    review = store.review_cautionary_procedural_candidate(
+        candidate_id=reflection.get("cautionary_candidate_id", ""),
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Create warning before lifecycle retention test.",
+    )
+    lifecycle = store.apply_cautionary_warning_lifecycle_action(
+        memory_id=review.get("cautionary_memory_id", ""),
+        action="archive",
+        reviewer="scenario_eval",
+        decision_note="Archive obsolete cautionary warning for retention testing.",
+    )
+    state = store.load()
+    package = store.build_context_package()
+    warnings = state.get("task_hub", {}).get("cautionary_procedural_memory", [])
+    lifecycle_decisions = state.get("task_hub", {}).get("cautionary_lifecycle_decisions", [])
+    active_exposed = [
+        item
+        for item in package.get("cautionary_procedural_memory", [])
+        if isinstance(item, dict)
+    ]
+    latest_warning = warnings[-1] if warnings else {}
+    checks = {
+        "warning_reviewed": review.get("status") == "approved",
+        "lifecycle_archived": lifecycle.get("status") == "archived",
+        "lifecycle_decision_recorded": bool(lifecycle_decisions)
+        and lifecycle_decisions[-1].get("decision_id")
+        == lifecycle.get("cautionary_lifecycle_decision_id"),
+        "warning_archived": bool(warnings)
+        and warnings[-1].get("status") == "archived",
+        "context_hides_archived_warning": not active_exposed,
+        "warning_not_executable_policy": latest_warning.get("executable_policy") is False,
+        "identity_not_mutated": state["identity_core"] == before_identity,
+        "event_replay_passed": store.replay_events()["status"] == "passed",
+    }
+    return EvaluationCheck(
+        name="cautionary_warning_lifecycle",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Cautionary Warning Lifecycle",
+            "candidate_id": reflection.get("cautionary_candidate_id"),
+            "cautionary_memory_id": review.get("cautionary_memory_id"),
+            "checks": checks,
+            "metrics": {
+                "cautionary_lifecycle_score": ratio(checks.values()),
+                "cautionary_lifecycle_decision_count": len(lifecycle_decisions),
+                "cautionary_archived_count": sum(
+                    1
+                    for item in warnings
+                    if isinstance(item, dict) and item.get("status") == "archived"
+                ),
+                "cautionary_lifecycle_active_context_count": len(active_exposed),
+                "cautionary_lifecycle_executable_policy_count": sum(
+                    1
+                    for item in warnings
+                    if isinstance(item, dict)
+                    and item.get("executable_policy") is not False
+                ),
+                "cautionary_lifecycle_identity_mutation_count": 0
                 if state["identity_core"] == before_identity
                 else 1,
             },
@@ -1424,6 +1526,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "cautionary_review_score" in item
     ]
+    cautionary_lifecycle_scores = [
+        item["cautionary_lifecycle_score"]
+        for item in metrics
+        if "cautionary_lifecycle_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -1491,6 +1598,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         )
         if cautionary_review_scores
         else None,
+        "cautionary_lifecycle_score": round(
+            sum(cautionary_lifecycle_scores) / len(cautionary_lifecycle_scores),
+            2,
+        )
+        if cautionary_lifecycle_scores
+        else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
         ),
@@ -1549,6 +1662,25 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "cautionary_identity_mutation_count": sum(
             int(item.get("cautionary_identity_mutation_count", 0))
+            for item in metrics
+        ),
+        "cautionary_lifecycle_decision_count": sum(
+            int(item.get("cautionary_lifecycle_decision_count", 0))
+            for item in metrics
+        ),
+        "cautionary_archived_count": sum(
+            int(item.get("cautionary_archived_count", 0)) for item in metrics
+        ),
+        "cautionary_lifecycle_active_context_count": sum(
+            int(item.get("cautionary_lifecycle_active_context_count", 0))
+            for item in metrics
+        ),
+        "cautionary_lifecycle_executable_policy_count": sum(
+            int(item.get("cautionary_lifecycle_executable_policy_count", 0))
+            for item in metrics
+        ),
+        "cautionary_lifecycle_identity_mutation_count": sum(
+            int(item.get("cautionary_lifecycle_identity_mutation_count", 0))
             for item in metrics
         ),
         "approved_identity_updates": sum(

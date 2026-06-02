@@ -949,6 +949,7 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "cautionary_procedural_candidates",
         "cautionary_procedural_memory",
         "cautionary_review_decisions",
+        "cautionary_lifecycle_decisions",
         "procedural_memory",
         "procedural_lifecycle_decisions",
         "procedural_review_decisions",
@@ -1106,6 +1107,38 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                         "Cautionary procedural memory must have a valid lifecycle status.",
                     )
                 )
+            if memory.get("status") in {"archived", "discarded", "quarantined"}:
+                lifecycle = memory.get("lifecycle") if isinstance(memory.get("lifecycle"), dict) else {}
+                decision_id = lifecycle.get("lifecycle_decision_id")
+                if not decision_id:
+                    issues.append(
+                        ValidationIssue(
+                            path + ".lifecycle.lifecycle_decision_id",
+                            "Cautionary warning lifecycle must reference a decision.",
+                        )
+                    )
+                elif decision_id != memory.get("last_lifecycle_decision_id"):
+                    issues.append(
+                        ValidationIssue(
+                            path + ".last_lifecycle_decision_id",
+                            "Cautionary warning last_lifecycle_decision_id must match lifecycle decision.",
+                        )
+                    )
+                history = memory.get("lifecycle_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(
+                        ValidationIssue(
+                            path + ".lifecycle_history",
+                            "Cautionary warning lifecycle action requires lifecycle history.",
+                        )
+                    )
+                elif history[-1].get("decision_id") != memory.get("last_lifecycle_decision_id"):
+                    issues.append(
+                        ValidationIssue(
+                            path + ".lifecycle_history",
+                            "Cautionary warning lifecycle history must reference latest decision.",
+                        )
+                    )
     procedural_memory = task_hub.get("procedural_memory", [])
     if isinstance(procedural_memory, list):
         for index, memory in enumerate(procedural_memory):
@@ -1199,6 +1232,40 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                     ValidationIssue(
                         path + ".executable_policy_created",
                         "Cautionary review must not create executable policy.",
+                    )
+                )
+    cautionary_lifecycle_decisions = task_hub.get("cautionary_lifecycle_decisions", [])
+    if isinstance(cautionary_lifecycle_decisions, list):
+        for index, decision in enumerate(cautionary_lifecycle_decisions):
+            path = f"task_hub.cautionary_lifecycle_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Cautionary lifecycle decision must be an object."))
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "memory_id",
+                "workflow",
+                "reviewer",
+                "action",
+                "result",
+                "snapshot_id",
+                "executable_policy_created",
+            ):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Cautionary lifecycle decision key is missing."))
+            if decision.get("result") not in {"archived", "discarded", "quarantined"}:
+                issues.append(
+                    ValidationIssue(
+                        path + ".result",
+                        "Cautionary lifecycle decision must resolve to archived, discarded, or quarantined.",
+                    )
+                )
+            if decision.get("executable_policy_created") is not False:
+                issues.append(
+                    ValidationIssue(
+                        path + ".executable_policy_created",
+                        "Cautionary lifecycle must not create executable policy.",
                     )
                 )
     return issues

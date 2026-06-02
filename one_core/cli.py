@@ -123,6 +123,19 @@ def main() -> None:
     procedural_lifecycle_parser.add_argument("--reviewer", default="manual_review")
     procedural_lifecycle_parser.add_argument("--decision-note", default="")
 
+    cautionary_lifecycle_parser = subparsers.add_parser(
+        "cautionary-warning-lifecycle",
+        help="Apply a reviewed lifecycle action to a cautionary warning.",
+    )
+    cautionary_lifecycle_parser.add_argument("memory_id")
+    cautionary_lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["archive", "discard", "quarantine"],
+    )
+    cautionary_lifecycle_parser.add_argument("--reviewer", default="manual_review")
+    cautionary_lifecycle_parser.add_argument("--decision-note", default="")
+
     identity_propose_parser = subparsers.add_parser(
         "propose-identity-update",
         help="Create a high-gate identity update proposal without applying it.",
@@ -339,6 +352,15 @@ def main() -> None:
     elif args.command == "procedural-lifecycle":
         print_json(
             store.apply_procedural_lifecycle_action(
+                memory_id=args.memory_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "cautionary-warning-lifecycle":
+        print_json(
+            store.apply_cautionary_warning_lifecycle_action(
                 memory_id=args.memory_id,
                 action=args.action,
                 reviewer=args.reviewer,

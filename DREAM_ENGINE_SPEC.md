@@ -368,6 +368,8 @@ P18 adds reviewed retention for procedural memory. `procedural-lifecycle` can ar
 
 P19 adds cautionary procedural review. `review-cautionary-procedural-candidate` can approve, reject, archive, or quarantine warning candidates. Approval creates `task_hub.cautionary_procedural_memory`, which is exposed as active warning context. It explicitly records `executable_policy: false`, so it remains guidance about what to avoid, not an automatic tool or workflow policy.
 
+P20 adds reviewed retention for cautionary warnings. `cautionary-warning-lifecycle` can archive, discard, or quarantine active `task_hub.cautionary_procedural_memory`. Archived or quarantined warnings are retained for audit but suppressed from active context. This remains warning lifecycle governance, not workflow execution.
+
 Dream artifacts also include a deterministic rubric:
 
 ```yaml

@@ -366,6 +366,8 @@ P18 增加 procedural memory 的已审查 retention。`procedural-lifecycle` 可
 
 P19 增加 cautionary procedural review。`review-cautionary-procedural-candidate` 可以 approve、reject、archive 或 quarantine warning candidates。批准后会创建 `task_hub.cautionary_procedural_memory`，并作为 active warning context 暴露。它明确记录 `executable_policy: false`，所以它只是“避免什么”的指导，不是自动工具或 workflow policy。
 
+P20 增加 cautionary warnings 的已审查 retention。`cautionary-warning-lifecycle` 可以 archive、discard 或 quarantine active `task_hub.cautionary_procedural_memory`。Archived 或 quarantined warnings 会保留审计轨迹，但会从 active context 中被压制。这仍然是 warning lifecycle governance，不是 workflow execution。
+
 Dream artifact 也包含确定性的 rubric：
 
 ```yaml

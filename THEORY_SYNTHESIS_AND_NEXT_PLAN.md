@@ -717,18 +717,38 @@ Implemented result:
 
 Remaining gaps:
 
-- active cautionary warnings do not yet have a retention lifecycle;
 - cautionary warnings are not yet linked to tool policy / safety policy;
+- no workflow policy executor yet.
+
+### P20 Cautionary Warning Lifecycle
+
+Goal: let active cautionary warnings stay active, become archived, discarded, or quarantined through an auditable retention path.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `cautionary-warning-lifecycle` CLI can archive, discard, or quarantine `task_hub.cautionary_procedural_memory`;
+- `StateStore.apply_cautionary_warning_lifecycle_action` writes snapshot, audit, trace, update log, lifecycle history, and `task_hub.cautionary_lifecycle_decisions`;
+- context packages expose only active cautionary procedural memory;
+- lifecycle decisions preserve `executable_policy_created: false`;
+- scenario evaluation adds `cautionary_warning_lifecycle`;
+- cautionary warning lifecycle does not mutate Identity Core and does not execute workflow policy.
+
+Remaining gaps:
+
+- cautionary warnings are not yet linked to tool policy / safety policy;
+- failure reflections and warnings do not yet enter a general reflection log;
 - no workflow policy executor yet.
 
 Recommended next step:
 
 ```text
-P20 Cautionary Warning Lifecycle
+P21 Reflection Log
 ```
 
 Reason:
 
-- P19 gives failure-derived warnings a review path and active context presence;
-- active warnings also need retention so obsolete or overbroad cautions can be archived, discarded, or quarantined;
-- this is still foundation work because it controls how warning state persists through time without becoming automatic behavior policy.
+- P17-P20 can record failure lessons, promote them into active warnings, and retire obsolete warnings;
+- the next missing foundation is a general reflection log that links observations, lessons, reviews, and later verification;
+- this supports the Cognitive OS self-growth requirement: a reflection should prove whether it changed later behavior, not just create a polished note.

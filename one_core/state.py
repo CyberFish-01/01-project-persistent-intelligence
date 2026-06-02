@@ -54,6 +54,7 @@ CLAIM_REVIEW_ACTIONS = {"resolve", "reject", "quarantine", "keep_open"}
 PROCEDURAL_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 PROCEDURAL_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 CAUTIONARY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
+CAUTIONARY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 
 
 def utc_now() -> str:
@@ -195,6 +196,7 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "cautionary_procedural_candidates": [],
         "cautionary_procedural_memory": [],
         "cautionary_review_decisions": [],
+        "cautionary_lifecycle_decisions": [],
         "procedural_memory": [],
         "procedural_lifecycle_decisions": [],
         "procedural_review_decisions": [],
@@ -516,6 +518,7 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "cautionary_procedural_candidates",
         "cautionary_procedural_memory",
         "cautionary_review_decisions",
+        "cautionary_lifecycle_decisions",
         "procedural_memory",
         "procedural_lifecycle_decisions",
         "procedural_review_decisions",
@@ -617,6 +620,7 @@ def task_action_evidence(trace: dict) -> List[str]:
             "procedural_lifecycle_decision_id",
             "cautionary_memory_id",
             "cautionary_decision_id",
+            "cautionary_lifecycle_decision_id",
         ):
             value = event.get(key)
             if value:
@@ -3110,6 +3114,196 @@ class StateStore:
             "cautionary_memory_id": cautionary_memory_id,
             "snapshot_id": snapshot["snapshot_id"],
             "cautionary_decision_id": decision["decision_id"],
+        }
+
+    def apply_cautionary_warning_lifecycle_action(
+        self,
+        memory_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in CAUTIONARY_LIFECYCLE_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_cautionary_lifecycle_action",
+                "action": action,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault("task_hub", default_task_hub(utc_now(), state.get("working_state", {})))
+        warning = next(
+            (
+                item
+                for item in task_hub.setdefault("cautionary_procedural_memory", [])
+                if isinstance(item, dict) and item.get("memory_id") == memory_id
+            ),
+            None,
+        )
+        if warning is None:
+            return {
+                "status": "not_found",
+                "error": "cautionary_warning_not_found",
+                "memory_id": memory_id,
+            }
+
+        before_status = warning.get("lifecycle", {}).get("status") or warning.get("status")
+        if before_status in {"archived", "discarded", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "memory_id": memory_id,
+                "lifecycle_status": before_status,
+            }
+
+        now = utc_now()
+        target_status = {
+            "archive": "archived",
+            "discard": "discarded",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        decision = {
+            "decision_id": new_id("cautionary_lifecycle_decision"),
+            "timestamp": now,
+            "memory_id": memory_id,
+            "workflow": warning.get("workflow"),
+            "source_reflection_id": warning.get("source_reflection_id"),
+            "reviewer": reviewer,
+            "action": normalized_action,
+            "result": target_status,
+            "decision_note": decision_note,
+            "memory_status_before": before_status,
+            "snapshot_id": None,
+            "risk": warning.get("risk", "medium"),
+            "confidence": warning.get("confidence", 0.5),
+            "evidence": [memory_id] + list(warning.get("evidence", [])),
+            "executable_policy_created": False,
+            "rollback": {"reversible": True},
+        }
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_cautionary_warning",
+            target_path="task_hub.cautionary_procedural_memory",
+            evidence=[memory_id] + list(warning.get("evidence", [])),
+            metadata={
+                "cautionary_lifecycle_decision_id": decision["decision_id"],
+                "memory_id": memory_id,
+                "memory_status": before_status,
+                "workflow": warning.get("workflow"),
+                "source_reflection_id": warning.get("source_reflection_id"),
+                "executable_policy_created": False,
+            },
+        )
+        warning["status"] = target_status
+        warning["review_status"] = target_status
+        warning["reviewed_at"] = now
+        warning["reviewer"] = reviewer
+        warning["decision_note"] = decision_note
+        warning["last_lifecycle_decision_id"] = decision["decision_id"]
+        warning["executable_policy"] = False
+        warning["lifecycle"] = {
+            **warning.get("lifecycle", {}),
+            "status": target_status,
+            "last_reviewed_at": now,
+            "review_status": target_status,
+            "lifecycle_decision_id": decision["decision_id"],
+        }
+        if normalized_action == "quarantine":
+            warning["quarantine_reason"] = decision_note or "cautionary_lifecycle_quarantine"
+        if normalized_action == "discard":
+            warning["discard_reason"] = decision_note or "cautionary_lifecycle_discard"
+
+        decision["snapshot_id"] = snapshot["snapshot_id"]
+        task_hub.setdefault("cautionary_lifecycle_decisions", []).append(decision)
+        warning.setdefault("lifecycle_history", []).append(decision)
+        warning.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": reviewer,
+                "operation": f"{normalized_action}_cautionary_warning",
+                "evidence": [memory_id],
+                "cautionary_lifecycle_decision_id": decision["decision_id"],
+            }
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.cautionary_procedural_memory",
+                "operation": f"{normalized_action}_cautionary_warning",
+                "before": before_status,
+                "after": target_status,
+                "evidence": [memory_id] + list(warning.get("evidence", [])),
+                "gate": "medium",
+                "confidence": warning.get("confidence", 0.5),
+                "cautionary_lifecycle_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_cautionary_warning_lifecycle",
+            target="task_hub.cautionary_procedural_memory",
+            outcome=target_status,
+            evidence=[memory_id] + list(warning.get("evidence", [])),
+            metadata={
+                "cautionary_lifecycle_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "memory_id": memory_id,
+                "decision_note": decision_note,
+                "executable_policy_created": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="cautionary_warning_lifecycle",
+            nodes=[
+                {
+                    "id": "cautionary_warning",
+                    "type": "Memory",
+                    "memory_id": memory_id,
+                    "executable_policy": False,
+                },
+                {
+                    "id": "lifecycle_review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[{"from": "cautionary_warning", "to": "lifecycle_review", "type": "feedback"}],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.cautionary_procedural_memory",
+                    "cautionary_memory_id": memory_id,
+                    "cautionary_lifecycle_decision_id": decision["decision_id"],
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_cautionary_warning",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "cautionary_lifecycle_decision": decision,
+                }
+            ],
+            summary=f"Applied lifecycle action {normalized_action} to cautionary warning {memory_id}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": target_status,
+            "memory_id": memory_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "cautionary_lifecycle_decision_id": decision["decision_id"],
         }
 
     def record_failure_reflection(

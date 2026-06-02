@@ -717,18 +717,38 @@ P17 Failure Reflection
 
 剩余缺口：
 
-- active cautionary warnings 还没有 retention lifecycle；
 - cautionary warnings 还没有和 tool policy / safety policy 联动；
+- 还没有 workflow policy executor。
+
+### P20 Cautionary Warning Lifecycle
+
+目标：让 active cautionary warnings 可以通过可审计 retention path 保持 active、archive、discard 或 quarantine。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `cautionary-warning-lifecycle` CLI 可以 archive、discard 或 quarantine `task_hub.cautionary_procedural_memory`；
+- `StateStore.apply_cautionary_warning_lifecycle_action` 会写入 snapshot、audit、trace、update log、lifecycle history 和 `task_hub.cautionary_lifecycle_decisions`；
+- context package 只暴露 active cautionary procedural memory；
+- lifecycle decisions 保持 `executable_policy_created: false`；
+- scenario evaluation 增加 `cautionary_warning_lifecycle`；
+- cautionary warning lifecycle 不修改 Identity Core，也不执行 workflow policy。
+
+剩余缺口：
+
+- cautionary warnings 还没有和 tool policy / safety policy 联动；
+- failure reflections 和 warnings 还没有进入通用 reflection log；
 - 还没有 workflow policy executor。
 
 建议下一步：
 
 ```text
-P20 Cautionary Warning Lifecycle
+P21 Reflection Log
 ```
 
 理由：
 
-- P19 已经让失败衍生的 warning 有了 review path 和 active context presence；
-- active warnings 也需要 retention，才能让过时或过宽的 caution 被 archive、discard 或 quarantine；
-- 这仍然属于地基工作，因为它控制 warning state 如何穿过时间，而不是把 warning 变成自动行为策略。
+- P17-P20 已经能记录失败 lesson、把它提升为 active warning，并退休过时 warning；
+- 下一块缺失地基是通用 reflection log，用来连接 observation、lesson、review 和后续验证；
+- 这回应 Cognitive OS 的自成长要求：reflection 不应该只是漂亮记录，而要能证明它是否改变了后续行为。
