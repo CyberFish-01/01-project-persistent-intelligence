@@ -147,6 +147,10 @@ class ClientTest(unittest.TestCase):
                     "where_am_i": "local",
                 },
                 "active_intent": {"goal": "test adapters"},
+                "context_package_version": "0.2",
+                "activation_trace": {
+                    "metrics": {"selected_count": 3, "suppressed_count": 1}
+                },
                 "recent_episodes": [{}],
                 "relevant_semantic_memories": [{}, {}],
                 "imported_memories": [],
@@ -155,6 +159,9 @@ class ClientTest(unittest.TestCase):
         )
         self.assertIn("01 Core 上下文包", context)
         self.assertIn("test adapters", context)
+        self.assertIn("版本：0.2", context)
+        self.assertIn("激活记忆：3", context)
+        self.assertIn("压制记忆：1", context)
 
         adapters = format_adapters(
             {

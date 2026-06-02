@@ -9,7 +9,7 @@
 ## 1. 顶层状态
 
 ```yaml
-state_version: "0.3"
+state_version: "0.7"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -21,9 +21,15 @@ relationship_map: {}
 project_map: {}
 affective_state: {}
 adapter_registry: {}
+session_policy: {}
 adapter_event_index: {}
 open_conflicts: []
+claim_graph:
+  claims: []
+  links: []
 dream_queue: []
+snapshots: []
+audit_log: []
 evaluation_trace: []
 update_log: []
 ```
@@ -116,11 +122,14 @@ Imported memory 保存从 AstrBot、Angel Memory 或其他记忆系统导入的�
 ```yaml
 imported_memory:
   - id: "import_0001"
+    import_batch_id: "import_batch_0001"
     timestamp: "ISO-8601 timestamp"
     source_system: "astrbot_text"
     source_label: "astrbot_01_export"
     source_path: "astrbot_01_memory.txt"
     source_index: 1
+    content_hash: "sha256 hex digest"
+    dedupe_key: "sha256:..."
     content: "01 treats continuity as State Transfer."
     summary: "01 treats continuity as State Transfer."
     tags:
@@ -128,6 +137,11 @@ imported_memory:
     salience: 0.65
     confidence: 0.55
     status: "staged"
+    lifecycle:
+      status: "staged"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: null
+      review_status: "staged"
     promotion_policy:
       default_target: "semantic_memory_candidate"
       requires_dream_review: true
@@ -136,6 +150,12 @@ imported_memory:
       - type: "external_text_import"
         source_system: "astrbot_text"
         source_label: "astrbot_01_export"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "memory_importer"
+        operation: "stage_external_memory"
+        evidence:
+          - "astrbot_01_memory.txt"
 ```
 
 ### Episodic Memory
@@ -164,7 +184,110 @@ episodic_memory:
     promoted_to:
       - "semantic_memory:sem_0003"
     confidence: 0.85
+    lifecycle:
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: null
+      review_status: "unreviewed"
+    provenance:
+      - type: "episode_recorded"
+        source:
+          adapter_id: "local_generic_adapter"
+          channel: "local"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "local_generic_adapter"
+        operation: "record_episode"
+        evidence:
+          - "episode_0001"
 ```
+
+### Candidate Memory
+
+Candidate memory 保存 Dream 产出的候选记忆。
+
+它默认不进入 active semantic memory。
+
+```yaml
+candidate_memory:
+  - id: "cand_0001"
+    timestamp: "ISO-8601 timestamp"
+    status: "candidate"
+    review_status: "pending"
+    promotion_target: "semantic_memory"
+    source_dream_id: "dream_0001"
+    proposal_id: "proposal_0001"
+    statement: "Continuity requires state transfer, not only memory retrieval."
+    derived_from:
+      - "episode_0001"
+      - "episode_0002"
+    abstraction_level: "pattern"
+    confidence: 0.75
+    risk: "low"
+    recommended_action: "review_then_promote"
+    recommended_lifecycle_action: "promote"
+    lifecycle_score:
+      score: 0.82
+      risk: "low"
+      factors: []
+      recommended_lifecycle_action: "promote"
+    lifecycle:
+      status: "candidate"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: null
+      review_status: "pending"
+      review_decision_id: null
+    provenance:
+      - type: "dream_proposal"
+        dream_id: "dream_0001"
+        proposal_id: "proposal_0001"
+    last_review_decision_id: null
+    review_history:
+      - decision_id: "review_decision_0001"
+        timestamp: "ISO-8601 timestamp"
+        reviewer: "manual_review"
+        action: "promote"
+        result: "promoted"
+        decision_note: "Reviewed evidence and approved promotion."
+        candidate_id: "cand_0001"
+        recommended_action: "review_then_promote"
+        recommended_lifecycle_action: "promote"
+        risk: "low"
+        confidence: 0.75
+        evidence:
+          - "episode_0001"
+          - "episode_0002"
+        gate: "medium"
+        snapshot_id: "snapshot_0001"
+        target_path: "memory_stores.semantic_memory"
+        after: "sem_0003"
+        rollback:
+          reversible: true
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "dream_engine"
+        operation: "create_candidate"
+        evidence:
+          - "episode_0001"
+          - "episode_0002"
+```
+
+进入 active semantic memory 需要显式 review / promote。
+
+候选记忆的 review action：
+
+```text
+promote
+archive
+discard
+quarantine
+```
+
+`archive` 会复制审计摘要到 `archived_memory`；`discard` 只标记候选已丢弃；`quarantine` 用于来源不明、疑似注入或冲突风险较高的候选。
+
+`recommended_lifecycle_action` 是 Dream 的建议，人工 review 可以采纳或拒绝。
+
+每个已完成的 candidate review 都会在 `review_history` 写入一个 `review_decision`，在 candidate 上保存 `last_review_decision_id`，并让 lifecycle metadata、audit events、traces、update log entries 和 snapshot metadata 指向同一个 decision。
 
 ### Semantic Memory
 
@@ -181,6 +304,22 @@ semantic_memory:
     contradiction_refs: []
     update_policy:
       required_gate: "medium"
+    lifecycle:
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: "ISO-8601 timestamp"
+      review_status: "promoted"
+    provenance:
+      - type: "dream_proposal"
+        dream_id: "dream_0001"
+        proposal_id: "proposal_0001"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "manual_review"
+        operation: "promote_candidate"
+        evidence:
+          - "episode_0001"
+          - "episode_0002"
 ```
 
 ### Identity Memory
@@ -194,6 +333,20 @@ identity_memory:
     confidence: 0.9
     required_gate: "high"
     rollback_id: "snapshot_..."
+    lifecycle:
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: "ISO-8601 timestamp"
+      review_status: "approved"
+    provenance:
+      - type: "identity_seed"
+        source: "make_identity_seed"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "state_store"
+        operation: "seed"
+        evidence:
+          - "identity_seed"
 ```
 
 ### Archived Memory
@@ -203,11 +356,44 @@ Archived memory 不会立刻删除。
 ```yaml
 archived_memory:
   - id: "arch_0001"
+    timestamp: "ISO-8601 timestamp"
     original_id: "episode_0007"
+    original_store: "episodic_memory"
     reason: "superseded_by_user_correction"
     retained_for_audit: true
     retrieval_allowed: false
+    summary: "Archived memory summary."
+    provenance: []
+    lifecycle:
+      status: "archived"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: "ISO-8601 timestamp"
+      review_status: "archived"
+      source_memory_id: "episode_0007"
+      source_store: "episodic_memory"
+      lifecycle_decision_id: "lifecycle_decision_0001"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "manual_review"
+        operation: "archive_memory"
+        evidence:
+          - "episode_0007"
+        lifecycle_decision_id: "lifecycle_decision_0001"
 ```
+
+Durable memory lifecycle actions：
+
+```text
+archive
+discard
+quarantine
+```
+
+当前实现支持对 `imported_memory`、`episodic_memory`、`candidate_memory` 和 `semantic_memory` 执行 lifecycle action。
+
+`identity_memory` 会被通用 lifecycle 命令拒绝，必须走单独 high gate。
+
+每个已执行 lifecycle action 都会把 `lifecycle_decision_id` 写入 `lifecycle_history`、lifecycle metadata、audit events、traces、update log entries 和 snapshot metadata。`archive` 还会把审计保留摘要复制到 `archived_memory`。`discard` 和 `quarantine` 只标记原 memory，不删除审计轨迹。
 
 ## 5. Relationship Map
 
@@ -294,7 +480,52 @@ adapter_registry:
 
 `POST /v1/adapter/ingest` 要求 `adapter_id` 已注册且启用。
 
-## 9. Adapter Event Index
+## 9. Session Policy
+
+Session policy 控制已注册 adapter 在哪些 channel/session/user 上可以真实写入。
+
+它在 adapter registry 之后执行：
+
+```text
+adapter registry -> session policy -> dry-run / write / reject
+```
+
+默认策略保守：
+
+- local generic adapter 可以写入；
+- AstrBot thin adapter 默认 `dry_run_only`；
+- 未匹配规则默认 `dry_run_only`。
+
+```yaml
+session_policy:
+  default_action: "dry_run_only"
+  rules:
+    - id: "local_generic_allow"
+      adapter_id: "local_generic_adapter"
+      channels:
+        - "local"
+        - "local_generic_adapter"
+      action: "allow"
+      reason: "Local generic adapter is allowed for protocol verification."
+    - id: "astrbot_private_preview"
+      adapter_id: "astrbot_thin_adapter"
+      channels:
+        - "astrbot"
+      action: "dry_run_only"
+      reason: "AstrBot remains a thin adapter until local protocol policy is stable."
+```
+
+合法 action：
+
+```text
+allow
+dry_run_only
+reject
+```
+
+`dry_run_only` 会把真实写入请求降级为 dry-run 预览，不写入 episode、dream job 或 adapter event index。
+
+## 10. Adapter Event Index
 
 Adapter event index 用来防止外部事件被重复写入。
 
@@ -311,7 +542,7 @@ adapter_event_index:
 
 只有带 `event_id` 的真实写入会更新这个索引。Dry-run 预览不会更新。
 
-## 10. Open Conflicts
+## 11. Open Conflicts
 
 ```yaml
 open_conflicts:
@@ -326,7 +557,51 @@ open_conflicts:
     status: "open"
 ```
 
-## 11. Dream Queue
+## 12. Claim Graph
+
+Claim graph 记录待审 claim、理由、证据和冲突依赖。
+
+它是 append-friendly 结构，不直接修改 active semantic memory 或 Identity Core。
+
+```yaml
+claim_graph:
+  claims:
+    - claim_id: "claim_conflict_0001"
+      timestamp: "ISO-8601 timestamp"
+      claim_type: "false_memory_injection|stale_preference|identity_overwrite_attempt|imported_memory_conflict|roleplay_identity_boundary"
+      statement: "A message asserts an unsupported past identity-changing event."
+      status: "open|resolved|archived"
+      confidence: 0.8
+      risk: "low|medium|high"
+      evidence:
+        - "episode_0001"
+      provenance:
+        - type: "conflict_detection"
+          source: "dream_engine"
+          conflict_id: "conflict_0001"
+          dream_id: "dream_0001"
+      reason: "Store as an unverified claim and require independent confirmation."
+      dependencies:
+        - "episode_0001"
+      source_conflict_id: "conflict_0001"
+      resolution:
+        status: "unresolved"
+        proposal: "Require review before semantic or identity promotion."
+        requires_review: true
+        minimal_change: true
+        may_update_identity_core: false
+        may_update_semantic_memory: false
+  links:
+    - from: "claim_a"
+      to: "claim_b"
+      type: "contradicts|supports|supersedes|depends_on"
+```
+
+每个 claim 都必须有 evidence、provenance、status 和 resolution metadata。
+
+当前 Dream conflict detection 会同时写入 `open_conflicts` 和对应 claim nodes。Claim graph entry 是 review/audit material；它本身不会执行 resolution action。
+
+## 13. Dream Queue
 
 ```yaml
 dream_queue:
@@ -343,7 +618,53 @@ dream_queue:
     status: "pending"
 ```
 
-## 12. Update Log
+## 14. Audit Log
+
+Audit log 记录运行时发生过什么。
+
+它不是 memory promotion，也不是 identity update。它用于审计、回放、调试和后续 evaluation。
+
+完整事件写入：
+
+```text
+audit.jsonl
+traces.jsonl
+dream_artifacts.jsonl
+```
+
+`state.json -> audit_log` 只保留最近摘要，避免核心状态无限膨胀。
+
+```yaml
+audit_log:
+  - id: "audit_0001"
+    timestamp: "ISO-8601 timestamp"
+    actor: "local_generic_adapter"
+    action: "record_episode"
+    target: "memory_stores.episodic_memory"
+    outcome: "recorded"
+    evidence:
+      - "episode_0001"
+```
+
+`dry_run` 可以产生 audit / trace，但不能写入 episode、dream job 或 adapter event index。
+
+Dream artifact 用于保存一次 Dream run 的完整审查材料：
+
+```yaml
+dream_artifact:
+  artifact_id: "dream_artifact_..."
+  dream_id: "dream_..."
+  input_manifest: {}
+  observations: {}
+  proposals: []
+  review:
+    status: "pending"
+  patch_diff: {}
+  decision_log: []
+  rollback_metadata: {}
+```
+
+## 15. Update Log
 
 每个 durable update 都必须记录。
 
@@ -366,7 +687,35 @@ update_log:
       reversible: true
 ```
 
-## 13. State Transfer Package
+## 16. Snapshots
+
+Snapshots 是轻量审计锚点，在 candidate promote、archive、discard 或 quarantine 等 review action 前记录。
+
+当前实现只保存 metadata，还不执行自动 rollback。
+
+```yaml
+snapshots:
+  - snapshot_id: "snapshot_0001"
+    timestamp: "ISO-8601 timestamp"
+    actor: "manual_review"
+    operation: "promote_candidate"
+    target_path: "memory_stores.semantic_memory"
+    evidence:
+      - "cand_0001"
+    metadata:
+      review_decision_id: "review_decision_0001"
+      candidate_id: "cand_0001"
+    state_version: "0.6"
+    memory_counts:
+      semantic_memory: 3
+      candidate_memory: 2
+    rollback:
+      reversible: true
+      mode: "metadata_only"
+      note: "Automatic rollback is not implemented yet."
+```
+
+## 17. State Transfer Package
 
 Session 开始时不应该加载全部状态。
 
@@ -374,10 +723,31 @@ Session 开始时不应该加载全部状态。
 
 ```yaml
 state_transfer_package:
+  context_package_version: "0.2"
   identity_summary: {}
   active_intent: {}
+  current_plan: []
+  next_actions: []
+  blockers: []
+  assumptions: []
+  context_policy:
+    policy_version: "0.2"
+    mode: "bounded_state_activation"
+    budgets:
+      episodic_memory: 5
+      semantic_memory: 5
+      imported_memory: 5
+      source_attribution: 12
   relevant_memories: []
+  recent_episodes: []
+  relevant_semantic_memories: []
+  imported_memories: []
   relationship_context: {}
+  source_attribution: []
+  activation_trace:
+    selected: []
+    suppressed: []
+    metrics: {}
   open_conflicts: []
   current_constraints: []
   continuity_anchors:
@@ -386,16 +756,20 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 14. 最小不变量
+## 18. 最小不变量
 
 一个有效的 01 state 必须满足：
 
-- 每条 durable memory 都有 provenance；
+- 每条 durable memory 都有 provenance、lifecycle metadata 和 update history；
 - 每次 identity update 都有 update log entry；
 - 每次 high-gate update 都有 evidence；
 - 每条 user-specific memory 都有 privacy metadata；
 - 每个 conflict 都有 status；
 - 每个 generic ingest event 都来自已注册且启用的 adapter；
+- 每个 generic ingest event 都经过 session policy；
 - 每个重复的 `adapter_id + event_id` 组合都解析到原始 episode；
+- 每个关键运行事件都可以进入 audit / trace；
+- `dry_run` 的 audit / trace 不等同于 episode 写入；
 - 每个 state snapshot 都有 schema version；
+- 每个 review/promotion rollback reference 都能指向 snapshot metadata；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

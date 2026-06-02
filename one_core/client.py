@@ -122,14 +122,18 @@ def format_status(status: dict[str, Any]) -> str:
 def format_context(context: dict[str, Any]) -> str:
     anchors = context.get("continuity_anchors", {})
     active_intent = context.get("active_intent", {})
+    activation_metrics = context.get("activation_trace", {}).get("metrics", {})
     return (
         "01 Core 上下文包\n"
+        f"- 版本：{context.get('context_package_version', 'unknown')}\n"
         f"- 我是谁：{anchors.get('who_am_i', 'unknown')}\n"
         f"- 我在哪：{anchors.get('where_am_i', 'unknown')}\n"
         f"- 我在做什么：{active_intent.get('goal', 'unknown')}\n"
         f"- 最近经历：{len(context.get('recent_episodes', []))}\n"
         f"- 语义记忆：{len(context.get('relevant_semantic_memories', []))}\n"
         f"- 导入记忆：{len(context.get('imported_memories', []))}\n"
+        f"- 激活记忆：{activation_metrics.get('selected_count', 'unknown')}\n"
+        f"- 压制记忆：{activation_metrics.get('suppressed_count', 'unknown')}\n"
         f"- 开放冲突：{len(context.get('open_conflicts', []))}"
     )
 

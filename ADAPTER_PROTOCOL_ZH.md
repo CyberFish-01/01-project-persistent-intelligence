@@ -7,7 +7,7 @@
 当前协议版本：
 
 ```text
-0.4
+0.6
 ```
 
 我们先做通用版，再做 AstrBot 特化版。
@@ -75,6 +75,19 @@ Protocol v0.3 引入了本地 adapter allowlist：
 - 未知 adapter 会在预览或写入前被拒绝；
 - `/v1/interact` 继续保持旧版兼容，暂时不强制检查 adapter registry。
 
+Protocol v0.5 引入 session policy：
+
+- adapter 通过 registry 后，还要通过 session policy；
+- policy action 支持 `allow`、`dry_run_only`、`reject`；
+- `dry_run_only` 会把真实写入请求降级成 dry-run 预览；
+- 默认 AstrBot thin adapter 是 `dry_run_only`，避免早期自动吸收聊天。
+
+Protocol v0.6 加固 auditability：
+
+- disabled adapter 会在 registry validation 阶段被拒绝，即使是 dry-run；
+- 成功的真实 ingest 除 episode 写入外，还会生成 adapter-level audit / trace；
+- deduplication 依赖持久化 `adapter_event_index`，API 实例重启后仍能识别重复的 `adapter_id + event_id`。
+
 默认注册的 adapter：
 
 ```text
@@ -108,7 +121,7 @@ POST /v1/interact
 POST /v1/adapter/ingest
 ```
 
-推荐从 v0.4 起使用这个入口。
+推荐从 v0.6 起使用这个入口。
 
 请求：
 
@@ -154,7 +167,7 @@ POST /v1/adapter/ingest
 
 ```json
 {
-  "protocol_version": "0.4",
+  "protocol_version": "0.6",
   "agent_id": "01",
   "status": "recorded",
   "dry_run": false,
@@ -168,10 +181,12 @@ dry-run 响应：
 
 ```json
 {
-  "protocol_version": "0.4",
+  "protocol_version": "0.6",
   "agent_id": "01",
   "status": "preview",
   "dry_run": true,
+  "policy_forced_dry_run": false,
+  "session_policy": {},
   "would_record_episode": {},
   "state_transfer_package": {}
 }
@@ -181,7 +196,7 @@ dry-run 响应：
 
 ```json
 {
-  "protocol_version": "0.4",
+  "protocol_version": "0.6",
   "agent_id": "01",
   "status": "duplicate",
   "dry_run": false,
@@ -190,6 +205,10 @@ dry-run 响应：
   "duplicate_event": {}
 }
 ```
+
+只有带 `event_id` 的真实写入会更新 `adapter_event_index`。Dry-run 预览不会更新。
+
+真实写入在通过 registry 和 session policy 后，也会创建 protocol-level `adapter_ingest` audit event 和 trace。它和底层 `record_episode` audit event 分开记录。
 
 ### Dream
 

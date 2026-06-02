@@ -69,6 +69,36 @@ Print the State Transfer Package:
 python3 -m one_core.cli context
 ```
 
+Promote a manually reviewed candidate memory into active semantic memory:
+
+```bash
+python3 -m one_core.cli promote-candidate cand_xxx \
+  --reviewer cyberfish \
+  --decision-note "Manual review confirmed this candidate can enter long-term semantic memory."
+```
+
+Review candidate memory without promoting it:
+
+```bash
+python3 -m one_core.cli review-candidate cand_xxx \
+  --action quarantine \
+  --reviewer cyberfish \
+  --decision-note "Unclear source; quarantine first."
+```
+
+Every candidate review returns a `review_decision_id` and `snapshot_id`, and records the same decision in candidate history, audit, trace, update log, and snapshot metadata.
+
+Apply a reviewed lifecycle action to a durable non-identity memory:
+
+```bash
+python3 -m one_core.cli lifecycle semantic_memory sem_xxx \
+  --action archive \
+  --reviewer cyberfish \
+  --decision-note "Superseded by a newer reviewed memory."
+```
+
+Lifecycle actions currently support `archive`, `discard`, and `quarantine` for imported, episodic, candidate, and semantic memory. Identity memory still requires a separate high gate.
+
 Import external memories from generic text:
 
 ```bash
@@ -88,6 +118,8 @@ Run tests:
 
 ```bash
 python3 -m unittest discover -s tests
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
 ```
 
 ## 3. What It Can Do
@@ -102,7 +134,7 @@ The first version can:
 - persist episodic memory;
 - create pending dream jobs;
 - run Dream Engine;
-- propose semantic memory from episodes;
+- propose candidate memory from episodes;
 - detect a simple identity overwrite attempt;
 - output continuity anchors:
 
@@ -151,13 +183,13 @@ If 01 Core can still answer who it is, where it is, what it is doing, what it ex
 
 Recommended sequence:
 
-1. Add HTTP API.
-2. Add real LLM provider.
-3. Add stricter evaluation scenarios.
-4. Add SQLite storage.
-5. Add AstrBot adapter.
-6. Add Memory Lifecycle compression, archival, and deletion.
-7. Add Identity Update Gate.
+1. Harden scenario evaluation.
+2. Build Context Builder v0.2.
+3. Add Conflict / Claim Graph.
+4. Add Task Hub and procedural memory.
+5. Add Identity Update Gate.
+6. Add SQLite storage after the state/event shape stabilizes.
+7. Update cloud and AstrBot only after several local protocol iterations.
 
 The first step is now real.
 

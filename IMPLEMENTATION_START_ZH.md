@@ -69,6 +69,36 @@ python3 -m one_core.cli dream
 python3 -m one_core.cli context
 ```
 
+把人工审查后的候选记忆提升为 active semantic memory：
+
+```bash
+python3 -m one_core.cli promote-candidate cand_xxx \
+  --reviewer cyberfish \
+  --decision-note "人工确认这个候选可以进入长期语义记忆。"
+```
+
+审查候选记忆但不提升：
+
+```bash
+python3 -m one_core.cli review-candidate cand_xxx \
+  --action quarantine \
+  --reviewer cyberfish \
+  --decision-note "来源不明，先隔离。"
+```
+
+每次 candidate review 都会返回 `review_decision_id` 和 `snapshot_id`，并把同一个 decision 写入 candidate history、audit、trace、update log 和 snapshot metadata。
+
+对非 identity 的 durable memory 执行已审查生命周期动作：
+
+```bash
+python3 -m one_core.cli lifecycle semantic_memory sem_xxx \
+  --action archive \
+  --reviewer cyberfish \
+  --decision-note "被新的已审查记忆替代。"
+```
+
+Lifecycle action 当前支持对 imported、episodic、candidate、semantic memory 执行 `archive`、`discard` 和 `quarantine`。Identity memory 仍需要单独的 high gate。
+
 从通用文本导入外部记忆：
 
 ```bash
@@ -88,6 +118,8 @@ python3 -m one_core.cli clean-memory raw_astrbot_export.json \
 
 ```bash
 python3 -m unittest discover -s tests
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
 ```
 
 ## 3. 它现在能做什么
@@ -102,7 +134,7 @@ python3 -m unittest discover -s tests
 - 保存 episodic memory；
 - 创建 pending dream jobs；
 - 运行 Dream Engine；
-- 从多个 episode 中提出 semantic memory；
+- 从多个 episode 中提出 candidate memory；
 - 检测最简单的 identity overwrite attempt；
 - 输出 continuity anchors：
 
@@ -161,13 +193,13 @@ Day 2: context
 
 推荐下一步顺序：
 
-1. 增加 HTTP API；
-2. 增加真实 LLM provider；
-3. 增加更严格的 evaluation scenarios；
-4. 增加 SQLite 存储；
-5. 增加 AstrBot adapter；
-6. 增加 Memory Lifecycle 的压缩、归档、删除；
-7. 增加 Identity Update Gate。
+1. 继续加固 scenario evaluation；
+2. 构建 Context Builder v0.2；
+3. 增加 Conflict / Claim Graph；
+4. 增加 Task Hub 和 procedural memory；
+5. 增加 Identity Update Gate；
+6. 等 state/event 形状稳定后再加 SQLite；
+7. 本地通用协议迭代几轮后再更新云端和 AstrBot。
 
 第一步已经迈出去了。
 

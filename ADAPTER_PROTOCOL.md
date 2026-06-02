@@ -7,7 +7,7 @@ This is the generic adapter protocol for 01 Core.
 Current protocol version:
 
 ```text
-0.4
+0.6
 ```
 
 We build the generic version first, then specialize for AstrBot.
@@ -75,6 +75,19 @@ Protocol v0.3 introduced a local adapter allowlist:
 - unknown adapters are rejected before preview or recording.
 - `/v1/interact` remains legacy-compatible and does not enforce the adapter registry yet.
 
+Protocol v0.5 introduces session policy:
+
+- adapters must pass session policy after registry validation.
+- policy actions are `allow`, `dry_run_only`, and `reject`.
+- `dry_run_only` downgrades real write requests into dry-run previews.
+- the default AstrBot thin adapter policy is `dry_run_only` to avoid early automatic chat absorption.
+
+Protocol v0.6 strengthens auditability:
+
+- disabled adapters are rejected at registry validation, even for dry-run.
+- successful real ingest writes an adapter-level audit / trace event in addition to the episode write.
+- deduplication is backed by durable `adapter_event_index`, so a restarted API instance still detects repeated `adapter_id + event_id`.
+
 Default registered adapters:
 
 ```text
@@ -108,7 +121,7 @@ Request:
 POST /v1/adapter/ingest
 ```
 
-This is the recommended v0.4 entry point.
+This is the recommended v0.6 entry point.
 
 Request:
 
@@ -154,7 +167,7 @@ Recorded response:
 
 ```json
 {
-  "protocol_version": "0.4",
+  "protocol_version": "0.6",
   "agent_id": "01",
   "status": "recorded",
   "dry_run": false,
@@ -168,10 +181,12 @@ Dry-run response:
 
 ```json
 {
-  "protocol_version": "0.4",
+  "protocol_version": "0.6",
   "agent_id": "01",
   "status": "preview",
   "dry_run": true,
+  "policy_forced_dry_run": false,
+  "session_policy": {},
   "would_record_episode": {},
   "state_transfer_package": {}
 }
@@ -181,7 +196,7 @@ Duplicate response:
 
 ```json
 {
-  "protocol_version": "0.4",
+  "protocol_version": "0.6",
   "agent_id": "01",
   "status": "duplicate",
   "dry_run": false,
@@ -190,6 +205,10 @@ Duplicate response:
   "duplicate_event": {}
 }
 ```
+
+Only real writes with an `event_id` update `adapter_event_index`. Dry-run previews do not.
+
+Real writes also create a protocol-level `adapter_ingest` audit event and trace after registry and session policy checks pass. This is separate from the lower-level `record_episode` audit event.
 
 ### Dream
 

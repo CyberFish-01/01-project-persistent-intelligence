@@ -179,6 +179,28 @@ status: "open|resolved|archived"
 proposed_resolution: "..."
 ```
 
+当前最小实现检测这些 conflict type：
+
+- `identity_overwrite_attempt`：单次交互尝试改写 01 identity；
+- `false_memory_injection`：消息声称一个没有证据的过去身份变化事件；
+- `stale_preference`：新的回答风格偏好替代旧偏好；
+- `roleplay_identity_boundary`：临时角色扮演触碰身份边界；
+- `imported_memory_conflict`：staged imported memory 与当前核心边界或语义原则矛盾。
+
+所有 conflict type 都会变成待审 `conflict_record` proposal 和 claim graph node。它们不会直接更新 active semantic memory 或 Identity Core。
+
+Claim graph 记录：
+
+- claim id；
+- conflict type；
+- statement；
+- evidence ids；
+- provenance；
+- reason / proposed resolution；
+- resolution metadata。
+
+Claim graph 写入是 audit/review material。它不是 semantic promotion，也不是 identity update。
+
 ## 9. Identity Update Proposals
 
 Dream 不能直接重写 Identity Core。
@@ -246,11 +268,106 @@ dream_report:
       severity: "medium"
   identity_update_proposals: []
   forgetting_proposals: []
+  proposals:
+    - proposal_id: "proposal_0001"
+      type: "semantic_memory_candidate"
+      confidence: 0.86
+      risk: "low"
+      affected_memory_ids:
+        - "episode_0012"
+      evidence:
+        - "episode_0012"
+      anchor_score: 0.8
+      recommended_action: "review_then_promote"
+      lifecycle_score:
+        score: 0.82
+        recommended_lifecycle_action: "promote"
+        factors: []
+      review_status: "pending"
   next_questions:
     - "What is the smallest runnable 01 prototype?"
 ```
 
-## 12. Failure Modes
+## 12. Dream Run Artifact
+
+每次 Dream run 都应该生成可审查 artifact。
+
+当前最小 artifact 写入：
+
+```text
+dream_artifacts.jsonl
+```
+
+Artifact 包含：
+
+- input manifest；
+- observations；
+- proposals；
+- rubric；
+- review status；
+- patch diff；
+- decision log；
+- rollback metadata。
+
+Proposal 最小字段：
+
+```yaml
+proposal:
+  proposal_id: "proposal_..."
+  type: "semantic_memory_candidate|identity_update_candidate|forgetting_candidate|conflict_record"
+  confidence: 0.75
+  risk: "low|medium|high"
+  affected_memory_ids: []
+  evidence: []
+  anchor_score: 0.8
+  recommended_action: "review_then_promote"
+  lifecycle_score:
+    score: 0.75
+    risk: "low"
+    recommended_lifecycle_action: "promote|archive|discard|quarantine"
+    factors: []
+  review_status: "pending"
+  payload: {}
+```
+
+`lifecycle_score` 只是 Dream 的可审计建议，不会自动执行 promotion、archive、discard 或 quarantine。
+
+已审查的 lifecycle action 可以后续通过本地 `lifecycle` 命令执行。当前执行层支持对 imported、episodic、candidate 和 semantic memory 执行 `archive`、`discard`、`quarantine`。它会拒绝 identity memory，因为 identity-level change 必须走 high gate。
+
+Identity update proposal 必须保持 `review_status: pending`，不能直接改写 Identity Core。
+
+当前 Dream Engine 将 semantic candidate 写入 `memory_stores.candidate_memory`。进入 active semantic memory 需要显式 `promote-candidate`。
+
+候选也可以被 `archive`、`discard` 或 `quarantine`，用于处理低价值、重复、来源不明或疑似注入的候选。
+
+每个被执行的 candidate review 都会创建统一的 `review_decision_id`，串联 candidate history、audit、trace、update log 和 snapshot metadata。
+
+Dream artifact 也包含确定性的 rubric：
+
+```yaml
+rubric:
+  rubric_id: "rubric_..."
+  status: "passed|needs_review"
+  score: 1.0
+  checks:
+    - name: "protects_core_identity"
+      passed: true
+      detail: "Identity proposals must stay pending and require manual review."
+    - name: "evidence_quality"
+      passed: true
+    - name: "proposal_specificity"
+      passed: true
+    - name: "reversibility"
+      passed: true
+    - name: "false_memory_resistance"
+      passed: true
+    - name: "minimal_change"
+      passed: true
+```
+
+Rubric 不是 promotion 命令。它是 review gate 和审计产物。如果返回 `needs_review`，后续 review 应把这次 Dream 输出视为可疑，直到人工或后续 governance 层处理。
+
+## 13. Failure Modes
 
 Dream 可能失败在：
 
@@ -266,7 +383,7 @@ Dream 可能失败在：
 
 每个 Dream Engine 实现都应该针对这些失败模式测试。
 
-## 13. MVP Dream Engine
+## 14. MVP Dream Engine
 
 第一版 Dream Engine 可以很简单：
 

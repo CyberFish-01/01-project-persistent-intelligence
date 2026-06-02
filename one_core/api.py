@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 from .dream import DreamEngine
 from .state import DEFAULT_STATE_DIR, StateStore
 
-PROTOCOL_VERSION = "0.4"
+PROTOCOL_VERSION = "0.6"
 
 
 def state_summary(store: StateStore) -> dict:
@@ -23,16 +23,23 @@ def state_summary(store: StateStore) -> dict:
         "anchors": state["working_state"]["context_anchors"],
         "imported_memories": len(state["memory_stores"].get("imported_memory", [])),
         "episodes": len(state["memory_stores"]["episodic_memory"]),
+        "candidate_memories": len(
+            state["memory_stores"].get("candidate_memory", [])
+        ),
         "semantic_memories": len(state["memory_stores"]["semantic_memory"]),
         "open_conflicts": len(state.get("open_conflicts", [])),
         "registered_adapters": len(
             state.get("adapter_registry", {}).get("adapters", {})
         ),
+        "session_policy_rules": len(state.get("session_policy", {}).get("rules", [])),
         "indexed_adapter_events": sum(
             len(events)
             for events in state.get("adapter_event_index", {}).values()
             if isinstance(events, dict)
         ),
+        "audit_events": len(store.list_audit_events()),
+        "traces": len(store.list_traces()),
+        "dream_artifacts": len(store.list_dream_artifacts()),
         "pending_dream_jobs": len(
             [job for job in state.get("dream_queue", []) if job.get("status") == "pending"]
         ),
@@ -122,6 +129,37 @@ class OneCoreAPI:
             if path == "/v1/adapter/ingest":
                 adapter_check = self.store.validate_adapter(normalized["adapter_id"])
                 if not adapter_check["allowed"]:
+                    self.store.record_audit_event(
+                        actor=normalized["adapter_id"] or "unknown_adapter",
+                        action="adapter_ingest",
+                        target="/v1/adapter/ingest",
+                        outcome="rejected",
+                        evidence=[],
+                        metadata={
+                            "error": adapter_check["error"],
+                            "dry_run": normalized["dry_run"],
+                            "event_id": normalized["event_id"],
+                            "channel": normalized["channel"],
+                        },
+                    )
+                    self.store.record_trace(
+                        workflow="adapter_ingest",
+                        nodes=[
+                            {
+                                "id": "adapter_check",
+                                "type": "Decision",
+                                "outcome": "rejected",
+                                "error": adapter_check["error"],
+                            }
+                        ],
+                        errors=[
+                            {
+                                "error": adapter_check["error"],
+                                "message": adapter_check["message"],
+                            }
+                        ],
+                        summary="Rejected adapter ingest before preview or write.",
+                    )
                     return HTTPStatus.FORBIDDEN, adapter_response(
                         {
                             "status": "rejected",
@@ -130,6 +168,63 @@ class OneCoreAPI:
                             "message": adapter_check["message"],
                         }
                     )
+                policy_check = self.store.evaluate_session_policy(
+                    adapter_id=normalized["adapter_id"],
+                    channel=normalized["channel"],
+                    session_id=normalized["session_id"],
+                    user_id=normalized["user_id"],
+                )
+                if policy_check["action"] == "reject":
+                    audit_event = self.store.record_audit_event(
+                        actor=normalized["adapter_id"],
+                        action="session_policy",
+                        target="/v1/adapter/ingest",
+                        outcome="rejected",
+                        evidence=[],
+                        metadata={
+                            "rule_id": policy_check["rule_id"],
+                            "reason": policy_check["reason"],
+                            "channel": normalized["channel"],
+                            "session_id": normalized["session_id"],
+                            "user_id": normalized["user_id"],
+                            "event_id": normalized["event_id"],
+                        },
+                    )
+                    self.store.record_trace(
+                        workflow="session_policy",
+                        nodes=[
+                            {
+                                "id": "policy",
+                                "type": "Decision",
+                                "outcome": "rejected",
+                                "rule_id": policy_check["rule_id"],
+                            }
+                        ],
+                        errors=[
+                            {
+                                "error": "session_policy_rejected",
+                                "message": policy_check["reason"],
+                            }
+                        ],
+                        summary="Rejected adapter event by session policy.",
+                        audit_event_ids=[audit_event["id"]],
+                    )
+                    return HTTPStatus.FORBIDDEN, adapter_response(
+                        {
+                            "status": "rejected",
+                            "dry_run": normalized["dry_run"],
+                            "error": "session_policy_rejected",
+                            "message": policy_check["reason"],
+                            "session_policy": policy_check,
+                        }
+                    )
+                if policy_check["action"] == "dry_run_only" and not normalized["dry_run"]:
+                    normalized["dry_run"] = True
+                    normalized["policy_forced_dry_run"] = True
+                    normalized["session_policy"] = policy_check
+                else:
+                    normalized["policy_forced_dry_run"] = False
+                    normalized["session_policy"] = policy_check
             message = normalized["message"]
             if not message:
                 return HTTPStatus.BAD_REQUEST, {
@@ -143,6 +238,39 @@ class OneCoreAPI:
                 )
                 if duplicate:
                     package = self.store.build_context_package()
+                    audit_event = self.store.record_audit_event(
+                        actor=normalized["adapter_id"],
+                        action="adapter_ingest",
+                        target="/v1/adapter/ingest",
+                        outcome="duplicate",
+                        evidence=[duplicate["episode_id"]],
+                        metadata={
+                            "event_id": normalized["event_id"],
+                            "channel": normalized["channel"],
+                            "session_id": normalized["session_id"],
+                        },
+                    )
+                    self.store.record_trace(
+                        workflow="adapter_ingest",
+                        nodes=[
+                            {
+                                "id": "dedup",
+                                "type": "Decision",
+                                "outcome": "duplicate",
+                                "episode_id": duplicate["episode_id"],
+                            }
+                        ],
+                        memory_events=[
+                            {
+                                "operation": "deduplicate",
+                                "target": "adapter_event_index",
+                                "episode_id": duplicate["episode_id"],
+                                "event_id": normalized["event_id"],
+                            }
+                        ],
+                        summary="Rejected duplicate adapter event without recording a new episode.",
+                        audit_event_ids=[audit_event["id"]],
+                    )
                     return HTTPStatus.CONFLICT, adapter_response(
                         {
                             "status": "duplicate",
@@ -156,10 +284,56 @@ class OneCoreAPI:
             if normalized["dry_run"]:
                 episode = self.store.preview_episode(**without_dry_run(normalized))
                 package = self.store.build_context_package()
+                audit_event = self.store.record_audit_event(
+                    actor=normalized["adapter_id"] or normalized["channel"],
+                    action="adapter_ingest_preview",
+                    target=path,
+                    outcome="preview",
+                    evidence=[],
+                    metadata={
+                        "event_id": normalized["event_id"],
+                        "event_type": normalized["event_type"],
+                        "channel": normalized["channel"],
+                        "session_id": normalized["session_id"],
+                        "policy_forced_dry_run": bool(
+                            normalized.get("policy_forced_dry_run")
+                        ),
+                        "session_policy": normalized.get("session_policy"),
+                    },
+                )
+                self.store.record_trace(
+                    workflow="adapter_ingest_preview",
+                    nodes=[
+                        {"id": "input", "type": "Input", "summary": episode["summary"]},
+                        {
+                            "id": "preview",
+                            "type": "Review",
+                            "operation": "preview_episode",
+                            "would_record_episode": episode["id"],
+                        },
+                    ],
+                    edges=[{"from": "input", "to": "preview", "type": "data_flow"}],
+                    review_events=[
+                        {
+                            "operation": "dry_run",
+                            "target": path,
+                            "outcome": "non_mutating_preview",
+                            "policy_forced_dry_run": bool(
+                                normalized.get("policy_forced_dry_run")
+                            ),
+                        }
+                    ],
+                    summary="Previewed adapter ingest without recording episode, dream job, or dedup index.",
+                    audit_event_ids=[audit_event["id"]],
+                )
                 return HTTPStatus.OK, adapter_response(
                     {
                         "status": "preview",
                         "dry_run": True,
+                        "policy_forced_dry_run": bool(
+                            normalized.get("policy_forced_dry_run")
+                        ),
+                        "session_policy": normalized.get("session_policy"),
                         "would_record_episode": episode,
                         "state_transfer_package": package,
                     }
@@ -167,6 +341,51 @@ class OneCoreAPI:
 
             episode = self.store.record_episode(**without_dry_run(normalized))
             package = self.store.build_context_package()
+            if path == "/v1/adapter/ingest":
+                audit_event = self.store.record_audit_event(
+                    actor=normalized["adapter_id"],
+                    action="adapter_ingest",
+                    target="/v1/adapter/ingest",
+                    outcome="recorded",
+                    evidence=[episode["id"]],
+                    metadata={
+                        "event_id": normalized["event_id"],
+                        "event_type": normalized["event_type"],
+                        "channel": normalized["channel"],
+                        "session_id": normalized["session_id"],
+                        "session_policy": normalized.get("session_policy"),
+                    },
+                )
+                self.store.record_trace(
+                    workflow="adapter_ingest",
+                    nodes=[
+                        {
+                            "id": "policy",
+                            "type": "Decision",
+                            "outcome": "allowed",
+                            "session_policy": normalized.get("session_policy"),
+                        },
+                        {
+                            "id": "episode",
+                            "type": "Memory",
+                            "operation": "record_episode",
+                            "episode_id": episode["id"],
+                        },
+                    ],
+                    edges=[
+                        {"from": "policy", "to": "episode", "type": "memory_write"}
+                    ],
+                    memory_events=[
+                        {
+                            "operation": "record",
+                            "target": "episodic_memory",
+                            "episode_id": episode["id"],
+                            "event_id": normalized["event_id"],
+                        }
+                    ],
+                    summary="Recorded adapter ingest through protocol after registry and session policy checks.",
+                    audit_event_ids=[audit_event["id"]],
+                )
             return HTTPStatus.OK, adapter_response(
                 {
                     "status": "recorded",
@@ -250,7 +469,18 @@ def create_server(
 
 
 def without_dry_run(payload: dict) -> dict:
-    return {key: value for key, value in payload.items() if key != "dry_run"}
+    allowed = {
+        "message",
+        "user_id",
+        "channel",
+        "session_id",
+        "event_id",
+        "event_type",
+        "adapter_id",
+        "metadata",
+        "salience_hint",
+    }
+    return {key: value for key, value in payload.items() if key in allowed}
 
 
 def run_server(host: str = "127.0.0.1", port: int = 8765, state_dir: Path = DEFAULT_STATE_DIR) -> None:

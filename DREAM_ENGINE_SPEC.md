@@ -181,6 +181,28 @@ status: "open|resolved|archived"
 proposed_resolution: "..."
 ```
 
+Current minimal implementation detects these conflict types:
+
+- `identity_overwrite_attempt`: a single interaction tries to rewrite 01 identity;
+- `false_memory_injection`: a message asserts an unsupported past identity-changing event;
+- `stale_preference`: a newer response-style preference supersedes an older one;
+- `roleplay_identity_boundary`: temporary roleplay touches identity boundaries;
+- `imported_memory_conflict`: staged imported memory contradicts a current core boundary or semantic principle.
+
+All conflict types become reviewable `conflict_record` proposals and claim graph nodes. They do not directly update active semantic memory or Identity Core.
+
+The claim graph records:
+
+- claim id;
+- conflict type;
+- statement;
+- evidence ids;
+- provenance;
+- reason / proposed resolution;
+- resolution metadata.
+
+Claim graph writes are audit/review material. They are not semantic promotion and they are not identity update.
+
 ## 9. Identity Update Proposals
 
 Dream must not directly rewrite Identity Core.
@@ -248,11 +270,106 @@ dream_report:
       severity: "medium"
   identity_update_proposals: []
   forgetting_proposals: []
+  proposals:
+    - proposal_id: "proposal_0001"
+      type: "semantic_memory_candidate"
+      confidence: 0.86
+      risk: "low"
+      affected_memory_ids:
+        - "episode_0012"
+      evidence:
+        - "episode_0012"
+      anchor_score: 0.8
+      recommended_action: "review_then_promote"
+      lifecycle_score:
+        score: 0.82
+        recommended_lifecycle_action: "promote"
+        factors: []
+      review_status: "pending"
   next_questions:
     - "What is the smallest runnable 01 prototype?"
 ```
 
-## 12. Failure Modes
+## 12. Dream Run Artifact
+
+Every Dream run should produce a reviewable artifact.
+
+The current minimal artifact is written to:
+
+```text
+dream_artifacts.jsonl
+```
+
+The artifact contains:
+
+- input manifest,
+- observations,
+- proposals,
+- rubric,
+- review status,
+- patch diff,
+- decision log,
+- rollback metadata.
+
+Minimal proposal fields:
+
+```yaml
+proposal:
+  proposal_id: "proposal_..."
+  type: "semantic_memory_candidate|identity_update_candidate|forgetting_candidate|conflict_record"
+  confidence: 0.75
+  risk: "low|medium|high"
+  affected_memory_ids: []
+  evidence: []
+  anchor_score: 0.8
+  recommended_action: "review_then_promote"
+  lifecycle_score:
+    score: 0.75
+    risk: "low"
+    recommended_lifecycle_action: "promote|archive|discard|quarantine"
+    factors: []
+  review_status: "pending"
+  payload: {}
+```
+
+`lifecycle_score` is an auditable Dream recommendation only. It does not automatically execute promotion, archive, discard, or quarantine.
+
+Reviewed lifecycle actions can be executed later through the local `lifecycle` command. The execution layer currently supports `archive`, `discard`, and `quarantine` for imported, episodic, candidate, and semantic memory. It rejects identity memory because identity-level changes require a high gate.
+
+Identity update proposals must remain `review_status: pending` and must not directly rewrite Identity Core.
+
+The current Dream Engine writes semantic candidates into `memory_stores.candidate_memory`. Entering active semantic memory requires explicit `promote-candidate`.
+
+Candidates can also be `archive`, `discard`, or `quarantine` to handle low-value, duplicate, unclear-source, or possible-injection candidates.
+
+Every executed candidate review creates a unified `review_decision_id` that links candidate history, audit, trace, update log, and snapshot metadata.
+
+Dream artifacts also include a deterministic rubric:
+
+```yaml
+rubric:
+  rubric_id: "rubric_..."
+  status: "passed|needs_review"
+  score: 1.0
+  checks:
+    - name: "protects_core_identity"
+      passed: true
+      detail: "Identity proposals must stay pending and require manual review."
+    - name: "evidence_quality"
+      passed: true
+    - name: "proposal_specificity"
+      passed: true
+    - name: "reversibility"
+      passed: true
+    - name: "false_memory_resistance"
+      passed: true
+    - name: "minimal_change"
+      passed: true
+```
+
+The rubric is not a promotion command. It is a review gate and audit artifact. If it returns `needs_review`, downstream review should treat the Dream output as suspect until a human or later governance layer resolves it.
+
+## 13. Failure Modes
 
 Dream can fail by:
 
@@ -268,7 +385,7 @@ Dream can fail by:
 
 Every Dream Engine implementation should be tested against these failures.
 
-## 13. MVP Dream Engine
+## 14. MVP Dream Engine
 
 The first Dream Engine can be simple:
 

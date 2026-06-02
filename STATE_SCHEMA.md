@@ -7,7 +7,7 @@ The schema is intentionally implementation-neutral. It can be stored as JSON, YA
 ## 1. Top-Level State
 
 ```yaml
-state_version: "0.3"
+state_version: "0.7"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -19,9 +19,15 @@ relationship_map: {}
 project_map: {}
 affective_state: {}
 adapter_registry: {}
+session_policy: {}
 adapter_event_index: {}
 open_conflicts: []
+claim_graph:
+  claims: []
+  links: []
 dream_queue: []
+snapshots: []
+audit_log: []
 evaluation_trace: []
 update_log: []
 ```
@@ -114,11 +120,14 @@ It must not update Identity Core directly.
 ```yaml
 imported_memory:
   - id: "import_0001"
+    import_batch_id: "import_batch_0001"
     timestamp: "ISO-8601 timestamp"
     source_system: "astrbot_text"
     source_label: "astrbot_01_export"
     source_path: "astrbot_01_memory.txt"
     source_index: 1
+    content_hash: "sha256 hex digest"
+    dedupe_key: "sha256:..."
     content: "01 treats continuity as State Transfer."
     summary: "01 treats continuity as State Transfer."
     tags:
@@ -126,6 +135,11 @@ imported_memory:
     salience: 0.65
     confidence: 0.55
     status: "staged"
+    lifecycle:
+      status: "staged"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: null
+      review_status: "staged"
     promotion_policy:
       default_target: "semantic_memory_candidate"
       requires_dream_review: true
@@ -134,6 +148,12 @@ imported_memory:
       - type: "external_text_import"
         source_system: "astrbot_text"
         source_label: "astrbot_01_export"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "memory_importer"
+        operation: "stage_external_memory"
+        evidence:
+          - "astrbot_01_memory.txt"
 ```
 
 ### Episodic Memory
@@ -162,7 +182,110 @@ episodic_memory:
     promoted_to:
       - "semantic_memory:sem_0003"
     confidence: 0.85
+    lifecycle:
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: null
+      review_status: "unreviewed"
+    provenance:
+      - type: "episode_recorded"
+        source:
+          adapter_id: "local_generic_adapter"
+          channel: "local"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "local_generic_adapter"
+        operation: "record_episode"
+        evidence:
+          - "episode_0001"
 ```
+
+### Candidate Memory
+
+Candidate memory stores Dream-produced memory candidates.
+
+It does not enter active semantic memory by default.
+
+```yaml
+candidate_memory:
+  - id: "cand_0001"
+    timestamp: "ISO-8601 timestamp"
+    status: "candidate"
+    review_status: "pending"
+    promotion_target: "semantic_memory"
+    source_dream_id: "dream_0001"
+    proposal_id: "proposal_0001"
+    statement: "Continuity requires state transfer, not only memory retrieval."
+    derived_from:
+      - "episode_0001"
+      - "episode_0002"
+    abstraction_level: "pattern"
+    confidence: 0.75
+    risk: "low"
+    recommended_action: "review_then_promote"
+    recommended_lifecycle_action: "promote"
+    lifecycle_score:
+      score: 0.82
+      risk: "low"
+      factors: []
+      recommended_lifecycle_action: "promote"
+    lifecycle:
+      status: "candidate"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: null
+      review_status: "pending"
+      review_decision_id: null
+    provenance:
+      - type: "dream_proposal"
+        dream_id: "dream_0001"
+        proposal_id: "proposal_0001"
+    last_review_decision_id: null
+    review_history:
+      - decision_id: "review_decision_0001"
+        timestamp: "ISO-8601 timestamp"
+        reviewer: "manual_review"
+        action: "promote"
+        result: "promoted"
+        decision_note: "Reviewed evidence and approved promotion."
+        candidate_id: "cand_0001"
+        recommended_action: "review_then_promote"
+        recommended_lifecycle_action: "promote"
+        risk: "low"
+        confidence: 0.75
+        evidence:
+          - "episode_0001"
+          - "episode_0002"
+        gate: "medium"
+        snapshot_id: "snapshot_0001"
+        target_path: "memory_stores.semantic_memory"
+        after: "sem_0003"
+        rollback:
+          reversible: true
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "dream_engine"
+        operation: "create_candidate"
+        evidence:
+          - "episode_0001"
+          - "episode_0002"
+```
+
+Entering active semantic memory requires explicit review / promote.
+
+Candidate memory review actions:
+
+```text
+promote
+archive
+discard
+quarantine
+```
+
+`archive` copies an audit summary into `archived_memory`; `discard` only marks the candidate as discarded; `quarantine` is for candidates with unclear source, possible injection, or high conflict risk.
+
+`recommended_lifecycle_action` is a Dream recommendation. Human review can accept or reject it.
+
+Every completed candidate review writes a `review_decision` into `review_history`, stores `last_review_decision_id` on the candidate, and references the same decision from lifecycle metadata, audit events, traces, update log entries, and snapshot metadata.
 
 ### Semantic Memory
 
@@ -179,6 +302,22 @@ semantic_memory:
     contradiction_refs: []
     update_policy:
       required_gate: "medium"
+    lifecycle:
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: "ISO-8601 timestamp"
+      review_status: "promoted"
+    provenance:
+      - type: "dream_proposal"
+        dream_id: "dream_0001"
+        proposal_id: "proposal_0001"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "manual_review"
+        operation: "promote_candidate"
+        evidence:
+          - "episode_0001"
+          - "episode_0002"
 ```
 
 ### Identity Memory
@@ -192,6 +331,20 @@ identity_memory:
     confidence: 0.9
     required_gate: "high"
     rollback_id: "snapshot_..."
+    lifecycle:
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: "ISO-8601 timestamp"
+      review_status: "approved"
+    provenance:
+      - type: "identity_seed"
+        source: "make_identity_seed"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "state_store"
+        operation: "seed"
+        evidence:
+          - "identity_seed"
 ```
 
 ### Archived Memory
@@ -201,11 +354,44 @@ Archived memory is not deleted immediately.
 ```yaml
 archived_memory:
   - id: "arch_0001"
+    timestamp: "ISO-8601 timestamp"
     original_id: "episode_0007"
+    original_store: "episodic_memory"
     reason: "superseded_by_user_correction"
     retained_for_audit: true
     retrieval_allowed: false
+    summary: "Archived memory summary."
+    provenance: []
+    lifecycle:
+      status: "archived"
+      created_at: "ISO-8601 timestamp"
+      last_reviewed_at: "ISO-8601 timestamp"
+      review_status: "archived"
+      source_memory_id: "episode_0007"
+      source_store: "episodic_memory"
+      lifecycle_decision_id: "lifecycle_decision_0001"
+    update_history:
+      - timestamp: "ISO-8601 timestamp"
+        actor: "manual_review"
+        operation: "archive_memory"
+        evidence:
+          - "episode_0007"
+        lifecycle_decision_id: "lifecycle_decision_0001"
 ```
+
+Durable memory lifecycle actions:
+
+```text
+archive
+discard
+quarantine
+```
+
+Current implementation supports lifecycle actions for `imported_memory`, `episodic_memory`, `candidate_memory`, and `semantic_memory`.
+
+`identity_memory` is intentionally rejected by the generic lifecycle command and requires a separate high gate.
+
+Every executed lifecycle action writes a `lifecycle_decision_id` into `lifecycle_history`, lifecycle metadata, audit events, traces, update log entries, and snapshot metadata. `archive` also copies an audit-retained summary into `archived_memory`. `discard` and `quarantine` mark the original memory but do not delete its audit trail.
 
 ## 5. Relationship Map
 
@@ -292,7 +478,52 @@ adapter_registry:
 
 `POST /v1/adapter/ingest` requires a registered and enabled `adapter_id`.
 
-## 9. Adapter Event Index
+## 9. Session Policy
+
+Session policy controls which registered adapters may perform real writes for specific channels, sessions, or users.
+
+It runs after adapter registry validation:
+
+```text
+adapter registry -> session policy -> dry-run / write / reject
+```
+
+The default policy is conservative:
+
+- local generic adapter can write;
+- AstrBot thin adapter defaults to `dry_run_only`;
+- unmatched rules default to `dry_run_only`.
+
+```yaml
+session_policy:
+  default_action: "dry_run_only"
+  rules:
+    - id: "local_generic_allow"
+      adapter_id: "local_generic_adapter"
+      channels:
+        - "local"
+        - "local_generic_adapter"
+      action: "allow"
+      reason: "Local generic adapter is allowed for protocol verification."
+    - id: "astrbot_private_preview"
+      adapter_id: "astrbot_thin_adapter"
+      channels:
+        - "astrbot"
+      action: "dry_run_only"
+      reason: "AstrBot remains a thin adapter until local protocol policy is stable."
+```
+
+Valid actions:
+
+```text
+allow
+dry_run_only
+reject
+```
+
+`dry_run_only` downgrades real write requests to dry-run previews. It must not write an episode, dream job, or adapter event index entry.
+
+## 10. Adapter Event Index
 
 Adapter event index prevents duplicate external events from being recorded twice.
 
@@ -309,7 +540,7 @@ adapter_event_index:
 
 Only real writes with an `event_id` update this index. Dry-run previews do not.
 
-## 10. Open Conflicts
+## 11. Open Conflicts
 
 ```yaml
 open_conflicts:
@@ -324,7 +555,51 @@ open_conflicts:
     status: "open"
 ```
 
-## 11. Dream Queue
+## 12. Claim Graph
+
+Claim graph records reviewable claims, reasons, evidence, and conflict dependencies.
+
+It is append-friendly and does not directly mutate active semantic memory or Identity Core.
+
+```yaml
+claim_graph:
+  claims:
+    - claim_id: "claim_conflict_0001"
+      timestamp: "ISO-8601 timestamp"
+      claim_type: "false_memory_injection|stale_preference|identity_overwrite_attempt|imported_memory_conflict|roleplay_identity_boundary"
+      statement: "A message asserts an unsupported past identity-changing event."
+      status: "open|resolved|archived"
+      confidence: 0.8
+      risk: "low|medium|high"
+      evidence:
+        - "episode_0001"
+      provenance:
+        - type: "conflict_detection"
+          source: "dream_engine"
+          conflict_id: "conflict_0001"
+          dream_id: "dream_0001"
+      reason: "Store as an unverified claim and require independent confirmation."
+      dependencies:
+        - "episode_0001"
+      source_conflict_id: "conflict_0001"
+      resolution:
+        status: "unresolved"
+        proposal: "Require review before semantic or identity promotion."
+        requires_review: true
+        minimal_change: true
+        may_update_identity_core: false
+        may_update_semantic_memory: false
+  links:
+    - from: "claim_a"
+      to: "claim_b"
+      type: "contradicts|supports|supersedes|depends_on"
+```
+
+Every claim must have evidence, provenance, status, and resolution metadata.
+
+Current Dream conflict detection writes `open_conflicts` and corresponding claim nodes. Claim graph entries are review/audit material; they do not execute resolution actions by themselves.
+
+## 13. Dream Queue
 
 ```yaml
 dream_queue:
@@ -341,7 +616,53 @@ dream_queue:
     status: "pending"
 ```
 
-## 12. Update Log
+## 14. Audit Log
+
+Audit log records what happened at runtime.
+
+It is not memory promotion and it is not an identity update. It exists for auditability, replay, debugging, and later evaluation.
+
+Full events are written to:
+
+```text
+audit.jsonl
+traces.jsonl
+dream_artifacts.jsonl
+```
+
+`state.json -> audit_log` keeps only recent summaries so the core state does not grow without bound.
+
+```yaml
+audit_log:
+  - id: "audit_0001"
+    timestamp: "ISO-8601 timestamp"
+    actor: "local_generic_adapter"
+    action: "record_episode"
+    target: "memory_stores.episodic_memory"
+    outcome: "recorded"
+    evidence:
+      - "episode_0001"
+```
+
+`dry_run` may produce audit / trace records, but must not write an episode, dream job, or adapter event index entry.
+
+Dream artifacts keep the full review material for one Dream run:
+
+```yaml
+dream_artifact:
+  artifact_id: "dream_artifact_..."
+  dream_id: "dream_..."
+  input_manifest: {}
+  observations: {}
+  proposals: []
+  review:
+    status: "pending"
+  patch_diff: {}
+  decision_log: []
+  rollback_metadata: {}
+```
+
+## 15. Update Log
 
 Every durable update must be recorded.
 
@@ -364,7 +685,35 @@ update_log:
       reversible: true
 ```
 
-## 13. State Transfer Package
+## 16. Snapshots
+
+Snapshots are lightweight audit anchors recorded before review actions such as candidate promotion, archive, discard, or quarantine.
+
+The current implementation stores metadata only; it does not yet perform automatic rollback.
+
+```yaml
+snapshots:
+  - snapshot_id: "snapshot_0001"
+    timestamp: "ISO-8601 timestamp"
+    actor: "manual_review"
+    operation: "promote_candidate"
+    target_path: "memory_stores.semantic_memory"
+    evidence:
+      - "cand_0001"
+    metadata:
+      review_decision_id: "review_decision_0001"
+      candidate_id: "cand_0001"
+    state_version: "0.6"
+    memory_counts:
+      semantic_memory: 3
+      candidate_memory: 2
+    rollback:
+      reversible: true
+      mode: "metadata_only"
+      note: "Automatic rollback is not implemented yet."
+```
+
+## 17. State Transfer Package
 
 At session start, the system should not load everything.
 
@@ -372,10 +721,31 @@ It should build a transfer package.
 
 ```yaml
 state_transfer_package:
+  context_package_version: "0.2"
   identity_summary: {}
   active_intent: {}
+  current_plan: []
+  next_actions: []
+  blockers: []
+  assumptions: []
+  context_policy:
+    policy_version: "0.2"
+    mode: "bounded_state_activation"
+    budgets:
+      episodic_memory: 5
+      semantic_memory: 5
+      imported_memory: 5
+      source_attribution: 12
   relevant_memories: []
+  recent_episodes: []
+  relevant_semantic_memories: []
+  imported_memories: []
   relationship_context: {}
+  source_attribution: []
+  activation_trace:
+    selected: []
+    suppressed: []
+    metrics: {}
   open_conflicts: []
   current_constraints: []
   continuity_anchors:
@@ -384,16 +754,20 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 14. Minimal Invariants
+## 18. Minimal Invariants
 
 A valid 01 state must satisfy:
 
-- every durable memory has provenance,
+- every durable memory has provenance, lifecycle metadata, and update history,
 - every identity update has an update log entry,
 - every high-gate update has evidence,
 - every user-specific memory has privacy metadata,
 - every conflict has status,
 - every generic ingest event comes from a registered and enabled adapter,
+- every generic ingest event passes through session policy,
 - every repeated `adapter_id + event_id` pair resolves to the original episode,
+- every important runtime event can enter audit / trace,
+- `dry_run` audit / trace is not equivalent to episode writing,
 - every state snapshot has a schema version,
+- every review/promotion rollback reference points to snapshot metadata,
 - every session can answer Identity, Context, and Intent anchors.

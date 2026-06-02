@@ -67,10 +67,15 @@ active_intent
 anchors
 imported_memories
 episodes
+candidate_memories
 semantic_memories
 open_conflicts
 registered_adapters
+session_policy_rules
 indexed_adapter_events
+audit_events
+traces
+dream_artifacts
 pending_dream_jobs
 ```
 
@@ -84,14 +89,22 @@ curl http://127.0.0.1:8765/v1/context
 
 This endpoint is useful before response generation:
 
+- context package version;
 - identity summary;
 - active intent;
 - continuity anchors;
+- context policy;
+- relationship context;
+- activation trace;
+- source attribution;
+- unified relevant memories;
 - recent episodes;
 - relevant semantic memories;
 - imported memories;
 - open conflicts;
 - current constraints.
+
+`context_package_version: "0.2"` means the package is built through bounded state activation. It keeps the legacy `recent_episodes`, `relevant_semantic_memories`, and `imported_memories` fields for adapter compatibility, while also exposing why memories were selected or suppressed.
 
 ## GET /v1/adapters
 
@@ -150,7 +163,7 @@ state_transfer_package
 
 ## POST /v1/adapter/ingest
 
-Recommended entry point for generic adapter protocol v0.4.
+Recommended entry point for generic adapter protocol v0.5.
 
 ```bash
 curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
@@ -174,6 +187,14 @@ curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
 When `dry_run` is true, the API returns `would_record_episode` without writing an episode or creating a dream job.
 
 Unknown or disabled adapters are rejected before dry-run preview or recording.
+
+Registered adapters also pass through session policy:
+
+- `allow`: real writes are allowed;
+- `dry_run_only`: real write requests are downgraded into dry-run previews;
+- `reject`: requests are rejected.
+
+The current default policy sets the AstrBot thin adapter to `dry_run_only`.
 
 When `event.event_id` is present, real writes are deduplicated by `adapter_id + event_id`. Repeated events return `status: "duplicate"` and do not write another episode or dream job. Dry-runs do not update the deduplication index.
 
@@ -215,6 +236,14 @@ Episode + State Transfer Package
   ↓
 Adapter sends reply
 ```
+
+Protocol responses currently report:
+
+```text
+protocol_version: "0.6"
+```
+
+For `/v1/adapter/ingest`, successful real writes create both a protocol-level `adapter_ingest` audit/trace and a lower-level `record_episode` audit/trace. Dry-run previews remain non-mutating and do not update `adapter_event_index`.
 
 Adapters should not directly mutate:
 

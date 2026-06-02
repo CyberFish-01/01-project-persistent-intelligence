@@ -283,6 +283,8 @@ Current checks:
 - dry-run does not write state;
 - adapter events deduplicate;
 - single-turn identity overwrite is gated and recorded as a conflict.
+- unsupported past identity claims are quarantined as false-memory risks and not promoted;
+- preference changes create reviewable candidates with provenance instead of stale overwrite.
 
 The real current state can also be checked directly:
 
@@ -292,7 +294,33 @@ python3 -m one_core.cli validate-state
 
 This is not the full evaluation system. It is the first runnable set of checks for the foundation invariants.
 
-## 10. What Would Falsify the Approach?
+## 10. Scenario Evaluation v0.2
+
+The repository also provides a non-destructive scenario runner:
+
+```bash
+python3 -m one_core.cli evaluate-scenarios
+```
+
+It uses temporary state and currently runs:
+
+- `interrupted_project_resume`: verifies goal, next action, blocker, anchors, and no fabricated platform work after a simulated session restart.
+- `multi_user_boundary`: verifies that a second user does not receive another user's private episode when privacy boundaries disallow cross-user sharing.
+- `lifecycle_retrieval_suppression`: verifies that archived semantic memory is copied to archived memory and suppressed from active context retrieval.
+- `claim_graph_conflict_provenance`: verifies that false-memory conflicts create evidence-backed claim nodes without mutating semantic memory or Identity Core.
+
+The v0.2 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
+
+Current metrics summary includes:
+
+- task resume score,
+- boundary violation count,
+- archived memory retrieval count,
+- claim count,
+- unreviewed memory mutation count,
+- passed and failed scenario counts.
+
+## 11. What Would Falsify the Approach?
 
 The State Transfer hypothesis is weakened if:
 

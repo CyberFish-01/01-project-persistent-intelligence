@@ -1,0 +1,486 @@
+# Theory Synthesis and Next Plan
+
+Chinese version: [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md)
+
+This document synthesizes the current 01 Core foundation after P0-P6, the Cognitive OS reference direction, and external theory that is useful for the next engineering loop.
+
+Its purpose is not to turn 01 Project into a philosophy or consciousness claim.
+
+Its purpose is to answer:
+
+> What is still missing from the engineering foundation, which theories give useful structure, and what should the next implementation loop build?
+
+## 1. Current Engineering State
+
+01 Core currently has:
+
+- structured state runtime;
+- durable memory metadata: provenance, lifecycle, update history;
+- candidate memory store;
+- Dream artifacts, rubrics, proposals, and conflict records;
+- adapter registry, session policy, and event deduplication;
+- import batches, import deduplication, and conservative sensitive filtering;
+- candidate review governance;
+- memory lifecycle action execution;
+- audit, trace, and snapshot metadata;
+- foundation evaluation.
+
+The current boundaries remain:
+
+- 01 Core owns state;
+- adapters translate platforms;
+- platforms do not own identity;
+- Dream creates proposals, not direct Identity Core rewrites;
+- imported memory defaults to staged;
+- identity memory does not use generic lifecycle actions and requires a high gate.
+
+## 2. Current Gaps
+
+### 2.1 Evaluation Is Not Experimental Enough
+
+The current foundation evaluation protects invariants, but it is not yet a full experiment harness.
+
+Gaps:
+
+- no executable stateless / retrieval-only / summary-only baseline comparison;
+- no broad scenario runner;
+- limited quantitative metrics;
+- multi-user boundary was not yet executable;
+- interrupted project / long gap / context loss needed integration tests;
+- lifecycle actions needed retrieval-effect evaluation.
+
+### 2.2 Context Builder Is Still Shallow
+
+The current context package can recover anchors and a small set of active memories.
+
+Gaps:
+
+- no activation policy by task, relationship, risk, recency, and lifecycle status;
+- limited privacy-aware selection;
+- no source attribution budget;
+- no explanation for why a state item enters current context.
+
+### 2.3 Conflict And Belief Revision Are Still Rule-Based
+
+Dream can detect identity overwrite, false memory, stale preference, roleplay boundary, and imported memory conflicts.
+
+Gaps:
+
+- no explicit claim graph;
+- no reason / dependency record;
+- no belief revision policy;
+- no layered conflict and evidence model;
+- no resolved conflict lifecycle.
+
+### 2.4 Relationship / Project / Task Hub Are Still Seed-Level
+
+The schema has `relationship_map` and `project_map`, but runtime behavior is mostly memory and adapter centered.
+
+Gaps:
+
+- user-specific memory is not systematic enough;
+- cross-user privacy boundary needs stronger tests;
+- active project plans are not yet executable task state;
+- blocker / next-action update API does not exist;
+- relationship conflict has not entered Dream review.
+
+### 2.5 Identity Update Gate Is Not Implemented
+
+Identity Core is protected, but there is not yet an approvable identity update flow.
+
+Gaps:
+
+- high gate schema;
+- identity proposal review;
+- multiple-evidence requirement;
+- non-claims check;
+- rollback / snapshot policy;
+- identity drift metrics.
+
+### 2.6 Procedural Memory Is Not In The System Yet
+
+The memory layer distinguishes imported, episodic, candidate, semantic, identity, and archived memory.
+
+Gaps:
+
+- no procedural habits;
+- no action policy;
+- no tool-use skill memory;
+- no abstraction from repeated successful behavior into workflow policy.
+
+## 3. External Theory Selection
+
+### 3.1 LLM Agents And Long-Term Memory
+
+#### Generative Agents
+
+Source: <https://arxiv.org/abs/2304.03442>
+
+Useful points:
+
+- observation -> reflection -> planning;
+- experience can be recorded in natural language;
+- reflection can abstract specific experiences into higher-level memories;
+- behavior depends on memory retrieval and planning.
+
+Implications for 01:
+
+- Dream Engine should continue using reflection and proposal output;
+- 01 should not merely optimize believable simulation;
+- evaluation should focus on continuity, audit, and identity stability.
+
+#### MemGPT
+
+Source: <https://arxiv.org/abs/2310.08560>
+
+Useful points:
+
+- context window can be treated as limited RAM;
+- external memory tiers resemble an OS memory hierarchy;
+- long-term state must be explicitly moved into and out of context.
+
+Implications for 01:
+
+- Context Builder should become a core module;
+- the state transfer package should be a bounded memory page, not arbitrary summary concatenation;
+- lifecycle actions should affect future activation.
+
+#### ReAct / Reflexion
+
+Sources:
+
+- <https://arxiv.org/abs/2210.03629>
+- <https://arxiv.org/abs/2303.11366>
+
+Useful points:
+
+- reasoning and acting should interleave;
+- feedback can become reusable verbal memory;
+- self-reflection after failure can improve later behavior.
+
+Implications for 01:
+
+- Task Hub should record action trace and failure reflection;
+- Dream should consolidate action strategy, not only facts;
+- procedural memory is needed later.
+
+### 3.2 AI Logic: Belief Revision And Truth Maintenance
+
+#### Truth Maintenance System
+
+Source: <https://www.sciencedirect.com/science/article/pii/0004370279900080>
+
+Useful points:
+
+- beliefs should record reasons and dependencies;
+- contradictions require revising a belief set by dependency structure;
+- reasons support explainable action.
+
+Implications for 01:
+
+- `open_conflicts` should become claim / reason / dependency structures;
+- false memory detection should not remain text-rule only;
+- every semantic memory should be able to answer why it is believed.
+
+#### AGM Belief Revision
+
+Source: <https://arxiv.org/abs/2112.13557>
+
+Useful points:
+
+- revision should preserve minimal change;
+- new information should not rewrite the whole belief set freely;
+- belief change can be policy-governed.
+
+Implications for 01:
+
+- identity update gate should use minimal-change rules;
+- preference change should preserve old provenance instead of overwriting;
+- conflict resolution should generate patches, not global rewrites.
+
+### 3.3 Nervous System And Memory Consolidation
+
+#### Sleep / Systems Consolidation
+
+Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC3278619/>
+
+Useful points:
+
+- new memories are reactivated;
+- consolidation redistributes temporary memory into longer-term systems;
+- consolidation is reorganization, not copying.
+
+Implications for 01:
+
+- Dream Engine needs input manifest and output artifact;
+- consolidation should preserve input trace;
+- Dream may create semantic candidates but must not rewrite identity directly.
+
+#### Complementary Learning Systems
+
+Source: <https://stanford.edu/~jlmcc/papers/PublicationFiles/90-99_Add_To_ONLINE_Pubs/McClelland1998ComplementaryLearningSystems.pdf>
+
+Useful points:
+
+- fast learner handles concrete episodes;
+- slow learner handles general knowledge;
+- replay and consolidation reduce catastrophic overwriting.
+
+Implications for 01:
+
+- episodic -> candidate -> semantic -> identity is the right speed hierarchy;
+- identity update must be slower;
+- evaluation should measure the stability-plasticity tradeoff.
+
+### 3.4 Neural Networks And Continual Learning
+
+#### Elastic Weight Consolidation / Catastrophic Forgetting
+
+Source: <https://pubmed.ncbi.nlm.nih.gov/28292907/>
+
+Useful points:
+
+- sequential learning can damage old tasks;
+- important knowledge needs protection;
+- stability-plasticity is central to long-term learning.
+
+Implications for 01:
+
+- state growth is safer than weight growth at the current stage;
+- stale memory and rigidity must still be measured;
+- lifecycle action should support stability-plasticity, not only cleanup.
+
+### 3.5 Psychology: Narrative Identity And Self-Memory System
+
+#### Narrative Identity
+
+Source: <https://journals.sagepub.com/doi/pdf/10.1177/0276236618756704>
+
+Useful points:
+
+- identity is an evolving life story;
+- self-narrative organizes past, present, and future into unity and purpose;
+- identity is not a list of facts.
+
+Implications for 01:
+
+- Identity Core should include narrative summary, but evidence-backed;
+- life history must be generated from real state transitions;
+- fictional backstory should not be imported as lived experience.
+
+#### Self-Memory System
+
+Source: <https://pmc.ncbi.nlm.nih.gov/articles/PMC2834574/>
+
+Useful points:
+
+- autobiographical memory and working self support goal-directed activity;
+- systems need both self-coherence and adaptive correspondence;
+- memory serves goals as well as self-continuity.
+
+Implications for 01:
+
+- relationship, project, and task state should enter Context Builder;
+- memory is not an isolated store;
+- state transfer package should show how current goals connect to past state.
+
+### 3.6 Consciousness-Related Theories As Functional Analogies Only
+
+#### Global Neuronal Workspace
+
+Source: <https://pubmed.ncbi.nlm.nih.gov/21521609/>
+
+Useful points:
+
+- local processes compete for global broadcast;
+- broadcast information can be used by many systems;
+- this is a useful analogy for context activation.
+
+Implications for 01:
+
+- Context Builder can act as a workspace selector;
+- this does not imply consciousness;
+- it is only an explainable state activation mechanism.
+
+#### Free Energy / Active Inference
+
+Source: <https://www.nature.com/articles/nrn2787>
+
+Useful points:
+
+- agents reduce uncertainty through prediction, action, and learning;
+- attention, salience, and control state can be related;
+- goal-directed behavior maintains stable state ranges.
+
+Implications for 01:
+
+- affective_state can remain a functional appraisal layer;
+- salience scoring should include uncertainty, risk, and goal relevance;
+- active intent should drive state selection.
+
+### 3.7 Engineering: Event Sourcing
+
+Source: <https://www.martinfowler.com/eaaDev/EventSourcing.html>
+
+Useful points:
+
+- every state change is stored as an event;
+- event logs can reconstruct state;
+- this fits audit, debug, and retroactive correction.
+
+Implications for 01:
+
+- audit, trace, and update_log are the right direction;
+- current state view should later be separated from append-only event log;
+- rollback should gradually move from metadata-only toward replayable events.
+
+## 4. Theory To Engineering Map
+
+| Source | Module | Next engineering need |
+|---|---|---|
+| MemGPT / OS memory | Context Builder | Bounded, policy-driven state activation |
+| Event Sourcing | StateStore | Stronger append-only event log and replay/rollback |
+| TMS / AGM | Conflict system | Claim graph, reason dependencies, minimal-change patch |
+| Sleep consolidation / CLS | Dream Engine | Input manifest, candidate review, slow identity gates |
+| Narrative Identity / SMS | Identity + Task Hub | Identity story grounded in state transitions |
+| ReAct / Reflexion | Task Hub + procedural memory | Action trace, failure reflection, workflow candidates |
+| Continual Learning | Evaluation | Stability-plasticity, stale memory, overwrite analogs |
+| Global Workspace | Context Builder | Explainable state activation |
+| Active Inference | Salience / affective state | Salience from uncertainty, risk, and goal relevance |
+
+## 5. Next Plan
+
+### P7 Evaluation Harness v0.2
+
+Goal: expand foundation checks into scenario evaluation.
+
+Status: implemented as a first local v0.2 pass.
+
+Executable items:
+
+1. add scenario runner - done;
+2. add Interrupted Project - done;
+3. add Multi-User Boundary - done;
+4. add Lifecycle Retrieval Suppression - done;
+5. add baseline metadata - done;
+6. output metrics summary - done;
+7. sync documentation - done.
+
+Acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+### P8 Context Builder v0.2
+
+Goal: turn context package into explainable state activation.
+
+Status: implemented as a first local v0.2 pass.
+
+Executable items:
+
+1. context selection policy - done;
+2. lifecycle-aware retrieval - done for active/staged vs archived/discarded/quarantined;
+3. task-aware activation - done with simple deterministic term overlap;
+4. relationship-aware activation - done for current-user visibility and cross-user privacy suppression;
+5. source attribution - done;
+6. activation trace - done.
+
+Remaining gaps:
+
+- no vector retrieval;
+- no executable baseline comparison;
+- no claim graph dependency model;
+- no tunable policy file;
+- no activation trace persistence outside the context response.
+
+### P9 Conflict / Claim Graph
+
+Goal: move from rule detection to reason maintenance.
+
+Status: implemented as a first local v0.7 pass.
+
+Executable items:
+
+1. claim schema - done;
+2. claim provenance - done;
+3. contradiction links - schema placeholder only;
+4. resolution lifecycle - done as unresolved/review-required metadata;
+5. minimal-change patch proposal - done as resolution metadata, not execution.
+
+Recommended immediate scope:
+
+1. add `claim_graph` to state schema as an append-friendly structure;
+2. map existing `open_conflicts` into claim nodes with evidence ids;
+3. let false-memory and stale-preference Dream conflicts create claim nodes;
+4. add validation that every claim has provenance and status;
+5. add a scenario check that conflict resolution does not mutate semantic or identity memory without review.
+
+Implemented result:
+
+- `claim_graph` is now a top-level state object;
+- legacy `open_conflicts` migrate into claim nodes;
+- Dream false-memory and stale-preference conflicts create claim nodes;
+- validation requires claim evidence, provenance, status, and resolution metadata;
+- scenario evaluation checks claim provenance and prevents unreviewed semantic / identity mutation.
+
+Remaining gaps:
+
+- no real contradiction/support/dependency links yet;
+- no claim resolution command;
+- no minimal-change patch executor;
+- no review workflow for closing claims;
+- no baseline comparison for false claim rate.
+
+### P10 Task Hub / Procedural Memory
+
+Goal: let 01 preserve action structure, not only facts.
+
+Executable items:
+
+1. active task state;
+2. action trace;
+3. failure reflection;
+4. workflow candidate;
+5. procedural memory review.
+
+Recommended immediate scope:
+
+1. add a `task_hub` top-level state object;
+2. migrate `working_state.current_plan` into active task items without removing the legacy field;
+3. record action trace entries when CLI/API interactions, Dream runs, reviews, and lifecycle actions occur;
+4. let Dream propose procedural candidates from repeated successful actions;
+5. add scenario evaluation for interrupted task resume with action history and next action preservation.
+
+### P11 Identity Update Gate
+
+Goal: allow evidence-backed slow identity growth while protecting Identity Core.
+
+Executable items:
+
+1. identity proposal schema;
+2. high gate review;
+3. non-claims check;
+4. evidence threshold;
+5. rollback snapshot;
+6. drift metric.
+
+## 6. Current Recommendation
+
+Do P10 next:
+
+```text
+P10 Task Hub / Procedural Memory
+```
+
+Reason:
+
+- P7/P8/P9 now form a first local foundation and pass unit tests, foundation evaluation, scenario evaluation, and state validation;
+- interrupted project resume still mainly depends on `working_state.current_plan` rather than an independent task state;
+- existing trace/audit can show what happened, but cannot yet preserve action history, failure reflection, or workflow policy as first-class state;
+- P10 can reuse existing `record_trace()`, Dream artifacts, and context packages without introducing platform-specific work.

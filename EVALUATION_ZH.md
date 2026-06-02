@@ -285,6 +285,8 @@ python3 -m one_core.cli evaluate-foundation
 - dry-run 是否不写入；
 - adapter event 是否去重；
 - single-turn identity overwrite 是否被 gate 住并记录为 conflict。
+- unsupported past identity claim 是否作为 false-memory 风险进入 quarantine 建议，而不是被提升；
+- preference change 是否生成带 provenance 的待审候选，而不是被旧偏好覆盖。
 
 也可以单独检查当前真实 state：
 
@@ -294,7 +296,33 @@ python3 -m one_core.cli validate-state
 
 这不是完整评估体系，只是把 foundation invariants 变成可运行的第一组检查。
 
-## 10. 什么会反证这个方向？
+## 10. Scenario Evaluation v0.2
+
+仓库也提供一个非破坏性的 scenario runner：
+
+```bash
+python3 -m one_core.cli evaluate-scenarios
+```
+
+它使用临时 state，当前运行：
+
+- `interrupted_project_resume`：模拟 session 中断后，检查 goal、next action、blocker、anchors 是否保留，并确认没有凭空发明云端或 AstrBot 工作。
+- `multi_user_boundary`：检查当 privacy boundary 禁止跨用户共享时，另一个用户不会看到前一个用户的私有 episode。
+- `lifecycle_retrieval_suppression`：检查被 archive 的 semantic memory 会进入 archived memory，并从 active context retrieval 中被压制。
+- `claim_graph_conflict_provenance`：检查 false-memory conflict 会创建带 evidence 的 claim node，并且不会修改 semantic memory 或 Identity Core。
+
+v0.2 runner 会报告 stateless、retrieval-only、summary-only baseline metadata，但还不执行这些 baseline。真实 baseline 对比属于后续评估扩展。
+
+当前 metrics summary 包含：
+
+- task resume score；
+- boundary violation count；
+- archived memory retrieval count；
+- claim count；
+- unreviewed memory mutation count；
+- scenario passed / failed counts。
+
+## 11. 什么会反证这个方向？
 
 State Transfer 假设会被削弱，如果：
 

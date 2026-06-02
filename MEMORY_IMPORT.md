@@ -17,6 +17,8 @@ Dream review
   ↓
 Optional semantic memory candidates
   ↓
+Manual review / promote
+  ↓
 No default Identity Core update
 ```
 
@@ -32,8 +34,10 @@ The importer keeps only:
 - source system;
 - source label;
 - source path;
+- import batch id;
 - import timestamp;
 - confidence;
+- content hash / dedupe key;
 - provenance;
 - promotion policy.
 
@@ -154,7 +158,41 @@ promotion_policy:
 
 Imported memories are external material by default, not identity core.
 
-## 6. Why Not Identity Core
+## 6. Import Safety Checks
+
+`import-text` now treats every run as an import batch.
+
+The report written to `imports.jsonl` includes:
+
+```yaml
+import_batch_id: "import_batch_..."
+candidate_count: 4
+imported_count: 2
+skipped_count: 2
+duplicate_count: 1
+sensitive_count: 1
+filter_report:
+  duplicate_items: []
+  sensitive_items: []
+```
+
+Each imported memory receives:
+
+```yaml
+import_batch_id: "import_batch_..."
+content_hash: "..."
+dedupe_key: "sha256:..."
+```
+
+The importer deduplicates within the current batch and against existing `imported_memory`.
+
+It also conservatively filters obvious sensitive material, such as passwords, tokens, API keys, secrets, private keys, and Chinese password/key markers. Filtered sensitive content is not stored as imported memory and is not copied into the report as plaintext or hash; the report keeps only source index and reason for sensitive items.
+
+If every candidate is skipped, `import-text` still writes an import report and audit/trace events, but it does not create a Dream job.
+
+These checks are not a replacement for human review. They are a first safety boundary before Dream review.
+
+## 7. Why Not Identity Core
 
 Old memories may contain:
 
@@ -170,7 +208,7 @@ These can be historical materials, but they should not automatically change "Who
 
 Identity Core updates must pass a high gate.
 
-## 7. Recommended Flow
+## 8. Recommended Flow
 
 1. Export old memories from AstrBot / Angel Memory.
 2. Run `clean-memory` to produce `.txt`.
@@ -178,16 +216,16 @@ Identity Core updates must pass a high gate.
 4. Run `import-text`.
 5. Check `context` and `status`.
 6. Run `dream`.
-7. Review Dream semantic candidates.
-8. Later, add manual approval and identity update gates.
+7. Review Dream candidate memory.
+8. After manual approval, use `promote-candidate` to promote it into active semantic memory.
+9. Identity updates still require a high gate and must not be auto-approved.
 
-## 8. Current Limits
+## 9. Current Limits
 
 The first cleaner/importer does not yet:
 
 - read AstrBot databases directly;
 - parse Angel Memory proprietary formats;
-- deduplicate automatically;
 - judge truth automatically;
 - promote to identity memory automatically.
 

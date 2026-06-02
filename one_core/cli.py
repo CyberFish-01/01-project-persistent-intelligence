@@ -14,7 +14,7 @@ from .client import (
 )
 from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
-from .evaluation import run_foundation_evaluation
+from .evaluation import run_foundation_evaluation, run_scenario_evaluation
 from .importer import import_text_file
 from .state import DEFAULT_STATE_DIR, StateStore
 from .validation import validate_state
@@ -67,11 +67,58 @@ def main() -> None:
     dream_parser = subparsers.add_parser("dream", help="Run a dream consolidation cycle.")
     dream_parser.add_argument("--limit", type=int, default=20)
 
+    promote_parser = subparsers.add_parser(
+        "promote-candidate",
+        help="Promote a reviewed candidate memory into active semantic memory.",
+    )
+    promote_parser.add_argument("candidate_id")
+    promote_parser.add_argument("--reviewer", default="manual_review")
+    promote_parser.add_argument("--decision-note", default="")
+
+    review_parser = subparsers.add_parser(
+        "review-candidate",
+        help="Review a candidate memory with promote, archive, discard, or quarantine.",
+    )
+    review_parser.add_argument("candidate_id")
+    review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["promote", "archive", "discard", "quarantine"],
+    )
+    review_parser.add_argument("--reviewer", default="manual_review")
+    review_parser.add_argument("--decision-note", default="")
+
+    lifecycle_parser = subparsers.add_parser(
+        "lifecycle",
+        help="Apply a reviewed lifecycle action to a durable memory.",
+    )
+    lifecycle_parser.add_argument(
+        "store_name",
+        choices=[
+            "imported_memory",
+            "episodic_memory",
+            "candidate_memory",
+            "semantic_memory",
+        ],
+    )
+    lifecycle_parser.add_argument("memory_id")
+    lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["archive", "discard", "quarantine"],
+    )
+    lifecycle_parser.add_argument("--reviewer", default="manual_review")
+    lifecycle_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
         "evaluate-foundation",
         help="Run non-destructive foundation invariant checks.",
+    )
+    subparsers.add_parser(
+        "evaluate-scenarios",
+        help="Run non-destructive continuity scenario checks.",
     )
     subparsers.add_parser(
         "validate-state",
@@ -158,10 +205,39 @@ def main() -> None:
     elif args.command == "dream":
         report = DreamEngine(store).run(limit=args.limit)
         print_json(report)
+    elif args.command == "promote-candidate":
+        print_json(
+            store.promote_candidate_memory(
+                args.candidate_id,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "review-candidate":
+        print_json(
+            store.review_candidate_memory(
+                args.candidate_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "lifecycle":
+        print_json(
+            store.apply_memory_lifecycle_action(
+                store_name=args.store_name,
+                memory_id=args.memory_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
     elif args.command == "context":
         print_json(store.build_context_package())
     elif args.command == "evaluate-foundation":
         print_json(run_foundation_evaluation())
+    elif args.command == "evaluate-scenarios":
+        print_json(run_scenario_evaluation())
     elif args.command == "validate-state":
         print_json(validate_state(store.load(), store.list_episodes()))
     elif args.command == "remote":

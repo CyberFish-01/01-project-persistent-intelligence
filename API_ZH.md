@@ -67,10 +67,15 @@ active_intent
 anchors
 imported_memories
 episodes
+candidate_memories
 semantic_memories
 open_conflicts
 registered_adapters
+session_policy_rules
 indexed_adapter_events
+audit_events
+traces
+dream_artifacts
 pending_dream_jobs
 ```
 
@@ -84,14 +89,22 @@ curl http://127.0.0.1:8765/v1/context
 
 这个端点适合 adapter 在生成回复前获取：
 
+- context package version；
 - identity summary；
 - active intent；
 - continuity anchors；
+- context policy；
+- relationship context；
+- activation trace；
+- source attribution；
+- unified relevant memories；
 - recent episodes；
 - relevant semantic memories；
 - imported memories；
 - open conflicts；
 - current constraints。
+
+`context_package_version: "0.2"` 表示这个 package 通过 bounded state activation 构建。它保留旧的 `recent_episodes`、`relevant_semantic_memories` 和 `imported_memories` 字段以兼容 adapter，同时额外暴露 memory 为什么被选择或压制。
 
 ## GET /v1/adapters
 
@@ -150,7 +163,7 @@ state_transfer_package
 
 ## POST /v1/adapter/ingest
 
-通用 adapter protocol v0.4 的推荐入口。
+通用 adapter protocol v0.5 的推荐入口。
 
 ```bash
 curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
@@ -174,6 +187,14 @@ curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
 `dry_run: true` 时只返回 `would_record_episode`，不会写入 episode，也不会创建 dream job。
 
 未知或禁用 adapter 会在 dry-run 预览或真实写入前被拒绝。
+
+已注册 adapter 还会经过 session policy：
+
+- `allow`：允许真实写入；
+- `dry_run_only`：真实写入请求会被降级成 dry-run 预览；
+- `reject`：拒绝请求。
+
+当前默认策略中，AstrBot thin adapter 是 `dry_run_only`。
 
 当 `event.event_id` 存在时，真实写入会用 `adapter_id + event_id` 去重。重复事件返回 `status: "duplicate"`，不会再写入 episode，也不会再创建 dream job。Dry-run 不更新去重索引。
 
@@ -215,6 +236,14 @@ Episode + State Transfer Package
   ↓
 Adapter sends reply
 ```
+
+当前协议响应版本：
+
+```text
+protocol_version: "0.6"
+```
+
+对于 `/v1/adapter/ingest`，成功真实写入会同时创建 protocol-level `adapter_ingest` audit/trace 和底层 `record_episode` audit/trace。Dry-run 预览仍然不写入 state，也不会更新 `adapter_event_index`。
 
 外部 adapter 不应该直接修改：
 

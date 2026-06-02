@@ -48,6 +48,67 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
 
+    def test_durable_memory_requires_lifecycle_and_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            memory = state["memory_stores"]["semantic_memory"][0]
+            memory.pop("lifecycle")
+            memory.pop("provenance")
+            memory.pop("update_history")
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("memory_stores.semantic_memory[0].lifecycle", paths)
+            self.assertIn("memory_stores.semantic_memory[0].provenance", paths)
+            self.assertIn("memory_stores.semantic_memory[0].update_history", paths)
+
+    def test_snapshot_requires_rollback_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["snapshots"].append(
+                {
+                    "snapshot_id": "snapshot_missing_rollback",
+                    "timestamp": state["created_at"],
+                    "actor": "unit_test",
+                    "operation": "promote_candidate",
+                    "target_path": "memory_stores.semantic_memory",
+                    "state_version": state["state_version"],
+                    "rollback": {},
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("snapshots[0].rollback.reversible", paths)
+
+    def test_claim_graph_requires_provenance_evidence_and_resolution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["claim_graph"]["claims"].append(
+                {
+                    "claim_id": "claim_bad",
+                    "timestamp": state["created_at"],
+                    "claim_type": "false_memory_injection",
+                    "statement": "Unsupported claim.",
+                    "status": "open",
+                    "evidence": [],
+                    "provenance": [],
+                    "resolution": {},
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("claim_graph.claims[0].evidence", paths)
+            self.assertIn("claim_graph.claims[0].provenance", paths)
+            self.assertIn("claim_graph.claims[0].resolution", paths)
+
 
 if __name__ == "__main__":
     unittest.main()
