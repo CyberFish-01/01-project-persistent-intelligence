@@ -2,6 +2,8 @@
 
 **How Can Intelligence Persist Through Time?**
 
+[中文 README](./README_ZH.md)
+
 01 Project is a research program about persistent intelligence: how an AI system can remain continuous across conversations, tasks, memories, dreams, conflicts, and social interactions.
 
 The project begins from a simple problem:
@@ -12,15 +14,19 @@ Even when a model is powerful, its context is long, and its agent loop is comple
 
 This repository records the foundational documents and the first engineering frame:
 
-- [VISION.md](./VISION.md): the full research vision for Persistent Intelligence, State Transfer, Dream Engine, Memory Lifecycle, Identity Growth, and Cognitive Ecology.
-- [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md): the theory of artificial life history, including false assigned history, generated history, and identity seed.
+- [VISION.md](./VISION.md) / [VISION_ZH.md](./VISION_ZH.md): the full research vision for Persistent Intelligence, State Transfer, Dream Engine, Memory Lifecycle, Identity Growth, and Cognitive Ecology.
+- [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md): the theory of artificial life history, including false assigned history, generated history, and identity seed.
 - [RESEARCH_NOTES_ZH.md](./RESEARCH_NOTES_ZH.md): Chinese research notes preserving the two original idea chains in detail.
-- [NON_CLAIMS.md](./NON_CLAIMS.md): what the project does not claim, including consciousness, biological emotion, and personhood.
-- [ARCHITECTURE.md](./ARCHITECTURE.md): a first technical architecture for identity-first persistent agents.
-- [STATE_SCHEMA.md](./STATE_SCHEMA.md): a concrete state-transfer schema for identity, memory, tasks, affective state, conflicts, and update logs.
-- [DREAM_ENGINE_SPEC.md](./DREAM_ENGINE_SPEC.md): the proposed offline reflection and consolidation process.
-- [EVALUATION.md](./EVALUATION.md): how to test persistence, drift, memory lifecycle quality, and identity continuity.
-- [LITERATURE_MAP.md](./LITERATURE_MAP.md): related work in LLM agents, cognitive architecture, psychology, neuroscience, and continual learning.
+- [NON_CLAIMS.md](./NON_CLAIMS.md) / [NON_CLAIMS_ZH.md](./NON_CLAIMS_ZH.md): what the project does not claim, including consciousness, biological emotion, and personhood.
+- [ARCHITECTURE.md](./ARCHITECTURE.md) / [ARCHITECTURE_ZH.md](./ARCHITECTURE_ZH.md): a first technical architecture for identity-first persistent agents.
+- [STATE_SCHEMA.md](./STATE_SCHEMA.md) / [STATE_SCHEMA_ZH.md](./STATE_SCHEMA_ZH.md): a concrete state-transfer schema for identity, memory, tasks, affective state, conflicts, and update logs.
+- [DREAM_ENGINE_SPEC.md](./DREAM_ENGINE_SPEC.md) / [DREAM_ENGINE_SPEC_ZH.md](./DREAM_ENGINE_SPEC_ZH.md): the proposed offline reflection and consolidation process.
+- [EVALUATION.md](./EVALUATION.md) / [EVALUATION_ZH.md](./EVALUATION_ZH.md): how to test persistence, drift, memory lifecycle quality, and identity continuity.
+- [LITERATURE_MAP.md](./LITERATURE_MAP.md) / [LITERATURE_MAP_ZH.md](./LITERATURE_MAP_ZH.md): related work in LLM agents, cognitive architecture, psychology, neuroscience, and continual learning.
+
+Documentation policy:
+
+> Future documents should be drafted in Chinese first, then mirrored in English. The English versions are preserved because many technical terms in this research program remain most precise in English.
 
 The central claim:
 
