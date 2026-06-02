@@ -23,6 +23,7 @@ This repository records the foundational documents and the first engineering fra
 - [DREAM_ENGINE_SPEC.md](./DREAM_ENGINE_SPEC.md) / [DREAM_ENGINE_SPEC_ZH.md](./DREAM_ENGINE_SPEC_ZH.md): the proposed offline reflection and consolidation process.
 - [EVALUATION.md](./EVALUATION.md) / [EVALUATION_ZH.md](./EVALUATION_ZH.md): how to test persistence, drift, memory lifecycle quality, and identity continuity.
 - [LITERATURE_MAP.md](./LITERATURE_MAP.md) / [LITERATURE_MAP_ZH.md](./LITERATURE_MAP_ZH.md): related work in LLM agents, cognitive architecture, psychology, neuroscience, and continual learning.
+- [IMPLEMENTATION_START.md](./IMPLEMENTATION_START.md) / [IMPLEMENTATION_START_ZH.md](./IMPLEMENTATION_START_ZH.md): the first runnable local 01 Core prototype.
 
 Documentation policy:
 
@@ -36,6 +37,19 @@ The central claim:
 01 is not intended to be the strongest model, a super-agent, or a fictional character with a prewritten biography.
 
 01 is an **Identity Seed**: a first experiment in giving intelligence a starting point, a direction, a world, and enough continuity to grow a life history of its own.
+
+## First Runnable Step
+
+This repository now includes a minimal local prototype:
+
+```bash
+python3 -m one_core.cli init
+python3 -m one_core.cli interact "We begin implementing 01 Core."
+python3 -m one_core.cli dream
+python3 -m one_core.cli status
+```
+
+It stores state under `work/01_state` by default.
 
 ```text
 01 Project

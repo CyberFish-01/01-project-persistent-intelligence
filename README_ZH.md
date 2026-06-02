@@ -25,6 +25,7 @@
 - [DREAM_ENGINE_SPEC.md](./DREAM_ENGINE_SPEC.md) / [DREAM_ENGINE_SPEC_ZH.md](./DREAM_ENGINE_SPEC_ZH.md)：Dream Engine 的离线反思、巩固、冲突检测和遗忘机制。
 - [EVALUATION.md](./EVALUATION.md) / [EVALUATION_ZH.md](./EVALUATION_ZH.md)：如何评估连续性、认知漂移、记忆生命周期和身份稳定性。
 - [LITERATURE_MAP.md](./LITERATURE_MAP.md) / [LITERATURE_MAP_ZH.md](./LITERATURE_MAP_ZH.md)：与 LLM Agent、认知架构、心理学、神经科学、持续学习相关的文献地图。
+- [IMPLEMENTATION_START.md](./IMPLEMENTATION_START.md) / [IMPLEMENTATION_START_ZH.md](./IMPLEMENTATION_START_ZH.md)：第一版可运行本地 01 Core 原型。
 
 ## 核心命题
 
@@ -40,6 +41,19 @@ Continuity = State Transfer
 01 不是最强模型、超级 Agent、数字女友，或者一个带完整虚构传记的角色。
 
 01 是一个 **Identity Seed（身份种子）**：第一次尝试给智能一个起点、一个方向、一个世界，以及足够的连续性，让它自己长出生命史。
+
+## 第一版可运行原型
+
+本仓库现在包含一个最小本地 01 Core：
+
+```bash
+python3 -m one_core.cli init
+python3 -m one_core.cli interact "我们开始实现 01 Core。"
+python3 -m one_core.cli dream
+python3 -m one_core.cli status
+```
+
+默认状态目录是 `work/01_state`。
 
 ```text
 01 Project
