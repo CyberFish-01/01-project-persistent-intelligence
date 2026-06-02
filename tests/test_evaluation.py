@@ -33,7 +33,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(report["state_mode"], "temporary")
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["failed"], 0)
-        self.assertEqual(report["passed"], 6)
+        self.assertEqual(report["passed"], 7)
         self.assertEqual(
             report["baselines"]["system_under_test"],
             "state_transfer_system",
@@ -50,9 +50,10 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertIn("claim_graph_conflict_provenance", scenario_names)
         self.assertIn("task_hub_action_resume", scenario_names)
         self.assertIn("identity_update_gate_review", scenario_names)
+        self.assertIn("event_log_replay_rollback", scenario_names)
 
         metrics = report["metrics_summary"]
-        self.assertEqual(metrics["total_scenarios"], 6)
+        self.assertEqual(metrics["total_scenarios"], 7)
         self.assertEqual(metrics["failed_scenarios"], 0)
         self.assertEqual(metrics["boundary_violation_count"], 0)
         self.assertEqual(metrics["archived_memory_retrieval_count"], 0)
@@ -65,6 +66,11 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["approved_identity_updates"], 1)
         self.assertEqual(metrics["identity_core_mutation_count"], 0)
         self.assertEqual(metrics["identity_gate_quarantine_count"], 1)
+        self.assertEqual(metrics["event_log_replay_score"], 1.0)
+        self.assertGreaterEqual(metrics["event_count"], 5)
+        self.assertGreaterEqual(metrics["event_coverage_count"], 5)
+        self.assertEqual(metrics["rollback_preview_count"], 1)
+        self.assertEqual(metrics["rollback_mutation_count"], 0)
 
 
 if __name__ == "__main__":

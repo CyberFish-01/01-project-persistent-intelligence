@@ -45,6 +45,7 @@ class CoreStateTests(unittest.TestCase):
             self.assertTrue(state["memory_stores"]["identity_memory"][0]["update_history"])
             self.assertEqual(store.list_audit_events(), [])
             self.assertEqual(store.list_traces(), [])
+            self.assertEqual(store.list_events(), [])
 
     def test_load_migrates_old_state_with_adapter_registry(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -895,6 +896,46 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(state["identity_core"], before_identity)
             self.assertEqual(len(state["memory_stores"]["identity_memory"]), 1)
 
+    def test_record_episode_writes_replayable_state_event(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episode = store.record_episode("P12 needs an append-only event log.")
+            events = store.list_events()
+            replay = store.replay_events()
+
+            self.assertEqual(len(events), 1)
+            self.assertEqual(events[0]["workflow"], "record_episode")
+            self.assertEqual(events[0]["after"], episode["id"])
+            self.assertEqual(events[0]["target_path"], "memory_stores.episodic_memory")
+            self.assertEqual(replay["status"], "passed")
+            self.assertEqual(replay["event_count"], 1)
+
+    def test_dry_run_preview_does_not_write_state_event(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            api = OneCoreAPI(store)
+            store.init()
+
+            status_code, response = api.handle_post(
+                "/v1/adapter/ingest",
+                {
+                    "adapter_id": "local_generic_adapter",
+                    "dry_run": True,
+                    "event": {
+                        "event_id": "dry-run-p12",
+                        "event_type": "message",
+                        "text": "Preview should not enter the event log.",
+                        "user": {"id": "cyberfish"},
+                        "source": {"channel": "local", "session_id": "p12"},
+                    },
+                },
+            )
+
+            self.assertEqual(status_code, 200)
+            self.assertEqual(response["status"], "preview")
+            self.assertEqual(store.list_events(), [])
+
     def test_identity_update_gate_approves_supported_identity_memory_without_core_patch(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))
@@ -934,6 +975,36 @@ class CoreStateTests(unittest.TestCase):
                 state["identity_update_gate"]["review_decisions"][-1]["snapshot_id"],
                 result["snapshot_id"],
             )
+
+    def test_rollback_preview_reports_snapshot_without_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episodes = [
+                store.record_episode("identity gate evidence one"),
+                store.record_episode("identity gate evidence two"),
+                store.record_episode("identity gate evidence three"),
+            ]
+            proposal = store.propose_identity_update(
+                "01 identity growth is reviewable event-sourced state.",
+                evidence=[episode["id"] for episode in episodes],
+                proposer="unit_test",
+                confidence=0.82,
+            )
+            result = store.review_identity_update(
+                proposal["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+            )
+            before = store.load()
+            preview = store.rollback_preview(result["snapshot_id"])
+            after = store.load()
+
+            self.assertEqual(preview["status"], "preview")
+            self.assertEqual(preview["snapshot_id"], result["snapshot_id"])
+            self.assertFalse(preview["would_modify_state"])
+            self.assertTrue(preview["affected_event_ids"])
+            self.assertEqual(after, before)
 
     def test_identity_update_gate_blocks_non_claims_violation(self):
         with tempfile.TemporaryDirectory() as tmp:

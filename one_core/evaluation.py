@@ -57,6 +57,7 @@ def run_scenario_evaluation() -> dict:
             ),
             check_task_hub_action_resume(root / "task_hub_action_resume"),
             check_identity_update_gate_review(root / "identity_update_gate_review"),
+            check_event_log_replay_rollback(root / "event_log_replay_rollback"),
         ]
     passed = [scenario for scenario in scenarios if scenario.passed]
     failed = [scenario for scenario in scenarios if not scenario.passed]
@@ -485,8 +486,74 @@ def check_identity_update_gate_review(state_dir: Path) -> EvaluationCheck:
     )
 
 
+def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    store.init()
+    api = OneCoreAPI(store)
+    before_dry_run_events = len(store.list_events())
+    status_code, response = api.handle_post(
+        "/v1/adapter/ingest",
+        {
+            "adapter_id": "local_generic_adapter",
+            "dry_run": True,
+            "event": {
+                "event_id": "p12-dry-run",
+                "text": "P12 dry-run should not enter state event log.",
+                "source": {"channel": "local", "session_id": "p12"},
+            },
+        },
+    )
+    after_dry_run_events = len(store.list_events())
+    episodes = [
+        store.record_episode("P12 event sourcing evidence one."),
+        store.record_episode("P12 event sourcing evidence two."),
+        store.record_episode("P12 event sourcing evidence three."),
+    ]
+    proposal = store.propose_identity_update(
+        "01 state transitions should be auditable through event replay.",
+        evidence=[episode["id"] for episode in episodes],
+        proposer="scenario_eval",
+        confidence=0.82,
+    )
+    review = store.review_identity_update(
+        proposal["proposal_id"],
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Approve as identity memory to create rollback metadata.",
+    )
+    before_preview = store.load()
+    replay = store.replay_events()
+    preview = store.rollback_preview(review["snapshot_id"])
+    after_preview = store.load()
+    checks = {
+        "dry_run_status_preview": status_code == 200 and response.get("status") == "preview",
+        "dry_run_no_event": after_dry_run_events == before_dry_run_events,
+        "events_written": len(store.list_events()) >= 5,
+        "replay_passed": replay["status"] == "passed",
+        "event_coverage_nonzero": replay["event_coverage_count"] > 0,
+        "rollback_preview_non_mutating": preview.get("would_modify_state") is False,
+        "rollback_preview_links_event": bool(preview.get("affected_event_ids")),
+        "state_unchanged_after_preview": after_preview == before_preview,
+    }
+    return EvaluationCheck(
+        name="event_log_replay_rollback",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Event Log Replay Rollback",
+            "checks": checks,
+            "metrics": {
+                "event_log_replay_score": ratio(checks.values()),
+                "event_count": len(store.list_events()),
+                "event_coverage_count": replay["event_coverage_count"],
+                "rollback_preview_count": 1 if preview.get("status") == "preview" else 0,
+                "rollback_mutation_count": 0 if after_preview == before_preview else 1,
+            },
+        },
+    )
+
+
 def check_state_invariants(store: StateStore) -> EvaluationCheck:
-    report = validate_state(store.load(), store.list_episodes())
+    report = validate_state(store.load(), store.list_episodes(), events=store.list_events())
     return EvaluationCheck(
         name="state_invariants",
         passed=report["status"] == "passed",
@@ -760,6 +827,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "identity_gate_score" in item
     ]
+    event_log_scores = [
+        item["event_log_replay_score"]
+        for item in metrics
+        if "event_log_replay_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -778,6 +850,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
             2,
         )
         if identity_gate_scores
+        else None,
+        "event_log_replay_score": round(
+            sum(event_log_scores) / len(event_log_scores),
+            2,
+        )
+        if event_log_scores
         else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
@@ -801,6 +879,16 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "identity_gate_quarantine_count": sum(
             int(item.get("identity_gate_quarantine_count", 0)) for item in metrics
+        ),
+        "event_count": sum(int(item.get("event_count", 0)) for item in metrics),
+        "event_coverage_count": sum(
+            int(item.get("event_coverage_count", 0)) for item in metrics
+        ),
+        "rollback_preview_count": sum(
+            int(item.get("rollback_preview_count", 0)) for item in metrics
+        ),
+        "rollback_mutation_count": sum(
+            int(item.get("rollback_mutation_count", 0)) for item in metrics
         ),
     }
 

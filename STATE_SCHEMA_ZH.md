@@ -9,7 +9,7 @@
 ## 1. 顶层状态
 
 ```yaml
-state_version: "0.9"
+state_version: "1.0"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -767,6 +767,7 @@ Audit log 记录运行时发生过什么。
 ```text
 audit.jsonl
 traces.jsonl
+events.jsonl
 dream_artifacts.jsonl
 ```
 
@@ -785,6 +786,40 @@ audit_log:
 ```
 
 `dry_run` 可以产生 audit / trace，但不能写入 episode、dream job 或 adapter event index。
+
+`events.jsonl` 是 P12 引入的 append-only state transition envelope。它把一个已完成的 runtime trace 与其产生的 durable `update_log` entry 连接起来。它是 replay/audit ledger，不是完整 state 的第二份副本。
+
+```yaml
+event:
+  event_id: "event_0001"
+  sequence: 1
+  timestamp: "ISO-8601 timestamp"
+  event_type: "state_transition"
+  state_version: "1.0"
+  workflow: "record_episode"
+  trace_id: "trace_0001"
+  audit_event_ids:
+    - "audit_0001"
+  update_id: "update_0001"
+  actor: "local_generic_adapter"
+  operation: "append"
+  target_path: "memory_stores.episodic_memory"
+  before: null
+  after: "episode_0001"
+  evidence:
+    - "episode_0001"
+  rollback:
+    reversible: true
+  memory_events: []
+  review_events: []
+```
+
+P12 replay 支持刻意保持保守：
+
+- `replay-events` 检查 event `update_id` 是否仍能引用当前 `update_log`；
+- 它会报告旧 state update 的 coverage，但不要求 P12 之前的 update 必须有 event；
+- `rollback-preview <snapshot_id>` 只报告 snapshot 与 affected event metadata，不修改 state；
+- `dry_run` preview 不写入 state event。
 
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
@@ -843,7 +878,7 @@ snapshots:
     metadata:
       review_decision_id: "review_decision_0001"
       candidate_id: "cand_0001"
-    state_version: "0.9"
+    state_version: "1.0"
     memory_counts:
       semantic_memory: 3
       candidate_memory: 2
@@ -923,6 +958,7 @@ state_transfer_package:
 - `dry_run` 的 audit / trace 不等同于 episode 写入；
 - 每个 state snapshot 都有 schema version；
 - 每个 review/promotion rollback reference 都能指向 snapshot metadata；
+- 每个 state event 都引用现有 update_log entry；
 - `task_hub.action_trace` 只记录真实状态变更，不记录 non-mutating dry-run；
 - procedural candidate 必须有 workflow、evidence 和 pending review status；
 - identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；

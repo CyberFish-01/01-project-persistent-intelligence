@@ -40,6 +40,7 @@ def state_summary(store: StateStore) -> dict:
         ),
         "audit_events": len(store.list_audit_events()),
         "traces": len(store.list_traces()),
+        "events": len(store.list_events()),
         "dream_artifacts": len(store.list_dream_artifacts()),
         "pending_identity_proposals": len(
             [

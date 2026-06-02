@@ -310,8 +310,9 @@ It uses temporary state and currently runs:
 - `claim_graph_conflict_provenance`: verifies that false-memory conflicts create evidence-backed claim nodes without mutating semantic memory or Identity Core.
 - `task_hub_action_resume`: verifies that Task Hub preserves active tasks, next actions, and action history after interruption, and proposes procedural candidates from repeated successful actions.
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
+- `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, and rollback preview does not mutate state.
 
-The v0.4 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
+The v0.5 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
 
 Current metrics summary includes:
 
@@ -326,6 +327,11 @@ Current metrics summary includes:
 - approved identity updates,
 - identity core mutation count,
 - identity gate quarantine count,
+- event log replay score,
+- event count,
+- event coverage count,
+- rollback preview count,
+- rollback mutation count,
 - passed and failed scenario counts.
 
 ## 11. What Would Falsify the Approach?

@@ -156,6 +156,15 @@ def main() -> None:
         "validate-state",
         help="Validate the current state structure without mutating it.",
     )
+    subparsers.add_parser(
+        "replay-events",
+        help="Check append-only event log consistency against current update_log.",
+    )
+    rollback_parser = subparsers.add_parser(
+        "rollback-preview",
+        help="Preview rollback metadata for a snapshot without mutating state.",
+    )
+    rollback_parser.add_argument("snapshot_id")
 
     remote_parser = subparsers.add_parser(
         "remote", help="Call a running 01 Core API through the generic adapter protocol."
@@ -291,7 +300,17 @@ def main() -> None:
     elif args.command == "evaluate-scenarios":
         print_json(run_scenario_evaluation())
     elif args.command == "validate-state":
-        print_json(validate_state(store.load(), store.list_episodes()))
+        print_json(
+            validate_state(
+                store.load(),
+                store.list_episodes(),
+                events=store.list_events(),
+            )
+        )
+    elif args.command == "replay-events":
+        print_json(store.replay_events())
+    elif args.command == "rollback-preview":
+        print_json(store.rollback_preview(args.snapshot_id))
     elif args.command == "remote":
         client = OneCoreClient(args.api_base_url)
         if args.remote_command == "health":

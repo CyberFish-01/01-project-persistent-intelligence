@@ -11,7 +11,7 @@ from .schema_defaults import default_identity_update_gate
 from .seed import make_identity_seed
 
 
-STATE_VERSION = "0.9"
+STATE_VERSION = "1.0"
 DEFAULT_STATE_DIR = Path("work/01_state")
 
 DEFAULT_REGISTERED_ADAPTERS = (
@@ -605,6 +605,113 @@ def identity_drift_score(
     }
 
 
+def state_updates_with_ids(state: dict) -> List[dict]:
+    updates = state.get("update_log", [])
+    if not isinstance(updates, list):
+        return []
+    return [
+        update
+        for update in updates
+        if isinstance(update, dict) and update.get("id")
+    ]
+
+
+def current_memory_counts(state: dict) -> dict:
+    return {
+        name: len(values)
+        for name, values in state.get("memory_stores", {}).items()
+        if isinstance(values, list)
+    }
+
+
+def last_update_for_trace(state: dict, trace: dict) -> Optional[dict]:
+    updates = state_updates_with_ids(state)
+    if not updates:
+        return None
+    referenced_ids = trace_referenced_update_ids(trace)
+    if referenced_ids:
+        for update in reversed(updates):
+            if update.get("id") in referenced_ids:
+                return update
+    workflow = trace.get("workflow")
+    if workflow == "record_episode":
+        for update in reversed(updates):
+            if (
+                update.get("operation") == "append"
+                and update.get("target_path") == "memory_stores.episodic_memory"
+            ):
+                return update
+    return updates[-1]
+
+
+def trace_referenced_update_ids(trace: dict) -> set[str]:
+    ids = set()
+    for group_name in ("memory_events", "review_events"):
+        group = trace.get(group_name, [])
+        if not isinstance(group, list):
+            continue
+        for item in group:
+            if not isinstance(item, dict):
+                continue
+            for key in ("update_id", "state_update_id"):
+                if item.get(key):
+                    ids.add(str(item[key]))
+            nested = item.get("review_decision") or item.get("identity_decision")
+            if isinstance(nested, dict) and nested.get("update_id"):
+                ids.add(str(nested["update_id"]))
+    return ids
+
+
+def build_state_event(state: dict, trace: dict, update: dict, sequence: int) -> dict:
+    return {
+        "event_id": new_id("event"),
+        "sequence": sequence,
+        "timestamp": trace.get("ended_at") or trace.get("started_at") or utc_now(),
+        "event_type": "state_transition",
+        "state_version": state.get("state_version"),
+        "workflow": trace.get("workflow"),
+        "trace_id": trace.get("trace_id"),
+        "audit_event_ids": trace.get("audit_event_ids", []),
+        "update_id": update.get("id"),
+        "actor": update.get("actor"),
+        "operation": update.get("operation"),
+        "target_path": update.get("target_path"),
+        "before": update.get("before"),
+        "after": update.get("after"),
+        "evidence": update.get("evidence", []),
+        "gate": update.get("gate"),
+        "confidence": update.get("confidence"),
+        "rollback": update.get("rollback", {}),
+        "memory_events": trace.get("memory_events", []),
+        "review_events": trace.get("review_events", []),
+        "summary": trace.get("summary", ""),
+    }
+
+
+def should_update_have_event(update: dict) -> bool:
+    if update.get("operation") in {"init", "migrate"}:
+        return False
+    if update.get("actor") == "state_store":
+        return False
+    return True
+
+
+def workflow_counts(events: List[dict]) -> dict:
+    counts: dict[str, int] = {}
+    for event in events:
+        workflow = str(event.get("workflow") or "unknown")
+        counts[workflow] = counts.get(workflow, 0) + 1
+    return counts
+
+
+def target_path_counts(events: List[dict]) -> dict:
+    counts: dict[str, int] = {}
+    for event in events:
+        target = str(event.get("target_path") or "unknown")
+        counts[target] = counts.get(target, 0) + 1
+    return counts
+
+
 def inferred_memory_provenance(store_name: str, memory: dict) -> List[dict]:
     if store_name == "imported_memory":
         return [
@@ -668,6 +775,7 @@ class StateStore:
         self.imports_path = self.state_dir / "imports.jsonl"
         self.audit_path = self.state_dir / "audit.jsonl"
         self.traces_path = self.state_dir / "traces.jsonl"
+        self.events_path = self.state_dir / "events.jsonl"
         self.dream_artifacts_path = self.state_dir / "dream_artifacts.jsonl"
 
     def exists(self) -> bool:
@@ -872,6 +980,7 @@ class StateStore:
         self.imports_path.touch(exist_ok=True)
         self.audit_path.touch(exist_ok=True)
         self.traces_path.touch(exist_ok=True)
+        self.events_path.touch(exist_ok=True)
         self.dream_artifacts_path.touch(exist_ok=True)
         return state
 
@@ -1261,6 +1370,9 @@ class StateStore:
 
     def list_traces(self) -> List[dict]:
         return self.read_jsonl(self.traces_path)
+
+    def list_events(self) -> List[dict]:
+        return self.read_jsonl(self.events_path)
 
     def list_dream_artifacts(self) -> List[dict]:
         return self.read_jsonl(self.dream_artifacts_path)
@@ -2426,7 +2538,108 @@ class StateStore:
                 trace=trace,
                 status=status,
             )
+            self.record_state_event(
+                state=state,
+                trace=trace,
+                status=status,
+            )
         return trace
+
+    def record_state_event(
+        self,
+        state: dict,
+        trace: dict,
+        status: str = "completed",
+    ) -> Optional[dict]:
+        if status != "completed":
+            return None
+        update = last_update_for_trace(state=state, trace=trace)
+        if not update:
+            return None
+        event = build_state_event(
+            state=state,
+            trace=trace,
+            update=update,
+            sequence=len(self.list_events()) + 1,
+        )
+        self.append_jsonl(self.events_path, event)
+        return event
+
+    def replay_events(self) -> dict:
+        events = self.list_events()
+        updates = state_updates_with_ids(self.load())
+        update_ids = {update["id"] for update in updates}
+        event_update_ids = {
+            event.get("update_id")
+            for event in events
+            if event.get("update_id")
+        }
+        missing_event_update_ids = sorted(event_update_ids - update_ids)
+        return {
+            "status": "passed" if not missing_event_update_ids else "failed",
+            "mode": "audit_replay",
+            "event_count": len(events),
+            "state_update_count": len(updates),
+            "event_coverage_count": len(event_update_ids & update_ids),
+            "workflows": workflow_counts(events),
+            "target_paths": target_path_counts(events),
+            "missing_event_update_ids": missing_event_update_ids,
+            "uncovered_state_update_ids": sorted(
+                update["id"]
+                for update in updates
+                if update["id"] not in event_update_ids
+                and should_update_have_event(update)
+            ),
+            "coverage_note": "P12 replay validates event references; pre-P12 state updates may be uncovered.",
+            "last_event_id": events[-1]["event_id"] if events else None,
+        }
+
+    def rollback_preview(self, snapshot_id: str) -> dict:
+        state = self.load()
+        snapshot = next(
+            (
+                item
+                for item in state.get("snapshots", [])
+                if isinstance(item, dict) and item.get("snapshot_id") == snapshot_id
+            ),
+            None,
+        )
+        if snapshot is None:
+            return {
+                "status": "not_found",
+                "snapshot_id": snapshot_id,
+                "error": "snapshot_not_found",
+            }
+        events = self.list_events()
+        target_updates = [
+            update
+            for update in state_updates_with_ids(state)
+            if update.get("rollback", {}).get("snapshot_id") == snapshot_id
+        ]
+        event_update_ids = {
+            update["id"]
+            for update in target_updates
+            if update.get("id")
+        }
+        affected_events = [
+            event
+            for event in events
+            if event.get("update_id") in event_update_ids
+        ]
+        return {
+            "status": "preview",
+            "mode": "metadata_only",
+            "snapshot_id": snapshot_id,
+            "operation": snapshot.get("operation"),
+            "target_path": snapshot.get("target_path"),
+            "rollback": snapshot.get("rollback", {}),
+            "memory_counts_at_snapshot": snapshot.get("memory_counts", {}),
+            "current_memory_counts": current_memory_counts(state),
+            "affected_update_ids": sorted(event_update_ids),
+            "affected_event_ids": [event.get("event_id") for event in affected_events],
+            "would_modify_state": False,
+            "note": "P12 only previews rollback from snapshot metadata and event references.",
+        }
 
     def record_episode(
         self,

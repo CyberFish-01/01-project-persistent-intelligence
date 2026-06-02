@@ -7,7 +7,7 @@ The schema is intentionally implementation-neutral. It can be stored as JSON, YA
 ## 1. Top-Level State
 
 ```yaml
-state_version: "0.9"
+state_version: "1.0"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -765,6 +765,7 @@ Full events are written to:
 ```text
 audit.jsonl
 traces.jsonl
+events.jsonl
 dream_artifacts.jsonl
 ```
 
@@ -783,6 +784,40 @@ audit_log:
 ```
 
 `dry_run` may produce audit / trace records, but must not write an episode, dream job, or adapter event index entry.
+
+`events.jsonl` is the P12 append-only state transition envelope. It links a completed runtime trace to the durable `update_log` entry it produced. It is a replay/audit ledger, not a second copy of the whole state.
+
+```yaml
+event:
+  event_id: "event_0001"
+  sequence: 1
+  timestamp: "ISO-8601 timestamp"
+  event_type: "state_transition"
+  state_version: "1.0"
+  workflow: "record_episode"
+  trace_id: "trace_0001"
+  audit_event_ids:
+    - "audit_0001"
+  update_id: "update_0001"
+  actor: "local_generic_adapter"
+  operation: "append"
+  target_path: "memory_stores.episodic_memory"
+  before: null
+  after: "episode_0001"
+  evidence:
+    - "episode_0001"
+  rollback:
+    reversible: true
+  memory_events: []
+  review_events: []
+```
+
+P12 replay support is intentionally conservative:
+
+- `replay-events` validates that event `update_id` values still reference current `update_log` entries,
+- it reports coverage for old state updates but does not require pre-P12 updates to have events,
+- `rollback-preview <snapshot_id>` reports snapshot and affected event metadata without mutating state,
+- `dry_run` previews do not write state events.
 
 Dream artifacts keep the full review material for one Dream run:
 
@@ -841,7 +876,7 @@ snapshots:
     metadata:
       review_decision_id: "review_decision_0001"
       candidate_id: "cand_0001"
-    state_version: "0.9"
+    state_version: "1.0"
     memory_counts:
       semantic_memory: 3
       candidate_memory: 2
@@ -921,6 +956,7 @@ A valid 01 state must satisfy:
 - `dry_run` audit / trace is not equivalent to episode writing,
 - every state snapshot has a schema version,
 - every review/promotion rollback reference points to snapshot metadata,
+- every state event references an existing update_log entry,
 - `task_hub.action_trace` records real state mutations, not non-mutating dry-runs,
 - every procedural candidate has workflow, evidence, and pending review status,
 - every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,

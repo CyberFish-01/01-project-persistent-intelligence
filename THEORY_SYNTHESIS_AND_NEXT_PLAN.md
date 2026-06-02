@@ -507,17 +507,47 @@ Remaining gaps:
 - no deep claim_graph dependency integration with identity proposals yet;
 - no human review UI yet.
 
+### P12 Event Log / Replay / Rollback
+
+Goal: move audit from "records exist" toward a replayable transition ledger.
+
+Status: implemented as a first local v1.0 pass.
+
+Executable items:
+
+1. append-only `events.jsonl` - done;
+2. event envelope linking trace, audit event, and update_log entry - done;
+3. `replay-events` CLI consistency check - done;
+4. `rollback-preview <snapshot_id>` CLI - done metadata-only;
+5. scenario evaluation for event replay and rollback preview - done.
+
+Implemented result:
+
+- completed runtime traces with state mutations now write state transition events;
+- dry-run preview does not write state events;
+- replay validates event `update_id` references and reports coverage;
+- rollback preview links snapshot metadata to affected events without mutating state;
+- scenario evaluation adds `event_log_replay_rollback`.
+
+Remaining gaps:
+
+- replay does not reconstruct full state from an empty seed yet;
+- pre-P12 updates may be uncovered and are reported as coverage gaps;
+- rollback is still preview-only;
+- event schema is deterministic but still coarse;
+- no event compaction or retention policy yet.
+
 ## 6. Current Recommendation
 
-Do P12 next:
+Do P13 next:
 
 ```text
-P12 Event Log / Replay / Rollback
+P13 Dream Artifact Package
 ```
 
 Reason:
 
-- P7-P11 now make memory, conflict, task, procedural candidate, and identity gate stateful and verifiable;
-- snapshots are still metadata-only, and update_log/action_trace cannot be replayed;
-- real state transfer needs to move from "record what happened" toward "replay, compare, and preview rollback";
-- P12 should turn the Event Sourcing direction into an append-only event log, replay checks, and rollback preview.
+- P12 gives state transitions an event ledger, but Dream artifacts are still only a partial package;
+- Cognitive OS repeatedly points to Dream input manifest, observations, proposals, review, patch diff, decision log, and rollback metadata as the next durable unit;
+- P13 should make every dream run inspectable as an artifact package before deeper claim resolution or UI work;
+- this keeps the project on the foundation path: state transfer, audit, review, and bounded evolution.

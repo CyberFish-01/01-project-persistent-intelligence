@@ -312,8 +312,9 @@ python3 -m one_core.cli evaluate-scenarios
 - `claim_graph_conflict_provenance`：检查 false-memory conflict 会创建带 evidence 的 claim node，并且不会修改 semantic memory 或 Identity Core。
 - `task_hub_action_resume`：检查 Task Hub 能在中断后保留 active task、next action、action history，并从重复成功行动中提出 procedural candidate。
 - `identity_update_gate_review`：检查 identity update 必须通过 high gate；单证据会被 quarantine，三证据可批准为 identity_memory，但不会改写 Identity Core。
+- `event_log_replay_rollback`：检查真实 state transition 会进入 append-only event log，dry-run preview 不写入，replay check 通过，rollback preview 不修改 state。
 
-v0.4 runner 会报告 stateless、retrieval-only、summary-only baseline metadata，但还不执行这些 baseline。真实 baseline 对比属于后续评估扩展。
+v0.5 runner 会报告 stateless、retrieval-only、summary-only baseline metadata，但还不执行这些 baseline。真实 baseline 对比属于后续评估扩展。
 
 当前 metrics summary 包含：
 
@@ -328,6 +329,11 @@ v0.4 runner 会报告 stateless、retrieval-only、summary-only baseline metadat
 - approved identity updates；
 - identity core mutation count；
 - identity gate quarantine count；
+- event log replay score；
+- event count；
+- event coverage count；
+- rollback preview count；
+- rollback mutation count；
 - scenario passed / failed counts。
 
 ## 11. 什么会反证这个方向？

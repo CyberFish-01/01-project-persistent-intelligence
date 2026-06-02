@@ -507,17 +507,47 @@ git diff --check
 - 还没有 claim_graph dependency 与 identity proposal 的深层联动；
 - 还没有人工 review UI。
 
+### P12 Event Log / Replay / Rollback
+
+目标：把 audit 从“有记录”推进到“有可检查的 transition ledger”。
+
+状态：已实现第一版本地 v1.0。
+
+可执行项：
+
+1. append-only `events.jsonl` - 已完成；
+2. 连接 trace、audit event 和 update_log entry 的 event envelope - 已完成；
+3. `replay-events` CLI consistency check - 已完成；
+4. `rollback-preview <snapshot_id>` CLI - 已完成 metadata-only；
+5. event replay 和 rollback preview 的 scenario evaluation - 已完成。
+
+已实现结果：
+
+- 带 state mutation 的 completed runtime trace 现在会写入 state transition event；
+- dry-run preview 不写入 state event；
+- replay 会检查 event `update_id` 是否仍能引用 update_log，并报告 coverage；
+- rollback preview 会把 snapshot metadata 与 affected events 连接起来，但不修改 state；
+- scenario evaluation 增加 `event_log_replay_rollback`。
+
+剩余缺口：
+
+- replay 还不能从空 seed 完整重建 state；
+- P12 之前的 update 可能没有 event，只作为 coverage gap 报告；
+- rollback 仍是 preview-only；
+- event schema 是确定性的，但仍然比较粗；
+- 还没有 event compaction 或 retention policy。
+
 ## 6. 当前建议
 
 下一步先做：
 
 ```text
-P12 Event Log / Replay / Rollback
+P13 Dream Artifact Package
 ```
 
 理由：
 
-- P7-P11 已经让 memory、conflict、task、procedural candidate 和 identity gate 都进入了可验证状态；
-- 现在 snapshots 仍是 metadata-only，update_log/action_trace 还不能 replay；
-- 真正的 state transfer 需要从“记录发生过什么”推进到“可以重放、比较、回滚”；
-- P12 应把 Event Sourcing 方向落成 append-only event log、replay check 和 rollback preview。
+- P12 让 state transition 有了 event ledger，但 Dream artifact 仍然只是部分 package；
+- Cognitive OS 反复指向 Dream input manifest、observations、proposals、review、patch diff、decision log、rollback metadata 作为下一种 durable unit；
+- P13 应让每次 dream run 都能作为 artifact package 被检查，再继续做更深的 claim resolution 或 UI；
+- 这仍然贴着地基方向：state transfer、audit、review、bounded evolution。

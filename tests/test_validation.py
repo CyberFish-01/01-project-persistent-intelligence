@@ -161,6 +161,32 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
 
+    def test_event_log_requires_valid_update_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            report = validate_state(
+                state,
+                store.list_episodes(),
+                events=[
+                    {
+                        "event_id": "event_bad",
+                        "sequence": 1,
+                        "timestamp": state["created_at"],
+                        "event_type": "state_transition",
+                        "workflow": "record_episode",
+                        "trace_id": "trace_bad",
+                        "update_id": "missing_update",
+                        "operation": "append",
+                        "target_path": "memory_stores.episodic_memory",
+                    }
+                ],
+            )
+
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("events[0].update_id", paths)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -19,6 +19,7 @@ class APITests(unittest.TestCase):
             self.assertEqual(status["indexed_adapter_events"], 0)
             self.assertEqual(status["audit_events"], 0)
             self.assertEqual(status["traces"], 0)
+            self.assertEqual(status["events"], 0)
             self.assertEqual(status["dream_artifacts"], 0)
             self.assertEqual(status["pending_identity_proposals"], 0)
             self.assertEqual(status["identity_review_decisions"], 0)

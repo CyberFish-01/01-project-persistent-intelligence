@@ -57,7 +57,11 @@ class ValidationIssue:
     severity: str = "error"
 
 
-def validate_state(state: dict[str, Any], episodes: Iterable[dict] | None = None) -> dict:
+def validate_state(
+    state: dict[str, Any],
+    episodes: Iterable[dict] | None = None,
+    events: Iterable[dict] | None = None,
+) -> dict:
     issues: list[ValidationIssue] = []
     issues.extend(validate_top_level(state))
     issues.extend(validate_identity_core(state))
@@ -72,6 +76,8 @@ def validate_state(state: dict[str, Any], episodes: Iterable[dict] | None = None
     issues.extend(validate_task_hub(state))
     issues.extend(validate_identity_update_gate(state))
     issues.extend(validate_snapshots(state))
+    if events is not None:
+        issues.extend(validate_event_log(state, events))
     return {
         "status": "passed" if not issues else "failed",
         "issues": [issue_to_dict(issue) for issue in issues],
@@ -446,6 +452,56 @@ def validate_update_log(state: dict[str, Any]) -> list[ValidationIssue]:
                 issues.append(
                     ValidationIssue(path + f".{key}", "Update log entry key is missing.")
                 )
+    return issues
+
+
+def validate_event_log(
+    state: dict[str, Any],
+    events: Iterable[dict],
+) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    update_ids = {
+        str(update["id"])
+        for update in state.get("update_log", [])
+        if isinstance(update, dict) and update.get("id")
+    }
+    last_sequence = 0
+    for index, event in enumerate(events):
+        path = f"events[{index}]"
+        if not isinstance(event, dict):
+            issues.append(ValidationIssue(path, "Event log entry must be an object."))
+            continue
+        for key in (
+            "event_id",
+            "sequence",
+            "timestamp",
+            "event_type",
+            "workflow",
+            "trace_id",
+            "update_id",
+            "operation",
+            "target_path",
+        ):
+            if key not in event:
+                issues.append(ValidationIssue(path + f".{key}", "Event key is missing."))
+        sequence = event.get("sequence")
+        if not isinstance(sequence, int) or sequence <= last_sequence:
+            issues.append(
+                ValidationIssue(
+                    path + ".sequence",
+                    "Event sequence must increase monotonically.",
+                )
+            )
+        elif isinstance(sequence, int):
+            last_sequence = sequence
+        update_id = event.get("update_id")
+        if update_id and str(update_id) not in update_ids:
+            issues.append(
+                ValidationIssue(
+                    path + ".update_id",
+                    "Event update_id must reference state update_log.",
+                )
+            )
     return issues
 
 
