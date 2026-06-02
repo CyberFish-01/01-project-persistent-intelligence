@@ -184,6 +184,14 @@ local core
 - 不扩大平台权限；
 - 不引入不可审计的 identity update。
 
+仓库提供一个非破坏性的 foundation evaluation 命令：
+
+```bash
+python3 -m one_core.cli evaluate-foundation
+```
+
+它使用临时 state，检查 continuity anchors、dry-run 不写入、adapter event 去重、identity overwrite gate，不会把测试 episode 写进真实 `work/01_state`。
+
 ## 9. 判断一个想法是否偏离
 
 如果一个想法主要在回答：

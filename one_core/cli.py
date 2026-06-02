@@ -14,6 +14,7 @@ from .client import (
 )
 from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
+from .evaluation import run_foundation_evaluation
 from .importer import import_text_file
 from .state import DEFAULT_STATE_DIR, StateStore
 
@@ -66,6 +67,11 @@ def main() -> None:
     dream_parser.add_argument("--limit", type=int, default=20)
 
     subparsers.add_parser("context", help="Print the current state transfer package.")
+
+    subparsers.add_parser(
+        "evaluate-foundation",
+        help="Run non-destructive foundation invariant checks.",
+    )
 
     remote_parser = subparsers.add_parser(
         "remote", help="Call a running 01 Core API through the generic adapter protocol."
@@ -149,6 +155,8 @@ def main() -> None:
         print_json(report)
     elif args.command == "context":
         print_json(store.build_context_package())
+    elif args.command == "evaluate-foundation":
+        print_json(run_foundation_evaluation())
     elif args.command == "remote":
         client = OneCoreClient(args.api_base_url)
         if args.remote_command == "health":

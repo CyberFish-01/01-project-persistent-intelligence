@@ -57,6 +57,7 @@ python3 -m one_core.cli init
 python3 -m one_core.cli interact "我们开始实现 01 Core。"
 python3 -m one_core.cli dream
 python3 -m one_core.cli status
+python3 -m one_core.cli evaluate-foundation
 ```
 
 默认状态目录是 `work/01_state`。

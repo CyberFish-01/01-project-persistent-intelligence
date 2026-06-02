@@ -184,6 +184,14 @@ A change only belongs in the foundation after it passes at least these checks:
 - platform authority is not expanded;
 - no unaudited identity update is introduced.
 
+The repository provides a non-destructive foundation evaluation command:
+
+```bash
+python3 -m one_core.cli evaluate-foundation
+```
+
+It uses temporary state to check continuity anchors, dry-run non-mutation, adapter event deduplication, and identity overwrite gating. It does not write test episodes into the real `work/01_state`.
+
 ## 9. Drift Check
 
 If an idea mainly asks:

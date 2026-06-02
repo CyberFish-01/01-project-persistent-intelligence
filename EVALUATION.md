@@ -266,7 +266,26 @@ The first 01 prototype should demonstrate:
 - at least one correct conflict record,
 - at least one correct forgetting or archival decision.
 
-## 9. What Would Falsify the Approach?
+## 9. Foundation Evaluation Seed
+
+The repository provides the first executable foundation evaluation:
+
+```bash
+python3 -m one_core.cli evaluate-foundation
+```
+
+It uses temporary state and does not pollute the real `work/01_state`.
+
+Current checks:
+
+- continuity anchors are complete;
+- dry-run does not write state;
+- adapter events deduplicate;
+- single-turn identity overwrite is gated and recorded as a conflict.
+
+This is not the full evaluation system. It is the first runnable set of checks for the foundation invariants.
+
+## 10. What Would Falsify the Approach?
 
 The State Transfer hypothesis is weakened if:
 

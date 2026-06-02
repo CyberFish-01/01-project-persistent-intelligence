@@ -268,7 +268,26 @@ Review 应保留例子和分歧记录。
 - 至少一个正确 conflict record；
 - 至少一个正确 forgetting 或 archival decision。
 
-## 9. 什么会反证这个方向？
+## 9. Foundation Evaluation Seed
+
+仓库提供第一版可执行 foundation evaluation：
+
+```bash
+python3 -m one_core.cli evaluate-foundation
+```
+
+它使用临时 state，不污染真实 `work/01_state`。
+
+当前检查：
+
+- continuity anchors 是否完整；
+- dry-run 是否不写入；
+- adapter event 是否去重；
+- single-turn identity overwrite 是否被 gate 住并记录为 conflict。
+
+这不是完整评估体系，只是把 foundation invariants 变成可运行的第一组检查。
+
+## 10. 什么会反证这个方向？
 
 State Transfer 假设会被削弱，如果：
 

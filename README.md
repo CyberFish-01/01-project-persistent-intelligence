@@ -53,6 +53,7 @@ python3 -m one_core.cli init
 python3 -m one_core.cli interact "We begin implementing 01 Core."
 python3 -m one_core.cli dream
 python3 -m one_core.cli status
+python3 -m one_core.cli evaluate-foundation
 ```
 
 It stores state under `work/01_state` by default.
