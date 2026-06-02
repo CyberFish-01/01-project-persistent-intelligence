@@ -15,6 +15,7 @@ Even when a model is powerful, its context is long, and its agent loop is comple
 This repository records the foundational documents and the first engineering frame:
 
 - [VISION.md](./VISION.md) / [VISION_ZH.md](./VISION_ZH.md): the full research vision for Persistent Intelligence, State Transfer, Dream Engine, Memory Lifecycle, Identity Growth, and Cognitive Ecology.
+- [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): the project-level engineering foundation: boundaries, invariants, and stage order that future implementation must obey.
 - [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md): the theory of artificial life history, including false assigned history, generated history, and identity seed.
 - [RESEARCH_NOTES_ZH.md](./RESEARCH_NOTES_ZH.md): Chinese research notes preserving the two original idea chains in detail.
 - [NON_CLAIMS.md](./NON_CLAIMS.md) / [NON_CLAIMS_ZH.md](./NON_CLAIMS_ZH.md): what the project does not claim, including consciousness, biological emotion, and personhood.

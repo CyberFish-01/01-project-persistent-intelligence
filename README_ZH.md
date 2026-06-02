@@ -17,6 +17,7 @@
 本仓库保留英文原文，并补充中文并行版本。以后默认 **中文优先起草，英文并行保留**。
 
 - [VISION.md](./VISION.md) / [VISION_ZH.md](./VISION_ZH.md)：Persistent Intelligence、State Transfer、Dream Engine、Memory Lifecycle、Identity Growth、Cognitive Ecology 的完整研究愿景。
+- [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级工程地基，定义后续实现必须服从的边界、不变量和阶段顺序。
 - [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md)：人工生命史、虚假历史、生成历史、Identity Seed。
 - [RESEARCH_NOTES_ZH.md](./RESEARCH_NOTES_ZH.md)：中文原始研究记录，保留两条思想链的完整展开。
 - [NON_CLAIMS.md](./NON_CLAIMS.md) / [NON_CLAIMS_ZH.md](./NON_CLAIMS_ZH.md)：项目不主张什么，包括意识、生物情绪、人格权等边界。
