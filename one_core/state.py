@@ -10,7 +10,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from .seed import make_identity_seed
 
 
-STATE_VERSION = "0.2"
+STATE_VERSION = "0.3"
 DEFAULT_STATE_DIR = Path("work/01_state")
 
 DEFAULT_REGISTERED_ADAPTERS = (
@@ -209,6 +209,7 @@ class StateStore:
                 },
             },
             "adapter_registry": default_adapter_registry(now),
+            "adapter_event_index": {},
             "open_conflicts": [],
             "dream_queue": [],
             "evaluation_trace": [],
@@ -268,6 +269,26 @@ class StateStore:
                 }
             )
             changed = True
+        if "adapter_event_index" not in state:
+            state["adapter_event_index"] = self.rebuild_adapter_event_index()
+            state["state_version"] = STATE_VERSION
+            state["updated_at"] = now
+            state.setdefault("update_log", []).append(
+                {
+                    "id": new_id("update"),
+                    "timestamp": now,
+                    "actor": "state_store",
+                    "target_path": "adapter_event_index",
+                    "operation": "migrate",
+                    "before": None,
+                    "after": "rebuilt_from_episodes",
+                    "evidence": ["protocol_v0.4_event_deduplication"],
+                    "gate": "low",
+                    "confidence": 1.0,
+                    "rollback": {"reversible": True},
+                }
+            )
+            changed = True
         return changed
 
     def save(self, state: dict) -> None:
@@ -319,6 +340,46 @@ class StateStore:
         adapter = dict(registered)
         adapter["registered"] = True
         return {"allowed": True, "adapter": adapter}
+
+    def rebuild_adapter_event_index(self) -> dict:
+        index: dict[str, dict[str, dict]] = {}
+        for episode in self.list_episodes():
+            self.index_adapter_event(index, episode)
+        return index
+
+    def index_adapter_event(self, index: dict, episode: dict) -> None:
+        event_id = episode.get("event_id")
+        source = episode.get("source") if isinstance(episode.get("source"), dict) else {}
+        adapter_id = source.get("adapter_id") or episode.get("adapter_id")
+        if not adapter_id or not event_id:
+            return
+
+        adapter_events = index.setdefault(str(adapter_id), {})
+        adapter_events[str(event_id)] = {
+            "adapter_id": str(adapter_id),
+            "event_id": str(event_id),
+            "episode_id": episode["id"],
+            "recorded_at": episode["timestamp"],
+            "channel": source.get("channel") or episode.get("channel"),
+        }
+
+    def find_recorded_adapter_event(
+        self, adapter_id: Optional[str], event_id: Optional[str]
+    ) -> Optional[dict]:
+        normalized_adapter_id = str(adapter_id or "").strip()
+        normalized_event_id = str(event_id or "").strip()
+        if not normalized_adapter_id or not normalized_event_id:
+            return None
+
+        state = self.load()
+        entry = (
+            state.get("adapter_event_index", {})
+            .get(normalized_adapter_id, {})
+            .get(normalized_event_id)
+        )
+        if not entry:
+            return None
+        return dict(entry)
 
     def append_jsonl(self, path: Path, item: dict) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -396,6 +457,7 @@ class StateStore:
                 "sensitivity": sensitivity,
             }
         )
+        self.index_adapter_event(state.setdefault("adapter_event_index", {}), episode)
         update_working_state_from_message(state, message, user_id, now)
         state["dream_queue"].append(
             {

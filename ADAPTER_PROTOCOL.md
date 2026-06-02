@@ -7,7 +7,7 @@ This is the generic adapter protocol for 01 Core.
 Current protocol version:
 
 ```text
-0.3
+0.4
 ```
 
 We build the generic version first, then specialize for AstrBot.
@@ -69,7 +69,7 @@ GET /v1/adapters
 
 Returns the current adapter registry and registered adapters.
 
-Protocol v0.3 introduces a local adapter allowlist:
+Protocol v0.3 introduced a local adapter allowlist:
 
 - `/v1/adapter/ingest` requires a registered and enabled `adapter_id`.
 - unknown adapters are rejected before preview or recording.
@@ -108,7 +108,7 @@ Request:
 POST /v1/adapter/ingest
 ```
 
-This is the recommended v0.3 entry point.
+This is the recommended v0.4 entry point.
 
 Request:
 
@@ -141,20 +141,20 @@ Fields:
 
 - `adapter_id`: external adapter identity, such as `astrbot_thin_adapter`.
 - `adapter_id` must be present in the 01 Core adapter registry and enabled.
-- `event_id`: original platform event ID, reserved for future audit and deduplication.
+- `event_id`: original platform event ID. If present, 01 Core deduplicates real writes by `adapter_id + event_id`.
 - `event_type`: currently mostly `message`; future values may include `reaction`, `system_event`, and `task_event`.
 - `text`: the text that enters episode preview or recording.
 - `source.channel`: external platform or channel name.
 - `source.session_id`: external session ID.
 - `salience_hint`: adapter-provided salience suggestion from 0 to 1. 01 Core treats it as a suggestion, not an unconditional score.
 - `metadata`: low-risk platform metadata. Do not put passwords, tokens, or full private payloads here.
-- `dry_run`: when true, returns an episode preview without writing state.
+- `dry_run`: when true, returns an episode preview without writing state or updating the deduplication index.
 
 Recorded response:
 
 ```json
 {
-  "protocol_version": "0.3",
+  "protocol_version": "0.4",
   "agent_id": "01",
   "status": "recorded",
   "dry_run": false,
@@ -168,12 +168,26 @@ Dry-run response:
 
 ```json
 {
-  "protocol_version": "0.3",
+  "protocol_version": "0.4",
   "agent_id": "01",
   "status": "preview",
   "dry_run": true,
   "would_record_episode": {},
   "state_transfer_package": {}
+}
+```
+
+Duplicate response:
+
+```json
+{
+  "protocol_version": "0.4",
+  "agent_id": "01",
+  "status": "duplicate",
+  "dry_run": false,
+  "error": "duplicate_event",
+  "episode_id": "episode_xxx",
+  "duplicate_event": {}
 }
 ```
 

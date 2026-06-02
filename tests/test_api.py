@@ -15,6 +15,7 @@ class APITests(unittest.TestCase):
             self.assertEqual(status["agent_id"], "01")
             self.assertEqual(status["episodes"], 0)
             self.assertGreaterEqual(status["registered_adapters"], 1)
+            self.assertEqual(status["indexed_adapter_events"], 0)
 
             status_code, adapters = api.handle_get("/v1/adapters")
             self.assertEqual(status_code, 200)
@@ -79,6 +80,7 @@ class APITests(unittest.TestCase):
             status_code, status = api.handle_get("/v1/status")
             self.assertEqual(status_code, 200)
             self.assertEqual(status["episodes"], 0)
+            self.assertEqual(status["indexed_adapter_events"], 0)
 
     def test_adapter_ingest_ignores_invalid_salience_hint(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -96,6 +98,58 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(status_code, 200)
             self.assertEqual(preview["would_record_episode"]["salience"], 0.25)
+
+    def test_adapter_ingest_deduplicates_recorded_event_id(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            api = OneCoreAPI(StateStore(Path(tmp)))
+            payload = {
+                "adapter_id": "local_generic_adapter",
+                "event": {
+                    "event_id": "event-1",
+                    "text": "这是一条真实 adapter 事件。",
+                    "user": {"id": "tester"},
+                    "source": {
+                        "channel": "local",
+                        "session_id": "session_1",
+                    },
+                    "event_type": "message",
+                },
+            }
+            status_code, recorded = api.handle_post("/v1/adapter/ingest", payload)
+            self.assertEqual(status_code, 200)
+            self.assertEqual(recorded["status"], "recorded")
+
+            status_code, duplicate = api.handle_post("/v1/adapter/ingest", payload)
+            self.assertEqual(status_code, 409)
+            self.assertEqual(duplicate["status"], "duplicate")
+            self.assertEqual(duplicate["error"], "duplicate_event")
+            self.assertEqual(duplicate["episode_id"], recorded["episode_id"])
+
+            status_code, status = api.handle_get("/v1/status")
+            self.assertEqual(status_code, 200)
+            self.assertEqual(status["episodes"], 1)
+            self.assertEqual(status["indexed_adapter_events"], 1)
+
+    def test_adapter_ingest_without_event_id_is_not_deduplicated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            api = OneCoreAPI(StateStore(Path(tmp)))
+            payload = {
+                "adapter_id": "local_generic_adapter",
+                "event": {
+                    "text": "没有 event_id 的兼容消息。",
+                    "source": {"channel": "local"},
+                },
+            }
+            first_status, first = api.handle_post("/v1/adapter/ingest", payload)
+            second_status, second = api.handle_post("/v1/adapter/ingest", payload)
+            self.assertEqual(first_status, 200)
+            self.assertEqual(second_status, 200)
+            self.assertNotEqual(first["episode_id"], second["episode_id"])
+
+            status_code, status = api.handle_get("/v1/status")
+            self.assertEqual(status_code, 200)
+            self.assertEqual(status["episodes"], 2)
+            self.assertEqual(status["indexed_adapter_events"], 0)
 
     def test_adapter_ingest_rejects_unregistered_adapter(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -131,12 +131,14 @@ class ClientTest(unittest.TestCase):
                 "semantic_memories": 4,
                 "open_conflicts": 5,
                 "registered_adapters": 6,
+                "indexed_adapter_events": 7,
                 "pending_dream_jobs": 6,
             }
         )
         self.assertIn("01 Core 状态", status)
         self.assertIn("persist", status)
         self.assertIn("已注册适配器：6", status)
+        self.assertIn("已索引事件：7", status)
 
         context = format_context(
             {

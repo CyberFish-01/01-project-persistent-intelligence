@@ -9,7 +9,7 @@
 ## 1. 顶层状态
 
 ```yaml
-state_version: "0.2"
+state_version: "0.3"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -21,6 +21,7 @@ relationship_map: {}
 project_map: {}
 affective_state: {}
 adapter_registry: {}
+adapter_event_index: {}
 open_conflicts: []
 dream_queue: []
 evaluation_trace: []
@@ -293,7 +294,24 @@ adapter_registry:
 
 `POST /v1/adapter/ingest` 要求 `adapter_id` 已注册且启用。
 
-## 9. Open Conflicts
+## 9. Adapter Event Index
+
+Adapter event index 用来防止外部事件被重复写入。
+
+```yaml
+adapter_event_index:
+  local_generic_adapter:
+    platform_event_id:
+      adapter_id: "local_generic_adapter"
+      event_id: "platform_event_id"
+      episode_id: "episode_0001"
+      recorded_at: "ISO-8601 timestamp"
+      channel: "local"
+```
+
+只有带 `event_id` 的真实写入会更新这个索引。Dry-run 预览不会更新。
+
+## 10. Open Conflicts
 
 ```yaml
 open_conflicts:
@@ -308,7 +326,7 @@ open_conflicts:
     status: "open"
 ```
 
-## 10. Dream Queue
+## 11. Dream Queue
 
 ```yaml
 dream_queue:
@@ -325,7 +343,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 11. Update Log
+## 12. Update Log
 
 每个 durable update 都必须记录。
 
@@ -348,7 +366,7 @@ update_log:
       reversible: true
 ```
 
-## 12. State Transfer Package
+## 13. State Transfer Package
 
 Session 开始时不应该加载全部状态。
 
@@ -368,7 +386,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 13. 最小不变量
+## 14. 最小不变量
 
 一个有效的 01 state 必须满足：
 
@@ -378,5 +396,6 @@ state_transfer_package:
 - 每条 user-specific memory 都有 privacy metadata；
 - 每个 conflict 都有 status；
 - 每个 generic ingest event 都来自已注册且启用的 adapter；
+- 每个重复的 `adapter_id + event_id` 组合都解析到原始 episode；
 - 每个 state snapshot 都有 schema version；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

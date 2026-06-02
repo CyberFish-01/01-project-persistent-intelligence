@@ -70,6 +70,7 @@ episodes
 semantic_memories
 open_conflicts
 registered_adapters
+indexed_adapter_events
 pending_dream_jobs
 ```
 
@@ -149,7 +150,7 @@ state_transfer_package
 
 ## POST /v1/adapter/ingest
 
-Recommended entry point for generic adapter protocol v0.3.
+Recommended entry point for generic adapter protocol v0.4.
 
 ```bash
 curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
@@ -173,6 +174,8 @@ curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
 When `dry_run` is true, the API returns `would_record_episode` without writing an episode or creating a dream job.
 
 Unknown or disabled adapters are rejected before dry-run preview or recording.
+
+When `event.event_id` is present, real writes are deduplicated by `adapter_id + event_id`. Repeated events return `status: "duplicate"` and do not write another episode or dream job. Dry-runs do not update the deduplication index.
 
 ## POST /v1/dream
 

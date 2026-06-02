@@ -114,6 +114,7 @@ def format_status(status: dict[str, Any]) -> str:
         f"- 语义记忆：{status.get('semantic_memories', 0)}\n"
         f"- 开放冲突：{status.get('open_conflicts', 0)}\n"
         f"- 已注册适配器：{status.get('registered_adapters', 0)}\n"
+        f"- 已索引事件：{status.get('indexed_adapter_events', 0)}\n"
         f"- 待做梦任务：{status.get('pending_dream_jobs', 0)}"
     )
 

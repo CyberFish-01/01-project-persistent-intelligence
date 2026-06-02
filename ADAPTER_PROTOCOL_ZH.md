@@ -7,7 +7,7 @@
 当前协议版本：
 
 ```text
-0.3
+0.4
 ```
 
 我们先做通用版，再做 AstrBot 特化版。
@@ -69,7 +69,7 @@ GET /v1/adapters
 
 返回当前 adapter registry 和已注册 adapter。
 
-Protocol v0.3 引入本地 adapter allowlist：
+Protocol v0.3 引入了本地 adapter allowlist：
 
 - `/v1/adapter/ingest` 要求 `adapter_id` 已注册且启用；
 - 未知 adapter 会在预览或写入前被拒绝；
@@ -108,7 +108,7 @@ POST /v1/interact
 POST /v1/adapter/ingest
 ```
 
-推荐从 v0.3 起使用这个入口。
+推荐从 v0.4 起使用这个入口。
 
 请求：
 
@@ -141,20 +141,20 @@ POST /v1/adapter/ingest
 
 - `adapter_id`：外部接入器身份，例如 `astrbot_thin_adapter`。
 - `adapter_id` 必须存在于 01 Core adapter registry，并且处于启用状态。
-- `event_id`：外部平台原始事件 ID，用于审计和去重的未来扩展。
+- `event_id`：外部平台原始事件 ID。存在时，01 Core 会用 `adapter_id + event_id` 对真实写入去重。
 - `event_type`：当前主要是 `message`，后续可扩展为 `reaction`、`system_event`、`task_event`。
 - `text`：真正进入 episode 预览或记录的文本。
 - `source.channel`：外部平台或通道名。
 - `source.session_id`：外部会话 ID。
 - `salience_hint`：adapter 给出的显著性建议，范围 0 到 1。01 Core 会把它当建议，不会无条件采用。
 - `metadata`：平台原始信息的低风险摘要，不应该塞入密码、token 或完整隐私 payload。
-- `dry_run`：为 `true` 时只返回 episode 预览，不写入 state。
+- `dry_run`：为 `true` 时只返回 episode 预览，不写入 state，也不更新去重索引。
 
 响应会包含：
 
 ```json
 {
-  "protocol_version": "0.3",
+  "protocol_version": "0.4",
   "agent_id": "01",
   "status": "recorded",
   "dry_run": false,
@@ -168,12 +168,26 @@ dry-run 响应：
 
 ```json
 {
-  "protocol_version": "0.3",
+  "protocol_version": "0.4",
   "agent_id": "01",
   "status": "preview",
   "dry_run": true,
   "would_record_episode": {},
   "state_transfer_package": {}
+}
+```
+
+重复事件响应：
+
+```json
+{
+  "protocol_version": "0.4",
+  "agent_id": "01",
+  "status": "duplicate",
+  "dry_run": false,
+  "error": "duplicate_event",
+  "episode_id": "episode_xxx",
+  "duplicate_event": {}
 }
 ```
 

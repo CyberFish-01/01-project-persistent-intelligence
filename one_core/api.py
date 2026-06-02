@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 from .dream import DreamEngine
 from .state import DEFAULT_STATE_DIR, StateStore
 
-PROTOCOL_VERSION = "0.3"
+PROTOCOL_VERSION = "0.4"
 
 
 def state_summary(store: StateStore) -> dict:
@@ -27,6 +27,11 @@ def state_summary(store: StateStore) -> dict:
         "open_conflicts": len(state.get("open_conflicts", [])),
         "registered_adapters": len(
             state.get("adapter_registry", {}).get("adapters", {})
+        ),
+        "indexed_adapter_events": sum(
+            len(events)
+            for events in state.get("adapter_event_index", {}).values()
+            if isinstance(events, dict)
         ),
         "pending_dream_jobs": len(
             [job for job in state.get("dream_queue", []) if job.get("status") == "pending"]
@@ -131,6 +136,23 @@ class OneCoreAPI:
                     "error": "missing_message",
                     "message": f"POST {path} requires a non-empty message.",
                 }
+            if path == "/v1/adapter/ingest" and not normalized["dry_run"]:
+                duplicate = self.store.find_recorded_adapter_event(
+                    normalized["adapter_id"],
+                    normalized["event_id"],
+                )
+                if duplicate:
+                    package = self.store.build_context_package()
+                    return HTTPStatus.CONFLICT, adapter_response(
+                        {
+                            "status": "duplicate",
+                            "dry_run": False,
+                            "error": "duplicate_event",
+                            "duplicate_event": duplicate,
+                            "episode_id": duplicate["episode_id"],
+                            "state_transfer_package": package,
+                        }
+                    )
             if normalized["dry_run"]:
                 episode = self.store.preview_episode(**without_dry_run(normalized))
                 package = self.store.build_context_package()

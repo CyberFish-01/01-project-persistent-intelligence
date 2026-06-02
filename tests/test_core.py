@@ -22,6 +22,7 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(state["agent_id"], "01")
             self.assertIn("adapter_registry", state)
             self.assertIn("generic_adapter", state["adapter_registry"]["adapters"])
+            self.assertIn("adapter_event_index", state)
 
     def test_load_migrates_old_state_with_adapter_registry(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -43,6 +44,36 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(
                 migrated["update_log"][-1]["evidence"],
                 ["protocol_v0.3_adapter_registry"],
+            )
+
+    def test_load_migrates_old_state_with_adapter_event_index(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episode = store.record_episode(
+                "旧状态里已经记录过这个外部事件。",
+                channel="local",
+                adapter_id="local_generic_adapter",
+                event_id="event-1",
+            )
+            state = store.load()
+            state.pop("adapter_event_index")
+            state["state_version"] = "0.2"
+            store.state_path.write_text(
+                json.dumps(state, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            migrated = store.load()
+            self.assertEqual(
+                migrated["adapter_event_index"]["local_generic_adapter"]["event-1"][
+                    "episode_id"
+                ],
+                episode["id"],
+            )
+            self.assertEqual(
+                migrated["update_log"][-1]["evidence"],
+                ["protocol_v0.4_event_deduplication"],
             )
 
     def test_interaction_records_episode_and_updates_intent(self):

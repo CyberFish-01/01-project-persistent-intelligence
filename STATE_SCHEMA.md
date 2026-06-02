@@ -7,7 +7,7 @@ The schema is intentionally implementation-neutral. It can be stored as JSON, YA
 ## 1. Top-Level State
 
 ```yaml
-state_version: "0.2"
+state_version: "0.3"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -19,6 +19,7 @@ relationship_map: {}
 project_map: {}
 affective_state: {}
 adapter_registry: {}
+adapter_event_index: {}
 open_conflicts: []
 dream_queue: []
 evaluation_trace: []
@@ -291,7 +292,24 @@ adapter_registry:
 
 `POST /v1/adapter/ingest` requires a registered and enabled `adapter_id`.
 
-## 9. Open Conflicts
+## 9. Adapter Event Index
+
+Adapter event index prevents duplicate external events from being recorded twice.
+
+```yaml
+adapter_event_index:
+  local_generic_adapter:
+    platform_event_id:
+      adapter_id: "local_generic_adapter"
+      event_id: "platform_event_id"
+      episode_id: "episode_0001"
+      recorded_at: "ISO-8601 timestamp"
+      channel: "local"
+```
+
+Only real writes with an `event_id` update this index. Dry-run previews do not.
+
+## 10. Open Conflicts
 
 ```yaml
 open_conflicts:
@@ -306,7 +324,7 @@ open_conflicts:
     status: "open"
 ```
 
-## 10. Dream Queue
+## 11. Dream Queue
 
 ```yaml
 dream_queue:
@@ -323,7 +341,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 11. Update Log
+## 12. Update Log
 
 Every durable update must be recorded.
 
@@ -346,7 +364,7 @@ update_log:
       reversible: true
 ```
 
-## 12. State Transfer Package
+## 13. State Transfer Package
 
 At session start, the system should not load everything.
 
@@ -366,7 +384,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 13. Minimal Invariants
+## 14. Minimal Invariants
 
 A valid 01 state must satisfy:
 
@@ -376,5 +394,6 @@ A valid 01 state must satisfy:
 - every user-specific memory has privacy metadata,
 - every conflict has status,
 - every generic ingest event comes from a registered and enabled adapter,
+- every repeated `adapter_id + event_id` pair resolves to the original episode,
 - every state snapshot has a schema version,
 - every session can answer Identity, Context, and Intent anchors.
