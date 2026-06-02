@@ -598,17 +598,49 @@ Remaining gaps:
 - identity proposals use claim ids as evidence, but do not deeply reason over claim dependencies yet;
 - no UI for reviewing claim graph.
 
+### P15 Context Builder v0.3
+
+Goal: move the context package from response-only activation toward configurable, auditable, persistent state activation.
+
+Status: implemented as a first local v0.3 pass.
+
+Executable items:
+
+1. top-level `context_builder` state object - done;
+2. configurable context policy - first pass done;
+3. persistent activation traces - done;
+4. source attribution budget - done;
+5. identity gate / claim graph / Dream artifact activation signals - first pass done;
+6. scenario evaluation for context builder policy trace - done.
+
+Implemented result:
+
+- `context_builder.policy` now stores Context Builder v0.3 policy, budgets, signal weights, and persistence settings;
+- `build_context_package()` outputs `context_package_version: "0.3"` and `context_package_id`;
+- activation traces are saved into `context_builder.activation_traces`, while adapter dry-run previews do not persist traces;
+- source attribution budget is enforced from policy;
+- identity gate evidence, claim graph evidence, and Dream artifact inputs affect activation reasons and scores;
+- scenario evaluation adds `context_builder_policy_trace`.
+
+Remaining gaps:
+
+- no vector retrieval or embeddings yet;
+- signal weights are still deterministic heuristics;
+- no independent CLI/API command for editing context policy yet;
+- activation trace history has no retention / compaction review workflow yet;
+- no real baseline comparison for context policy benefit yet.
+
 ## 6. Current Recommendation
 
-Do P15 next:
+Do P16 next:
 
 ```text
-P15 Context Builder v0.3
+P16 Procedural Memory Review
 ```
 
 Reason:
 
-- P8 gave context activation a first explainable form, but activation trace is still response-only and policy is hardcoded;
-- P11-P14 now add identity gate, event log, Dream package, and claim review material that should influence context selection;
-- P15 should add configurable context policy, persistent activation traces, and source attribution budget;
-- this will make session start more like bounded state transfer rather than ad hoc memory retrieval.
+- P10 lets Dream propose `procedural_candidates` from repeated successful actions, but those candidates cannot yet be reviewed/promoted;
+- P15 lets context see task/action/procedural signals, so the next step should make action structure reviewable and reversible as durable memory;
+- P16 should add a procedural memory store, `review-procedural-candidate` CLI, approval/audit/snapshot/rollback metadata;
+- this lets 01 preserve not only facts and identity, but also stable patterns of how to work.

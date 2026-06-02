@@ -96,7 +96,9 @@ curl http://127.0.0.1:8765/v1/context
 - context policy；
 - relationship context；
 - activation trace；
+- persistent context package id；
 - source attribution；
+- context signal summary；
 - unified relevant memories；
 - recent episodes；
 - relevant semantic memories；
@@ -104,7 +106,9 @@ curl http://127.0.0.1:8765/v1/context
 - open conflicts；
 - current constraints。
 
-`context_package_version: "0.2"` 表示这个 package 通过 bounded state activation 构建。它保留旧的 `recent_episodes`、`relevant_semantic_memories` 和 `imported_memories` 字段以兼容 adapter，同时额外暴露 memory 为什么被选择或压制。
+`context_package_version: "0.3"` 表示这个 package 通过可配置的 bounded state activation 构建。它保留旧的 `recent_episodes`、`relevant_semantic_memories` 和 `imported_memories` 字段以兼容 adapter，同时额外暴露 memory 为什么被选择或压制。
+
+P15 增加了 `context_builder.activation_traces` 持久历史、source attribution budget 执行，以及来自 identity gate evidence、claim graph evidence 和 Dream artifact inputs 的 context signals。Adapter dry-run 预览会构建 context，但不会持久化 activation trace。
 
 ## GET /v1/adapters
 

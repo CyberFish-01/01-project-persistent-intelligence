@@ -27,6 +27,11 @@ open_conflicts: []
 claim_graph:
   claims: []
   links: []
+context_builder:
+  builder_version: "0.3"
+  policy: {}
+  activation_traces: []
+  last_context_package_id: null
 task_hub:
   active_tasks: []
   completed_tasks: []
@@ -963,7 +968,8 @@ Session 开始时不应该加载全部状态。
 
 ```yaml
 state_transfer_package:
-  context_package_version: "0.2"
+  context_package_version: "0.3"
+  context_package_id: "context_package_..."
   identity_summary: {}
   active_intent: {}
   current_plan: []
@@ -984,13 +990,21 @@ state_transfer_package:
   blockers: []
   assumptions: []
   context_policy:
-    policy_version: "0.2"
+    policy_version: "0.3"
     mode: "bounded_state_activation"
     budgets:
       episodic_memory: 5
       semantic_memory: 5
       imported_memory: 5
       source_attribution: 12
+      activation_trace_history: 20
+    signal_weights:
+      identity_gate_evidence: 0.08
+      claim_graph_evidence: 0.08
+      dream_artifact_input: 0.06
+    persistence:
+      activation_trace_history: true
+      context_builds_are_state_events: false
   relevant_memories: []
   recent_episodes: []
   relevant_semantic_memories: []
@@ -998,9 +1012,18 @@ state_transfer_package:
   relationship_context: {}
   source_attribution: []
   activation_trace:
+    trace_id: "context_activation_..."
+    context_package_id: "context_package_..."
+    policy_version: "0.3"
     selected: []
     suppressed: []
+    signal_summary: {}
     metrics: {}
+  context_signal_summary:
+    identity_gate_evidence_count: 0
+    claim_graph_evidence_count: 0
+    dream_artifact_input_count: 0
+    dream_artifact_proposal_count: 0
   open_conflicts: []
   current_constraints: []
   continuity_anchors:

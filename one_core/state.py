@@ -120,6 +120,57 @@ def default_claim_graph() -> dict:
     }
 
 
+def default_context_policy() -> dict:
+    return {
+        "policy_version": "0.3",
+        "mode": "bounded_state_activation",
+        "budgets": {
+            "episodic_memory": 5,
+            "semantic_memory": 5,
+            "imported_memory": 5,
+            "source_attribution": 12,
+            "activation_trace_history": 20,
+        },
+        "selection_dimensions": [
+            "lifecycle_status",
+            "relationship_boundary",
+            "task_relevance",
+            "salience",
+            "confidence",
+            "recency",
+            "source_attribution",
+            "identity_gate_signal",
+            "claim_review_signal",
+            "dream_artifact_signal",
+        ],
+        "suppression_rules": [
+            "archived_discarded_or_quarantined_memory_is_not_activated",
+            "cross_user_private_episode_is_not_activated",
+            "identity_memory_requires_explicit_high_gate_context",
+        ],
+        "signal_weights": {
+            "identity_gate_evidence": 0.08,
+            "claim_graph_evidence": 0.08,
+            "dream_artifact_input": 0.06,
+        },
+        "persistence": {
+            "activation_trace_history": True,
+            "context_builds_are_state_events": False,
+        },
+    }
+
+
+def default_context_builder(timestamp: str) -> dict:
+    return {
+        "builder_version": "0.3",
+        "policy": default_context_policy(),
+        "activation_traces": [],
+        "last_context_package_id": None,
+        "created_at": timestamp,
+        "updated_at": timestamp,
+    }
+
+
 def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> dict:
     tasks = tasks_from_current_plan(working_state or {}, timestamp)
     return {
@@ -365,6 +416,74 @@ def ensure_claim_graph(state: dict, timestamp: str) -> bool:
         )
         if add_claim_to_graph(claim_graph, claim):
             changed = True
+    return changed
+
+
+def ensure_context_builder(state: dict, timestamp: str) -> bool:
+    changed = False
+    default_builder = default_context_builder(timestamp)
+    context_builder = state.get("context_builder")
+    if not isinstance(context_builder, dict):
+        state["context_builder"] = default_builder
+        return True
+
+    for key, value in default_builder.items():
+        if key not in context_builder:
+            context_builder[key] = value
+            changed = True
+
+    policy = context_builder.get("policy")
+    default_policy = default_context_policy()
+    if not isinstance(policy, dict):
+        context_builder["policy"] = default_policy
+        changed = True
+    else:
+        for key, value in default_policy.items():
+            if key not in policy:
+                policy[key] = value
+                changed = True
+        budgets = policy.get("budgets")
+        if not isinstance(budgets, dict):
+            policy["budgets"] = default_policy["budgets"]
+            changed = True
+        else:
+            for key, value in default_policy["budgets"].items():
+                if key not in budgets:
+                    budgets[key] = value
+                    changed = True
+        signal_weights = policy.get("signal_weights")
+        if not isinstance(signal_weights, dict):
+            policy["signal_weights"] = default_policy["signal_weights"]
+            changed = True
+        else:
+            for key, value in default_policy["signal_weights"].items():
+                if key not in signal_weights:
+                    signal_weights[key] = value
+                    changed = True
+        persistence = policy.get("persistence")
+        if not isinstance(persistence, dict):
+            policy["persistence"] = default_policy["persistence"]
+            changed = True
+        else:
+            for key, value in default_policy["persistence"].items():
+                if key not in persistence:
+                    persistence[key] = value
+                    changed = True
+
+    traces = context_builder.get("activation_traces")
+    if not isinstance(traces, list):
+        context_builder["activation_traces"] = []
+        changed = True
+    else:
+        budget = int(
+            context_builder.get("policy", {})
+            .get("budgets", {})
+            .get("activation_trace_history", 20)
+        )
+        if len(traces) > budget:
+            context_builder["activation_traces"] = traces[-budget:]
+            changed = True
+    context_builder["updated_at"] = context_builder.get("updated_at") or timestamp
     return changed
 
 
@@ -975,6 +1094,7 @@ class StateStore:
             "adapter_event_index": {},
             "open_conflicts": [],
             "claim_graph": default_claim_graph(),
+            "context_builder": default_context_builder(now),
             "task_hub": default_task_hub(now, working_state),
             "identity_update_gate": default_identity_update_gate(now),
             "dream_queue": [],
@@ -1193,6 +1313,25 @@ class StateStore:
                     "before": "open_conflicts_without_claim_graph",
                     "after": "claim_graph_initialized",
                     "evidence": ["claim_graph_v0.7"],
+                    "gate": "low",
+                    "confidence": 1.0,
+                    "rollback": {"reversible": True},
+                }
+            )
+            changed = True
+        if ensure_context_builder(state, now):
+            state["state_version"] = STATE_VERSION
+            state["updated_at"] = now
+            state.setdefault("update_log", []).append(
+                {
+                    "id": new_id("update"),
+                    "timestamp": now,
+                    "actor": "state_store",
+                    "target_path": "context_builder",
+                    "operation": "migrate",
+                    "before": "hardcoded_context_policy",
+                    "after": "context_builder_v0.3",
+                    "evidence": ["context_builder_v0.3"],
                     "gate": "low",
                     "confidence": 1.0,
                     "rollback": {"reversible": True},
@@ -3020,14 +3159,21 @@ class StateStore:
             timestamp=utc_now(),
         )
 
-    def build_context_package(self) -> dict:
+    def build_context_package(self, persist_trace: bool = True) -> dict:
         state = self.load()
+        now = utc_now()
         working_state = state["working_state"]
         current_plan = working_state.get("current_plan", [])
         task_hub = state.get("task_hub", default_task_hub(utc_now(), working_state))
         identity_gate = state.get(
             "identity_update_gate",
             default_identity_update_gate(utc_now()),
+        )
+        context_builder = state.setdefault("context_builder", default_context_builder(now))
+        policy = context_builder.setdefault("policy", default_context_policy())
+        context_signals = build_context_signal_index(
+            state=state,
+            dream_artifacts=self.list_dream_artifacts(),
         )
         active_tasks = [
             task
@@ -3039,7 +3185,6 @@ class StateStore:
             for action in task_hub.get("action_trace", [])
             if isinstance(action, dict)
         ][-10:]
-        policy = default_context_policy()
         task_terms = context_task_terms(working_state)
         relationship_context = build_relationship_context(state)
         episodic, episodic_trace = activate_context_memories(
@@ -3048,6 +3193,7 @@ class StateStore:
             items=state["memory_stores"].get("episodic_memory", []),
             policy=policy,
             task_terms=task_terms,
+            context_signals=context_signals,
         )
         semantic, semantic_trace = activate_context_memories(
             state=state,
@@ -3055,6 +3201,7 @@ class StateStore:
             items=state["memory_stores"].get("semantic_memory", []),
             policy=policy,
             task_terms=task_terms,
+            context_signals=context_signals,
         )
         imported, imported_trace = activate_context_memories(
             state=state,
@@ -3062,6 +3209,7 @@ class StateStore:
             items=state["memory_stores"].get("imported_memory", []),
             policy=policy,
             task_terms=task_terms,
+            context_signals=context_signals,
         )
         relevant_memories = build_relevant_memory_view(
             [
@@ -3073,10 +3221,19 @@ class StateStore:
         activation_trace = build_activation_trace(
             traces=[episodic_trace, semantic_trace, imported_trace],
             policy=policy,
+            context_signals=context_signals,
+            timestamp=now,
         )
-        source_attribution = build_source_attribution(relevant_memories)
-        return {
-            "context_package_version": "0.2",
+        package_id = new_id("context_package")
+        activation_trace["trace_id"] = new_id("context_activation")
+        activation_trace["context_package_id"] = package_id
+        source_attribution = build_source_attribution(
+            relevant_memories,
+            budget=int(policy.get("budgets", {}).get("source_attribution", 12)),
+        )
+        package = {
+            "context_package_version": "0.3",
+            "context_package_id": package_id,
             "identity_summary": state["identity_core"]["self_model"]["summary"],
             "active_intent": working_state["active_intent"],
             "current_plan": current_plan,
@@ -3116,6 +3273,7 @@ class StateStore:
             "relationship_context": relationship_context,
             "source_attribution": source_attribution,
             "activation_trace": activation_trace,
+            "context_signal_summary": summarize_context_signals(context_signals),
             "relevant_memories": relevant_memories,
             "imported_memories": imported,
             "recent_episodes": episodic,
@@ -3123,33 +3281,45 @@ class StateStore:
             "open_conflicts": state.get("open_conflicts", []),
             "current_constraints": state["identity_core"].get("identity_constraints", []),
         }
+        if persist_trace and policy.get("persistence", {}).get(
+            "activation_trace_history",
+            True,
+        ):
+            self.record_context_activation_trace(
+                state=state,
+                activation_trace=activation_trace,
+                policy=policy,
+                package_id=package_id,
+                timestamp=now,
+            )
+        return package
 
-
-def default_context_policy() -> dict:
-    return {
-        "policy_version": "0.2",
-        "mode": "bounded_state_activation",
-        "budgets": {
-            "episodic_memory": 5,
-            "semantic_memory": 5,
-            "imported_memory": 5,
-            "source_attribution": 12,
-        },
-        "selection_dimensions": [
-            "lifecycle_status",
-            "relationship_boundary",
-            "task_relevance",
-            "salience",
-            "confidence",
-            "recency",
-            "source_attribution",
-        ],
-        "suppression_rules": [
-            "archived_discarded_or_quarantined_memory_is_not_activated",
-            "cross_user_private_episode_is_not_activated",
-            "identity_memory_requires_explicit_high_gate_context",
-        ],
-    }
+    def record_context_activation_trace(
+        self,
+        state: dict,
+        activation_trace: dict,
+        policy: dict,
+        package_id: str,
+        timestamp: str,
+    ) -> None:
+        context_builder = state.setdefault("context_builder", default_context_builder(timestamp))
+        entry = {
+            "trace_id": activation_trace.get("trace_id"),
+            "context_package_id": package_id,
+            "timestamp": timestamp,
+            "policy_version": policy.get("policy_version"),
+            "metrics": activation_trace.get("metrics", {}),
+            "selected": activation_trace.get("selected", []),
+            "suppressed": activation_trace.get("suppressed", []),
+            "signal_summary": activation_trace.get("signal_summary", {}),
+        }
+        history = context_builder.setdefault("activation_traces", [])
+        history.append(entry)
+        budget = int(policy.get("budgets", {}).get("activation_trace_history", 20))
+        context_builder["activation_traces"] = history[-budget:]
+        context_builder["last_context_package_id"] = package_id
+        context_builder["updated_at"] = timestamp
+        self.save(state)
 
 
 def context_task_terms(working_state: dict) -> List[str]:
@@ -3217,6 +3387,7 @@ def activate_context_memories(
     items: List[dict],
     policy: dict,
     task_terms: List[str],
+    context_signals: Optional[dict] = None,
 ) -> tuple[List[dict], dict]:
     selected_candidates = []
     suppressed = []
@@ -3231,6 +3402,8 @@ def activate_context_memories(
             index=index,
             total_items=total_items,
             task_terms=task_terms,
+            policy=policy,
+            context_signals=context_signals or {},
         )
         if decision["activated"]:
             selected_candidates.append((decision["score"], index, item, decision))
@@ -3262,6 +3435,8 @@ def context_activation_decision(
     index: int,
     total_items: int,
     task_terms: List[str],
+    policy: dict,
+    context_signals: dict,
 ) -> dict:
     item_id = str(item.get("id") or f"{store_name}_{index}")
     lifecycle_status = str(
@@ -3310,12 +3485,20 @@ def context_activation_decision(
     source_score = 0.1 if item.get("provenance") or item.get("source") else 0.0
     if source_score:
         reasons.append("source_attributed")
+    signal_score, signal_reasons = context_signal_score(
+        item_id=item_id,
+        item=item,
+        context_signals=context_signals,
+        policy=policy,
+    )
+    reasons.extend(signal_reasons)
     score = (
         memory_salience(item) * 0.35
         + memory_confidence(item) * 0.25
         + task_score * 0.2
         + recency_score(index, total_items) * 0.1
         + source_score
+        + signal_score
     )
     return {
         **base,
@@ -3323,6 +3506,82 @@ def context_activation_decision(
         "score": round(min(score, 1.0), 2),
         "reasons": reasons,
     }
+
+
+def build_context_signal_index(state: dict, dream_artifacts: List[dict]) -> dict:
+    identity_evidence = set()
+    for proposal in state.get("identity_update_gate", {}).get("proposals", []):
+        if not isinstance(proposal, dict):
+            continue
+        identity_evidence.update(str(item) for item in proposal.get("evidence", []) if item)
+    for decision in state.get("identity_update_gate", {}).get("review_decisions", []):
+        if not isinstance(decision, dict):
+            continue
+        identity_evidence.update(str(item) for item in decision.get("evidence", []) if item)
+
+    claim_evidence = set()
+    for claim in state.get("claim_graph", {}).get("claims", []):
+        if not isinstance(claim, dict):
+            continue
+        claim_evidence.update(str(item) for item in claim.get("evidence", []) if item)
+    for decision in state.get("claim_graph", {}).get("review_decisions", []):
+        if not isinstance(decision, dict):
+            continue
+        claim_evidence.update(str(item) for item in decision.get("patch_preview", {}).get("affected_evidence", []) if item)
+
+    dream_inputs = set()
+    dream_proposals = set()
+    for artifact in dream_artifacts[-10:]:
+        if not isinstance(artifact, dict):
+            continue
+        for item in artifact.get("input_manifest", {}).get("items", []):
+            if isinstance(item, dict) and item.get("id"):
+                dream_inputs.add(str(item["id"]))
+        affected = artifact.get("rollback_metadata", {}).get("affected_ids", {})
+        if isinstance(affected, dict):
+            for values in affected.values():
+                if isinstance(values, list):
+                    dream_proposals.update(str(item) for item in values if item)
+    return {
+        "identity_gate_evidence": identity_evidence,
+        "claim_graph_evidence": claim_evidence,
+        "dream_artifact_inputs": dream_inputs,
+        "dream_artifact_proposals": dream_proposals,
+    }
+
+
+def context_signal_score(
+    item_id: str,
+    item: dict,
+    context_signals: dict,
+    policy: dict,
+) -> tuple[float, List[str]]:
+    weights = policy.get("signal_weights", {})
+    score = 0.0
+    reasons = []
+    related_ids = set(item_related_ids(item))
+    related_ids.add(item_id)
+    if related_ids & context_signals.get("identity_gate_evidence", set()):
+        score += float(weights.get("identity_gate_evidence", 0.08))
+        reasons.append("identity_gate_evidence")
+    if related_ids & context_signals.get("claim_graph_evidence", set()):
+        score += float(weights.get("claim_graph_evidence", 0.08))
+        reasons.append("claim_graph_evidence")
+    if related_ids & context_signals.get("dream_artifact_inputs", set()):
+        score += float(weights.get("dream_artifact_input", 0.06))
+        reasons.append("dream_artifact_input")
+    return min(score, 0.25), reasons
+
+
+def item_related_ids(item: dict) -> List[str]:
+    related = []
+    for key in ("id", "derived_from", "evidence", "affected_memory_ids", "raw_refs"):
+        value = item.get(key)
+        if isinstance(value, list):
+            related.extend(str(entry) for entry in value if entry)
+        elif value:
+            related.append(str(value))
+    return related
 
 
 def episode_visible_to_current_user(state: dict, episode: dict) -> bool:
@@ -3409,7 +3668,12 @@ def build_relevant_memory_view(groups: List[tuple[str, List[dict]]]) -> List[dic
     return memories
 
 
-def build_activation_trace(traces: List[dict], policy: dict) -> dict:
+def build_activation_trace(
+    traces: List[dict],
+    policy: dict,
+    context_signals: dict,
+    timestamp: str,
+) -> dict:
     selected = [
         entry
         for trace in traces
@@ -3422,8 +3686,10 @@ def build_activation_trace(traces: List[dict], policy: dict) -> dict:
     ]
     return {
         "policy_version": policy["policy_version"],
+        "timestamp": timestamp,
         "selected": selected,
         "suppressed": suppressed,
+        "signal_summary": summarize_context_signals(context_signals),
         "metrics": {
             "selected_count": len(selected),
             "suppressed_count": len(suppressed),
@@ -3440,9 +3706,29 @@ def build_activation_trace(traces: List[dict], policy: dict) -> dict:
     }
 
 
-def build_source_attribution(relevant_memories: List[dict]) -> List[dict]:
+def summarize_context_signals(context_signals: dict) -> dict:
+    return {
+        "identity_gate_evidence_count": len(
+            context_signals.get("identity_gate_evidence", set())
+        ),
+        "claim_graph_evidence_count": len(
+            context_signals.get("claim_graph_evidence", set())
+        ),
+        "dream_artifact_input_count": len(
+            context_signals.get("dream_artifact_inputs", set())
+        ),
+        "dream_artifact_proposal_count": len(
+            context_signals.get("dream_artifact_proposals", set())
+        ),
+    }
+
+
+def build_source_attribution(
+    relevant_memories: List[dict],
+    budget: int = 12,
+) -> List[dict]:
     attributions = []
-    for memory in relevant_memories[:12]:
+    for memory in relevant_memories[:budget]:
         provenance = memory.get("provenance") or []
         source = memory.get("source") or {}
         attributions.append(

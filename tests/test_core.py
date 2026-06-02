@@ -35,6 +35,12 @@ class CoreStateTests(unittest.TestCase):
             self.assertFalse(
                 state["claim_graph"]["policy"]["allow_direct_memory_mutation"]
             )
+            self.assertIn("context_builder", state)
+            self.assertEqual(state["context_builder"]["builder_version"], "0.3")
+            self.assertEqual(
+                state["context_builder"]["policy"]["policy_version"],
+                "0.3",
+            )
             self.assertIn("task_hub", state)
             self.assertTrue(state["task_hub"]["active_tasks"])
             self.assertEqual(state["task_hub"]["action_trace"], [])
@@ -538,7 +544,7 @@ class CoreStateTests(unittest.TestCase):
                 for entry in package["activation_trace"]["suppressed"]
             }
 
-            self.assertEqual(package["context_package_version"], "0.2")
+            self.assertEqual(package["context_package_version"], "0.3")
             self.assertEqual(
                 package["context_policy"]["mode"],
                 "bounded_state_activation",
@@ -565,6 +571,56 @@ class CoreStateTests(unittest.TestCase):
             )
             self.assertTrue(package["source_attribution"])
             self.assertEqual(archive["status"], "archived")
+
+    def test_context_builder_v03_persists_activation_trace_and_policy_budget(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["context_builder"]["policy"]["budgets"]["source_attribution"] = 1
+            store.save(state)
+
+            episode = store.record_episode(
+                "Context Builder v0.3 should persist activation traces."
+            )
+            proposal = store.propose_identity_update(
+                "01 treats context selection as bounded state transfer.",
+                evidence=[episode["id"]],
+                proposer="unit_test",
+                rationale="Exercise identity gate signal in context activation.",
+            )
+            package = store.build_context_package()
+            state = store.load()
+            trace = state["context_builder"]["activation_traces"][-1]
+            episode_decision = next(
+                item
+                for item in package["activation_trace"]["selected"]
+                if item["memory_id"] == episode["id"]
+            )
+
+            self.assertEqual(package["context_package_version"], "0.3")
+            self.assertEqual(package["context_policy"]["policy_version"], "0.3")
+            self.assertEqual(len(package["source_attribution"]), 1)
+            self.assertTrue(package["context_package_id"].startswith("context_package_"))
+            self.assertEqual(
+                state["context_builder"]["last_context_package_id"],
+                package["context_package_id"],
+            )
+            self.assertEqual(
+                trace["context_package_id"],
+                package["context_package_id"],
+            )
+            self.assertEqual(
+                trace["metrics"]["selected_count"],
+                package["activation_trace"]["metrics"]["selected_count"],
+            )
+            self.assertIn("identity_gate_evidence", episode_decision["reasons"])
+            self.assertEqual(
+                package["context_signal_summary"]["identity_gate_evidence_count"],
+                1,
+            )
+            stored_proposal = store.load()["identity_update_gate"]["proposals"][-1]
+            self.assertEqual(stored_proposal["proposal_id"], proposal["proposal_id"])
+            self.assertEqual(stored_proposal["review_status"], "pending")
 
     def test_dream_creates_candidate_memory_before_promotion(self):
         with tempfile.TemporaryDirectory() as tmp:

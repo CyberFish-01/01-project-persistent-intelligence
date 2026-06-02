@@ -96,7 +96,9 @@ This endpoint is useful before response generation:
 - context policy;
 - relationship context;
 - activation trace;
+- persistent context package id;
 - source attribution;
+- context signal summary;
 - unified relevant memories;
 - recent episodes;
 - relevant semantic memories;
@@ -104,7 +106,9 @@ This endpoint is useful before response generation:
 - open conflicts;
 - current constraints.
 
-`context_package_version: "0.2"` means the package is built through bounded state activation. It keeps the legacy `recent_episodes`, `relevant_semantic_memories`, and `imported_memories` fields for adapter compatibility, while also exposing why memories were selected or suppressed.
+`context_package_version: "0.3"` means the package is built through configurable bounded state activation. It keeps the legacy `recent_episodes`, `relevant_semantic_memories`, and `imported_memories` fields for adapter compatibility, while also exposing why memories were selected or suppressed.
+
+P15 adds persistent activation trace history under `context_builder.activation_traces`, source attribution budget enforcement, and context signals from identity gate evidence, claim graph evidence, and Dream artifact inputs. Dry-run adapter previews build context without persisting activation traces.
 
 ## GET /v1/adapters
 

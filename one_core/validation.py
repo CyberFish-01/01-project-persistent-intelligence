@@ -20,6 +20,7 @@ REQUIRED_TOP_LEVEL_KEYS = [
     "adapter_event_index",
     "open_conflicts",
     "claim_graph",
+    "context_builder",
     "task_hub",
     "identity_update_gate",
     "dream_queue",
@@ -74,6 +75,7 @@ def validate_state(
     issues.extend(validate_session_policy(state))
     issues.extend(validate_adapter_event_index(state, episodes or []))
     issues.extend(validate_claim_graph(state))
+    issues.extend(validate_context_builder(state))
     issues.extend(validate_task_hub(state))
     issues.extend(validate_identity_update_gate(state))
     issues.extend(validate_snapshots(state))
@@ -836,6 +838,97 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
                     "Claim graph link must reference at least one known claim.",
                 )
             )
+    return issues
+
+
+def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
+    context_builder = state.get("context_builder")
+    if not isinstance(context_builder, dict):
+        return [ValidationIssue("context_builder", "Context builder must be an object.")]
+
+    issues: list[ValidationIssue] = []
+    if context_builder.get("builder_version") != "0.3":
+        issues.append(
+            ValidationIssue(
+                "context_builder.builder_version",
+                "Context builder must declare builder_version 0.3.",
+            )
+        )
+    policy = context_builder.get("policy")
+    if not isinstance(policy, dict):
+        issues.append(
+            ValidationIssue(
+                "context_builder.policy",
+                "Context builder must include a policy object.",
+            )
+        )
+        policy = {}
+    if policy.get("policy_version") != "0.3":
+        issues.append(
+            ValidationIssue(
+                "context_builder.policy.policy_version",
+                "Context policy must declare policy_version 0.3.",
+            )
+        )
+    budgets = policy.get("budgets")
+    if not isinstance(budgets, dict):
+        issues.append(
+            ValidationIssue(
+                "context_builder.policy.budgets",
+                "Context policy must include budgets.",
+            )
+        )
+        budgets = {}
+    for key in (
+        "episodic_memory",
+        "semantic_memory",
+        "imported_memory",
+        "source_attribution",
+        "activation_trace_history",
+    ):
+        if key not in budgets:
+            issues.append(
+                ValidationIssue(
+                    f"context_builder.policy.budgets.{key}",
+                    "Context policy budget is missing.",
+                )
+            )
+    if not isinstance(policy.get("signal_weights"), dict):
+        issues.append(
+            ValidationIssue(
+                "context_builder.policy.signal_weights",
+                "Context policy must include signal weights.",
+            )
+        )
+    if not isinstance(policy.get("persistence"), dict):
+        issues.append(
+            ValidationIssue(
+                "context_builder.policy.persistence",
+                "Context policy must include persistence settings.",
+            )
+        )
+    traces = context_builder.get("activation_traces")
+    if not isinstance(traces, list):
+        issues.append(
+            ValidationIssue(
+                "context_builder.activation_traces",
+                "Context activation traces must be a list.",
+            )
+        )
+        traces = []
+    for index, trace in enumerate(traces):
+        path = f"context_builder.activation_traces[{index}]"
+        if not isinstance(trace, dict):
+            issues.append(ValidationIssue(path, "Context activation trace must be an object."))
+            continue
+        for key in ("trace_id", "context_package_id", "timestamp", "policy_version", "metrics"):
+            if key not in trace:
+                issues.append(
+                    ValidationIssue(
+                        path + f".{key}",
+                        "Context activation trace key is missing.",
+                    )
+                )
     return issues
 
 

@@ -25,6 +25,29 @@ class StateValidationTests(unittest.TestCase):
             paths = {issue["path"] for issue in report["issues"]}
             self.assertIn("working_state.context_anchors.who_am_i", paths)
 
+    def test_context_builder_requires_policy_and_trace_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["context_builder"]["policy"]["budgets"].pop("source_attribution")
+            state["context_builder"]["policy"].pop("signal_weights")
+            state["context_builder"]["activation_traces"].append(
+                {"trace_id": "trace_missing_metadata"}
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn(
+                "context_builder.policy.budgets.source_attribution",
+                paths,
+            )
+            self.assertIn("context_builder.policy.signal_weights", paths)
+            self.assertIn(
+                "context_builder.activation_traces[0].context_package_id",
+                paths,
+            )
+
     def test_adapter_event_index_must_point_to_episode(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

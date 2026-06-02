@@ -598,17 +598,49 @@ git diff --check
 - identity proposal 可以使用 claim id 作为 evidence，但还不会深度推理 claim dependencies；
 - 还没有 claim graph review UI。
 
+### P15 Context Builder v0.3
+
+目标：把 context package 从 response-only activation 推进到可配置、可审计、可持久化的 state activation。
+
+状态：已实现第一版本地 v0.3。
+
+可执行项：
+
+1. 顶层 `context_builder` state object - 已完成；
+2. configurable context policy - 已完成第一版；
+3. persistent activation traces - 已完成；
+4. source attribution budget - 已完成；
+5. identity gate / claim graph / Dream artifact activation signals - 已完成第一版；
+6. context builder policy trace 的 scenario evaluation - 已完成。
+
+已实现结果：
+
+- `context_builder.policy` 现在保存 Context Builder v0.3 policy、budgets、signal weights 和 persistence settings；
+- `build_context_package()` 输出 `context_package_version: "0.3"` 和 `context_package_id`；
+- activation trace 会保存到 `context_builder.activation_traces`，但 adapter dry-run preview 不持久化 trace；
+- source attribution budget 现在按 policy 执行；
+- identity gate evidence、claim graph evidence 和 Dream artifact inputs 会影响 activation reasons 与分数；
+- scenario evaluation 增加 `context_builder_policy_trace`。
+
+剩余缺口：
+
+- 还没有 vector retrieval 或 embedding；
+- signal weights 仍然是 deterministic heuristic；
+- context policy 还没有独立 CLI/API 编辑命令；
+- activation trace 还没有 retention / compaction 审查流程；
+- 还没有真实 baseline 对比验证 context policy 的收益。
+
 ## 6. 当前建议
 
 下一步先做：
 
 ```text
-P15 Context Builder v0.3
+P16 Procedural Memory Review
 ```
 
 理由：
 
-- P8 已经给 context activation 做了第一版解释机制，但 activation trace 仍只随 response 返回，policy 也还是 hardcoded；
-- P11-P14 已经加入 identity gate、event log、Dream package 和 claim review material，这些都应该影响 context selection；
-- P15 应增加 configurable context policy、persistent activation traces 和 source attribution budget；
-- 这会让 session start 更像 bounded state transfer，而不是临时 memory retrieval。
+- P10 已经让 Dream 能从重复成功行动提出 `procedural_candidates`，但这些候选还不能被正式 review/promote；
+- P15 让 context 能看到 task/action/procedural signals，下一步应让行动结构成为可审查、可撤销的长期记忆；
+- P16 应增加 procedural memory store、`review-procedural-candidate` CLI、approval/audit/snapshot/rollback metadata；
+- 这会让 01 不只记得事实和身份，也能延续“如何做事”的稳定模式。

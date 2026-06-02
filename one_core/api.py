@@ -252,7 +252,7 @@ class OneCoreAPI:
                     normalized["event_id"],
                 )
                 if duplicate:
-                    package = self.store.build_context_package()
+                    package = self.store.build_context_package(persist_trace=False)
                     audit_event = self.store.record_audit_event(
                         actor=normalized["adapter_id"],
                         action="adapter_ingest",
@@ -298,7 +298,7 @@ class OneCoreAPI:
                     )
             if normalized["dry_run"]:
                 episode = self.store.preview_episode(**without_dry_run(normalized))
-                package = self.store.build_context_package()
+                package = self.store.build_context_package(persist_trace=False)
                 audit_event = self.store.record_audit_event(
                     actor=normalized["adapter_id"] or normalized["channel"],
                     action="adapter_ingest_preview",

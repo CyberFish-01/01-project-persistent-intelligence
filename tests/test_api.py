@@ -93,6 +93,10 @@ class APITests(unittest.TestCase):
             self.assertEqual(status["episodes"], 0)
             self.assertEqual(status["indexed_adapter_events"], 0)
             self.assertEqual(status["pending_dream_jobs"], 0)
+            self.assertEqual(
+                api.store.load()["context_builder"]["activation_traces"],
+                [],
+            )
             self.assertEqual(api.store.list_audit_events()[-1]["action"], "adapter_ingest_preview")
             self.assertEqual(api.store.list_traces()[-1]["workflow"], "adapter_ingest_preview")
 
