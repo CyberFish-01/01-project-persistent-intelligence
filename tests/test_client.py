@@ -4,7 +4,13 @@ import json
 import unittest
 from unittest.mock import patch
 
-from one_core.client import AdapterEvent, OneCoreClient, format_context, format_status
+from one_core.client import (
+    AdapterEvent,
+    OneCoreClient,
+    format_adapters,
+    format_context,
+    format_status,
+)
 
 
 class FakeResponse:
@@ -99,6 +105,21 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(result, {"status": "preview"})
         self.assertTrue(captured["body"]["dry_run"])
 
+    def test_client_fetches_adapters(self) -> None:
+        captured = {}
+
+        def fake_urlopen(request, timeout):
+            captured["url"] = request.full_url
+            captured["method"] = request.get_method()
+            return FakeResponse({"adapters": []})
+
+        with patch("urllib.request.urlopen", fake_urlopen):
+            result = OneCoreClient("http://localhost:9999").adapters()
+
+        self.assertEqual(result, {"adapters": []})
+        self.assertEqual(captured["url"], "http://localhost:9999/v1/adapters")
+        self.assertEqual(captured["method"], "GET")
+
     def test_formatters_are_human_readable(self) -> None:
         status = format_status(
             {
@@ -109,11 +130,13 @@ class ClientTest(unittest.TestCase):
                 "episodes": 3,
                 "semantic_memories": 4,
                 "open_conflicts": 5,
+                "registered_adapters": 6,
                 "pending_dream_jobs": 6,
             }
         )
         self.assertIn("01 Core 状态", status)
         self.assertIn("persist", status)
+        self.assertIn("已注册适配器：6", status)
 
         context = format_context(
             {
@@ -130,6 +153,20 @@ class ClientTest(unittest.TestCase):
         )
         self.assertIn("01 Core 上下文包", context)
         self.assertIn("test adapters", context)
+
+        adapters = format_adapters(
+            {
+                "adapters": [
+                    {
+                        "adapter_id": "generic_adapter",
+                        "enabled": True,
+                        "channels": ["generic_adapter"],
+                    }
+                ]
+            }
+        )
+        self.assertIn("01 Core 适配器注册表", adapters)
+        self.assertIn("generic_adapter", adapters)
 
 
 if __name__ == "__main__":

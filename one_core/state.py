@@ -10,8 +10,35 @@ from typing import Any, Dict, Iterable, List, Optional
 from .seed import make_identity_seed
 
 
-STATE_VERSION = "0.1"
+STATE_VERSION = "0.2"
 DEFAULT_STATE_DIR = Path("work/01_state")
+
+DEFAULT_REGISTERED_ADAPTERS = (
+    {
+        "adapter_id": "generic_adapter",
+        "display_name": "Generic Adapter",
+        "enabled": True,
+        "channels": ["generic_adapter"],
+        "trust_level": "local",
+        "notes": "Default adapter identity used by the generic Python client.",
+    },
+    {
+        "adapter_id": "local_generic_adapter",
+        "display_name": "Local Generic Adapter",
+        "enabled": True,
+        "channels": ["local", "local_generic_adapter"],
+        "trust_level": "local",
+        "notes": "Local development adapter for CLI and protocol verification.",
+    },
+    {
+        "adapter_id": "astrbot_thin_adapter",
+        "display_name": "AstrBot Thin Adapter",
+        "enabled": True,
+        "channels": ["astrbot"],
+        "trust_level": "local",
+        "notes": "Reserved thin adapter identity for AstrBot once it uses /v1/adapter/ingest.",
+    },
+)
 
 
 def utc_now() -> str:
@@ -20,6 +47,18 @@ def utc_now() -> str:
 
 def new_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:12]}"
+
+
+def default_adapter_registry(timestamp: str) -> dict:
+    adapters = {}
+    for adapter in DEFAULT_REGISTERED_ADAPTERS:
+        entry = dict(adapter)
+        entry["registered_at"] = timestamp
+        adapters[entry["adapter_id"]] = entry
+    return {
+        "allow_unknown_adapters": False,
+        "adapters": adapters,
+    }
 
 
 def read_json(path: Path) -> dict:
@@ -169,6 +208,7 @@ class StateStore:
                     "may_not_claim": ["subjective feeling", "biological emotion"],
                 },
             },
+            "adapter_registry": default_adapter_registry(now),
             "open_conflicts": [],
             "dream_queue": [],
             "evaluation_trace": [],
@@ -199,11 +239,86 @@ class StateStore:
     def load(self) -> dict:
         if not self.exists():
             return self.init()
-        return read_json(self.state_path)
+        state = read_json(self.state_path)
+        migrated = self.migrate_state(state)
+        if migrated:
+            write_json(self.state_path, state)
+        return state
+
+    def migrate_state(self, state: dict) -> bool:
+        changed = False
+        now = utc_now()
+        if "adapter_registry" not in state:
+            state["adapter_registry"] = default_adapter_registry(now)
+            state["state_version"] = STATE_VERSION
+            state["updated_at"] = now
+            state.setdefault("update_log", []).append(
+                {
+                    "id": new_id("update"),
+                    "timestamp": now,
+                    "actor": "state_store",
+                    "target_path": "adapter_registry",
+                    "operation": "migrate",
+                    "before": None,
+                    "after": "default_adapter_registry",
+                    "evidence": ["protocol_v0.3_adapter_registry"],
+                    "gate": "low",
+                    "confidence": 1.0,
+                    "rollback": {"reversible": True},
+                }
+            )
+            changed = True
+        return changed
 
     def save(self, state: dict) -> None:
         state["updated_at"] = utc_now()
         write_json(self.state_path, state)
+
+    def adapter_registry(self) -> dict:
+        return self.load()["adapter_registry"]
+
+    def list_adapters(self) -> List[dict]:
+        adapters = self.adapter_registry().get("adapters", {})
+        return sorted(adapters.values(), key=lambda adapter: adapter["adapter_id"])
+
+    def validate_adapter(self, adapter_id: Optional[str]) -> dict:
+        normalized_id = str(adapter_id or "").strip()
+        if not normalized_id:
+            return {
+                "allowed": False,
+                "error": "missing_adapter_id",
+                "message": "POST /v1/adapter/ingest requires adapter_id.",
+            }
+
+        registry = self.adapter_registry()
+        adapters = registry.get("adapters", {})
+        registered = adapters.get(normalized_id)
+        if registered is None:
+            if registry.get("allow_unknown_adapters"):
+                return {
+                    "allowed": True,
+                    "adapter": {
+                        "adapter_id": normalized_id,
+                        "registered": False,
+                        "enabled": True,
+                    },
+                }
+            return {
+                "allowed": False,
+                "error": "unregistered_adapter",
+                "message": f"Adapter '{normalized_id}' is not registered in 01 Core.",
+            }
+
+        if not registered.get("enabled", False):
+            return {
+                "allowed": False,
+                "error": "disabled_adapter",
+                "message": f"Adapter '{normalized_id}' is disabled in 01 Core.",
+            }
+
+        adapter = dict(registered)
+        adapter["registered"] = True
+        return {"allowed": True, "adapter": adapter}
 
     def append_jsonl(self, path: Path, item: dict) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)

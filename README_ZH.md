@@ -85,6 +85,7 @@ cp -R adapters/astrbot/astrbot_plugin_01_core /root/data/plugins/
 
 ```bash
 python3 -m one_core.cli remote health
+python3 -m one_core.cli remote adapters
 python3 -m one_core.cli remote interact "继续推进 01 Core。"
 python3 -m one_core.cli remote status
 ```

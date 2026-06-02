@@ -81,6 +81,7 @@ Test the generic adapter protocol locally:
 
 ```bash
 python3 -m one_core.cli remote health
+python3 -m one_core.cli remote adapters
 python3 -m one_core.cli remote interact "Continue 01 Core."
 python3 -m one_core.cli remote status
 ```

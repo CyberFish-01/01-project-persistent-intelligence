@@ -59,6 +59,9 @@ class OneCoreClient:
     def context(self) -> dict[str, Any]:
         return self._request("GET", "/v1/context")
 
+    def adapters(self) -> dict[str, Any]:
+        return self._request("GET", "/v1/adapters")
+
     def interact(self, event: AdapterEvent, dry_run: bool = False) -> dict[str, Any]:
         payload = event.to_payload()
         if dry_run:
@@ -110,6 +113,7 @@ def format_status(status: dict[str, Any]) -> str:
         f"- 事件记忆：{status.get('episodes', 0)}\n"
         f"- 语义记忆：{status.get('semantic_memories', 0)}\n"
         f"- 开放冲突：{status.get('open_conflicts', 0)}\n"
+        f"- 已注册适配器：{status.get('registered_adapters', 0)}\n"
         f"- 待做梦任务：{status.get('pending_dream_jobs', 0)}"
     )
 
@@ -127,3 +131,14 @@ def format_context(context: dict[str, Any]) -> str:
         f"- 导入记忆：{len(context.get('imported_memories', []))}\n"
         f"- 开放冲突：{len(context.get('open_conflicts', []))}"
     )
+
+
+def format_adapters(payload: dict[str, Any]) -> str:
+    adapters = payload.get("adapters", [])
+    lines = ["01 Core 适配器注册表"]
+    for adapter in adapters:
+        status = "enabled" if adapter.get("enabled") else "disabled"
+        adapter_id = adapter.get("adapter_id", "unknown")
+        channels = ", ".join(adapter.get("channels", [])) or "none"
+        lines.append(f"- {adapter_id}: {status}; channels={channels}")
+    return "\n".join(lines)

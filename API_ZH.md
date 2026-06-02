@@ -69,6 +69,7 @@ imported_memories
 episodes
 semantic_memories
 open_conflicts
+registered_adapters
 pending_dream_jobs
 ```
 
@@ -90,6 +91,24 @@ curl http://127.0.0.1:8765/v1/context
 - imported memories；
 - open conflicts；
 - current constraints。
+
+## GET /v1/adapters
+
+返回本地 adapter registry 和已注册 adapter。
+
+```bash
+curl http://127.0.0.1:8765/v1/adapters
+```
+
+默认注册的 adapter：
+
+```text
+generic_adapter
+local_generic_adapter
+astrbot_thin_adapter
+```
+
+`POST /v1/adapter/ingest` 要求 `adapter_id` 已注册且启用。
 
 ## POST /v1/interact
 
@@ -130,7 +149,7 @@ state_transfer_package
 
 ## POST /v1/adapter/ingest
 
-通用 adapter protocol v0.2 的推荐入口。
+通用 adapter protocol v0.3 的推荐入口。
 
 ```bash
 curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
@@ -152,6 +171,8 @@ curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
 ```
 
 `dry_run: true` 时只返回 `would_record_episode`，不会写入 episode，也不会创建 dream job。
+
+未知或禁用 adapter 会在 dry-run 预览或真实写入前被拒绝。
 
 ## POST /v1/dream
 
@@ -183,7 +204,7 @@ AstrBot / Web UI / Telegram
   ↓
 Adapter
   ↓
-POST /v1/interact
+POST /v1/adapter/ingest
   ↓
 01 Core
   ↓

@@ -1,3 +1,4 @@
+import json
 import tempfile
 import unittest
 import sqlite3
@@ -19,6 +20,30 @@ class CoreStateTests(unittest.TestCase):
             self.assertIn("where_am_i", anchors)
             self.assertIn("what_am_i_doing", anchors)
             self.assertEqual(state["agent_id"], "01")
+            self.assertIn("adapter_registry", state)
+            self.assertIn("generic_adapter", state["adapter_registry"]["adapters"])
+
+    def test_load_migrates_old_state_with_adapter_registry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state.pop("adapter_registry")
+            state["state_version"] = "0.1"
+            store.state_path.write_text(
+                json.dumps(state, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            migrated = store.load()
+            self.assertIn("adapter_registry", migrated)
+            self.assertIn(
+                "local_generic_adapter",
+                migrated["adapter_registry"]["adapters"],
+            )
+            self.assertEqual(
+                migrated["update_log"][-1]["evidence"],
+                ["protocol_v0.3_adapter_registry"],
+            )
 
     def test_interaction_records_episode_and_updates_intent(self):
         with tempfile.TemporaryDirectory() as tmp:

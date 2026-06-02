@@ -69,6 +69,7 @@ imported_memories
 episodes
 semantic_memories
 open_conflicts
+registered_adapters
 pending_dream_jobs
 ```
 
@@ -90,6 +91,24 @@ This endpoint is useful before response generation:
 - imported memories;
 - open conflicts;
 - current constraints.
+
+## GET /v1/adapters
+
+Returns the local adapter registry and registered adapters.
+
+```bash
+curl http://127.0.0.1:8765/v1/adapters
+```
+
+Default registered adapters:
+
+```text
+generic_adapter
+local_generic_adapter
+astrbot_thin_adapter
+```
+
+`POST /v1/adapter/ingest` requires a registered and enabled `adapter_id`.
 
 ## POST /v1/interact
 
@@ -130,7 +149,7 @@ state_transfer_package
 
 ## POST /v1/adapter/ingest
 
-Recommended entry point for generic adapter protocol v0.2.
+Recommended entry point for generic adapter protocol v0.3.
 
 ```bash
 curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
@@ -152,6 +171,8 @@ curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
 ```
 
 When `dry_run` is true, the API returns `would_record_episode` without writing an episode or creating a dream job.
+
+Unknown or disabled adapters are rejected before dry-run preview or recording.
 
 ## POST /v1/dream
 
@@ -183,7 +204,7 @@ AstrBot / Web UI / Telegram
   ↓
 Adapter
   ↓
-POST /v1/interact
+POST /v1/adapter/ingest
   ↓
 01 Core
   ↓

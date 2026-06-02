@@ -9,7 +9,7 @@
 ## 1. 顶层状态
 
 ```yaml
-state_version: "0.1"
+state_version: "0.2"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -20,6 +20,7 @@ memory_stores: {}
 relationship_map: {}
 project_map: {}
 affective_state: {}
+adapter_registry: {}
 open_conflicts: []
 dream_queue: []
 evaluation_trace: []
@@ -271,7 +272,28 @@ affective_state:
       - "biological emotion"
 ```
 
-## 8. Open Conflicts
+## 8. Adapter Registry
+
+Adapter registry 控制哪些外部 adapter 可以使用通用 ingest 入口。
+
+```yaml
+adapter_registry:
+  allow_unknown_adapters: false
+  adapters:
+    generic_adapter:
+      adapter_id: "generic_adapter"
+      display_name: "Generic Adapter"
+      enabled: true
+      channels:
+        - "generic_adapter"
+      trust_level: "local"
+      registered_at: "ISO-8601 timestamp"
+      notes: "Default adapter identity used by the generic Python client."
+```
+
+`POST /v1/adapter/ingest` 要求 `adapter_id` 已注册且启用。
+
+## 9. Open Conflicts
 
 ```yaml
 open_conflicts:
@@ -286,7 +308,7 @@ open_conflicts:
     status: "open"
 ```
 
-## 9. Dream Queue
+## 10. Dream Queue
 
 ```yaml
 dream_queue:
@@ -303,7 +325,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 10. Update Log
+## 11. Update Log
 
 每个 durable update 都必须记录。
 
@@ -326,7 +348,7 @@ update_log:
       reversible: true
 ```
 
-## 11. State Transfer Package
+## 12. State Transfer Package
 
 Session 开始时不应该加载全部状态。
 
@@ -346,7 +368,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 12. 最小不变量
+## 13. 最小不变量
 
 一个有效的 01 state 必须满足：
 
@@ -355,5 +377,6 @@ state_transfer_package:
 - 每次 high-gate update 都有 evidence；
 - 每条 user-specific memory 都有 privacy metadata；
 - 每个 conflict 都有 status；
+- 每个 generic ingest event 都来自已注册且启用的 adapter；
 - 每个 state snapshot 都有 schema version；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

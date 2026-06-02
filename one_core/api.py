@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 from .dream import DreamEngine
 from .state import DEFAULT_STATE_DIR, StateStore
 
-PROTOCOL_VERSION = "0.2"
+PROTOCOL_VERSION = "0.3"
 
 
 def state_summary(store: StateStore) -> dict:
@@ -25,6 +25,9 @@ def state_summary(store: StateStore) -> dict:
         "episodes": len(state["memory_stores"]["episodic_memory"]),
         "semantic_memories": len(state["memory_stores"]["semantic_memory"]),
         "open_conflicts": len(state.get("open_conflicts", [])),
+        "registered_adapters": len(
+            state.get("adapter_registry", {}).get("adapters", {})
+        ),
         "pending_dream_jobs": len(
             [job for job in state.get("dream_queue", []) if job.get("status") == "pending"]
         ),
@@ -99,11 +102,29 @@ class OneCoreAPI:
             return HTTPStatus.OK, adapter_response(
                 {"state_transfer_package": package, **package}
             )
+        if path == "/v1/adapters":
+            return HTTPStatus.OK, adapter_response(
+                {
+                    "adapter_registry": self.store.adapter_registry(),
+                    "adapters": self.store.list_adapters(),
+                }
+            )
         return HTTPStatus.NOT_FOUND, {"error": "not_found", "path": path}
 
     def handle_post(self, path: str, body: dict) -> Tuple[int, dict]:
         if path in {"/v1/interact", "/v1/adapter/ingest"}:
             normalized = normalize_interaction_body(body)
+            if path == "/v1/adapter/ingest":
+                adapter_check = self.store.validate_adapter(normalized["adapter_id"])
+                if not adapter_check["allowed"]:
+                    return HTTPStatus.FORBIDDEN, adapter_response(
+                        {
+                            "status": "rejected",
+                            "dry_run": normalized["dry_run"],
+                            "error": adapter_check["error"],
+                            "message": adapter_check["message"],
+                        }
+                    )
             message = normalized["message"]
             if not message:
                 return HTTPStatus.BAD_REQUEST, {

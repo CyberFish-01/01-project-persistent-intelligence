@@ -7,7 +7,7 @@ This is the generic adapter protocol for 01 Core.
 Current protocol version:
 
 ```text
-0.2
+0.3
 ```
 
 We build the generic version first, then specialize for AstrBot.
@@ -61,6 +61,28 @@ GET /v1/status
 GET /v1/context
 ```
 
+### Adapter Registry
+
+```text
+GET /v1/adapters
+```
+
+Returns the current adapter registry and registered adapters.
+
+Protocol v0.3 introduces a local adapter allowlist:
+
+- `/v1/adapter/ingest` requires a registered and enabled `adapter_id`.
+- unknown adapters are rejected before preview or recording.
+- `/v1/interact` remains legacy-compatible and does not enforce the adapter registry yet.
+
+Default registered adapters:
+
+```text
+generic_adapter
+local_generic_adapter
+astrbot_thin_adapter
+```
+
 ### Interaction
 
 ```text
@@ -86,7 +108,7 @@ Request:
 POST /v1/adapter/ingest
 ```
 
-This is the recommended v0.2 entry point.
+This is the recommended v0.3 entry point.
 
 Request:
 
@@ -118,6 +140,7 @@ Request:
 Fields:
 
 - `adapter_id`: external adapter identity, such as `astrbot_thin_adapter`.
+- `adapter_id` must be present in the 01 Core adapter registry and enabled.
 - `event_id`: original platform event ID, reserved for future audit and deduplication.
 - `event_type`: currently mostly `message`; future values may include `reaction`, `system_event`, and `task_event`.
 - `text`: the text that enters episode preview or recording.
@@ -131,7 +154,7 @@ Recorded response:
 
 ```json
 {
-  "protocol_version": "0.2",
+  "protocol_version": "0.3",
   "agent_id": "01",
   "status": "recorded",
   "dry_run": false,
@@ -145,7 +168,7 @@ Dry-run response:
 
 ```json
 {
-  "protocol_version": "0.2",
+  "protocol_version": "0.3",
   "agent_id": "01",
   "status": "preview",
   "dry_run": true,
@@ -192,6 +215,7 @@ You can also test it through CLI:
 python3 -m one_core.cli remote health
 python3 -m one_core.cli remote status
 python3 -m one_core.cli remote context
+python3 -m one_core.cli remote adapters
 python3 -m one_core.cli remote interact "Continue 01 Core."
 python3 -m one_core.cli remote interact "Preview only." --dry-run --salience-hint 0.8
 python3 -m one_core.cli remote dream --limit 50

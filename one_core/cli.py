@@ -5,7 +5,13 @@ import json
 from pathlib import Path
 
 from .api import run_server, state_summary
-from .client import AdapterEvent, OneCoreClient, format_context, format_status
+from .client import (
+    AdapterEvent,
+    OneCoreClient,
+    format_adapters,
+    format_context,
+    format_status,
+)
 from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
 from .importer import import_text_file
@@ -75,6 +81,7 @@ def main() -> None:
     remote_subparsers.add_parser("health", help="Call GET /health.")
     remote_subparsers.add_parser("status", help="Call GET /v1/status.")
     remote_subparsers.add_parser("context", help="Call GET /v1/context.")
+    remote_subparsers.add_parser("adapters", help="Call GET /v1/adapters.")
     remote_interact = remote_subparsers.add_parser(
         "interact", help="Call POST /v1/interact."
     )
@@ -150,6 +157,8 @@ def main() -> None:
             print(format_status(client.status()))
         elif args.remote_command == "context":
             print(format_context(client.context()))
+        elif args.remote_command == "adapters":
+            print(format_adapters(client.adapters()))
         elif args.remote_command == "interact":
             print_json(
                 client.interact(

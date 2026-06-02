@@ -7,7 +7,7 @@
 当前协议版本：
 
 ```text
-0.2
+0.3
 ```
 
 我们先做通用版，再做 AstrBot 特化版。
@@ -61,6 +61,28 @@ GET /v1/status
 GET /v1/context
 ```
 
+### Adapter Registry
+
+```text
+GET /v1/adapters
+```
+
+返回当前 adapter registry 和已注册 adapter。
+
+Protocol v0.3 引入本地 adapter allowlist：
+
+- `/v1/adapter/ingest` 要求 `adapter_id` 已注册且启用；
+- 未知 adapter 会在预览或写入前被拒绝；
+- `/v1/interact` 继续保持旧版兼容，暂时不强制检查 adapter registry。
+
+默认注册的 adapter：
+
+```text
+generic_adapter
+local_generic_adapter
+astrbot_thin_adapter
+```
+
 ### Interaction
 
 ```text
@@ -86,7 +108,7 @@ POST /v1/interact
 POST /v1/adapter/ingest
 ```
 
-推荐从 v0.2 起使用这个入口。
+推荐从 v0.3 起使用这个入口。
 
 请求：
 
@@ -118,6 +140,7 @@ POST /v1/adapter/ingest
 字段含义：
 
 - `adapter_id`：外部接入器身份，例如 `astrbot_thin_adapter`。
+- `adapter_id` 必须存在于 01 Core adapter registry，并且处于启用状态。
 - `event_id`：外部平台原始事件 ID，用于审计和去重的未来扩展。
 - `event_type`：当前主要是 `message`，后续可扩展为 `reaction`、`system_event`、`task_event`。
 - `text`：真正进入 episode 预览或记录的文本。
@@ -131,7 +154,7 @@ POST /v1/adapter/ingest
 
 ```json
 {
-  "protocol_version": "0.2",
+  "protocol_version": "0.3",
   "agent_id": "01",
   "status": "recorded",
   "dry_run": false,
@@ -145,7 +168,7 @@ dry-run 响应：
 
 ```json
 {
-  "protocol_version": "0.2",
+  "protocol_version": "0.3",
   "agent_id": "01",
   "status": "preview",
   "dry_run": true,
@@ -192,6 +215,7 @@ client.interact(
 python3 -m one_core.cli remote health
 python3 -m one_core.cli remote status
 python3 -m one_core.cli remote context
+python3 -m one_core.cli remote adapters
 python3 -m one_core.cli remote interact "继续推进 01 Core。"
 python3 -m one_core.cli remote interact "先预览，不写入。" --dry-run --salience-hint 0.8
 python3 -m one_core.cli remote dream --limit 50

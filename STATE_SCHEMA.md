@@ -7,7 +7,7 @@ The schema is intentionally implementation-neutral. It can be stored as JSON, YA
 ## 1. Top-Level State
 
 ```yaml
-state_version: "0.1"
+state_version: "0.2"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -18,6 +18,7 @@ memory_stores: {}
 relationship_map: {}
 project_map: {}
 affective_state: {}
+adapter_registry: {}
 open_conflicts: []
 dream_queue: []
 evaluation_trace: []
@@ -269,7 +270,28 @@ affective_state:
       - "biological emotion"
 ```
 
-## 8. Open Conflicts
+## 8. Adapter Registry
+
+Adapter registry controls which external adapters may use the generic ingest path.
+
+```yaml
+adapter_registry:
+  allow_unknown_adapters: false
+  adapters:
+    generic_adapter:
+      adapter_id: "generic_adapter"
+      display_name: "Generic Adapter"
+      enabled: true
+      channels:
+        - "generic_adapter"
+      trust_level: "local"
+      registered_at: "ISO-8601 timestamp"
+      notes: "Default adapter identity used by the generic Python client."
+```
+
+`POST /v1/adapter/ingest` requires a registered and enabled `adapter_id`.
+
+## 9. Open Conflicts
 
 ```yaml
 open_conflicts:
@@ -284,7 +306,7 @@ open_conflicts:
     status: "open"
 ```
 
-## 9. Dream Queue
+## 10. Dream Queue
 
 ```yaml
 dream_queue:
@@ -301,7 +323,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 10. Update Log
+## 11. Update Log
 
 Every durable update must be recorded.
 
@@ -324,7 +346,7 @@ update_log:
       reversible: true
 ```
 
-## 11. State Transfer Package
+## 12. State Transfer Package
 
 At session start, the system should not load everything.
 
@@ -344,7 +366,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 12. Minimal Invariants
+## 13. Minimal Invariants
 
 A valid 01 state must satisfy:
 
@@ -353,5 +375,6 @@ A valid 01 state must satisfy:
 - every high-gate update has evidence,
 - every user-specific memory has privacy metadata,
 - every conflict has status,
+- every generic ingest event comes from a registered and enabled adapter,
 - every state snapshot has a schema version,
 - every session can answer Identity, Context, and Intent anchors.

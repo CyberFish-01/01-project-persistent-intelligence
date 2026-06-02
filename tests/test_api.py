@@ -14,6 +14,12 @@ class APITests(unittest.TestCase):
             self.assertEqual(status_code, 200)
             self.assertEqual(status["agent_id"], "01")
             self.assertEqual(status["episodes"], 0)
+            self.assertGreaterEqual(status["registered_adapters"], 1)
+
+            status_code, adapters = api.handle_get("/v1/adapters")
+            self.assertEqual(status_code, 200)
+            adapter_ids = [adapter["adapter_id"] for adapter in adapters["adapters"]]
+            self.assertIn("local_generic_adapter", adapter_ids)
 
             status_code, interact = api.handle_post(
                 "/v1/interact",
@@ -50,7 +56,7 @@ class APITests(unittest.TestCase):
             status_code, preview = api.handle_post(
                 "/v1/adapter/ingest",
                 {
-                    "adapter_id": "local_test_adapter",
+                    "adapter_id": "local_generic_adapter",
                     "dry_run": True,
                     "event": {
                         "text": "这是一条 dry-run adapter 事件。",
@@ -80,6 +86,7 @@ class APITests(unittest.TestCase):
             status_code, preview = api.handle_post(
                 "/v1/adapter/ingest",
                 {
+                    "adapter_id": "generic_adapter",
                     "dry_run": True,
                     "event": {
                         "text": "普通消息",
@@ -89,6 +96,25 @@ class APITests(unittest.TestCase):
             )
             self.assertEqual(status_code, 200)
             self.assertEqual(preview["would_record_episode"]["salience"], 0.25)
+
+    def test_adapter_ingest_rejects_unregistered_adapter(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            api = OneCoreAPI(StateStore(Path(tmp)))
+            status_code, response = api.handle_post(
+                "/v1/adapter/ingest",
+                {
+                    "adapter_id": "unknown_adapter",
+                    "dry_run": True,
+                    "event": {"text": "未知 adapter 不应写入。"},
+                },
+            )
+            self.assertEqual(status_code, 403)
+            self.assertEqual(response["status"], "rejected")
+            self.assertEqual(response["error"], "unregistered_adapter")
+
+            status_code, status = api.handle_get("/v1/status")
+            self.assertEqual(status_code, 200)
+            self.assertEqual(status["episodes"], 0)
 
 
 if __name__ == "__main__":
