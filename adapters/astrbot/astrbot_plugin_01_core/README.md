@@ -13,6 +13,24 @@ AstrBot = external entrance
 
 The adapter does not read or write `state.json` directly, and it does not reuse AstrBot or Angel Memory internals. It only talks to 01 Core through the local HTTP API.
 
+The current version should be treated as a **thin adapter**, not an AstrBot-specialized adapter.
+
+Project route:
+
+```text
+generic adapter protocol
+  ↓
+local port iteration
+  ↓
+AstrBot uses the generic protocol
+  ↓
+several validation cycles
+  ↓
+AstrBot specialization
+```
+
+So this version should not add long-term identity interpretation, Angel Memory writes, or automatic full-chat ingestion inside the plugin.
+
 ## Prepare
 
 Start the 01 Core API from the 01 Project repository:

@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .api import run_server, state_summary
+from .client import AdapterEvent, OneCoreClient, format_context, format_status
 from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
 from .importer import import_text_file
@@ -60,6 +61,30 @@ def main() -> None:
 
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
+    remote_parser = subparsers.add_parser(
+        "remote", help="Call a running 01 Core API through the generic adapter protocol."
+    )
+    remote_parser.add_argument(
+        "--api-base-url",
+        default="http://127.0.0.1:8765",
+        help="01 Core API base URL.",
+    )
+    remote_subparsers = remote_parser.add_subparsers(
+        dest="remote_command", required=True
+    )
+    remote_subparsers.add_parser("health", help="Call GET /health.")
+    remote_subparsers.add_parser("status", help="Call GET /v1/status.")
+    remote_subparsers.add_parser("context", help="Call GET /v1/context.")
+    remote_interact = remote_subparsers.add_parser(
+        "interact", help="Call POST /v1/interact."
+    )
+    remote_interact.add_argument("message")
+    remote_interact.add_argument("--user-id", default="local_adapter_user")
+    remote_interact.add_argument("--channel", default="local_generic_adapter")
+    remote_interact.add_argument("--session-id")
+    remote_dream = remote_subparsers.add_parser("dream", help="Call POST /v1/dream.")
+    remote_dream.add_argument("--limit", type=int, default=20)
+
     args = parser.parse_args()
     store = StateStore(Path(args.state_dir))
 
@@ -112,6 +137,27 @@ def main() -> None:
         print_json(report)
     elif args.command == "context":
         print_json(store.build_context_package())
+    elif args.command == "remote":
+        client = OneCoreClient(args.api_base_url)
+        if args.remote_command == "health":
+            print_json(client.health())
+        elif args.remote_command == "status":
+            print(format_status(client.status()))
+        elif args.remote_command == "context":
+            print(format_context(client.context()))
+        elif args.remote_command == "interact":
+            print_json(
+                client.interact(
+                    AdapterEvent(
+                        message=args.message,
+                        user_id=args.user_id,
+                        channel=args.channel,
+                        session_id=args.session_id,
+                    )
+                )
+            )
+        elif args.remote_command == "dream":
+            print_json(client.dream(limit=args.limit))
 
 
 def build_local_reply(package: dict) -> str:

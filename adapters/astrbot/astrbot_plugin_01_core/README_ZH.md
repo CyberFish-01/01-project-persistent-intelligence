@@ -13,6 +13,24 @@ AstrBot = 外部入口
 
 适配器不直接读写 `state.json`，也不复用 AstrBot 或 Angel Memory 的内部记忆结构。它只通过 01 Core HTTP API 交互。
 
+当前版本应被看作 **thin adapter**，不是 AstrBot 特化版。
+
+项目路线是：
+
+```text
+通用 adapter protocol
+  ↓
+本地端口迭代
+  ↓
+AstrBot 使用通用协议
+  ↓
+多轮验证
+  ↓
+AstrBot 特化适配
+```
+
+因此这一版不要在插件内加入长期身份解释、Angel Memory 写入、自动吸收全量聊天等逻辑。
+
 ## 准备
 
 先在 01 Project 仓库里启动 01 Core API：

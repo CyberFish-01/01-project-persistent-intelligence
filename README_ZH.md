@@ -28,6 +28,7 @@
 - [IMPLEMENTATION_START.md](./IMPLEMENTATION_START.md) / [IMPLEMENTATION_START_ZH.md](./IMPLEMENTATION_START_ZH.md)：第一版可运行本地 01 Core 原型。
 - [MEMORY_IMPORT.md](./MEMORY_IMPORT.md) / [MEMORY_IMPORT_ZH.md](./MEMORY_IMPORT_ZH.md)：如何把 AstrBot、Angel Memory 或其他系统的记忆以通用文本形式导入。
 - [API.md](./API.md) / [API_ZH.md](./API_ZH.md)：给 AstrBot 等 adapter 使用的本地 HTTP API。
+- [ADAPTER_PROTOCOL.md](./ADAPTER_PROTOCOL.md) / [ADAPTER_PROTOCOL_ZH.md](./ADAPTER_PROTOCOL_ZH.md)：通用 adapter 协议。本地通用版先稳定，再做 AstrBot 特化。
 - [adapters/astrbot/astrbot_plugin_01_core](./adapters/astrbot/astrbot_plugin_01_core)：第一版 AstrBot adapter。AstrBot 作为入口，01 Core 保存连续性状态。
 - [CLOUD_DEPLOYMENT.md](./CLOUD_DEPLOYMENT.md) / [CLOUD_DEPLOYMENT_ZH.md](./CLOUD_DEPLOYMENT_ZH.md)：把 01 Core 部署为云服务器常驻服务。
 
@@ -78,6 +79,14 @@ cp -R adapters/astrbot/astrbot_plugin_01_core /root/data/plugins/
 /01 status
 /01 chat <内容>
 /01 dream
+```
+
+通用 adapter 协议本地测试：
+
+```bash
+python3 -m one_core.cli remote health
+python3 -m one_core.cli remote interact "继续推进 01 Core。"
+python3 -m one_core.cli remote status
 ```
 
 ```text
