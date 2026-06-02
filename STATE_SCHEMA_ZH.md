@@ -674,6 +674,21 @@ task_hub:
       errors: []
       evidence:
         - "episode_0001"
+  failure_reflections:
+    - reflection_id: "failure_reflection_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "tool_use"
+      summary: "A tool workflow failed because required input was missing."
+      lesson: "Check required inputs before tool execution."
+      next_action: "Ask for or infer required input first."
+      source_action_id: "action_0002"
+      status: "active"
+      reviewer: "manual_review"
+      evidence:
+        - "action_0002"
+      provenance:
+        - type: "failure_reflection"
+          source_action_id: "action_0002"
   procedural_candidates:
     - candidate_id: "proc_0001"
       timestamp: "ISO-8601 timestamp"
@@ -691,6 +706,24 @@ task_hub:
       provenance:
         - type: "dream_procedural_candidate"
           dream_id: "dream_0001"
+  cautionary_procedural_candidates:
+    - candidate_id: "caution_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "tool_use"
+      statement: "Failure reflection for workflow 'tool_use': Check required inputs before tool execution."
+      avoid: "Tried a tool workflow before collecting required input."
+      next_action: "Ask for or infer required input first."
+      evidence:
+        - "failure_reflection_0001"
+        - "action_0002"
+      confidence: 0.6
+      risk: "medium"
+      review_status: "pending"
+      recommended_action: "review_then_consider"
+      source_reflection_id: "failure_reflection_0001"
+      provenance:
+        - type: "failure_reflection_caution"
+          reflection_id: "failure_reflection_0001"
   procedural_memory:
     - memory_id: "proc_mem_0001"
       timestamp: "ISO-8601 timestamp"
@@ -724,6 +757,8 @@ task_hub:
 真实状态变更的 trace 会进入 `task_hub.action_trace`。`dry_run` preview 可以写 audit / trace，但不能写 episode、dream job、adapter event index，也不能写入 `task_hub.action_trace`。
 
 Dream 可以从重复成功的 action trace 里提出 `procedural_candidates`。这些候选不等于已采用的 procedural memory，必须等待 review。P16 增加 `review-procedural-candidate`；批准后会创建 `task_hub.procedural_memory`，并连接 decision、snapshot、audit、trace、update log 和 rollback metadata。它仍然不会执行 workflow policy。
+
+P17 增加显式 failure reflection。`record-failure-reflection` 会把失败或阻塞的 workflow lesson 记录到 `task_hub.failure_reflections`，并创建 pending `task_hub.cautionary_procedural_candidates` 条目。Cautionary candidates 是警告型 proposal，不是可执行 workflow policy。它们必须保持 pending，直到后续 review path 出现，并且不能修改 Identity Core。
 
 ## 14. Identity Update Gate
 
@@ -1004,11 +1039,15 @@ state_transfer_package:
     active_tasks: []
     blocked_tasks: []
     recent_actions: []
+    failure_reflections: []
     procedural_candidates: []
+    cautionary_procedural_candidates: []
     procedural_memory: []
   active_tasks: []
   action_trace: []
+  failure_reflections: []
   procedural_candidates: []
+  cautionary_procedural_candidates: []
   procedural_memory: []
   identity_update_gate:
     required_gate: "high"
@@ -1078,7 +1117,9 @@ state_transfer_package:
 - 每个 review/promotion rollback reference 都能指向 snapshot metadata；
 - 每个 state event 都引用现有 update_log entry；
 - `task_hub.action_trace` 只记录真实状态变更，不记录 non-mutating dry-run；
+- 每个 failure reflection 都有 workflow、summary、lesson、evidence、provenance 和 status；
 - procedural candidate 必须有 workflow、evidence 和 pending review status；
+- 每个 cautionary procedural candidate 都有 source reflection、avoid 指引、evidence 和 pending review status；
 - identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；
 - P11 不允许直接 patch `identity_core`，approve 只能追加 identity_memory；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

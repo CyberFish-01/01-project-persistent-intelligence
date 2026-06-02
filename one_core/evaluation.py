@@ -60,6 +60,7 @@ def run_scenario_evaluation() -> dict:
             ),
             check_task_hub_action_resume(root / "task_hub_action_resume"),
             check_procedural_memory_review(root / "procedural_memory_review"),
+            check_failure_reflection(root / "failure_reflection"),
             check_identity_update_gate_review(root / "identity_update_gate_review"),
             check_event_log_replay_rollback(root / "event_log_replay_rollback"),
             check_dream_artifact_package(root / "dream_artifact_package"),
@@ -550,6 +551,84 @@ def check_procedural_memory_review(state_dir: Path) -> EvaluationCheck:
                 "procedural_memory_count": len(procedural_memory),
                 "procedural_review_decision_count": len(decisions),
                 "procedural_identity_mutation_count": 0
+                if state["identity_core"] == before_identity
+                else 1,
+            },
+        },
+    )
+
+
+def check_failure_reflection(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    state = store.load()
+    store.record_trace(
+        workflow="tool_use",
+        nodes=[
+            {
+                "id": "failed_tool",
+                "type": "Action",
+                "summary": "Tool failed because required input was missing.",
+            }
+        ],
+        errors=[
+            {
+                "error": "missing_input",
+                "message": "Required input was missing.",
+            }
+        ],
+        summary="Tool workflow failed because input was missing.",
+        state=state,
+        status="failed",
+    )
+    store.save(state)
+    failed_action = state["task_hub"]["action_trace"][-1]
+    result = store.record_failure_reflection(
+        workflow="tool_use",
+        action_id=failed_action["action_id"],
+        summary="Tried a tool workflow before collecting required input.",
+        lesson="Check required inputs before tool execution.",
+        next_action="Ask for or infer required input first.",
+        reviewer="scenario_eval",
+    )
+    state = store.load()
+    package = store.build_context_package()
+    reflections = state.get("task_hub", {}).get("failure_reflections", [])
+    cautions = state.get("task_hub", {}).get("cautionary_procedural_candidates", [])
+    checks = {
+        "reflection_recorded": bool(reflections)
+        and reflections[-1].get("reflection_id") == result.get("reflection_id"),
+        "caution_recorded": bool(cautions)
+        and cautions[-1].get("candidate_id") == result.get("cautionary_candidate_id"),
+        "caution_pending": cautions[-1].get("review_status") == "pending",
+        "context_exposes_reflection": result.get("reflection_id")
+        in {
+            item.get("reflection_id")
+            for item in package.get("failure_reflections", [])
+            if isinstance(item, dict)
+        },
+        "context_exposes_caution": result.get("cautionary_candidate_id")
+        in {
+            item.get("candidate_id")
+            for item in package.get("cautionary_procedural_candidates", [])
+            if isinstance(item, dict)
+        },
+        "identity_not_mutated": state["identity_core"] == before_identity,
+        "event_replay_passed": store.replay_events()["status"] == "passed",
+    }
+    return EvaluationCheck(
+        name="failure_reflection",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Failure Reflection",
+            "reflection_id": result.get("reflection_id"),
+            "candidate_id": result.get("cautionary_candidate_id"),
+            "checks": checks,
+            "metrics": {
+                "failure_reflection_score": ratio(checks.values()),
+                "failure_reflection_count": len(reflections),
+                "failure_caution_count": len(cautions),
+                "failure_identity_mutation_count": 0
                 if state["identity_core"] == before_identity
                 else 1,
             },
@@ -1153,6 +1232,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "procedural_review_score" in item
     ]
+    failure_reflection_scores = [
+        item["failure_reflection_score"]
+        for item in metrics
+        if "failure_reflection_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -1202,6 +1286,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         )
         if procedural_review_scores
         else None,
+        "failure_reflection_score": round(
+            sum(failure_reflection_scores) / len(failure_reflection_scores),
+            2,
+        )
+        if failure_reflection_scores
+        else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
         ),
@@ -1224,6 +1314,15 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "procedural_identity_mutation_count": sum(
             int(item.get("procedural_identity_mutation_count", 0)) for item in metrics
+        ),
+        "failure_reflection_count": sum(
+            int(item.get("failure_reflection_count", 0)) for item in metrics
+        ),
+        "failure_caution_count": sum(
+            int(item.get("failure_caution_count", 0)) for item in metrics
+        ),
+        "failure_identity_mutation_count": sum(
+            int(item.get("failure_identity_mutation_count", 0)) for item in metrics
         ),
         "approved_identity_updates": sum(
             int(item.get("approved_identity_updates", 0)) for item in metrics

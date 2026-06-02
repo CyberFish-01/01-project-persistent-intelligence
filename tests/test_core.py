@@ -474,6 +474,65 @@ class CoreStateTests(unittest.TestCase):
                 {item["memory_id"] for item in package["procedural_memory"]},
             )
 
+    def test_failure_reflection_creates_cautionary_candidate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            state = store.load()
+            store.record_trace(
+                workflow="tool_use",
+                nodes=[
+                    {
+                        "id": "failed_tool",
+                        "type": "Action",
+                        "summary": "Tool failed because required input was missing.",
+                    }
+                ],
+                errors=[
+                    {
+                        "error": "missing_input",
+                        "message": "Required input was missing.",
+                    }
+                ],
+                summary="Tool workflow failed because input was missing.",
+                state=state,
+                status="failed",
+            )
+            store.save(state)
+            failed_action = state["task_hub"]["action_trace"][-1]
+
+            result = store.record_failure_reflection(
+                workflow="tool_use",
+                action_id=failed_action["action_id"],
+                summary="Tried a tool workflow before collecting required input.",
+                lesson="Check required inputs before tool execution.",
+                next_action="Ask for or infer required input first.",
+                reviewer="unit_test",
+            )
+            state = store.load()
+            reflection = state["task_hub"]["failure_reflections"][-1]
+            caution = state["task_hub"]["cautionary_procedural_candidates"][-1]
+
+            self.assertEqual(result["status"], "recorded")
+            self.assertEqual(reflection["workflow"], "tool_use")
+            self.assertEqual(caution["review_status"], "pending")
+            self.assertEqual(caution["source_reflection_id"], result["reflection_id"])
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(store.list_traces()[-1]["workflow"], "failure_reflection")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            package = store.build_context_package()
+            self.assertIn(
+                result["reflection_id"],
+                {item["reflection_id"] for item in package["failure_reflections"]},
+            )
+            self.assertIn(
+                result["cautionary_candidate_id"],
+                {
+                    item["candidate_id"]
+                    for item in package["cautionary_procedural_candidates"]
+                },
+            )
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

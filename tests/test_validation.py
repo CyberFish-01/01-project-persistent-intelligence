@@ -218,6 +218,44 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
 
+    def test_failure_reflection_requires_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["task_hub"]["failure_reflections"].append(
+                {
+                    "reflection_id": "failure_reflection_bad",
+                    "workflow": "tool_use",
+                    "summary": "Tool failed.",
+                }
+            )
+            state["task_hub"]["cautionary_procedural_candidates"].append(
+                {
+                    "candidate_id": "caution_bad",
+                    "workflow": "tool_use",
+                    "statement": "Avoid repeating failure.",
+                    "review_status": "approved",
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("task_hub.failure_reflections[0].lesson", paths)
+            self.assertIn("task_hub.failure_reflections[0].evidence", paths)
+            self.assertIn(
+                "task_hub.cautionary_procedural_candidates[0].avoid",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.cautionary_procedural_candidates[0].source_reflection_id",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.cautionary_procedural_candidates[0].review_status",
+                paths,
+            )
+
     def test_identity_update_gate_requires_proposal_gate_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

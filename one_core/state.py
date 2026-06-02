@@ -188,7 +188,9 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         ],
         "recurring_duties": [],
         "action_trace": [],
+        "failure_reflections": [],
         "procedural_candidates": [],
+        "cautionary_procedural_candidates": [],
         "procedural_memory": [],
         "procedural_review_decisions": [],
     }
@@ -504,7 +506,9 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "blocked_tasks",
         "recurring_duties",
         "action_trace",
+        "failure_reflections",
         "procedural_candidates",
+        "cautionary_procedural_candidates",
         "procedural_memory",
         "procedural_review_decisions",
     ):
@@ -2728,6 +2732,159 @@ class StateStore:
             "procedural_decision_id": decision["decision_id"],
         }
 
+    def record_failure_reflection(
+        self,
+        workflow: str,
+        summary: str,
+        lesson: str,
+        reviewer: str = "manual_review",
+        action_id: Optional[str] = None,
+        next_action: str = "",
+    ) -> dict:
+        normalized_workflow = str(workflow or "").strip()
+        normalized_summary = str(summary or "").strip()
+        normalized_lesson = str(lesson or "").strip()
+        if not normalized_workflow:
+            return {
+                "status": "rejected",
+                "error": "missing_workflow",
+            }
+        if not normalized_summary or not normalized_lesson:
+            return {
+                "status": "rejected",
+                "error": "missing_failure_reflection",
+            }
+
+        state = self.load()
+        now = utc_now()
+        task_hub = state.setdefault("task_hub", default_task_hub(now, state.get("working_state", {})))
+        source_action = find_task_action(
+            task_hub.get("action_trace", []),
+            action_id=action_id,
+            workflow=normalized_workflow,
+            statuses={"failed", "blocked"},
+        )
+        source_action_id = source_action.get("action_id") if source_action else action_id
+        reflection = {
+            "reflection_id": new_id("failure_reflection"),
+            "timestamp": now,
+            "workflow": normalized_workflow,
+            "summary": normalized_summary,
+            "lesson": normalized_lesson,
+            "next_action": next_action,
+            "source_action_id": source_action_id,
+            "status": "active",
+            "reviewer": reviewer,
+            "evidence": [item for item in [source_action_id] if item],
+            "provenance": [
+                {
+                    "type": "failure_reflection",
+                    "source_action_id": source_action_id,
+                }
+            ],
+        }
+        caution = {
+            "candidate_id": new_id("caution"),
+            "timestamp": now,
+            "workflow": normalized_workflow,
+            "statement": f"Failure reflection for workflow '{normalized_workflow}': {normalized_lesson}",
+            "avoid": normalized_summary,
+            "next_action": next_action,
+            "evidence": [reflection["reflection_id"]] + reflection["evidence"],
+            "confidence": 0.6,
+            "risk": "medium",
+            "review_status": "pending",
+            "recommended_action": "review_then_consider",
+            "source_reflection_id": reflection["reflection_id"],
+            "provenance": [
+                {
+                    "type": "failure_reflection_caution",
+                    "reflection_id": reflection["reflection_id"],
+                }
+            ],
+        }
+        task_hub.setdefault("failure_reflections", []).append(reflection)
+        task_hub.setdefault("cautionary_procedural_candidates", []).append(caution)
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.failure_reflections",
+                "operation": "record_failure_reflection",
+                "before": None,
+                "after": reflection["reflection_id"],
+                "evidence": reflection["evidence"],
+                "gate": "medium",
+                "confidence": caution["confidence"],
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action="record_failure_reflection",
+            target="task_hub.failure_reflections",
+            outcome="recorded",
+            evidence=reflection["evidence"],
+            metadata={
+                "reflection_id": reflection["reflection_id"],
+                "cautionary_candidate_id": caution["candidate_id"],
+                "workflow": normalized_workflow,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="failure_reflection",
+            nodes=[
+                {
+                    "id": "failed_action",
+                    "type": "Action",
+                    "action_id": source_action_id,
+                    "workflow": normalized_workflow,
+                },
+                {
+                    "id": "reflection",
+                    "type": "Review",
+                    "reflection_id": reflection["reflection_id"],
+                },
+                {
+                    "id": "caution",
+                    "type": "Memory",
+                    "candidate_id": caution["candidate_id"],
+                },
+            ],
+            edges=[
+                {"from": "failed_action", "to": "reflection", "type": "reflection"},
+                {"from": "reflection", "to": "caution", "type": "proposal"},
+            ],
+            memory_events=[
+                {
+                    "operation": "record",
+                    "target": "task_hub.failure_reflections",
+                    "memory_id": reflection["reflection_id"],
+                    "candidate_id": caution["candidate_id"],
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "failure_reflection",
+                    "reviewer": reviewer,
+                    "lesson": normalized_lesson,
+                    "next_action": next_action,
+                }
+            ],
+            summary=f"Recorded failure reflection for workflow {normalized_workflow}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": "recorded",
+            "reflection_id": reflection["reflection_id"],
+            "cautionary_candidate_id": caution["candidate_id"],
+            "source_action_id": source_action_id,
+        }
+
     def apply_memory_lifecycle_action(
         self,
         store_name: str,
@@ -3418,12 +3575,22 @@ class StateStore:
                 "active_tasks": active_tasks,
                 "blocked_tasks": task_hub.get("blocked_tasks", []),
                 "recent_actions": action_trace,
+                "failure_reflections": task_hub.get("failure_reflections", []),
                 "procedural_candidates": task_hub.get("procedural_candidates", []),
+                "cautionary_procedural_candidates": task_hub.get(
+                    "cautionary_procedural_candidates",
+                    [],
+                ),
                 "procedural_memory": task_hub.get("procedural_memory", []),
             },
             "active_tasks": active_tasks,
             "action_trace": action_trace,
+            "failure_reflections": task_hub.get("failure_reflections", []),
             "procedural_candidates": task_hub.get("procedural_candidates", []),
+            "cautionary_procedural_candidates": task_hub.get(
+                "cautionary_procedural_candidates",
+                [],
+            ),
             "procedural_memory": task_hub.get("procedural_memory", []),
             "identity_update_gate": {
                 "required_gate": identity_gate.get("required_gate", "high"),
@@ -4309,6 +4476,24 @@ def build_procedural_memory(
             }
         ],
     }
+
+
+def find_task_action(
+    action_trace: List[dict],
+    action_id: Optional[str],
+    workflow: str,
+    statuses: set[str],
+) -> dict:
+    if action_id:
+        for action in reversed(action_trace):
+            if isinstance(action, dict) and action.get("action_id") == action_id:
+                return action
+    for action in reversed(action_trace):
+        if not isinstance(action, dict):
+            continue
+        if action.get("workflow") == workflow and action.get("status") in statuses:
+            return action
+    return {}
 
 
 def build_candidate_review_decision(

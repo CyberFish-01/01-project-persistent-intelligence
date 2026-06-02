@@ -362,6 +362,8 @@ procedural_candidate:
 
 P16 adds explicit procedural review. `review-procedural-candidate` can approve, reject, archive, or quarantine a candidate. Approval creates `task_hub.procedural_memory` with evidence, steps, review decision, snapshot, audit, trace, update log, and rollback metadata. This still does not execute workflows automatically.
 
+P17 adds failure reflection. `record-failure-reflection` records a failed or blocked workflow lesson in `task_hub.failure_reflections` and creates a pending `task_hub.cautionary_procedural_candidates` entry. These cautionary candidates are warning proposals only. They do not execute workflows, and they do not mutate Identity Core.
+
 Dream artifacts also include a deterministic rubric:
 
 ```yaml

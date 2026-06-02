@@ -447,9 +447,9 @@ git diff --check
 
 1. active task state - 已完成第一版；
 2. action trace - 已完成第一版；
-3. failure reflection - 尚未完成；
+3. failure reflection - 已移至 P17，并完成第一版；
 4. workflow candidate - 已完成第一版；
-5. procedural memory review - 仅完成 pending candidate schema，尚未完成 review command。
+5. procedural memory review - 已移至 P16，并完成第一版。
 
 建议立即范围：
 
@@ -469,9 +469,6 @@ git diff --check
 
 剩余缺口：
 
-- 还没有 failure reflection schema；
-- 还没有 procedural candidate review/promote command；
-- 还没有正式 procedural memory store；
 - 还没有 workflow policy executor；
 - action trace 目前来自 runtime trace 摘要，还不是完整 replayable action log。
 
@@ -655,23 +652,45 @@ git diff --check
 
 剩余缺口：
 
-- 还没有 failure reflection schema；
 - 还没有 workflow policy executor；
 - 还没有 procedural memory lifecycle/retention command；
 - procedural memory 还没有和具体 tool policy / safety policy 深度联动；
-- 还没有从失败行动中生成 cautionary procedural memory。
 
 ## 6. 当前建议
 
-下一步先做：
+P17 是当前需要完成和复审的地基：
 
 ```text
 P17 Failure Reflection
 ```
 
+目标：保存失败或阻塞后的改进线索。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `task_hub.failure_reflections` 记录 workflow、summary、lesson、next action、evidence、provenance 和 status；
+- `record-failure-reflection` 会创建 pending `task_hub.cautionary_procedural_candidates`；
+- context package 会暴露 failure reflections 和 cautionary procedural candidates；
+- scenario evaluation 增加 `failure_reflection`；
+- failure reflection 不修改 Identity Core，也不执行 workflow policy。
+
+剩余缺口：
+
+- cautionary procedural candidates 还没有 review/promote 路径；
+- 还没有 procedural memory lifecycle/retention command；
+- procedural memory 还没有和具体 tool policy / safety policy 深度联动；
+- 还没有 workflow policy executor。
+
+建议下一步：
+
+```text
+P18 Procedural Lifecycle / Retention
+```
+
 理由：
 
-- P16 已经让成功行动结构可以进入 procedural memory，但失败/阻塞仍只是 action trace 的浅层状态；
-- ReAct / Reflexion 思路提醒我们，长期行动连续性不仅要保存成功 recipe，也要保存失败后的改进线索；
-- P17 应增加 failure reflection schema、failed/blocked outcome review、cautionary procedural candidates；
-- 这会让 01 在中断后不只知道下一步做什么，也知道上次为什么卡住、下次怎么避开。
+- P16 和 P17 已经能生成正向和警告型行动知识；
+- 下一层地基是决定 procedural memory 如何保持 active、变 stale、archive 或 quarantine；
+- 这仍然应该是可审查、可回滚的流程，并且不自动执行工具。

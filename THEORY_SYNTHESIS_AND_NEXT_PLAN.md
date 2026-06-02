@@ -447,9 +447,9 @@ Executable items:
 
 1. active task state - first pass done;
 2. action trace - first pass done;
-3. failure reflection - not done yet;
+3. failure reflection - moved to P17 and implemented as a first pass;
 4. workflow candidate - first pass done;
-5. procedural memory review - pending candidate schema only; no review command yet.
+5. procedural memory review - moved to P16 and implemented as a first pass.
 
 Recommended immediate scope:
 
@@ -469,9 +469,6 @@ Implemented result:
 
 Remaining gaps:
 
-- no failure reflection schema yet;
-- no procedural candidate review/promote command yet;
-- no durable procedural memory store yet;
 - no workflow policy executor yet;
 - action trace is currently a runtime trace summary, not a fully replayable action log.
 
@@ -655,23 +652,45 @@ Implemented result:
 
 Remaining gaps:
 
-- no failure reflection schema yet;
 - no workflow policy executor yet;
 - no procedural memory lifecycle/retention command yet;
 - procedural memory is not yet deeply linked to tool policy / safety policy;
-- no cautionary procedural memory from failed actions yet.
 
 ## 6. Current Recommendation
 
-Do P17 next:
+P17 is now the immediate foundation to finish and review:
 
 ```text
 P17 Failure Reflection
 ```
 
+Goal: preserve improvement signals after failed or blocked workflows.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `task_hub.failure_reflections` records workflow, summary, lesson, next action, evidence, provenance, and status;
+- `record-failure-reflection` creates a pending `task_hub.cautionary_procedural_candidates` entry;
+- context packages expose both failure reflections and cautionary procedural candidates;
+- scenario evaluation adds `failure_reflection`;
+- failure reflection does not mutate Identity Core and does not execute workflow policy.
+
+Remaining gaps:
+
+- no review/promote path for cautionary procedural candidates yet;
+- no procedural memory lifecycle/retention command yet;
+- procedural memory is not yet deeply linked to tool policy / safety policy;
+- no workflow policy executor yet.
+
+Recommended next step:
+
+```text
+P18 Procedural Lifecycle / Retention
+```
+
 Reason:
 
-- P16 lets successful action structure enter procedural memory, but failures and blockers are still shallow action-trace states;
-- ReAct / Reflexion suggest that long-term action continuity should preserve improvement signals after failure, not just successful recipes;
-- P17 should add failure reflection schema, failed/blocked outcome review, and cautionary procedural candidates;
-- this lets 01 resume not only what to do next, but also why it got stuck and what to avoid next time.
+- P16 and P17 now create durable positive and cautionary action knowledge;
+- the next foundation is deciding how procedural memory stays active, becomes stale, is archived, or is quarantined;
+- this should still be reviewable and reversible, with no automatic tool execution.

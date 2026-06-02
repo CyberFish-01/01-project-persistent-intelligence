@@ -168,6 +168,17 @@ def main() -> None:
     procedural_review_parser.add_argument("--reviewer", default="manual_review")
     procedural_review_parser.add_argument("--decision-note", default="")
 
+    failure_reflection_parser = subparsers.add_parser(
+        "record-failure-reflection",
+        help="Record a failure reflection and cautionary procedural candidate.",
+    )
+    failure_reflection_parser.add_argument("--workflow", required=True)
+    failure_reflection_parser.add_argument("--summary", required=True)
+    failure_reflection_parser.add_argument("--lesson", required=True)
+    failure_reflection_parser.add_argument("--reviewer", default="manual_review")
+    failure_reflection_parser.add_argument("--action-id", default=None)
+    failure_reflection_parser.add_argument("--next-action", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -335,6 +346,17 @@ def main() -> None:
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "record-failure-reflection":
+        print_json(
+            store.record_failure_reflection(
+                workflow=args.workflow,
+                summary=args.summary,
+                lesson=args.lesson,
+                reviewer=args.reviewer,
+                action_id=args.action_id,
+                next_action=args.next_action,
             )
         )
     elif args.command == "context":

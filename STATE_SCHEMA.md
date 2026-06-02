@@ -672,6 +672,21 @@ task_hub:
       errors: []
       evidence:
         - "episode_0001"
+  failure_reflections:
+    - reflection_id: "failure_reflection_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "tool_use"
+      summary: "A tool workflow failed because required input was missing."
+      lesson: "Check required inputs before tool execution."
+      next_action: "Ask for or infer required input first."
+      source_action_id: "action_0002"
+      status: "active"
+      reviewer: "manual_review"
+      evidence:
+        - "action_0002"
+      provenance:
+        - type: "failure_reflection"
+          source_action_id: "action_0002"
   procedural_candidates:
     - candidate_id: "proc_0001"
       timestamp: "ISO-8601 timestamp"
@@ -689,6 +704,24 @@ task_hub:
       provenance:
         - type: "dream_procedural_candidate"
           dream_id: "dream_0001"
+  cautionary_procedural_candidates:
+    - candidate_id: "caution_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "tool_use"
+      statement: "Failure reflection for workflow 'tool_use': Check required inputs before tool execution."
+      avoid: "Tried a tool workflow before collecting required input."
+      next_action: "Ask for or infer required input first."
+      evidence:
+        - "failure_reflection_0001"
+        - "action_0002"
+      confidence: 0.6
+      risk: "medium"
+      review_status: "pending"
+      recommended_action: "review_then_consider"
+      source_reflection_id: "failure_reflection_0001"
+      provenance:
+        - type: "failure_reflection_caution"
+          reflection_id: "failure_reflection_0001"
   procedural_memory:
     - memory_id: "proc_mem_0001"
       timestamp: "ISO-8601 timestamp"
@@ -722,6 +755,8 @@ task_hub:
 Trace entries for real state mutations enter `task_hub.action_trace`. `dry_run` preview may write audit / trace, but it must not write episodes, dream jobs, adapter event index entries, or `task_hub.action_trace`.
 
 Dream may propose `procedural_candidates` from repeated successful action traces. These candidates are not adopted procedural memory until reviewed. P16 adds `review-procedural-candidate`; approval creates `task_hub.procedural_memory` with decision, snapshot, audit, trace, update log, and rollback metadata. It still does not execute workflow policy.
+
+P17 adds explicit failure reflection. `record-failure-reflection` records a failed or blocked workflow lesson in `task_hub.failure_reflections` and creates a pending `task_hub.cautionary_procedural_candidates` entry. Cautionary candidates are warning proposals, not executable workflow policy. They must remain pending until a later review path exists, and they must not mutate Identity Core.
 
 ## 14. Identity Update Gate
 
@@ -1002,11 +1037,15 @@ state_transfer_package:
     active_tasks: []
     blocked_tasks: []
     recent_actions: []
+    failure_reflections: []
     procedural_candidates: []
+    cautionary_procedural_candidates: []
     procedural_memory: []
   active_tasks: []
   action_trace: []
+  failure_reflections: []
   procedural_candidates: []
+  cautionary_procedural_candidates: []
   procedural_memory: []
   identity_update_gate:
     required_gate: "high"
@@ -1076,7 +1115,9 @@ A valid 01 state must satisfy:
 - every review/promotion rollback reference points to snapshot metadata,
 - every state event references an existing update_log entry,
 - `task_hub.action_trace` records real state mutations, not non-mutating dry-runs,
+- every failure reflection has workflow, summary, lesson, evidence, provenance, and status,
 - every procedural candidate has workflow, evidence, and pending review status,
+- every cautionary procedural candidate has a source reflection, avoid guidance, evidence, and pending review status,
 - every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,
 - P11 must not directly patch `identity_core`; approval can only append identity_memory,
 - every session can answer Identity, Context, and Intent anchors.

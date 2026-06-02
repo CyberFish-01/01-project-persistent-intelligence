@@ -944,7 +944,9 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "blocked_tasks",
         "recurring_duties",
         "action_trace",
+        "failure_reflections",
         "procedural_candidates",
+        "cautionary_procedural_candidates",
         "procedural_memory",
         "procedural_review_decisions",
     ):
@@ -1008,6 +1010,33 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                             "Procedural candidate last_review_decision_id must match latest decision.",
                         )
                     )
+    reflections = task_hub.get("failure_reflections", [])
+    if isinstance(reflections, list):
+        for index, reflection in enumerate(reflections):
+            path = f"task_hub.failure_reflections[{index}]"
+            if not isinstance(reflection, dict):
+                issues.append(ValidationIssue(path, "Failure reflection must be an object."))
+                continue
+            for key in ("reflection_id", "timestamp", "workflow", "summary", "lesson", "status", "evidence", "provenance"):
+                if key not in reflection:
+                    issues.append(ValidationIssue(path + f".{key}", "Failure reflection key is missing."))
+    cautions = task_hub.get("cautionary_procedural_candidates", [])
+    if isinstance(cautions, list):
+        for index, caution in enumerate(cautions):
+            path = f"task_hub.cautionary_procedural_candidates[{index}]"
+            if not isinstance(caution, dict):
+                issues.append(ValidationIssue(path, "Cautionary procedural candidate must be an object."))
+                continue
+            for key in ("candidate_id", "workflow", "statement", "avoid", "evidence", "review_status", "source_reflection_id"):
+                if key not in caution:
+                    issues.append(ValidationIssue(path + f".{key}", "Cautionary procedural candidate key is missing."))
+            if caution.get("review_status") != "pending":
+                issues.append(
+                    ValidationIssue(
+                        path + ".review_status",
+                        "Cautionary procedural candidate must remain pending.",
+                    )
+                )
     procedural_memory = task_hub.get("procedural_memory", [])
     if isinstance(procedural_memory, list):
         for index, memory in enumerate(procedural_memory):
