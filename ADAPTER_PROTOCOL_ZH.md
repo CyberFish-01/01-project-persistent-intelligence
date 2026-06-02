@@ -4,6 +4,12 @@
 
 这是 01 Core 的通用接入协议。
 
+当前协议版本：
+
+```text
+0.2
+```
+
 我们先做通用版，再做 AstrBot 特化版。
 
 核心原则：
@@ -61,6 +67,8 @@ GET /v1/context
 POST /v1/interact
 ```
 
+旧版兼容请求：
+
 请求：
 
 ```json
@@ -69,6 +77,80 @@ POST /v1/interact
   "user_id": "平台内用户 ID",
   "channel": "平台或 adapter 名称",
   "session_id": "平台内会话 ID"
+}
+```
+
+### Adapter Ingest
+
+```text
+POST /v1/adapter/ingest
+```
+
+推荐从 v0.2 起使用这个入口。
+
+请求：
+
+```json
+{
+  "adapter_id": "astrbot_thin_adapter",
+  "dry_run": false,
+  "event": {
+    "event_id": "平台内事件 ID",
+    "event_type": "message",
+    "text": "用户或外部平台输入",
+    "user": {
+      "id": "平台内用户 ID"
+    },
+    "source": {
+      "adapter_id": "astrbot_thin_adapter",
+      "channel": "astrbot",
+      "session_id": "平台内会话 ID"
+    },
+    "salience_hint": 0.6,
+    "metadata": {
+      "platform": "astrbot",
+      "message_kind": "private"
+    }
+  }
+}
+```
+
+字段含义：
+
+- `adapter_id`：外部接入器身份，例如 `astrbot_thin_adapter`。
+- `event_id`：外部平台原始事件 ID，用于审计和去重的未来扩展。
+- `event_type`：当前主要是 `message`，后续可扩展为 `reaction`、`system_event`、`task_event`。
+- `text`：真正进入 episode 预览或记录的文本。
+- `source.channel`：外部平台或通道名。
+- `source.session_id`：外部会话 ID。
+- `salience_hint`：adapter 给出的显著性建议，范围 0 到 1。01 Core 会把它当建议，不会无条件采用。
+- `metadata`：平台原始信息的低风险摘要，不应该塞入密码、token 或完整隐私 payload。
+- `dry_run`：为 `true` 时只返回 episode 预览，不写入 state。
+
+响应会包含：
+
+```json
+{
+  "protocol_version": "0.2",
+  "agent_id": "01",
+  "status": "recorded",
+  "dry_run": false,
+  "episode_id": "episode_xxx",
+  "episode": {},
+  "state_transfer_package": {}
+}
+```
+
+dry-run 响应：
+
+```json
+{
+  "protocol_version": "0.2",
+  "agent_id": "01",
+  "status": "preview",
+  "dry_run": true,
+  "would_record_episode": {},
+  "state_transfer_package": {}
 }
 ```
 
@@ -111,6 +193,7 @@ python3 -m one_core.cli remote health
 python3 -m one_core.cli remote status
 python3 -m one_core.cli remote context
 python3 -m one_core.cli remote interact "继续推进 01 Core。"
+python3 -m one_core.cli remote interact "先预览，不写入。" --dry-run --salience-hint 0.8
 python3 -m one_core.cli remote dream --limit 50
 ```
 

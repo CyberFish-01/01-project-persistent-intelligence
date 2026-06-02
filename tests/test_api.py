@@ -44,6 +44,52 @@ class APITests(unittest.TestCase):
             self.assertEqual(status_code, 400)
             self.assertEqual(response["error"], "missing_message")
 
+    def test_adapter_ingest_dry_run_does_not_record_episode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            api = OneCoreAPI(StateStore(Path(tmp)))
+            status_code, preview = api.handle_post(
+                "/v1/adapter/ingest",
+                {
+                    "adapter_id": "local_test_adapter",
+                    "dry_run": True,
+                    "event": {
+                        "text": "这是一条 dry-run adapter 事件。",
+                        "user": {"id": "tester"},
+                        "source": {
+                            "channel": "local_test",
+                            "session_id": "session_1",
+                        },
+                        "event_type": "message",
+                        "salience_hint": 0.9,
+                    },
+                },
+            )
+            self.assertEqual(status_code, 200)
+            self.assertEqual(preview["status"], "preview")
+            self.assertTrue(preview["dry_run"])
+            self.assertIn("would_record_episode", preview)
+            self.assertGreaterEqual(preview["would_record_episode"]["salience"], 0.25)
+
+            status_code, status = api.handle_get("/v1/status")
+            self.assertEqual(status_code, 200)
+            self.assertEqual(status["episodes"], 0)
+
+    def test_adapter_ingest_ignores_invalid_salience_hint(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            api = OneCoreAPI(StateStore(Path(tmp)))
+            status_code, preview = api.handle_post(
+                "/v1/adapter/ingest",
+                {
+                    "dry_run": True,
+                    "event": {
+                        "text": "普通消息",
+                        "salience_hint": "not-a-number",
+                    },
+                },
+            )
+            self.assertEqual(status_code, 200)
+            self.assertEqual(preview["would_record_episode"]["salience"], 0.25)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -128,6 +128,31 @@ anchors
 state_transfer_package
 ```
 
+## POST /v1/adapter/ingest
+
+通用 adapter protocol v0.2 的推荐入口。
+
+```bash
+curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "adapter_id": "local_generic_adapter",
+    "dry_run": true,
+    "event": {
+      "event_type": "message",
+      "text": "先预览这条外部事件，不写入 state。",
+      "user": {"id": "cyberfish"},
+      "source": {
+        "channel": "local",
+        "session_id": "local-dev"
+      },
+      "salience_hint": 0.8
+    }
+  }'
+```
+
+`dry_run: true` 时只返回 `would_record_episode`，不会写入 episode，也不会创建 dream job。
+
 ## POST /v1/dream
 
 运行一次 Dream consolidation。

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 import json
 import unittest
 from unittest.mock import patch
@@ -27,7 +26,19 @@ class ClientTest(unittest.TestCase):
         event = AdapterEvent("hello", user_id="u1", channel="test")
         self.assertEqual(
             event.to_payload(),
-            {"message": "hello", "user_id": "u1", "channel": "test"},
+            {
+                "adapter_id": "generic_adapter",
+                "event": {
+                    "text": "hello",
+                    "user": {"id": "u1"},
+                    "source": {
+                        "adapter_id": "generic_adapter",
+                        "channel": "test",
+                        "session_id": None,
+                    },
+                    "event_type": "message",
+                },
+            },
         )
 
     def test_client_posts_interaction_payload(self) -> None:
@@ -51,18 +62,42 @@ class ClientTest(unittest.TestCase):
             )
 
         self.assertEqual(result, {"reply": "ok"})
-        self.assertEqual(captured["url"], "http://localhost:9999/v1/interact")
+        self.assertEqual(captured["url"], "http://localhost:9999/v1/adapter/ingest")
         self.assertEqual(captured["method"], "POST")
         self.assertEqual(captured["timeout"], 3)
         self.assertEqual(
             captured["body"],
             {
-                "message": "hello",
-                "user_id": "u1",
-                "channel": "local",
-                "session_id": "s1",
+                "adapter_id": "generic_adapter",
+                "event": {
+                    "text": "hello",
+                    "user": {"id": "u1"},
+                    "source": {
+                        "adapter_id": "generic_adapter",
+                        "channel": "local",
+                        "session_id": "s1",
+                    },
+                    "event_type": "message",
+                    "session_id": "s1",
+                },
             },
         )
+
+    def test_client_can_dry_run_interaction(self) -> None:
+        captured = {}
+
+        def fake_urlopen(request, timeout):
+            captured["body"] = json.loads(request.data.decode("utf-8"))
+            return FakeResponse({"status": "preview"})
+
+        with patch("urllib.request.urlopen", fake_urlopen):
+            result = OneCoreClient("http://localhost:9999").interact(
+                AdapterEvent("hello"),
+                dry_run=True,
+            )
+
+        self.assertEqual(result, {"status": "preview"})
+        self.assertTrue(captured["body"]["dry_run"])
 
     def test_formatters_are_human_readable(self) -> None:
         status = format_status(

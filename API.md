@@ -128,6 +128,31 @@ anchors
 state_transfer_package
 ```
 
+## POST /v1/adapter/ingest
+
+Recommended entry point for generic adapter protocol v0.2.
+
+```bash
+curl -X POST http://127.0.0.1:8765/v1/adapter/ingest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "adapter_id": "local_generic_adapter",
+    "dry_run": true,
+    "event": {
+      "event_type": "message",
+      "text": "Preview this external event without writing state.",
+      "user": {"id": "cyberfish"},
+      "source": {
+        "channel": "local",
+        "session_id": "local-dev"
+      },
+      "salience_hint": 0.8
+    }
+  }'
+```
+
+When `dry_run` is true, the API returns `would_record_episode` without writing an episode or creating a dream job.
+
 ## POST /v1/dream
 
 Runs one Dream consolidation cycle.

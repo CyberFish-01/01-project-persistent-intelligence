@@ -4,6 +4,12 @@ Chinese mirror: [ADAPTER_PROTOCOL_ZH.md](./ADAPTER_PROTOCOL_ZH.md)
 
 This is the generic adapter protocol for 01 Core.
 
+Current protocol version:
+
+```text
+0.2
+```
+
 We build the generic version first, then specialize for AstrBot.
 
 Core rule:
@@ -61,6 +67,8 @@ GET /v1/context
 POST /v1/interact
 ```
 
+Legacy-compatible request:
+
 Request:
 
 ```json
@@ -69,6 +77,80 @@ Request:
   "user_id": "platform user ID",
   "channel": "platform or adapter name",
   "session_id": "platform session ID"
+}
+```
+
+### Adapter Ingest
+
+```text
+POST /v1/adapter/ingest
+```
+
+This is the recommended v0.2 entry point.
+
+Request:
+
+```json
+{
+  "adapter_id": "astrbot_thin_adapter",
+  "dry_run": false,
+  "event": {
+    "event_id": "platform event ID",
+    "event_type": "message",
+    "text": "user or platform input",
+    "user": {
+      "id": "platform user ID"
+    },
+    "source": {
+      "adapter_id": "astrbot_thin_adapter",
+      "channel": "astrbot",
+      "session_id": "platform session ID"
+    },
+    "salience_hint": 0.6,
+    "metadata": {
+      "platform": "astrbot",
+      "message_kind": "private"
+    }
+  }
+}
+```
+
+Fields:
+
+- `adapter_id`: external adapter identity, such as `astrbot_thin_adapter`.
+- `event_id`: original platform event ID, reserved for future audit and deduplication.
+- `event_type`: currently mostly `message`; future values may include `reaction`, `system_event`, and `task_event`.
+- `text`: the text that enters episode preview or recording.
+- `source.channel`: external platform or channel name.
+- `source.session_id`: external session ID.
+- `salience_hint`: adapter-provided salience suggestion from 0 to 1. 01 Core treats it as a suggestion, not an unconditional score.
+- `metadata`: low-risk platform metadata. Do not put passwords, tokens, or full private payloads here.
+- `dry_run`: when true, returns an episode preview without writing state.
+
+Recorded response:
+
+```json
+{
+  "protocol_version": "0.2",
+  "agent_id": "01",
+  "status": "recorded",
+  "dry_run": false,
+  "episode_id": "episode_xxx",
+  "episode": {},
+  "state_transfer_package": {}
+}
+```
+
+Dry-run response:
+
+```json
+{
+  "protocol_version": "0.2",
+  "agent_id": "01",
+  "status": "preview",
+  "dry_run": true,
+  "would_record_episode": {},
+  "state_transfer_package": {}
 }
 ```
 
@@ -111,6 +193,7 @@ python3 -m one_core.cli remote health
 python3 -m one_core.cli remote status
 python3 -m one_core.cli remote context
 python3 -m one_core.cli remote interact "Continue 01 Core."
+python3 -m one_core.cli remote interact "Preview only." --dry-run --salience-hint 0.8
 python3 -m one_core.cli remote dream --limit 50
 ```
 

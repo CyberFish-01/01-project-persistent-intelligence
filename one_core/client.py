@@ -17,16 +17,32 @@ class AdapterEvent:
     user_id: str = "adapter_user"
     channel: str = "generic_adapter"
     session_id: str | None = None
+    adapter_id: str = "generic_adapter"
+    event_id: str | None = None
+    event_type: str = "message"
+    salience_hint: float | None = None
+    metadata: dict[str, Any] | None = None
 
     def to_payload(self) -> dict[str, Any]:
-        payload: dict[str, Any] = {
-            "message": self.message,
-            "user_id": self.user_id,
-            "channel": self.channel,
+        event: dict[str, Any] = {
+            "text": self.message,
+            "user": {"id": self.user_id},
+            "source": {
+                "adapter_id": self.adapter_id,
+                "channel": self.channel,
+                "session_id": self.session_id,
+            },
+            "event_type": self.event_type,
         }
+        if self.event_id:
+            event["event_id"] = self.event_id
         if self.session_id:
-            payload["session_id"] = self.session_id
-        return payload
+            event["session_id"] = self.session_id
+        if self.salience_hint is not None:
+            event["salience_hint"] = self.salience_hint
+        if self.metadata:
+            event["metadata"] = self.metadata
+        return {"adapter_id": self.adapter_id, "event": event}
 
 
 class OneCoreClient:
@@ -43,8 +59,11 @@ class OneCoreClient:
     def context(self) -> dict[str, Any]:
         return self._request("GET", "/v1/context")
 
-    def interact(self, event: AdapterEvent) -> dict[str, Any]:
-        return self._request("POST", "/v1/interact", event.to_payload())
+    def interact(self, event: AdapterEvent, dry_run: bool = False) -> dict[str, Any]:
+        payload = event.to_payload()
+        if dry_run:
+            payload["dry_run"] = True
+        return self._request("POST", "/v1/adapter/ingest", payload)
 
     def dream(self, limit: int = 20) -> dict[str, Any]:
         return self._request("POST", "/v1/dream", {"limit": limit})

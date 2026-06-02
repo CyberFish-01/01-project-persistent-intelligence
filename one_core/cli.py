@@ -82,6 +82,11 @@ def main() -> None:
     remote_interact.add_argument("--user-id", default="local_adapter_user")
     remote_interact.add_argument("--channel", default="local_generic_adapter")
     remote_interact.add_argument("--session-id")
+    remote_interact.add_argument("--adapter-id", default="local_generic_adapter")
+    remote_interact.add_argument("--event-id")
+    remote_interact.add_argument("--event-type", default="message")
+    remote_interact.add_argument("--salience-hint", type=float)
+    remote_interact.add_argument("--dry-run", action="store_true")
     remote_dream = remote_subparsers.add_parser("dream", help="Call POST /v1/dream.")
     remote_dream.add_argument("--limit", type=int, default=20)
 
@@ -153,7 +158,12 @@ def main() -> None:
                         user_id=args.user_id,
                         channel=args.channel,
                         session_id=args.session_id,
-                    )
+                        adapter_id=args.adapter_id,
+                        event_id=args.event_id,
+                        event_type=args.event_type,
+                        salience_hint=args.salience_hint,
+                    ),
+                    dry_run=args.dry_run,
                 )
             )
         elif args.remote_command == "dream":

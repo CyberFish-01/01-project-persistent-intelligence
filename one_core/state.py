@@ -237,36 +237,48 @@ class StateStore:
         user_id: str = "local_user",
         channel: str = "cli",
         session_id: Optional[str] = None,
+        event_id: Optional[str] = None,
+        event_type: str = "message",
+        adapter_id: Optional[str] = None,
+        metadata: Optional[dict] = None,
+        salience_hint: Optional[float] = None,
     ) -> dict:
         state = self.load()
         now = utc_now()
         session_id = session_id or state["working_state"]["current_context"]["session_id"]
-        tags = infer_tags(message)
-        salience = score_salience(message, tags)
-        episode = {
-            "id": new_id("episode"),
-            "timestamp": now,
-            "session_id": session_id,
-            "channel": channel,
-            "participants": [user_id, "01"],
-            "summary": summarize_message(message),
-            "message": message,
-            "salience": salience,
-            "tags": tags,
-            "sensitivity": "normal",
-            "promoted_to": [],
-            "confidence": 0.75,
-        }
+        episode = build_episode_preview(
+            message=message,
+            user_id=user_id,
+            channel=channel,
+            session_id=session_id,
+            event_id=event_id,
+            event_type=event_type,
+            adapter_id=adapter_id,
+            metadata=metadata,
+            salience_hint=salience_hint,
+            timestamp=now,
+        )
+        tags = episode["tags"]
+        salience = episode["salience"]
+        confidence = episode["confidence"]
+        episode_id = episode["id"]
+        summary = episode["summary"]
+        sensitivity = episode["sensitivity"]
+        source = episode["source"]
+        adapter_metadata = episode["metadata"]
 
         self.append_jsonl(self.episodes_path, episode)
         state["memory_stores"]["episodic_memory"].append(
             {
-                "id": episode["id"],
+                "id": episode_id,
                 "timestamp": now,
-                "summary": episode["summary"],
+                "summary": summary,
                 "salience": salience,
                 "tags": tags,
-                "confidence": 0.75,
+                "confidence": confidence,
+                "channel": channel,
+                "source": source,
+                "sensitivity": sensitivity,
             }
         )
         update_working_state_from_message(state, message, user_id, now)
@@ -274,7 +286,7 @@ class StateStore:
             {
                 "id": new_id("dream_job"),
                 "trigger": "episode_recorded",
-                "input_episodes": [episode["id"]],
+                "input_episodes": [episode_id],
                 "requested_operations": [
                     "summarize",
                     "abstract",
@@ -288,19 +300,47 @@ class StateStore:
             {
                 "id": new_id("update"),
                 "timestamp": now,
-                "actor": "interaction_loop",
+                "actor": adapter_id or "interaction_loop",
                 "target_path": "memory_stores.episodic_memory",
                 "operation": "append",
                 "before": None,
-                "after": episode["id"],
-                "evidence": [episode["id"]],
+                "after": episode_id,
+                "evidence": [episode_id],
                 "gate": "low",
                 "confidence": 0.85,
+                "metadata": adapter_metadata,
                 "rollback": {"reversible": True},
             }
         )
         self.save(state)
         return episode
+
+    def preview_episode(
+        self,
+        message: str,
+        user_id: str = "local_user",
+        channel: str = "cli",
+        session_id: Optional[str] = None,
+        event_id: Optional[str] = None,
+        event_type: str = "message",
+        adapter_id: Optional[str] = None,
+        metadata: Optional[dict] = None,
+        salience_hint: Optional[float] = None,
+    ) -> dict:
+        state = self.load()
+        return build_episode_preview(
+            message=message,
+            user_id=user_id,
+            channel=channel,
+            session_id=session_id
+            or state["working_state"]["current_context"]["session_id"],
+            event_id=event_id,
+            event_type=event_type,
+            adapter_id=adapter_id,
+            metadata=metadata,
+            salience_hint=salience_hint,
+            timestamp=utc_now(),
+        )
 
     def build_context_package(self) -> dict:
         state = self.load()
@@ -352,6 +392,60 @@ def score_salience(message: str, tags: Iterable[str]) -> float:
     if re.search(r"重要|核心|必须|不要忘|记住|critical|important", message, re.I):
         score += 0.2
     return round(min(score, 1.0), 2)
+
+
+def apply_salience_hint(score: float, hint: Optional[float]) -> float:
+    if hint is None:
+        return score
+    try:
+        bounded = max(0.0, min(float(hint), 1.0))
+    except (TypeError, ValueError):
+        return score
+    blended = (score * 0.7) + (bounded * 0.3)
+    return round(max(score, blended), 2)
+
+
+def build_episode_preview(
+    message: str,
+    user_id: str,
+    channel: str,
+    session_id: str,
+    event_id: Optional[str] = None,
+    event_type: str = "message",
+    adapter_id: Optional[str] = None,
+    metadata: Optional[dict] = None,
+    salience_hint: Optional[float] = None,
+    timestamp: Optional[str] = None,
+) -> dict:
+    timestamp = timestamp or utc_now()
+    tags = infer_tags(message)
+    base_salience = score_salience(message, tags)
+    salience = apply_salience_hint(base_salience, salience_hint)
+    return {
+        "id": new_id("episode"),
+        "timestamp": timestamp,
+        "session_id": session_id,
+        "channel": channel,
+        "participants": [user_id, "01"],
+        "summary": summarize_message(message),
+        "message": message,
+        "salience": salience,
+        "base_salience": base_salience,
+        "salience_hint": salience_hint,
+        "tags": tags,
+        "sensitivity": "normal",
+        "promoted_to": [],
+        "confidence": 0.75,
+        "event_id": event_id,
+        "event_type": event_type or "message",
+        "source": {
+            "adapter_id": adapter_id or channel,
+            "channel": channel,
+            "event_id": event_id,
+            "event_type": event_type or "message",
+        },
+        "metadata": metadata or {},
+    }
 
 
 def summarize_message(message: str) -> str:
