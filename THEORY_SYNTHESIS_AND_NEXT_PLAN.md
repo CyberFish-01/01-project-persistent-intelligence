@@ -630,17 +630,48 @@ Remaining gaps:
 - activation trace history has no retention / compaction review workflow yet;
 - no real baseline comparison for context policy benefit yet.
 
+### P16 Procedural Memory Review
+
+Goal: let repeated successful workflows move from Dream candidates into reviewable, reversible durable procedural memory.
+
+Status: implemented as a first local v0.4 pass.
+
+Executable items:
+
+1. `task_hub.procedural_memory` store - done;
+2. `task_hub.procedural_review_decisions` - done;
+3. `review-procedural-candidate` CLI and StateStore method - done;
+4. approve/reject/archive/quarantine review actions - done;
+5. snapshot, audit, trace, update_log, rollback metadata - done;
+6. scenario evaluation for procedural memory review - done.
+
+Implemented result:
+
+- Dream still only proposes pending `procedural_candidates`;
+- approve creates `task_hub.procedural_memory` and marks the candidate approved;
+- review decisions enter candidate history, task hub decision store, snapshot, audit, trace, event, and update log;
+- context packages expose `procedural_memory` so later sessions can recover action structure;
+- procedural review does not mutate Identity Core and does not execute workflows automatically.
+
+Remaining gaps:
+
+- no failure reflection schema yet;
+- no workflow policy executor yet;
+- no procedural memory lifecycle/retention command yet;
+- procedural memory is not yet deeply linked to tool policy / safety policy;
+- no cautionary procedural memory from failed actions yet.
+
 ## 6. Current Recommendation
 
-Do P16 next:
+Do P17 next:
 
 ```text
-P16 Procedural Memory Review
+P17 Failure Reflection
 ```
 
 Reason:
 
-- P10 lets Dream propose `procedural_candidates` from repeated successful actions, but those candidates cannot yet be reviewed/promoted;
-- P15 lets context see task/action/procedural signals, so the next step should make action structure reviewable and reversible as durable memory;
-- P16 should add a procedural memory store, `review-procedural-candidate` CLI, approval/audit/snapshot/rollback metadata;
-- this lets 01 preserve not only facts and identity, but also stable patterns of how to work.
+- P16 lets successful action structure enter procedural memory, but failures and blockers are still shallow action-trace states;
+- ReAct / Reflexion suggest that long-term action continuity should preserve improvement signals after failure, not just successful recipes;
+- P17 should add failure reflection schema, failed/blocked outcome review, and cautionary procedural candidates;
+- this lets 01 resume not only what to do next, but also why it got stuck and what to avoid next time.

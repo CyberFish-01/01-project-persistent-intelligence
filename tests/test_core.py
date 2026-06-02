@@ -435,6 +435,45 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(procedural[0]["review_status"], "pending")
             self.assertGreaterEqual(len(procedural[0]["evidence"]), 2)
 
+    def test_procedural_candidate_review_promotes_reviewed_memory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            store.record_episode("第一次记录行动结构。")
+            store.record_episode("第二次记录行动结构。")
+            DreamEngine(store).run()
+            candidate = store.load()["task_hub"]["procedural_candidates"][0]
+
+            result = store.review_procedural_candidate(
+                candidate["candidate_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Repeated record_episode workflow is safe to remember.",
+            )
+            state = store.load()
+            reviewed = state["task_hub"]["procedural_candidates"][0]
+            procedural_memory = state["task_hub"]["procedural_memory"][0]
+
+            self.assertEqual(result["status"], "approved")
+            self.assertTrue(result["procedural_memory_id"].startswith("proc_mem_"))
+            self.assertEqual(reviewed["review_status"], "approved")
+            self.assertEqual(reviewed["promoted_to"], result["procedural_memory_id"])
+            self.assertEqual(
+                procedural_memory["review_decision_id"],
+                result["procedural_decision_id"],
+            )
+            self.assertEqual(procedural_memory["workflow"], "record_episode")
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertTrue(state["task_hub"]["procedural_review_decisions"])
+            self.assertTrue(result["snapshot_id"].startswith("snapshot_"))
+            self.assertEqual(store.list_traces()[-1]["workflow"], "procedural_memory_review")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            package = store.build_context_package()
+            self.assertIn(
+                result["procedural_memory_id"],
+                {item["memory_id"] for item in package["procedural_memory"]},
+            )
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

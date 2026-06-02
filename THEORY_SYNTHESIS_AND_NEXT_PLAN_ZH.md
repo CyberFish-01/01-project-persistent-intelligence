@@ -630,17 +630,48 @@ git diff --check
 - activation trace 还没有 retention / compaction 审查流程；
 - 还没有真实 baseline 对比验证 context policy 的收益。
 
+### P16 Procedural Memory Review
+
+目标：让 repeated successful workflow 从 Dream candidate 进入可审查、可撤销的 durable procedural memory。
+
+状态：已实现第一版本地 v0.4。
+
+可执行项：
+
+1. `task_hub.procedural_memory` store - 已完成；
+2. `task_hub.procedural_review_decisions` - 已完成；
+3. `review-procedural-candidate` CLI 和 StateStore method - 已完成；
+4. approve/reject/archive/quarantine review actions - 已完成；
+5. snapshot、audit、trace、update_log、rollback metadata - 已完成；
+6. procedural memory review 的 scenario evaluation - 已完成。
+
+已实现结果：
+
+- Dream 仍然只提出 pending `procedural_candidates`；
+- approve 会创建 `task_hub.procedural_memory`，并把 candidate 标记为 approved；
+- review decision 会进入 candidate history、task hub decision store、snapshot、audit、trace、event 和 update log；
+- context package 会暴露 `procedural_memory`，方便未来 session 恢复行动结构；
+- procedural review 不修改 Identity Core，也不会自动执行 workflow。
+
+剩余缺口：
+
+- 还没有 failure reflection schema；
+- 还没有 workflow policy executor；
+- 还没有 procedural memory lifecycle/retention command；
+- procedural memory 还没有和具体 tool policy / safety policy 深度联动；
+- 还没有从失败行动中生成 cautionary procedural memory。
+
 ## 6. 当前建议
 
 下一步先做：
 
 ```text
-P16 Procedural Memory Review
+P17 Failure Reflection
 ```
 
 理由：
 
-- P10 已经让 Dream 能从重复成功行动提出 `procedural_candidates`，但这些候选还不能被正式 review/promote；
-- P15 让 context 能看到 task/action/procedural signals，下一步应让行动结构成为可审查、可撤销的长期记忆；
-- P16 应增加 procedural memory store、`review-procedural-candidate` CLI、approval/audit/snapshot/rollback metadata；
-- 这会让 01 不只记得事实和身份，也能延续“如何做事”的稳定模式。
+- P16 已经让成功行动结构可以进入 procedural memory，但失败/阻塞仍只是 action trace 的浅层状态；
+- ReAct / Reflexion 思路提醒我们，长期行动连续性不仅要保存成功 recipe，也要保存失败后的改进线索；
+- P17 应增加 failure reflection schema、failed/blocked outcome review、cautionary procedural candidates；
+- 这会让 01 在中断后不只知道下一步做什么，也知道上次为什么卡住、下次怎么避开。

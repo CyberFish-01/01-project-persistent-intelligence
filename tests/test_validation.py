@@ -186,7 +186,21 @@ class StateValidationTests(unittest.TestCase):
                     "candidate_id": "proc_bad",
                     "workflow": "record_episode",
                     "evidence": [],
-                    "review_status": "pending",
+                    "review_status": "approved",
+                    "last_review_decision_id": "procedural_decision_missing",
+                }
+            )
+            state["task_hub"]["procedural_memory"].append(
+                {
+                    "memory_id": "proc_mem_bad",
+                    "workflow": "record_episode",
+                    "status": "draft",
+                }
+            )
+            state["task_hub"]["procedural_review_decisions"].append(
+                {
+                    "decision_id": "procedural_decision_bad",
+                    "candidate_id": "proc_bad",
                 }
             )
 
@@ -196,6 +210,13 @@ class StateValidationTests(unittest.TestCase):
             self.assertIn("task_hub.action_trace[0].trace_id", paths)
             self.assertIn("task_hub.action_trace[0].timestamp", paths)
             self.assertIn("task_hub.procedural_candidates[0].evidence", paths)
+            self.assertIn("task_hub.procedural_candidates[0].review_history", paths)
+            self.assertIn("task_hub.procedural_memory[0].steps", paths)
+            self.assertIn("task_hub.procedural_memory[0].status", paths)
+            self.assertIn(
+                "task_hub.procedural_review_decisions[0].workflow",
+                paths,
+            )
 
     def test_identity_update_gate_requires_proposal_gate_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:

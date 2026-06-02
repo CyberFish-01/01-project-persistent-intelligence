@@ -155,6 +155,19 @@ def main() -> None:
     claim_review_parser.add_argument("--reviewer", default="manual_review")
     claim_review_parser.add_argument("--decision-note", default="")
 
+    procedural_review_parser = subparsers.add_parser(
+        "review-procedural-candidate",
+        help="Review a procedural memory candidate.",
+    )
+    procedural_review_parser.add_argument("candidate_id")
+    procedural_review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["approve", "reject", "archive", "quarantine"],
+    )
+    procedural_review_parser.add_argument("--reviewer", default="manual_review")
+    procedural_review_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -310,6 +323,15 @@ def main() -> None:
         print_json(
             store.review_claim(
                 claim_id=args.claim_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "review-procedural-candidate":
+        print_json(
+            store.review_procedural_candidate(
+                candidate_id=args.candidate_id,
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,

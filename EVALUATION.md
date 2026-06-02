@@ -310,6 +310,7 @@ It uses temporary state and currently runs:
 - `claim_graph_conflict_provenance`: verifies that false-memory conflicts create evidence-backed claim nodes without mutating semantic memory or Identity Core.
 - `claim_graph_review_patch_preview`: verifies support/contradiction links, `review-claim`, minimal-change patch preview, and no semantic or Identity Core mutation.
 - `task_hub_action_resume`: verifies that Task Hub preserves active tasks, next actions, and action history after interruption, and proposes procedural candidates from repeated successful actions.
+- `procedural_memory_review`: verifies `review-procedural-candidate`, durable procedural memory creation, review decision metadata, snapshot, replay, and no Identity Core mutation.
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
 - `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, and rollback preview does not mutate state.
 - `dream_artifact_package`: verifies that Dream runs produce a complete artifact package with input manifest, provenance, review queue, patch diff, decision log, rollback metadata, and no direct Identity Core or active semantic memory write.
@@ -343,6 +344,10 @@ Current metrics summary includes:
 - claim link count,
 - claim review decision count,
 - claim patch mutation count,
+- procedural review score,
+- procedural memory count,
+- procedural review decision count,
+- procedural identity mutation count,
 - context builder score,
 - context activation trace count,
 - context source attribution count,

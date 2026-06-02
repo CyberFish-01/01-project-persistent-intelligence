@@ -59,6 +59,7 @@ def run_scenario_evaluation() -> dict:
                 root / "claim_graph_review_patch_preview"
             ),
             check_task_hub_action_resume(root / "task_hub_action_resume"),
+            check_procedural_memory_review(root / "procedural_memory_review"),
             check_identity_update_gate_review(root / "identity_update_gate_review"),
             check_event_log_replay_rollback(root / "event_log_replay_rollback"),
             check_dream_artifact_package(root / "dream_artifact_package"),
@@ -479,6 +480,78 @@ def check_task_hub_action_resume(state_dir: Path) -> EvaluationCheck:
                 "active_task_count": len(package.get("active_tasks", [])),
                 "action_trace_count": len(package.get("action_trace", [])),
                 "procedural_candidate_count": len(procedural),
+            },
+        },
+    )
+
+
+def check_procedural_memory_review(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    first = store.record_episode(
+        "P16 should review procedural candidates.",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="procedural-review",
+    )
+    second = store.record_episode(
+        "P16 should promote reviewed workflow memory without executing it.",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="procedural-review",
+    )
+    DreamEngine(store).run()
+    state = store.load()
+    candidate = next(
+        (
+            item
+            for item in state.get("task_hub", {}).get("procedural_candidates", [])
+            if item.get("workflow") == "record_episode"
+        ),
+        {},
+    )
+    result = store.review_procedural_candidate(
+        candidate.get("candidate_id", ""),
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Repeated record_episode workflow is approved as procedural memory.",
+    )
+    state = store.load()
+    package = store.build_context_package()
+    procedural_memory = state.get("task_hub", {}).get("procedural_memory", [])
+    decisions = state.get("task_hub", {}).get("procedural_review_decisions", [])
+    checks = {
+        "candidate_found": bool(candidate),
+        "review_approved": result.get("status") == "approved",
+        "procedural_memory_created": bool(procedural_memory)
+        and procedural_memory[-1].get("memory_id") == result.get("procedural_memory_id"),
+        "decision_recorded": bool(decisions)
+        and decisions[-1].get("decision_id") == result.get("procedural_decision_id"),
+        "snapshot_recorded": bool(result.get("snapshot_id")),
+        "context_exposes_procedural_memory": result.get("procedural_memory_id")
+        in {
+            item.get("memory_id")
+            for item in package.get("procedural_memory", [])
+            if isinstance(item, dict)
+        },
+        "identity_not_mutated": state["identity_core"] == before_identity,
+        "event_replay_passed": store.replay_events()["status"] == "passed",
+    }
+    return EvaluationCheck(
+        name="procedural_memory_review",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Procedural Memory Review",
+            "source_episode_ids": [first["id"], second["id"]],
+            "candidate_id": candidate.get("candidate_id"),
+            "checks": checks,
+            "metrics": {
+                "procedural_review_score": ratio(checks.values()),
+                "procedural_memory_count": len(procedural_memory),
+                "procedural_review_decision_count": len(decisions),
+                "procedural_identity_mutation_count": 0
+                if state["identity_core"] == before_identity
+                else 1,
             },
         },
     )
@@ -1075,6 +1148,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "context_builder_score" in item
     ]
+    procedural_review_scores = [
+        item["procedural_review_score"]
+        for item in metrics
+        if "procedural_review_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -1118,6 +1196,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         )
         if context_builder_scores
         else None,
+        "procedural_review_score": round(
+            sum(procedural_review_scores) / len(procedural_review_scores),
+            2,
+        )
+        if procedural_review_scores
+        else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
         ),
@@ -1131,6 +1215,15 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "procedural_candidate_count": sum(
             int(item.get("procedural_candidate_count", 0)) for item in metrics
+        ),
+        "procedural_memory_count": sum(
+            int(item.get("procedural_memory_count", 0)) for item in metrics
+        ),
+        "procedural_review_decision_count": sum(
+            int(item.get("procedural_review_decision_count", 0)) for item in metrics
+        ),
+        "procedural_identity_mutation_count": sum(
+            int(item.get("procedural_identity_mutation_count", 0)) for item in metrics
         ),
         "approved_identity_updates": sum(
             int(item.get("approved_identity_updates", 0)) for item in metrics

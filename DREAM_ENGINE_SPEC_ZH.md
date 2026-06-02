@@ -358,6 +358,8 @@ procedural_candidate:
   recommended_action: "review_then_promote"
 ```
 
+P16 增加显式 procedural review。`review-procedural-candidate` 可以 approve、reject、archive 或 quarantine 一个候选。批准后会创建带 evidence、steps、review decision、snapshot、audit、trace、update log 和 rollback metadata 的 `task_hub.procedural_memory`。这仍然不会自动执行 workflow。
+
 Dream artifact 也包含确定性的 rubric：
 
 ```yaml

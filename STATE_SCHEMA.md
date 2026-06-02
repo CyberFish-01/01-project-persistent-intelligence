@@ -689,13 +689,39 @@ task_hub:
       provenance:
         - type: "dream_procedural_candidate"
           dream_id: "dream_0001"
+  procedural_memory:
+    - memory_id: "proc_mem_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "record_episode"
+      statement: "Repeated successful workflow may be reusable procedural memory after review."
+      steps: []
+      evidence:
+        - "action_0001"
+        - "action_0002"
+      confidence: 0.65
+      risk: "low"
+      status: "active"
+      source_candidate_id: "proc_0001"
+      review_decision_id: "procedural_decision_0001"
+      lifecycle:
+        status: "active"
+        review_status: "approved"
+  procedural_review_decisions:
+    - decision_id: "procedural_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      candidate_id: "proc_0001"
+      workflow: "record_episode"
+      reviewer: "manual_review"
+      action: "approve"
+      result: "approved"
+      snapshot_id: "snapshot_0001"
 ```
 
 `working_state.current_plan` is retained as a legacy/compatibility field. P10 migrates it into `task_hub.active_tasks`, `completed_tasks`, or `blocked_tasks` without deleting the legacy field.
 
 Trace entries for real state mutations enter `task_hub.action_trace`. `dry_run` preview may write audit / trace, but it must not write episodes, dream jobs, adapter event index entries, or `task_hub.action_trace`.
 
-Dream may propose `procedural_candidates` from repeated successful action traces. These candidates are not adopted procedural memory until reviewed.
+Dream may propose `procedural_candidates` from repeated successful action traces. These candidates are not adopted procedural memory until reviewed. P16 adds `review-procedural-candidate`; approval creates `task_hub.procedural_memory` with decision, snapshot, audit, trace, update log, and rollback metadata. It still does not execute workflow policy.
 
 ## 14. Identity Update Gate
 
@@ -977,9 +1003,11 @@ state_transfer_package:
     blocked_tasks: []
     recent_actions: []
     procedural_candidates: []
+    procedural_memory: []
   active_tasks: []
   action_trace: []
   procedural_candidates: []
+  procedural_memory: []
   identity_update_gate:
     required_gate: "high"
     pending_proposals: []

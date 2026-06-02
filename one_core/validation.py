@@ -945,6 +945,8 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "recurring_duties",
         "action_trace",
         "procedural_candidates",
+        "procedural_memory",
+        "procedural_review_decisions",
     ):
         if not isinstance(task_hub.get(key), list):
             issues.append(ValidationIssue(f"task_hub.{key}", "Task hub key must be a list."))
@@ -990,6 +992,59 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                         "Procedural candidate requires non-empty evidence.",
                     )
                 )
+            if candidate.get("review_status") in {"approved", "rejected", "archived", "quarantined"}:
+                history = candidate.get("review_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(
+                        ValidationIssue(
+                            path + ".review_history",
+                            "Reviewed procedural candidate requires review history.",
+                        )
+                    )
+                elif history[-1].get("decision_id") != candidate.get("last_review_decision_id"):
+                    issues.append(
+                        ValidationIssue(
+                            path + ".last_review_decision_id",
+                            "Procedural candidate last_review_decision_id must match latest decision.",
+                        )
+                    )
+    procedural_memory = task_hub.get("procedural_memory", [])
+    if isinstance(procedural_memory, list):
+        for index, memory in enumerate(procedural_memory):
+            path = f"task_hub.procedural_memory[{index}]"
+            if not isinstance(memory, dict):
+                issues.append(ValidationIssue(path, "Procedural memory must be an object."))
+                continue
+            for key in (
+                "memory_id",
+                "workflow",
+                "steps",
+                "evidence",
+                "status",
+                "review_decision_id",
+                "provenance",
+                "lifecycle",
+                "update_history",
+            ):
+                if key not in memory:
+                    issues.append(ValidationIssue(path + f".{key}", "Procedural memory key is missing."))
+            if memory.get("status") != "active":
+                issues.append(
+                    ValidationIssue(
+                        path + ".status",
+                        "Procedural memory must be active after approval.",
+                    )
+                )
+    decisions = task_hub.get("procedural_review_decisions", [])
+    if isinstance(decisions, list):
+        for index, decision in enumerate(decisions):
+            path = f"task_hub.procedural_review_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Procedural review decision must be an object."))
+                continue
+            for key in ("decision_id", "timestamp", "candidate_id", "workflow", "reviewer", "action", "result", "snapshot_id"):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Procedural review decision key is missing."))
     return issues
 
 

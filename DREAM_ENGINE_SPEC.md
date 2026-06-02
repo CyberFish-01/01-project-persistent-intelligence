@@ -360,6 +360,8 @@ procedural_candidate:
   recommended_action: "review_then_promote"
 ```
 
+P16 adds explicit procedural review. `review-procedural-candidate` can approve, reject, archive, or quarantine a candidate. Approval creates `task_hub.procedural_memory` with evidence, steps, review decision, snapshot, audit, trace, update log, and rollback metadata. This still does not execute workflows automatically.
+
 Dream artifacts also include a deterministic rubric:
 
 ```yaml

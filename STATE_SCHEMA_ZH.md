@@ -691,13 +691,39 @@ task_hub:
       provenance:
         - type: "dream_procedural_candidate"
           dream_id: "dream_0001"
+  procedural_memory:
+    - memory_id: "proc_mem_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "record_episode"
+      statement: "Repeated successful workflow may be reusable procedural memory after review."
+      steps: []
+      evidence:
+        - "action_0001"
+        - "action_0002"
+      confidence: 0.65
+      risk: "low"
+      status: "active"
+      source_candidate_id: "proc_0001"
+      review_decision_id: "procedural_decision_0001"
+      lifecycle:
+        status: "active"
+        review_status: "approved"
+  procedural_review_decisions:
+    - decision_id: "procedural_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      candidate_id: "proc_0001"
+      workflow: "record_episode"
+      reviewer: "manual_review"
+      action: "approve"
+      result: "approved"
+      snapshot_id: "snapshot_0001"
 ```
 
 `working_state.current_plan` 仍然保留为 legacy/compatibility 字段。P10 会把它迁移为 `task_hub.active_tasks`、`completed_tasks` 或 `blocked_tasks`，但不删除旧字段。
 
 真实状态变更的 trace 会进入 `task_hub.action_trace`。`dry_run` preview 可以写 audit / trace，但不能写 episode、dream job、adapter event index，也不能写入 `task_hub.action_trace`。
 
-Dream 可以从重复成功的 action trace 里提出 `procedural_candidates`。这些候选不等于已采用的 procedural memory，必须等待 review。
+Dream 可以从重复成功的 action trace 里提出 `procedural_candidates`。这些候选不等于已采用的 procedural memory，必须等待 review。P16 增加 `review-procedural-candidate`；批准后会创建 `task_hub.procedural_memory`，并连接 decision、snapshot、audit、trace、update log 和 rollback metadata。它仍然不会执行 workflow policy。
 
 ## 14. Identity Update Gate
 
@@ -979,9 +1005,11 @@ state_transfer_package:
     blocked_tasks: []
     recent_actions: []
     procedural_candidates: []
+    procedural_memory: []
   active_tasks: []
   action_trace: []
   procedural_candidates: []
+  procedural_memory: []
   identity_update_gate:
     required_gate: "high"
     pending_proposals: []

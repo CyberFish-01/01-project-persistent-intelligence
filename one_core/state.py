@@ -51,6 +51,7 @@ LIFECYCLE_ACTION_STORES = {
 }
 IDENTITY_REVIEW_ACTIONS = {"approve", "reject", "quarantine"}
 CLAIM_REVIEW_ACTIONS = {"resolve", "reject", "quarantine", "keep_open"}
+PROCEDURAL_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 
 
 def utc_now() -> str:
@@ -188,6 +189,8 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "recurring_duties": [],
         "action_trace": [],
         "procedural_candidates": [],
+        "procedural_memory": [],
+        "procedural_review_decisions": [],
     }
 
 
@@ -502,6 +505,8 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "recurring_duties",
         "action_trace",
         "procedural_candidates",
+        "procedural_memory",
+        "procedural_review_decisions",
     ):
         if not isinstance(task_hub.get(key), list):
             task_hub[key] = []
@@ -2552,6 +2557,177 @@ class StateStore:
             "patch_preview": patch_preview,
         }
 
+    def review_procedural_candidate(
+        self,
+        candidate_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in PROCEDURAL_REVIEW_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_procedural_review_action",
+                "action": action,
+            }
+        state = self.load()
+        task_hub = state.setdefault("task_hub", default_task_hub(utc_now(), state.get("working_state", {})))
+        candidate = next(
+            (
+                item
+                for item in task_hub.setdefault("procedural_candidates", [])
+                if isinstance(item, dict) and item.get("candidate_id") == candidate_id
+            ),
+            None,
+        )
+        if candidate is None:
+            return {
+                "status": "not_found",
+                "error": "procedural_candidate_not_found",
+                "candidate_id": candidate_id,
+            }
+
+        now = utc_now()
+        review_status = {
+            "approve": "approved",
+            "reject": "rejected",
+            "archive": "archived",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        before_status = candidate.get("review_status", "pending")
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_procedural_candidate",
+            target_path="task_hub.procedural_candidates",
+            evidence=[candidate_id] + list(candidate.get("evidence", [])),
+            metadata={
+                "candidate_id": candidate_id,
+                "review_action": normalized_action,
+                "workflow": candidate.get("workflow"),
+            },
+        )
+        decision = build_procedural_review_decision(
+            candidate=candidate,
+            action=normalized_action,
+            result=review_status,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+        )
+
+        procedural_memory_id = None
+        target_path = "task_hub.procedural_candidates"
+        after: object = review_status
+        candidate["review_status"] = review_status
+        candidate["reviewed_at"] = now
+        candidate["reviewer"] = reviewer
+        candidate["last_review_decision_id"] = decision["decision_id"]
+        candidate.setdefault("review_history", []).append(decision)
+        if normalized_action == "approve":
+            procedural_memory = build_procedural_memory(candidate, decision, now)
+            task_hub.setdefault("procedural_memory", []).append(procedural_memory)
+            procedural_memory_id = procedural_memory["memory_id"]
+            candidate["promoted_to"] = procedural_memory_id
+            target_path = "task_hub.procedural_memory"
+            after = procedural_memory_id
+        elif normalized_action == "quarantine":
+            candidate["quarantine_reason"] = decision_note or "procedural_review_quarantine"
+        elif normalized_action == "archive":
+            candidate["archive_reason"] = decision_note or "procedural_review_archive"
+        task_hub.setdefault("procedural_review_decisions", []).append(decision)
+
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": target_path,
+                "operation": f"{normalized_action}_procedural_candidate",
+                "before": before_status,
+                "after": after,
+                "evidence": [candidate_id] + list(candidate.get("evidence", [])),
+                "gate": "medium",
+                "confidence": candidate.get("confidence", 0.5),
+                "procedural_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_procedural_candidate",
+            target=target_path,
+            outcome=review_status,
+            evidence=[candidate_id] + list(candidate.get("evidence", [])),
+            metadata={
+                "procedural_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "workflow": candidate.get("workflow"),
+                "decision_note": decision_note,
+                "procedural_memory_id": procedural_memory_id,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="procedural_memory_review",
+            nodes=[
+                {
+                    "id": "candidate",
+                    "type": "Memory",
+                    "candidate_id": candidate_id,
+                    "workflow": candidate.get("workflow"),
+                },
+                {
+                    "id": "review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+                {
+                    "id": "procedural_memory",
+                    "type": "Memory",
+                    "memory_id": procedural_memory_id,
+                    "created": procedural_memory_id is not None,
+                },
+            ],
+            edges=[
+                {"from": "candidate", "to": "review", "type": "feedback"},
+                {"from": "review", "to": "procedural_memory", "type": "memory_write"},
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": target_path,
+                    "candidate_id": candidate_id,
+                    "procedural_memory_id": procedural_memory_id,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_procedural_candidate",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "procedural_decision": decision,
+                }
+            ],
+            summary=f"Reviewed procedural candidate {candidate_id} with action {normalized_action}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": review_status,
+            "candidate_id": candidate_id,
+            "procedural_memory_id": procedural_memory_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "procedural_decision_id": decision["decision_id"],
+        }
+
     def apply_memory_lifecycle_action(
         self,
         store_name: str,
@@ -3243,10 +3419,12 @@ class StateStore:
                 "blocked_tasks": task_hub.get("blocked_tasks", []),
                 "recent_actions": action_trace,
                 "procedural_candidates": task_hub.get("procedural_candidates", []),
+                "procedural_memory": task_hub.get("procedural_memory", []),
             },
             "active_tasks": active_tasks,
             "action_trace": action_trace,
             "procedural_candidates": task_hub.get("procedural_candidates", []),
+            "procedural_memory": task_hub.get("procedural_memory", []),
             "identity_update_gate": {
                 "required_gate": identity_gate.get("required_gate", "high"),
                 "pending_proposals": [
@@ -4058,6 +4236,78 @@ def build_claim_patch_preview(
         "reason": decision_note
         or (conflict or {}).get("proposed_resolution", "")
         or "Review claim without direct memory mutation.",
+    }
+
+
+def build_procedural_review_decision(
+    candidate: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: str,
+    timestamp: str,
+) -> dict:
+    return {
+        "decision_id": new_id("procedural_decision"),
+        "timestamp": timestamp,
+        "candidate_id": candidate.get("candidate_id"),
+        "workflow": candidate.get("workflow"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "snapshot_id": snapshot_id,
+        "evidence": candidate.get("evidence", []),
+        "risk": candidate.get("risk", "medium"),
+        "confidence": candidate.get("confidence", 0.5),
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
+    }
+
+
+def build_procedural_memory(
+    candidate: dict,
+    decision: dict,
+    timestamp: str,
+) -> dict:
+    return {
+        "memory_id": new_id("proc_mem"),
+        "timestamp": timestamp,
+        "workflow": candidate.get("workflow"),
+        "statement": candidate.get("statement", ""),
+        "steps": candidate.get("steps", []),
+        "evidence": candidate.get("evidence", []),
+        "confidence": candidate.get("confidence", 0.5),
+        "risk": candidate.get("risk", "medium"),
+        "status": "active",
+        "source_candidate_id": candidate.get("candidate_id"),
+        "review_decision_id": decision["decision_id"],
+        "lifecycle": {
+            "status": "active",
+            "created_at": timestamp,
+            "last_reviewed_at": timestamp,
+            "review_status": "approved",
+            "review_decision_id": decision["decision_id"],
+        },
+        "provenance": [
+            {
+                "type": "procedural_candidate_review",
+                "candidate_id": candidate.get("candidate_id"),
+                "source_dream_id": candidate.get("source_dream_id"),
+            }
+        ],
+        "update_history": [
+            {
+                "timestamp": timestamp,
+                "actor": decision.get("reviewer"),
+                "operation": "approve_procedural_candidate",
+                "evidence": candidate.get("evidence", []),
+                "procedural_decision_id": decision["decision_id"],
+            }
+        ],
     }
 
 

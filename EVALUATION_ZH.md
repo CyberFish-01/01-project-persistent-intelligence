@@ -312,6 +312,7 @@ python3 -m one_core.cli evaluate-scenarios
 - `claim_graph_conflict_provenance`：检查 false-memory conflict 会创建带 evidence 的 claim node，并且不会修改 semantic memory 或 Identity Core。
 - `claim_graph_review_patch_preview`：检查 support/contradiction links、`review-claim`、minimal-change patch preview，以及不会修改 semantic memory 或 Identity Core。
 - `task_hub_action_resume`：检查 Task Hub 能在中断后保留 active task、next action、action history，并从重复成功行动中提出 procedural candidate。
+- `procedural_memory_review`：检查 `review-procedural-candidate`、durable procedural memory 创建、review decision metadata、snapshot、replay，以及不会修改 Identity Core。
 - `identity_update_gate_review`：检查 identity update 必须通过 high gate；单证据会被 quarantine，三证据可批准为 identity_memory，但不会改写 Identity Core。
 - `event_log_replay_rollback`：检查真实 state transition 会进入 append-only event log，dry-run preview 不写入，replay check 通过，rollback preview 不修改 state。
 - `dream_artifact_package`：检查 Dream run 会生成完整 artifact package，包含 input manifest、provenance、review queue、patch diff、decision log、rollback metadata，并且不直接写 Identity Core 或 active semantic memory。
@@ -345,6 +346,10 @@ v0.8 runner 会报告 stateless、retrieval-only、summary-only baseline metadat
 - claim link count；
 - claim review decision count；
 - claim patch mutation count；
+- procedural review score；
+- procedural memory count；
+- procedural review decision count；
+- procedural identity mutation count；
 - context builder score；
 - context activation trace count；
 - context source attribution count；
