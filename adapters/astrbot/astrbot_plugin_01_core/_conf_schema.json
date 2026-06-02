@@ -1,0 +1,22 @@
+{
+  "api_base_url": {
+    "description": "01 Core API 地址。默认只连接本机 127.0.0.1，建议让 01 Core 和 AstrBot 部署在同一台机器上。",
+    "type": "string",
+    "default": "http://127.0.0.1:8765"
+  },
+  "timeout_seconds": {
+    "description": "调用 01 Core API 的超时时间，单位秒。",
+    "type": "int",
+    "default": 10
+  },
+  "default_user_id": {
+    "description": "无法从 AstrBot 事件中读取用户 ID 时使用的默认用户 ID。",
+    "type": "string",
+    "default": "astrbot_user"
+  },
+  "channel_label": {
+    "description": "写入 01 Core episode 时使用的 channel 标签。",
+    "type": "string",
+    "default": "astrbot"
+  }
+}

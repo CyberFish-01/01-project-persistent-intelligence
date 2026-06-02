@@ -1,0 +1,8 @@
+name: astrbot_plugin_01_core
+desc: 01 Core 的 AstrBot 适配器。AstrBot 作为入口，01 Core 保存连续性状态。
+help: 使用 /01 ping 检查 API，/01 status 查看状态，/01 chat <内容> 写入一次交互，/01 dream [limit] 触发做梦整理。
+version: v0.1.0
+author: CyberFish-01
+repo: https://github.com/CyberFish-01/01-project-persistent-intelligence
+display_name: 01 Core Adapter
+short_desc: 通过本地 HTTP API 把 AstrBot 接入 01 Core。

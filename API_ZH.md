@@ -176,6 +176,26 @@ memory_stores
 dream_queue
 ```
 
+## AstrBot Adapter
+
+仓库内已经包含第一版 AstrBot adapter：
+
+```text
+adapters/astrbot/astrbot_plugin_01_core
+```
+
+安装到 AstrBot 插件目录后，可以使用：
+
+```text
+/01 ping
+/01 status
+/01 context
+/01 chat <内容>
+/01 dream [limit]
+```
+
+这一版是命令式桥接，不默认监听全部聊天。它适合先验证 01 Core 的状态迁移、episode 记录和 Dream consolidation。
+
 ## 为什么没有 import-text API
 
 第一版 HTTP API 暂时不提供文件导入端点。

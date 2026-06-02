@@ -176,6 +176,26 @@ memory_stores
 dream_queue
 ```
 
+## AstrBot Adapter
+
+The repository now includes the first AstrBot adapter:
+
+```text
+adapters/astrbot/astrbot_plugin_01_core
+```
+
+After installing it into AstrBot's plugin directory, use:
+
+```text
+/01 ping
+/01 status
+/01 context
+/01 chat <message>
+/01 dream [limit]
+```
+
+This first version is command-based and does not listen to every chat message by default. It is intended to validate state transfer, episode recording, and Dream consolidation through 01 Core.
+
 ## Why No import-text API Yet
 
 The first HTTP API does not expose file import.

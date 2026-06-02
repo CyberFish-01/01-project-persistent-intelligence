@@ -28,6 +28,7 @@
 - [IMPLEMENTATION_START.md](./IMPLEMENTATION_START.md) / [IMPLEMENTATION_START_ZH.md](./IMPLEMENTATION_START_ZH.md)：第一版可运行本地 01 Core 原型。
 - [MEMORY_IMPORT.md](./MEMORY_IMPORT.md) / [MEMORY_IMPORT_ZH.md](./MEMORY_IMPORT_ZH.md)：如何把 AstrBot、Angel Memory 或其他系统的记忆以通用文本形式导入。
 - [API.md](./API.md) / [API_ZH.md](./API_ZH.md)：给 AstrBot 等 adapter 使用的本地 HTTP API。
+- [adapters/astrbot/astrbot_plugin_01_core](./adapters/astrbot/astrbot_plugin_01_core)：第一版 AstrBot adapter。AstrBot 作为入口，01 Core 保存连续性状态。
 
 ## 核心命题
 
@@ -61,6 +62,21 @@ python3 -m one_core.cli status
 
 ```bash
 python3 -m one_core.cli serve
+```
+
+接入 AstrBot：
+
+```bash
+cp -R adapters/astrbot/astrbot_plugin_01_core /root/data/plugins/
+```
+
+然后在 AstrBot 中使用：
+
+```text
+/01 ping
+/01 status
+/01 chat <内容>
+/01 dream
 ```
 
 ```text
