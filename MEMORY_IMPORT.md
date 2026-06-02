@@ -89,6 +89,7 @@ Currently supported:
 - `.json`
 - `.jsonl`
 - `.csv`
+- `.db` / `.sqlite` / `.sqlite3`
 
 Command:
 
@@ -123,6 +124,14 @@ It ignores obvious noise fields:
 ```text
 id, uuid, timestamp, embedding, vector, metadata, session_id
 ```
+
+For Angel Memory `simple_memory.db`, the cleaner prioritizes:
+
+```text
+memory_records.judgment
+```
+
+and reads only `is_active = 1` current memories by default.
 
 ## 5. Where It Goes
 

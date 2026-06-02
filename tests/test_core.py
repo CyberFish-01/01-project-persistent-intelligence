@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import sqlite3
 from pathlib import Path
 
 from one_core.cleaner import clean_memory_files
@@ -127,6 +128,33 @@ class CoreStateTests(unittest.TestCase):
             )
             memories = clean_memory_files([source])
             self.assertEqual(memories, ["01 的核心状态不属于 Angel Memory"])
+
+    def test_clean_memory_files_extracts_sqlite_active_judgment(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "memory.db"
+            connection = sqlite3.connect(source)
+            try:
+                connection.execute(
+                    "CREATE TABLE memory_records (judgment TEXT, is_active INTEGER)"
+                )
+                connection.execute(
+                    "INSERT INTO memory_records VALUES (?, ?)",
+                    ("01 的当前记忆应从 SQLite 搬入 staged imported_memory。", 1),
+                )
+                connection.execute(
+                    "INSERT INTO memory_records VALUES (?, ?)",
+                    ("这条污染记忆不应导入。", 0),
+                )
+                connection.commit()
+            finally:
+                connection.close()
+
+            memories = clean_memory_files([source])
+            self.assertEqual(
+                memories,
+                ["01 的当前记忆应从 SQLite 搬入 staged imported_memory。"],
+            )
 
 
 if __name__ == "__main__":

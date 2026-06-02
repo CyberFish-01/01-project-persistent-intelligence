@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import re
+import sqlite3
 from pathlib import Path
 from typing import Any, Iterable, List, Sequence
 
@@ -21,6 +22,7 @@ TEXT_KEYS = {
     "answer",
     "response",
     "raw",
+    "judgment",
 }
 
 NOISE_KEYS = {
@@ -70,6 +72,8 @@ def extract_candidates(path: Path) -> List[str]:
         return extract_jsonl(path)
     if suffix == ".csv":
         return extract_csv(path)
+    if suffix in {".db", ".sqlite", ".sqlite3"}:
+        return extract_sqlite(path)
     return extract_text(path)
 
 
@@ -115,6 +119,47 @@ def extract_csv(path: Path) -> List[str]:
         for row in reader:
             candidates.extend(cell for cell in row if cell)
     return candidates
+
+
+def extract_sqlite(path: Path) -> List[str]:
+    candidates = []
+    connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        tables = [
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )
+            if not row[0].startswith("sqlite_")
+        ]
+        for table in tables:
+            columns = table_columns(connection, table)
+            if table == "memory_records" and "judgment" in columns:
+                query = "SELECT judgment FROM memory_records"
+                if "is_active" in columns:
+                    query += " WHERE is_active = 1"
+                for row in connection.execute(query):
+                    if row[0]:
+                        candidates.append(row[0])
+                continue
+
+            text_columns = [
+                column
+                for column in columns
+                if column.lower() in TEXT_KEYS and column.lower() not in NOISE_KEYS
+            ]
+            for column in text_columns:
+                query = f'SELECT "{column}" FROM "{table}"'
+                for row in connection.execute(query):
+                    if row[0]:
+                        candidates.append(str(row[0]))
+    finally:
+        connection.close()
+    return candidates
+
+
+def table_columns(connection: sqlite3.Connection, table: str) -> List[str]:
+    return [row[1] for row in connection.execute(f'PRAGMA table_info("{table}")')]
 
 
 def walk_json(value: Any, key: str = "") -> Iterable[str]:

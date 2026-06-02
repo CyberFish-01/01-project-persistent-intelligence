@@ -89,6 +89,7 @@ python3 -m one_core.cli import-text angel_memory_export.txt \
 - `.json`
 - `.jsonl`
 - `.csv`
+- `.db` / `.sqlite` / `.sqlite3`
 
 命令：
 
@@ -123,6 +124,14 @@ content, memory, text, message, summary, description, value, fact, memo, note
 ```text
 id, uuid, timestamp, embedding, vector, metadata, session_id
 ```
+
+对 Angel Memory 的 `simple_memory.db`，清洗器会优先提取：
+
+```text
+memory_records.judgment
+```
+
+并默认只读取 `is_active = 1` 的当前有效记忆。
 
 ## 5. 导入后存到哪里
 
