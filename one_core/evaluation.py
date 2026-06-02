@@ -58,6 +58,7 @@ def run_scenario_evaluation() -> dict:
             check_task_hub_action_resume(root / "task_hub_action_resume"),
             check_identity_update_gate_review(root / "identity_update_gate_review"),
             check_event_log_replay_rollback(root / "event_log_replay_rollback"),
+            check_dream_artifact_package(root / "dream_artifact_package"),
         ]
     passed = [scenario for scenario in scenarios if scenario.passed]
     failed = [scenario for scenario in scenarios if not scenario.passed]
@@ -552,8 +553,75 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     )
 
 
+def check_dream_artifact_package(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    before_semantic_count = len(store.load()["memory_stores"]["semantic_memory"])
+    store.record_episode(
+        "Dream artifact package should keep input manifest, observations, proposals, review queue, patch diff, decision log, and rollback metadata.",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="dream-artifact",
+    )
+    store.record_episode(
+        "Dream artifact package should create candidates only and avoid active memory or identity core direct writes.",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="dream-artifact",
+    )
+    report = DreamEngine(store).run()
+    state = store.load()
+    artifact = store.list_dream_artifacts()[-1]
+    completeness = artifact.get("package_completeness", {})
+    validation = validate_state(
+        state,
+        store.list_episodes(),
+        events=store.list_events(),
+        dream_artifacts=store.list_dream_artifacts(),
+    )
+    checks = {
+        "artifact_versioned": artifact.get("artifact_version") == "1.0",
+        "manifest_has_items": bool(artifact.get("input_manifest", {}).get("items")),
+        "provenance_links_inputs": bool(artifact.get("provenance", {}).get("used_entities")),
+        "proposal_index_available": bool(artifact.get("proposal_index", {}).get("by_type")),
+        "review_queue_available": bool(artifact.get("review", {}).get("queue")),
+        "patch_diff_candidate_only": artifact.get("patch_diff", {}).get("mode")
+        == "candidate_only",
+        "decision_log_available": bool(artifact.get("decision_log")),
+        "rollback_metadata_available": bool(
+            artifact.get("rollback_metadata", {}).get("affected_ids") is not None
+        ),
+        "package_complete": bool(completeness) and all(completeness.values()),
+        "identity_not_mutated": state["identity_core"] == before_identity,
+        "semantic_not_directly_promoted": len(state["memory_stores"]["semantic_memory"])
+        == before_semantic_count,
+        "validation_passed": validation["status"] == "passed",
+    }
+    return EvaluationCheck(
+        name="dream_artifact_package",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Dream Artifact Package",
+            "dream_id": report["id"],
+            "artifact_id": artifact["artifact_id"],
+            "checks": checks,
+            "metrics": {
+                "dream_artifact_package_score": ratio(checks.values()),
+                "dream_artifact_count": len(store.list_dream_artifacts()),
+                "dream_review_queue_count": len(artifact.get("review", {}).get("queue", [])),
+                "dream_package_validation_failures": validation["issue_count"],
+            },
+        },
+    )
+
+
 def check_state_invariants(store: StateStore) -> EvaluationCheck:
-    report = validate_state(store.load(), store.list_episodes(), events=store.list_events())
+    report = validate_state(
+        store.load(),
+        store.list_episodes(),
+        events=store.list_events(),
+        dream_artifacts=store.list_dream_artifacts(),
+    )
     return EvaluationCheck(
         name="state_invariants",
         passed=report["status"] == "passed",
@@ -832,6 +900,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "event_log_replay_score" in item
     ]
+    dream_artifact_scores = [
+        item["dream_artifact_package_score"]
+        for item in metrics
+        if "dream_artifact_package_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -856,6 +929,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
             2,
         )
         if event_log_scores
+        else None,
+        "dream_artifact_package_score": round(
+            sum(dream_artifact_scores) / len(dream_artifact_scores),
+            2,
+        )
+        if dream_artifact_scores
         else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
@@ -889,6 +968,16 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "rollback_mutation_count": sum(
             int(item.get("rollback_mutation_count", 0)) for item in metrics
+        ),
+        "dream_artifact_count": sum(
+            int(item.get("dream_artifact_count", 0)) for item in metrics
+        ),
+        "dream_review_queue_count": sum(
+            int(item.get("dream_review_queue_count", 0)) for item in metrics
+        ),
+        "dream_package_validation_failures": sum(
+            int(item.get("dream_package_validation_failures", 0))
+            for item in metrics
         ),
     }
 

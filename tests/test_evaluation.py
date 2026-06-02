@@ -33,7 +33,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(report["state_mode"], "temporary")
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["failed"], 0)
-        self.assertEqual(report["passed"], 7)
+        self.assertEqual(report["passed"], 8)
         self.assertEqual(
             report["baselines"]["system_under_test"],
             "state_transfer_system",
@@ -51,9 +51,10 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertIn("task_hub_action_resume", scenario_names)
         self.assertIn("identity_update_gate_review", scenario_names)
         self.assertIn("event_log_replay_rollback", scenario_names)
+        self.assertIn("dream_artifact_package", scenario_names)
 
         metrics = report["metrics_summary"]
-        self.assertEqual(metrics["total_scenarios"], 7)
+        self.assertEqual(metrics["total_scenarios"], 8)
         self.assertEqual(metrics["failed_scenarios"], 0)
         self.assertEqual(metrics["boundary_violation_count"], 0)
         self.assertEqual(metrics["archived_memory_retrieval_count"], 0)
@@ -71,6 +72,10 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertGreaterEqual(metrics["event_coverage_count"], 5)
         self.assertEqual(metrics["rollback_preview_count"], 1)
         self.assertEqual(metrics["rollback_mutation_count"], 0)
+        self.assertEqual(metrics["dream_artifact_package_score"], 1.0)
+        self.assertGreaterEqual(metrics["dream_artifact_count"], 1)
+        self.assertGreaterEqual(metrics["dream_review_queue_count"], 1)
+        self.assertEqual(metrics["dream_package_validation_failures"], 0)
 
 
 if __name__ == "__main__":

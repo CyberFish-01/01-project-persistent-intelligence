@@ -826,16 +826,62 @@ Dream artifact 用于保存一次 Dream run 的完整审查材料：
 ```yaml
 dream_artifact:
   artifact_id: "dream_artifact_..."
+  artifact_version: "1.0"
   dream_id: "dream_..."
-  input_manifest: {}
-  observations: {}
+  input_manifest:
+    episodes: []
+    imports: []
+    pending_jobs: []
+    item_count: 0
+    items: []
+  provenance:
+    agent: "dream_engine"
+    activity: "dream_consolidation"
+    used_entities: []
+    generated_entities: []
+  observations:
+    summary: "..."
+    input_counts: {}
   proposals: []
+  proposal_index:
+    by_type: {}
+    by_risk: {}
+    by_recommended_action: {}
   review:
     status: "pending"
-  patch_diff: {}
+    required_for: []
+    queue: []
+    queue_summary: {}
+  patch_diff:
+    mode: "candidate_only"
+    state_writes: {}
+    proposed_changes: {}
+    blocked_direct_writes: {}
+    summary: {}
   decision_log: []
-  rollback_metadata: {}
+  rollback_metadata:
+    rollback_required: false
+    affected_ids: {}
+    identity_core_changed: false
+    active_memory_direct_write: false
+  package_completeness:
+    has_input_manifest: true
+    has_observations: true
+    has_proposals: true
+    has_review_queue: true
+    has_patch_diff: true
+    has_decision_log: true
+    has_rollback_metadata: true
 ```
+
+Dream artifact package v1.0 采用本地 PROV/trace 形状：
+
+- `input_manifest` 记录本次 Dream run 使用的具体 episodes / imported memories；
+- `provenance` 连接 Dream activity、used entities 和生成的 candidate/review entities；
+- `review.queue` 标明 proposal、risk、evidence，以及是否需要人工 review；
+- `patch_diff.mode: candidate_only` 明确 Dream 只生成 candidate/review material，不直接写 active memory 或 Identity Core；
+- `rollback_metadata.affected_ids` 列出本次 Dream 影响到的 candidate memory、claim graph、identity gate 和 procedural candidate ids；
+- `package_completeness` 会被 validation 检查，避免后续 Dream run 静默丢失审计材料。
 
 ## 17. Update Log
 

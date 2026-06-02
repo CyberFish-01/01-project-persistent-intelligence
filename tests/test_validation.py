@@ -187,6 +187,40 @@ class StateValidationTests(unittest.TestCase):
             paths = {issue["path"] for issue in report["issues"]}
             self.assertIn("events[0].update_id", paths)
 
+    def test_dream_artifact_requires_package_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            report = validate_state(
+                state,
+                store.list_episodes(),
+                dream_artifacts=[
+                    {
+                        "artifact_id": "dream_artifact_bad",
+                        "dream_id": "dream_bad",
+                        "input_manifest": {},
+                        "decision_log": [],
+                        "rollback_metadata": {},
+                        "package_completeness": {
+                            "has_input_manifest": True,
+                            "has_review_queue": False,
+                        },
+                    }
+                ],
+            )
+
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("dream_artifacts[0].artifact_version", paths)
+            self.assertIn("dream_artifacts[0].review", paths)
+            self.assertIn("dream_artifacts[0].input_manifest.items", paths)
+            self.assertIn("dream_artifacts[0].decision_log", paths)
+            self.assertIn("dream_artifacts[0].rollback_metadata.affected_ids", paths)
+            self.assertIn(
+                "dream_artifacts[0].package_completeness.has_review_queue",
+                paths,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -592,12 +592,26 @@ class CoreStateTests(unittest.TestCase):
                 {"promote", "archive", "discard", "quarantine"},
             )
             artifacts = store.list_dream_artifacts()
-            self.assertEqual(artifacts[-1]["dream_id"], report["id"])
-            self.assertTrue(artifacts[-1]["proposals"])
-            self.assertEqual(artifacts[-1]["rubric"]["status"], "passed")
-            self.assertEqual(artifacts[-1]["review"]["rubric"]["score"], 1.0)
+            artifact = artifacts[-1]
+            self.assertEqual(artifact["dream_id"], report["id"])
+            self.assertEqual(artifact["artifact_version"], "1.0")
+            self.assertTrue(artifact["input_manifest"]["items"])
+            self.assertEqual(artifact["provenance"]["activity"], "dream_consolidation")
+            self.assertTrue(artifact["provenance"]["used_entities"])
+            self.assertTrue(artifact["proposals"])
+            self.assertIn("semantic_memory_candidate", artifact["proposal_index"]["by_type"])
+            self.assertEqual(artifact["rubric"]["status"], "passed")
+            self.assertEqual(artifact["review"]["rubric"]["score"], 1.0)
+            self.assertTrue(artifact["review"]["queue"])
+            self.assertEqual(artifact["review"]["queue_summary"]["total"], len(artifact["review"]["queue"]))
+            self.assertEqual(artifact["patch_diff"]["mode"], "candidate_only")
+            self.assertIn(
+                report["candidate_memories"][0],
+                artifact["rollback_metadata"]["affected_ids"]["candidate_memory"],
+            )
+            self.assertTrue(all(artifact["package_completeness"].values()))
             self.assertEqual(
-                artifacts[-1]["decision_log"][-1]["decision"],
+                artifact["decision_log"][-2]["decision"],
                 "rubric_evaluated",
             )
             self.assertEqual(
@@ -620,7 +634,7 @@ class CoreStateTests(unittest.TestCase):
                     "recommended_lifecycle_action"
                 ],
             )
-            self.assertEqual(artifacts[-1]["rollback_metadata"]["active_memory_direct_write"], False)
+            self.assertEqual(artifact["rollback_metadata"]["active_memory_direct_write"], False)
 
             promotion = store.promote_candidate_memory(
                 report["candidate_memories"][0],
@@ -1128,6 +1142,11 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(
                 artifact["observations"]["claim_graph_updates"],
                 report["claim_graph_updates"],
+            )
+            self.assertTrue(artifact["review"]["queue_summary"]["claim_related"])
+            self.assertEqual(
+                artifact["patch_diff"]["summary"]["conflict_count"],
+                len(false_memory_proposals),
             )
             self.assertEqual(artifact["rollback_metadata"]["rubric_status"], "passed")
 

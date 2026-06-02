@@ -61,6 +61,7 @@ def validate_state(
     state: dict[str, Any],
     episodes: Iterable[dict] | None = None,
     events: Iterable[dict] | None = None,
+    dream_artifacts: Iterable[dict] | None = None,
 ) -> dict:
     issues: list[ValidationIssue] = []
     issues.extend(validate_top_level(state))
@@ -78,6 +79,8 @@ def validate_state(
     issues.extend(validate_snapshots(state))
     if events is not None:
         issues.extend(validate_event_log(state, events))
+    if dream_artifacts is not None:
+        issues.extend(validate_dream_artifacts(dream_artifacts))
     return {
         "status": "passed" if not issues else "failed",
         "issues": [issue_to_dict(issue) for issue in issues],
@@ -502,6 +505,84 @@ def validate_event_log(
                     "Event update_id must reference state update_log.",
                 )
             )
+    return issues
+
+
+def validate_dream_artifacts(
+    dream_artifacts: Iterable[dict],
+) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    for index, artifact in enumerate(dream_artifacts):
+        path = f"dream_artifacts[{index}]"
+        if not isinstance(artifact, dict):
+            issues.append(ValidationIssue(path, "Dream artifact must be an object."))
+            continue
+        for key in (
+            "artifact_id",
+            "artifact_version",
+            "dream_id",
+            "input_manifest",
+            "provenance",
+            "observations",
+            "proposals",
+            "proposal_index",
+            "review",
+            "patch_diff",
+            "decision_log",
+            "rollback_metadata",
+            "package_completeness",
+        ):
+            if key not in artifact:
+                issues.append(ValidationIssue(path + f".{key}", "Dream artifact key is missing."))
+        manifest = artifact.get("input_manifest")
+        if isinstance(manifest, dict):
+            if not isinstance(manifest.get("items"), list):
+                issues.append(
+                    ValidationIssue(
+                        path + ".input_manifest.items",
+                        "Dream artifact input manifest must list source items.",
+                    )
+                )
+        review = artifact.get("review")
+        if isinstance(review, dict):
+            if not isinstance(review.get("queue"), list):
+                issues.append(
+                    ValidationIssue(
+                        path + ".review.queue",
+                        "Dream artifact review must include a queue.",
+                    )
+                )
+        decision_log = artifact.get("decision_log")
+        if not isinstance(decision_log, list) or not decision_log:
+            issues.append(
+                ValidationIssue(
+                    path + ".decision_log",
+                    "Dream artifact decision log must be non-empty.",
+                )
+            )
+        rollback = artifact.get("rollback_metadata")
+        if isinstance(rollback, dict):
+            if "affected_ids" not in rollback:
+                issues.append(
+                    ValidationIssue(
+                        path + ".rollback_metadata.affected_ids",
+                        "Dream artifact rollback metadata must include affected ids.",
+                    )
+                )
+        completeness = artifact.get("package_completeness")
+        if isinstance(completeness, dict):
+            missing = [
+                key
+                for key, value in completeness.items()
+                if key.startswith("has_") and value is not True
+            ]
+            for key in missing:
+                issues.append(
+                    ValidationIssue(
+                        path + f".package_completeness.{key}",
+                        "Dream artifact package completeness flag must be true.",
+                    )
+                )
     return issues
 
 

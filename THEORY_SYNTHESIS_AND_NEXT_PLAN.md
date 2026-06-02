@@ -537,17 +537,48 @@ Remaining gaps:
 - event schema is deterministic but still coarse;
 - no event compaction or retention policy yet.
 
+### P13 Dream Artifact Package
+
+Goal: make each Dream run inspectable as a durable review package.
+
+Status: implemented as a first local v1.0 pass.
+
+Executable items:
+
+1. artifact version and package completeness flags - done;
+2. input manifest with source item summaries - done;
+3. local PROV-style provenance block - done;
+4. proposal index and review queue - done;
+5. candidate-only patch diff - done;
+6. decision log and rollback affected ids - done;
+7. scenario evaluation for Dream artifact package - done.
+
+Implemented result:
+
+- Dream artifacts now include input manifest, provenance, observations, proposal index, review queue, patch diff, decision log, rollback metadata, and package completeness;
+- validation checks Dream artifact package fields when artifacts are available;
+- scenario evaluation adds `dream_artifact_package`;
+- Dream remains candidate/review-only and does not directly write active semantic memory or Identity Core.
+
+Remaining gaps:
+
+- no human review UI yet;
+- proposal approval is still handled through separate CLI commands;
+- artifact package does not yet include full text snapshots of every input;
+- no retention / compaction policy for artifact history;
+- claim resolution is still shallow.
+
 ## 6. Current Recommendation
 
-Do P13 next:
+Do P14 next:
 
 ```text
-P13 Dream Artifact Package
+P14 Claim Graph v0.2 / Belief Revision
 ```
 
 Reason:
 
-- P12 gives state transitions an event ledger, but Dream artifacts are still only a partial package;
-- Cognitive OS repeatedly points to Dream input manifest, observations, proposals, review, patch diff, decision log, and rollback metadata as the next durable unit;
-- P13 should make every dream run inspectable as an artifact package before deeper claim resolution or UI work;
-- this keeps the project on the foundation path: state transfer, audit, review, and bounded evolution.
+- P13 now gives Dream outputs a reviewable package, but conflicts still lack real support / contradiction / dependency links;
+- Truth Maintenance Systems and AGM belief revision point to reason dependencies and minimal-change repair as the next missing foundation;
+- P14 should make claim graph reviewable: support/contradiction links, `review-claim`, and minimal-change patch preview;
+- this improves false-memory handling, stale preference updates, and later identity proposal evidence quality.

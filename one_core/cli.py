@@ -305,6 +305,7 @@ def main() -> None:
                 store.load(),
                 store.list_episodes(),
                 events=store.list_events(),
+                dream_artifacts=store.list_dream_artifacts(),
             )
         )
     elif args.command == "replay-events":

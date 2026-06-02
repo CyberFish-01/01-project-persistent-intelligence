@@ -537,17 +537,48 @@ git diff --check
 - event schema 是确定性的，但仍然比较粗；
 - 还没有 event compaction 或 retention policy。
 
+### P13 Dream Artifact Package
+
+目标：让每次 Dream run 都成为可检查的 durable review package。
+
+状态：已实现第一版本地 v1.0。
+
+可执行项：
+
+1. artifact version 和 package completeness flags - 已完成；
+2. 带 source item summary 的 input manifest - 已完成；
+3. 本地 PROV-style provenance block - 已完成；
+4. proposal index 和 review queue - 已完成；
+5. candidate-only patch diff - 已完成；
+6. decision log 和 rollback affected ids - 已完成；
+7. Dream artifact package 的 scenario evaluation - 已完成。
+
+已实现结果：
+
+- Dream artifacts 现在包含 input manifest、provenance、observations、proposal index、review queue、patch diff、decision log、rollback metadata 和 package completeness；
+- validation 会在 artifacts 存在时检查 Dream artifact package 字段；
+- scenario evaluation 增加 `dream_artifact_package`；
+- Dream 仍然只生成 candidate/review material，不直接写 active semantic memory 或 Identity Core。
+
+剩余缺口：
+
+- 还没有人工 review UI；
+- proposal approval 仍然通过独立 CLI command 处理；
+- artifact package 还没有保存每个输入的完整文本 snapshot；
+- artifact history 还没有 retention / compaction policy；
+- claim resolution 仍然很浅。
+
 ## 6. 当前建议
 
 下一步先做：
 
 ```text
-P13 Dream Artifact Package
+P14 Claim Graph v0.2 / Belief Revision
 ```
 
 理由：
 
-- P12 让 state transition 有了 event ledger，但 Dream artifact 仍然只是部分 package；
-- Cognitive OS 反复指向 Dream input manifest、observations、proposals、review、patch diff、decision log、rollback metadata 作为下一种 durable unit；
-- P13 应让每次 dream run 都能作为 artifact package 被检查，再继续做更深的 claim resolution 或 UI；
-- 这仍然贴着地基方向：state transfer、audit、review、bounded evolution。
+- P13 已经让 Dream output 成为可审查 package，但 conflict 仍缺少真正的 support / contradiction / dependency links；
+- Truth Maintenance Systems 和 AGM belief revision 都指向 reason dependency 与 minimal-change repair，这是下一块缺失地基；
+- P14 应让 claim graph 可审查：support/contradiction links、`review-claim`、minimal-change patch preview；
+- 这会改善 false-memory handling、stale preference update，以及后续 identity proposal 的证据质量。

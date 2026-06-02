@@ -920,8 +920,28 @@ def build_dream_artifact(
 ) -> dict:
     artifact_id = new_id("dream_artifact")
     proposals = report.get("proposals", [])
+    proposal_index = index_proposals_for_review(proposals)
+    review_queue = build_dream_review_queue(
+        proposals=proposals,
+        rubric=report.get("rubric", {}),
+        claim_graph_updates=report.get("claim_graph_updates", []),
+        identity_gate_proposals=report.get("identity_gate_proposals", []),
+    )
+    patch_diff = build_dream_patch_diff(report=report, proposals=proposals)
+    rollback_metadata = build_dream_rollback_metadata(
+        report=report,
+        proposals=proposals,
+        patch_diff=patch_diff,
+    )
+    decision_log = build_dream_decision_log(
+        report=report,
+        proposals=proposals,
+        review_queue=review_queue,
+        rollback_metadata=rollback_metadata,
+    )
     return {
         "artifact_id": artifact_id,
+        "artifact_version": "1.0",
         "dream_id": report["id"],
         "timestamp": report["timestamp"],
         "input_manifest": {
@@ -929,9 +949,44 @@ def build_dream_artifact(
             "imports": report["input_imports"],
             "pending_jobs": [job.get("id") for job in pending_jobs],
             "item_count": len(selected_items),
+            "items": [
+                {
+                    "id": item.get("id"),
+                    "kind": "imported_memory"
+                    if item.get("import_batch_id")
+                    else "episode",
+                    "timestamp": item.get("timestamp"),
+                    "tags": item.get("tags", []),
+                    "salience": item.get("salience"),
+                    "lifecycle_status": item.get("lifecycle", {}).get("status"),
+                    "source": item.get("source")
+                    or {
+                        "source_system": item.get("source_system"),
+                        "source_label": item.get("source_label"),
+                    },
+                }
+                for item in selected_items
+            ],
+        },
+        "provenance": {
+            "agent": "dream_engine",
+            "activity": "dream_consolidation",
+            "generated_at": report["timestamp"],
+            "used_entities": report["input_episodes"] + report["input_imports"],
+            "generated_entities": (
+                report.get("candidate_memories", [])
+                + report.get("claim_graph_updates", [])
+                + report.get("identity_gate_proposals", [])
+                + report.get("procedural_candidate_updates", [])
+            ),
         },
         "observations": {
             "summary": report["summary"],
+            "input_counts": {
+                "episodes": len(report["input_episodes"]),
+                "imports": len(report["input_imports"]),
+                "pending_jobs": len(pending_jobs),
+            },
             "conflicts": report["conflicts"],
             "claim_graph_updates": report.get("claim_graph_updates", []),
             "semantic_candidates": report["semantic_candidates"],
@@ -944,6 +999,7 @@ def build_dream_artifact(
             ),
         },
         "proposals": proposals,
+        "proposal_index": proposal_index,
         "rubric": report.get("rubric", {}),
         "review": {
             "status": "pending"
@@ -951,53 +1007,237 @@ def build_dream_artifact(
             else "needs_review",
             "required_for": sorted({proposal["type"] for proposal in proposals}),
             "rubric": report.get("rubric", {}),
+            "queue": review_queue,
+            "queue_summary": {
+                "total": len(review_queue),
+                "high_risk": sum(
+                    1 for item in review_queue if item.get("risk") == "high"
+                ),
+                "identity_related": sum(
+                    1 for item in review_queue if item.get("identity_related")
+                ),
+                "claim_related": sum(
+                    1 for item in review_queue if item.get("claim_related")
+                ),
+            },
         },
-        "patch_diff": {
-            "semantic_candidates": [
-                proposal["payload"]
-                for proposal in proposals
-                if proposal["type"] == "semantic_memory_candidate"
-            ],
-            "identity_updates": [
-                proposal["payload"]
-                for proposal in proposals
-                if proposal["type"] == "identity_update_candidate"
-            ],
-            "forgetting": [
-                proposal["payload"]
-                for proposal in proposals
-                if proposal["type"] == "forgetting_candidate"
-            ],
+        "patch_diff": patch_diff,
+        "decision_log": decision_log,
+        "rollback_metadata": rollback_metadata,
+        "package_completeness": {
+            "has_input_manifest": True,
+            "has_observations": True,
+            "has_proposals": isinstance(proposals, list),
+            "has_review_queue": True,
+            "has_patch_diff": True,
+            "has_decision_log": True,
+            "has_rollback_metadata": True,
+        },
+    }
+
+
+def index_proposals_for_review(proposals: List[dict]) -> dict:
+    index: dict[str, list] = {
+        "by_type": {},
+        "by_risk": {},
+        "by_recommended_action": {},
+    }
+    for proposal in proposals:
+        proposal_id = proposal.get("proposal_id")
+        for bucket_name, value in (
+            ("by_type", proposal.get("type", "unknown")),
+            ("by_risk", proposal.get("risk", "unknown")),
+            ("by_recommended_action", proposal.get("recommended_action", "unknown")),
+        ):
+            bucket = index[bucket_name].setdefault(str(value), [])
+            bucket.append(proposal_id)
+    return index
+
+
+def build_dream_review_queue(
+    proposals: List[dict],
+    rubric: dict,
+    claim_graph_updates: List[str],
+    identity_gate_proposals: List[str],
+) -> List[dict]:
+    queue = []
+    for proposal in proposals:
+        proposal_type = proposal.get("type")
+        queue.append(
+            {
+                "proposal_id": proposal.get("proposal_id"),
+                "type": proposal_type,
+                "risk": proposal.get("risk", "medium"),
+                "review_status": proposal.get("review_status", "pending"),
+                "recommended_action": proposal.get("recommended_action"),
+                "recommended_lifecycle_action": proposal.get(
+                    "lifecycle_score", {}
+                ).get("recommended_lifecycle_action"),
+                "evidence": proposal.get("evidence", []),
+                "affected_memory_ids": proposal.get("affected_memory_ids", []),
+                "identity_related": proposal_type == "identity_update_candidate",
+                "claim_related": proposal_type == "conflict_record",
+                "requires_human_review": (
+                    proposal.get("risk") == "high"
+                    or proposal_type
+                    in {"identity_update_candidate", "conflict_record"}
+                    or rubric.get("status") != "passed"
+                ),
+            }
+        )
+    if claim_graph_updates:
+        queue.append(
+            {
+                "proposal_id": None,
+                "type": "claim_graph_updates",
+                "risk": "medium",
+                "review_status": "pending",
+                "recommended_action": "review_claims",
+                "evidence": claim_graph_updates,
+                "affected_memory_ids": claim_graph_updates,
+                "identity_related": False,
+                "claim_related": True,
+                "requires_human_review": True,
+            }
+        )
+    if identity_gate_proposals:
+        queue.append(
+            {
+                "proposal_id": None,
+                "type": "identity_gate_proposals",
+                "risk": "high",
+                "review_status": "pending",
+                "recommended_action": "high_gate_review",
+                "evidence": identity_gate_proposals,
+                "affected_memory_ids": identity_gate_proposals,
+                "identity_related": True,
+                "claim_related": False,
+                "requires_human_review": True,
+            }
+        )
+    return queue
+
+
+def build_dream_patch_diff(report: dict, proposals: List[dict]) -> dict:
+    semantic_payloads = [
+        proposal["payload"]
+        for proposal in proposals
+        if proposal["type"] == "semantic_memory_candidate"
+    ]
+    identity_payloads = [
+        proposal["payload"]
+        for proposal in proposals
+        if proposal["type"] == "identity_update_candidate"
+    ]
+    forgetting_payloads = [
+        proposal["payload"]
+        for proposal in proposals
+        if proposal["type"] == "forgetting_candidate"
+    ]
+    conflict_payloads = [
+        proposal["payload"]
+        for proposal in proposals
+        if proposal["type"] == "conflict_record"
+    ]
+    return {
+        "mode": "candidate_only",
+        "state_writes": {
+            "candidate_memory": report.get("candidate_memories", []),
+            "claim_graph": report.get("claim_graph_updates", []),
+            "identity_update_gate": report.get("identity_gate_proposals", []),
+            "task_hub.procedural_candidates": report.get(
+                "procedural_candidate_updates",
+                [],
+            ),
+        },
+        "proposed_changes": {
+            "semantic_candidates": semantic_payloads,
+            "identity_updates": identity_payloads,
+            "forgetting": forgetting_payloads,
+            "conflicts": conflict_payloads,
             "procedural_candidates": report.get("procedural_candidates", []),
         },
-        "decision_log": [
-            {
-                "decision": "proposal_created",
-                "proposal_id": proposal["proposal_id"],
-                "recommended_action": proposal["recommended_action"],
-                "recommended_lifecycle_action": proposal.get("lifecycle_score", {}).get(
-                    "recommended_lifecycle_action"
-                ),
-                "lifecycle_score": proposal.get("lifecycle_score", {}).get("score"),
-                "review_status": proposal["review_status"],
-            }
-            for proposal in proposals
-        ]
-        + [
-            {
-                "decision": "rubric_evaluated",
-                "rubric_id": report.get("rubric", {}).get("rubric_id"),
-                "status": report.get("rubric", {}).get("status"),
-                "score": report.get("rubric", {}).get("score"),
-            }
-        ],
-        "rollback_metadata": {
-            "rollback_required": bool(proposals),
-            "identity_core_changed": False,
-            "active_memory_direct_write": False,
-            "rubric_status": report.get("rubric", {}).get("status"),
-            "note": "Dream writes semantic candidates to candidate_memory. Promotion requires explicit review.",
+        "blocked_direct_writes": {
+            "identity_core": bool(identity_payloads),
+            "active_semantic_memory": bool(semantic_payloads),
         },
+        "summary": {
+            "semantic_candidate_count": len(semantic_payloads),
+            "identity_update_count": len(identity_payloads),
+            "forgetting_count": len(forgetting_payloads),
+            "conflict_count": len(conflict_payloads),
+            "procedural_candidate_count": len(report.get("procedural_candidates", [])),
+        },
+    }
+
+
+def build_dream_decision_log(
+    report: dict,
+    proposals: List[dict],
+    review_queue: List[dict],
+    rollback_metadata: dict,
+) -> List[dict]:
+    decisions = [
+        {
+            "decision": "proposal_created",
+            "proposal_id": proposal["proposal_id"],
+            "type": proposal["type"],
+            "risk": proposal.get("risk"),
+            "recommended_action": proposal["recommended_action"],
+            "recommended_lifecycle_action": proposal.get("lifecycle_score", {}).get(
+                "recommended_lifecycle_action"
+            ),
+            "lifecycle_score": proposal.get("lifecycle_score", {}).get("score"),
+            "review_status": proposal["review_status"],
+        }
+        for proposal in proposals
+    ]
+    decisions.append(
+        {
+            "decision": "review_queue_created",
+            "queue_count": len(review_queue),
+            "requires_human_review_count": sum(
+                1 for item in review_queue if item.get("requires_human_review")
+            ),
+        }
+    )
+    decisions.append(
+        {
+            "decision": "rubric_evaluated",
+            "rubric_id": report.get("rubric", {}).get("rubric_id"),
+            "status": report.get("rubric", {}).get("status"),
+            "score": report.get("rubric", {}).get("score"),
+        }
+    )
+    decisions.append(
+        {
+            "decision": "rollback_metadata_recorded",
+            "rollback_required": rollback_metadata.get("rollback_required"),
+            "affected_ids": rollback_metadata.get("affected_ids", {}),
+        }
+    )
+    return decisions
+
+
+def build_dream_rollback_metadata(
+    report: dict,
+    proposals: List[dict],
+    patch_diff: dict,
+) -> dict:
+    return {
+        "rollback_required": bool(proposals),
+        "identity_core_changed": False,
+        "active_memory_direct_write": False,
+        "rubric_status": report.get("rubric", {}).get("status"),
+        "affected_ids": {
+            "candidate_memory": report.get("candidate_memories", []),
+            "claim_graph": report.get("claim_graph_updates", []),
+            "identity_update_gate": report.get("identity_gate_proposals", []),
+            "procedural_candidates": report.get("procedural_candidate_updates", []),
+        },
+        "reversible_by_review": True,
+        "direct_state_write_mode": patch_diff.get("mode"),
+        "note": "Dream writes candidates and review material only. Promotion or identity change requires explicit review.",
     }
 
 

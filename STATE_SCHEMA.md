@@ -824,16 +824,62 @@ Dream artifacts keep the full review material for one Dream run:
 ```yaml
 dream_artifact:
   artifact_id: "dream_artifact_..."
+  artifact_version: "1.0"
   dream_id: "dream_..."
-  input_manifest: {}
-  observations: {}
+  input_manifest:
+    episodes: []
+    imports: []
+    pending_jobs: []
+    item_count: 0
+    items: []
+  provenance:
+    agent: "dream_engine"
+    activity: "dream_consolidation"
+    used_entities: []
+    generated_entities: []
+  observations:
+    summary: "..."
+    input_counts: {}
   proposals: []
+  proposal_index:
+    by_type: {}
+    by_risk: {}
+    by_recommended_action: {}
   review:
     status: "pending"
-  patch_diff: {}
+    required_for: []
+    queue: []
+    queue_summary: {}
+  patch_diff:
+    mode: "candidate_only"
+    state_writes: {}
+    proposed_changes: {}
+    blocked_direct_writes: {}
+    summary: {}
   decision_log: []
-  rollback_metadata: {}
+  rollback_metadata:
+    rollback_required: false
+    affected_ids: {}
+    identity_core_changed: false
+    active_memory_direct_write: false
+  package_completeness:
+    has_input_manifest: true
+    has_observations: true
+    has_proposals: true
+    has_review_queue: true
+    has_patch_diff: true
+    has_decision_log: true
+    has_rollback_metadata: true
 ```
+
+Dream artifact package v1.0 follows a local PROV/trace shape:
+
+- `input_manifest` records the concrete episodes/imported memories used by the Dream run,
+- `provenance` links Dream activity, used entities, and generated candidate/review entities,
+- `review.queue` names proposals, risks, evidence, and whether human review is required,
+- `patch_diff.mode: candidate_only` documents that Dream produced candidates/review material, not direct active memory or Identity Core writes,
+- `rollback_metadata.affected_ids` lists candidate memory, claim graph, identity gate, and procedural candidate ids affected by this Dream run,
+- `package_completeness` is validated so future runs do not silently lose audit material.
 
 ## 17. Update Log
 
