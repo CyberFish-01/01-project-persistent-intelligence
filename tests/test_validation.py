@@ -109,6 +109,45 @@ class StateValidationTests(unittest.TestCase):
             self.assertIn("claim_graph.claims[0].provenance", paths)
             self.assertIn("claim_graph.claims[0].resolution", paths)
 
+    def test_claim_graph_requires_links_and_review_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["claim_graph"]["claims"].append(
+                {
+                    "claim_id": "claim_bad_review",
+                    "timestamp": state["created_at"],
+                    "claim_type": "false_memory_injection",
+                    "statement": "Unsupported claim.",
+                    "status": "quarantined",
+                    "evidence": ["episode_1"],
+                    "provenance": [{"type": "unit_test"}],
+                    "dependencies": ["episode_1"],
+                    "revision_policy": {"mode": "minimal_change_preview"},
+                    "resolution": {
+                        "status": "quarantined",
+                        "requires_review": False,
+                    },
+                    "last_review_decision_id": "claim_decision_missing",
+                }
+            )
+            state["claim_graph"]["links"].append(
+                {
+                    "from": "episode_1",
+                    "to": "memory_stores.semantic_memory",
+                    "type": "invalid_link_type",
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("claim_graph.claims[0].review_history", paths)
+            self.assertIn("claim_graph.claims[0].resolution.patch_preview", paths)
+            self.assertIn("claim_graph.links[0].link_id", paths)
+            self.assertIn("claim_graph.links[0].type", paths)
+            self.assertIn("claim_graph.links[0]", paths)
+
     def test_task_hub_requires_action_and_procedural_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

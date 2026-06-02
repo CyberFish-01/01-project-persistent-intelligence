@@ -711,6 +711,27 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
     claims = claim_graph.get("claims")
     links = claim_graph.get("links")
     issues: list[ValidationIssue] = []
+    if claim_graph.get("graph_version") != "0.2":
+        issues.append(
+            ValidationIssue(
+                "claim_graph.graph_version",
+                "Claim graph must declare graph_version 0.2.",
+            )
+        )
+    if not isinstance(claim_graph.get("policy"), dict):
+        issues.append(
+            ValidationIssue(
+                "claim_graph.policy",
+                "Claim graph must include revision policy.",
+            )
+        )
+    if not isinstance(claim_graph.get("review_decisions"), list):
+        issues.append(
+            ValidationIssue(
+                "claim_graph.review_decisions",
+                "Claim graph review decisions must be a list.",
+            )
+        )
     if not isinstance(claims, list):
         issues.append(ValidationIssue("claim_graph.claims", "Claim graph claims must be a list."))
         claims = []
@@ -732,6 +753,9 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
             "status",
             "evidence",
             "provenance",
+            "dependencies",
+            "revision_policy",
+            "review_history",
             "resolution",
         ):
             if key not in claim:
@@ -765,15 +789,53 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
                     "Claim resolution must include status and requires_review.",
                 )
             )
+        elif "patch_preview" not in resolution:
+            issues.append(
+                ValidationIssue(
+                    path + ".resolution.patch_preview",
+                    "Claim resolution must include a minimal-change patch preview.",
+                )
+            )
+        if claim.get("status") in {"resolved", "rejected", "quarantined"}:
+            history = claim.get("review_history")
+            if not isinstance(history, list) or not history:
+                issues.append(
+                    ValidationIssue(
+                        path + ".review_history",
+                        "Reviewed claim requires review history.",
+                    )
+                )
+            elif history[-1].get("decision_id") != claim.get("last_review_decision_id"):
+                issues.append(
+                    ValidationIssue(
+                        path + ".last_review_decision_id",
+                        "Claim last_review_decision_id must match latest review decision.",
+                    )
+                )
 
     for index, link in enumerate(links):
         path = f"claim_graph.links[{index}]"
         if not isinstance(link, dict):
             issues.append(ValidationIssue(path, "Claim graph link must be an object."))
             continue
-        for key in ("from", "to", "type"):
+        for key in ("link_id", "timestamp", "from", "to", "type", "reason"):
             if key not in link:
                 issues.append(ValidationIssue(path + f".{key}", "Claim graph link key is missing."))
+        if link.get("type") not in {"contradicts", "supports", "supersedes", "depends_on"}:
+            issues.append(
+                ValidationIssue(
+                    path + ".type",
+                    "Claim graph link type is not supported.",
+                )
+            )
+        endpoints = {str(link.get("from")), str(link.get("to"))}
+        if claim_ids and not any(endpoint in claim_ids for endpoint in endpoints):
+            issues.append(
+                ValidationIssue(
+                    path,
+                    "Claim graph link must reference at least one known claim.",
+                )
+            )
     return issues
 
 

@@ -568,17 +568,47 @@ git diff --check
 - artifact history 还没有 retention / compaction policy；
 - claim resolution 仍然很浅。
 
+### P14 Claim Graph v0.2 / Belief Revision
+
+目标：让 conflict 成为可审查的 claim/reason/dependency 单元。
+
+状态：已实现第一版本地 v0.2。
+
+可执行项：
+
+1. claim graph version、policy 和 review decision store - 已完成；
+2. support/contradiction/dependency links - 已完成第一版；
+3. claim `revision_policy` 和 `review_history` - 已完成；
+4. `review-claim` CLI 和 StateStore method - 已完成；
+5. minimal-change patch preview - 已完成 preview-only；
+6. claim review patch preview 的 scenario evaluation - 已完成。
+
+已实现结果：
+
+- Dream conflict claims 现在会从 evidence 生成 support links，并为 identity 或 memory-sensitive conflicts 生成 contradiction/dependency links；
+- claim review 会记录 snapshot、audit、trace、event、update_log、review decision 和 patch preview；
+- patch preview 明确拒绝直接修改 Identity Core 和 semantic memory；
+- scenario evaluation 增加 `claim_graph_review_patch_preview`。
+
+剩余缺口：
+
+- link generation 仍然是 deterministic 和浅层的；
+- 还没有 claim merge/supersede workflow；
+- 还没有真实 patch executor；
+- identity proposal 可以使用 claim id 作为 evidence，但还不会深度推理 claim dependencies；
+- 还没有 claim graph review UI。
+
 ## 6. 当前建议
 
 下一步先做：
 
 ```text
-P14 Claim Graph v0.2 / Belief Revision
+P15 Context Builder v0.3
 ```
 
 理由：
 
-- P13 已经让 Dream output 成为可审查 package，但 conflict 仍缺少真正的 support / contradiction / dependency links；
-- Truth Maintenance Systems 和 AGM belief revision 都指向 reason dependency 与 minimal-change repair，这是下一块缺失地基；
-- P14 应让 claim graph 可审查：support/contradiction links、`review-claim`、minimal-change patch preview；
-- 这会改善 false-memory handling、stale preference update，以及后续 identity proposal 的证据质量。
+- P8 已经给 context activation 做了第一版解释机制，但 activation trace 仍只随 response 返回，policy 也还是 hardcoded；
+- P11-P14 已经加入 identity gate、event log、Dream package 和 claim review material，这些都应该影响 context selection；
+- P15 应增加 configurable context policy、persistent activation traces 和 source attribution budget；
+- 这会让 session start 更像 bounded state transfer，而不是临时 memory retrieval。

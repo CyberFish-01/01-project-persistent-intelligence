@@ -576,6 +576,7 @@ Claim graph 记录待审 claim、理由、证据和冲突依赖。
 
 ```yaml
 claim_graph:
+  graph_version: "0.2"
   claims:
     - claim_id: "claim_conflict_0001"
       timestamp: "ISO-8601 timestamp"
@@ -594,6 +595,12 @@ claim_graph:
       reason: "Store as an unverified claim and require independent confirmation."
       dependencies:
         - "episode_0001"
+      revision_policy:
+        mode: "minimal_change_preview"
+        requires_review: true
+        allow_direct_memory_mutation: false
+        allow_identity_core_mutation: false
+      review_history: []
       source_conflict_id: "conflict_0001"
       resolution:
         status: "unresolved"
@@ -602,15 +609,29 @@ claim_graph:
         minimal_change: true
         may_update_identity_core: false
         may_update_semantic_memory: false
+        patch_preview:
+          mode: "minimal_change_preview"
+          would_mutate_identity_core: false
+          would_mutate_semantic_memory: false
   links:
-    - from: "claim_a"
-      to: "claim_b"
+    - link_id: "claim_link_0001"
+      timestamp: "ISO-8601 timestamp"
+      from: "episode_0001"
+      to: "claim_conflict_0001"
       type: "contradicts|supports|supersedes|depends_on"
+      reason: "Evidence item supports the existence of this claim record."
+      confidence: 0.7
+  review_decisions: []
+  policy:
+    revision_mode: "minimal_change_preview"
+    allow_direct_memory_mutation: false
+    allow_identity_core_mutation: false
+    requires_review: true
 ```
 
-每个 claim 都必须有 evidence、provenance、status 和 resolution metadata。
+每个 claim 都必须有 evidence、provenance、status、dependencies、revision policy、review history 和 resolution metadata。
 
-当前 Dream conflict detection 会同时写入 `open_conflicts` 和对应 claim nodes。Claim graph entry 是 review/audit material；它本身不会执行 resolution action。
+当前 Dream conflict detection 会同时写入 `open_conflicts`、对应 claim nodes，以及 support/contradiction/dependency links。Claim graph entry 是 review/audit material；`review-claim` 会创建 minimal-change patch preview 和 review decision，但不会直接修改 semantic memory 或 Identity Core。
 
 ## 13. Task Hub
 

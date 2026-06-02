@@ -50,6 +50,7 @@ LIFECYCLE_ACTION_STORES = {
     "semantic_memory",
 }
 IDENTITY_REVIEW_ACTIONS = {"approve", "reject", "quarantine"}
+CLAIM_REVIEW_ACTIONS = {"resolve", "reject", "quarantine", "keep_open"}
 
 
 def utc_now() -> str:
@@ -106,8 +107,16 @@ def default_session_policy(timestamp: str) -> dict:
 
 def default_claim_graph() -> dict:
     return {
+        "graph_version": "0.2",
         "claims": [],
         "links": [],
+        "review_decisions": [],
+        "policy": {
+            "revision_mode": "minimal_change_preview",
+            "allow_direct_memory_mutation": False,
+            "allow_identity_core_mutation": False,
+            "requires_review": True,
+        },
     }
 
 
@@ -330,6 +339,22 @@ def ensure_claim_graph(state: dict, timestamp: str) -> bool:
     if not isinstance(claim_graph.get("links"), list):
         claim_graph["links"] = []
         changed = True
+    default_graph = default_claim_graph()
+    for key in ("graph_version", "policy", "review_decisions"):
+        if key not in claim_graph:
+            claim_graph[key] = default_graph[key]
+            changed = True
+    if not isinstance(claim_graph.get("review_decisions"), list):
+        claim_graph["review_decisions"] = []
+        changed = True
+    if not isinstance(claim_graph.get("policy"), dict):
+        claim_graph["policy"] = default_graph["policy"]
+        changed = True
+    else:
+        for key, value in default_graph["policy"].items():
+            if key not in claim_graph["policy"]:
+                claim_graph["policy"][key] = value
+                changed = True
     for conflict in state.get("open_conflicts", []):
         if not isinstance(conflict, dict):
             continue
@@ -2214,6 +2239,180 @@ class StateStore:
             "gate_result": gate_result,
         }
 
+    def review_claim(
+        self,
+        claim_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in CLAIM_REVIEW_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_claim_review_action",
+                "action": action,
+            }
+        state = self.load()
+        claim_graph = state.setdefault("claim_graph", default_claim_graph())
+        claim = next(
+            (
+                item
+                for item in claim_graph.setdefault("claims", [])
+                if isinstance(item, dict) and item.get("claim_id") == claim_id
+            ),
+            None,
+        )
+        if claim is None:
+            return {
+                "status": "not_found",
+                "error": "claim_not_found",
+                "claim_id": claim_id,
+            }
+
+        now = utc_now()
+        review_status = {
+            "resolve": "resolved",
+            "reject": "rejected",
+            "quarantine": "quarantined",
+            "keep_open": "open",
+        }[normalized_action]
+        patch_preview = build_claim_patch_preview(
+            conflict=None,
+            claim_id=claim_id,
+            evidence=claim.get("evidence", []),
+            action=normalized_action,
+            decision_note=decision_note,
+        )
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_claim",
+            target_path="claim_graph.claims",
+            evidence=[claim_id] + list(claim.get("evidence", [])),
+            metadata={
+                "claim_id": claim_id,
+                "review_action": normalized_action,
+                "patch_preview": patch_preview,
+            },
+        )
+        decision = {
+            "decision_id": new_id("claim_decision"),
+            "timestamp": now,
+            "claim_id": claim_id,
+            "reviewer": reviewer,
+            "action": normalized_action,
+            "result": review_status,
+            "decision_note": decision_note,
+            "snapshot_id": snapshot["snapshot_id"],
+            "patch_preview": patch_preview,
+            "rollback": {
+                "snapshot_id": snapshot["snapshot_id"],
+                "reversible": True,
+            },
+        }
+        before_status = claim.get("status", "open")
+        claim["status"] = review_status
+        claim["reviewed_at"] = now
+        claim["reviewer"] = reviewer
+        claim["last_review_decision_id"] = decision["decision_id"]
+        claim.setdefault("review_history", []).append(decision)
+        claim.setdefault("resolution", {})
+        claim["resolution"].update(
+            {
+                "status": review_status,
+                "requires_review": normalized_action == "keep_open",
+                "reviewed_at": now,
+                "reviewer": reviewer,
+                "decision_note": decision_note,
+                "claim_decision_id": decision["decision_id"],
+                "patch_preview": patch_preview,
+                "minimal_change": True,
+                "may_update_identity_core": False,
+                "may_update_semantic_memory": False,
+            }
+        )
+        claim_graph.setdefault("review_decisions", []).append(decision)
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "claim_graph.claims",
+                "operation": f"{normalized_action}_claim",
+                "before": before_status,
+                "after": review_status,
+                "evidence": [claim_id] + list(claim.get("evidence", [])),
+                "gate": "medium",
+                "confidence": claim.get("confidence", 0.6),
+                "claim_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_claim",
+            target="claim_graph.claims",
+            outcome=review_status,
+            evidence=[claim_id] + list(claim.get("evidence", [])),
+            metadata={
+                "claim_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "patch_preview": patch_preview,
+                "decision_note": decision_note,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="claim_review",
+            nodes=[
+                {
+                    "id": "claim",
+                    "type": "Memory",
+                    "claim_id": claim_id,
+                },
+                {
+                    "id": "review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+                {
+                    "id": "patch_preview",
+                    "type": "Decision",
+                    "mode": "minimal_change_preview",
+                    "would_mutate_identity_core": False,
+                    "would_mutate_semantic_memory": False,
+                },
+            ],
+            edges=[
+                {"from": "claim", "to": "review", "type": "feedback"},
+                {"from": "review", "to": "patch_preview", "type": "data_flow"},
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_claim",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "claim_decision": decision,
+                }
+            ],
+            summary=f"Reviewed claim {claim_id} with action {normalized_action}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": review_status,
+            "claim_id": claim_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "claim_decision_id": decision["decision_id"],
+            "patch_preview": patch_preview,
+        }
+
     def apply_memory_lifecycle_action(
         self,
         store_name: str,
@@ -3432,6 +3631,13 @@ def build_claim_from_conflict(
         "reason": conflict.get("proposed_resolution", ""),
         "dependencies": evidence,
         "source_conflict_id": conflict_id,
+        "revision_policy": {
+            "mode": "minimal_change_preview",
+            "requires_review": True,
+            "allow_direct_memory_mutation": False,
+            "allow_identity_core_mutation": False,
+        },
+        "review_history": [],
         "resolution": {
             "status": "unresolved",
             "proposal": conflict.get("proposed_resolution", ""),
@@ -3439,6 +3645,12 @@ def build_claim_from_conflict(
             "minimal_change": True,
             "may_update_identity_core": False,
             "may_update_semantic_memory": False,
+            "patch_preview": build_claim_patch_preview(
+                conflict=conflict,
+                claim_id=claim_id,
+                evidence=evidence,
+                action="keep_open",
+            ),
         },
     }
 
@@ -3458,7 +3670,109 @@ def add_claim_to_graph(claim_graph: dict, claim: dict) -> bool:
     if any(existing.get("claim_id") == claim_id for existing in claims):
         return False
     claims.append(claim)
+    for link in build_claim_links(claim):
+        add_claim_link(claim_graph, link)
     return True
+
+
+def build_claim_links(claim: dict) -> List[dict]:
+    claim_id = claim.get("claim_id")
+    timestamp = claim.get("timestamp") or utc_now()
+    links = []
+    for evidence_id in claim.get("evidence", []):
+        links.append(
+            {
+                "link_id": new_id("claim_link"),
+                "timestamp": timestamp,
+                "from": str(evidence_id),
+                "to": claim_id,
+                "type": "supports",
+                "reason": "Evidence item supports the existence of this claim record.",
+                "confidence": claim.get("confidence", 0.6),
+            }
+        )
+    claim_type = str(claim.get("claim_type") or "")
+    if claim_type in {
+        "identity_overwrite_attempt",
+        "false_memory_injection",
+        "roleplay_identity_boundary",
+    }:
+        links.append(
+            {
+                "link_id": new_id("claim_link"),
+                "timestamp": timestamp,
+                "from": claim_id,
+                "to": "identity_core",
+                "type": "contradicts",
+                "reason": "Claim touches identity boundaries and must not update Identity Core without high-gate review.",
+                "confidence": claim.get("confidence", 0.6),
+            }
+        )
+    if claim_type in {"stale_preference", "imported_memory_conflict"}:
+        links.append(
+            {
+                "link_id": new_id("claim_link"),
+                "timestamp": timestamp,
+                "from": claim_id,
+                "to": "memory_stores.semantic_memory",
+                "type": "depends_on",
+                "reason": "Claim may require semantic memory review before active use changes.",
+                "confidence": claim.get("confidence", 0.6),
+            }
+        )
+    return links
+
+
+def add_claim_link(claim_graph: dict, link: dict) -> bool:
+    links = claim_graph.setdefault("links", [])
+    fingerprint = (
+        link.get("from"),
+        link.get("to"),
+        link.get("type"),
+        link.get("reason"),
+    )
+    for existing in links:
+        if (
+            existing.get("from"),
+            existing.get("to"),
+            existing.get("type"),
+            existing.get("reason"),
+        ) == fingerprint:
+            return False
+    links.append(link)
+    return True
+
+
+def build_claim_patch_preview(
+    conflict: Optional[dict],
+    claim_id: str,
+    evidence: List[str],
+    action: str,
+    decision_note: str = "",
+) -> dict:
+    normalized_action = str(action or "keep_open")
+    status_by_action = {
+        "resolve": "resolved",
+        "reject": "rejected",
+        "quarantine": "quarantined",
+        "keep_open": "open",
+    }
+    return {
+        "mode": "minimal_change_preview",
+        "claim_id": claim_id,
+        "action": normalized_action,
+        "would_set_claim_status": status_by_action.get(normalized_action, "open"),
+        "would_update_resolution_status": status_by_action.get(
+            normalized_action,
+            "open",
+        ),
+        "would_mutate_identity_core": False,
+        "would_mutate_semantic_memory": False,
+        "affected_evidence": evidence,
+        "reason": decision_note
+        or (conflict or {}).get("proposed_resolution", "")
+        or "Review claim without direct memory mutation.",
+    }
 
 
 def build_candidate_review_decision(

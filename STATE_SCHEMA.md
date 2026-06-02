@@ -574,6 +574,7 @@ It is append-friendly and does not directly mutate active semantic memory or Ide
 
 ```yaml
 claim_graph:
+  graph_version: "0.2"
   claims:
     - claim_id: "claim_conflict_0001"
       timestamp: "ISO-8601 timestamp"
@@ -592,6 +593,12 @@ claim_graph:
       reason: "Store as an unverified claim and require independent confirmation."
       dependencies:
         - "episode_0001"
+      revision_policy:
+        mode: "minimal_change_preview"
+        requires_review: true
+        allow_direct_memory_mutation: false
+        allow_identity_core_mutation: false
+      review_history: []
       source_conflict_id: "conflict_0001"
       resolution:
         status: "unresolved"
@@ -600,15 +607,29 @@ claim_graph:
         minimal_change: true
         may_update_identity_core: false
         may_update_semantic_memory: false
+        patch_preview:
+          mode: "minimal_change_preview"
+          would_mutate_identity_core: false
+          would_mutate_semantic_memory: false
   links:
-    - from: "claim_a"
-      to: "claim_b"
+    - link_id: "claim_link_0001"
+      timestamp: "ISO-8601 timestamp"
+      from: "episode_0001"
+      to: "claim_conflict_0001"
       type: "contradicts|supports|supersedes|depends_on"
+      reason: "Evidence item supports the existence of this claim record."
+      confidence: 0.7
+  review_decisions: []
+  policy:
+    revision_mode: "minimal_change_preview"
+    allow_direct_memory_mutation: false
+    allow_identity_core_mutation: false
+    requires_review: true
 ```
 
-Every claim must have evidence, provenance, status, and resolution metadata.
+Every claim must have evidence, provenance, status, dependencies, revision policy, review history, and resolution metadata.
 
-Current Dream conflict detection writes `open_conflicts` and corresponding claim nodes. Claim graph entries are review/audit material; they do not execute resolution actions by themselves.
+Current Dream conflict detection writes `open_conflicts`, corresponding claim nodes, and support/contradiction/dependency links. Claim graph entries are review/audit material; `review-claim` creates a minimal-change patch preview and review decision, but does not directly mutate semantic memory or Identity Core.
 
 ## 13. Task Hub
 

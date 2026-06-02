@@ -142,6 +142,19 @@ def main() -> None:
     identity_review_parser.add_argument("--reviewer", default="manual_review")
     identity_review_parser.add_argument("--decision-note", default="")
 
+    claim_review_parser = subparsers.add_parser(
+        "review-claim",
+        help="Review a claim graph node with minimal-change patch preview.",
+    )
+    claim_review_parser.add_argument("claim_id")
+    claim_review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["resolve", "reject", "quarantine", "keep_open"],
+    )
+    claim_review_parser.add_argument("--reviewer", default="manual_review")
+    claim_review_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -288,6 +301,15 @@ def main() -> None:
         print_json(
             store.review_identity_update(
                 proposal_id=args.proposal_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "review-claim":
+        print_json(
+            store.review_claim(
+                claim_id=args.claim_id,
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,

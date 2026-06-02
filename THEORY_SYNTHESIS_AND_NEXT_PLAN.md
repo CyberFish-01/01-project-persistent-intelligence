@@ -568,17 +568,47 @@ Remaining gaps:
 - no retention / compaction policy for artifact history;
 - claim resolution is still shallow.
 
+### P14 Claim Graph v0.2 / Belief Revision
+
+Goal: make conflicts reviewable as claim/reason/dependency units.
+
+Status: implemented as a first local v0.2 pass.
+
+Executable items:
+
+1. claim graph version, policy, and review decision store - done;
+2. support/contradiction/dependency links - first pass done;
+3. claim `revision_policy` and `review_history` - done;
+4. `review-claim` CLI and StateStore method - done;
+5. minimal-change patch preview - done preview-only;
+6. scenario evaluation for claim review patch preview - done.
+
+Implemented result:
+
+- Dream conflict claims now produce support links from evidence and contradiction/dependency links for identity or memory-sensitive conflicts;
+- claim review records snapshot, audit, trace, event, update_log, review decision, and patch preview;
+- patch preview explicitly refuses direct Identity Core and semantic memory mutation;
+- scenario evaluation adds `claim_graph_review_patch_preview`.
+
+Remaining gaps:
+
+- link generation is still deterministic and shallow;
+- no claim merge/supersede workflow yet;
+- no actual patch executor yet;
+- identity proposals use claim ids as evidence, but do not deeply reason over claim dependencies yet;
+- no UI for reviewing claim graph.
+
 ## 6. Current Recommendation
 
-Do P14 next:
+Do P15 next:
 
 ```text
-P14 Claim Graph v0.2 / Belief Revision
+P15 Context Builder v0.3
 ```
 
 Reason:
 
-- P13 now gives Dream outputs a reviewable package, but conflicts still lack real support / contradiction / dependency links;
-- Truth Maintenance Systems and AGM belief revision point to reason dependencies and minimal-change repair as the next missing foundation;
-- P14 should make claim graph reviewable: support/contradiction links, `review-claim`, and minimal-change patch preview;
-- this improves false-memory handling, stale preference updates, and later identity proposal evidence quality.
+- P8 gave context activation a first explainable form, but activation trace is still response-only and policy is hardcoded;
+- P11-P14 now add identity gate, event log, Dream package, and claim review material that should influence context selection;
+- P15 should add configurable context policy, persistent activation traces, and source attribution budget;
+- this will make session start more like bounded state transfer rather than ad hoc memory retrieval.
