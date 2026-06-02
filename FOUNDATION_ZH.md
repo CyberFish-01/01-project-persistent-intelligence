@@ -188,9 +188,12 @@ local core
 
 ```bash
 python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli validate-state
 ```
 
-它使用临时 state，检查 continuity anchors、dry-run 不写入、adapter event 去重、identity overwrite gate，不会把测试 episode 写进真实 `work/01_state`。
+`evaluate-foundation` 使用临时 state，检查 state invariants、continuity anchors、dry-run 不写入、adapter event 去重、identity overwrite gate，不会把测试 episode 写进真实 `work/01_state`。
+
+`validate-state` 检查当前 `--state-dir` 的真实 state 结构，但不修改它。
 
 ## 9. 判断一个想法是否偏离
 

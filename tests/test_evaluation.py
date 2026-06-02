@@ -10,9 +10,10 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(report["state_mode"], "temporary")
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["failed"], 0)
-        self.assertGreaterEqual(report["passed"], 4)
+        self.assertGreaterEqual(report["passed"], 5)
 
         check_names = {check["name"] for check in report["checks"]}
+        self.assertIn("state_invariants", check_names)
         self.assertIn("continuity_anchors", check_names)
         self.assertIn("dry_run_is_non_mutating", check_names)
         self.assertIn("adapter_event_deduplication", check_names)

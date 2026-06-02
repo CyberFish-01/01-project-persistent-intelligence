@@ -280,10 +280,17 @@ python3 -m one_core.cli evaluate-foundation
 
 当前检查：
 
+- state invariants 是否成立；
 - continuity anchors 是否完整；
 - dry-run 是否不写入；
 - adapter event 是否去重；
 - single-turn identity overwrite 是否被 gate 住并记录为 conflict。
+
+也可以单独检查当前真实 state：
+
+```bash
+python3 -m one_core.cli validate-state
+```
 
 这不是完整评估体系，只是把 foundation invariants 变成可运行的第一组检查。
 

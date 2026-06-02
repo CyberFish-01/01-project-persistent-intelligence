@@ -7,6 +7,7 @@ from typing import List
 
 from .api import OneCoreAPI, state_summary
 from .state import StateStore
+from .validation import validate_state
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,7 @@ def run_foundation_evaluation() -> dict:
         store = StateStore(Path(tmp))
         store.init()
         checks = [
+            check_state_invariants(store),
             check_continuity_anchors(store),
             check_dry_run_is_non_mutating(store),
             check_adapter_event_deduplication(store),
@@ -36,6 +38,15 @@ def run_foundation_evaluation() -> dict:
         "failed": len(failed),
         "checks": [check_to_dict(check) for check in checks],
     }
+
+
+def check_state_invariants(store: StateStore) -> EvaluationCheck:
+    report = validate_state(store.load(), store.list_episodes())
+    return EvaluationCheck(
+        name="state_invariants",
+        passed=report["status"] == "passed",
+        details=report,
+    )
 
 
 def check_continuity_anchors(store: StateStore) -> EvaluationCheck:

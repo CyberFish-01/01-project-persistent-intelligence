@@ -53,6 +53,7 @@ python3 -m one_core.cli init
 python3 -m one_core.cli interact "We begin implementing 01 Core."
 python3 -m one_core.cli dream
 python3 -m one_core.cli status
+python3 -m one_core.cli validate-state
 python3 -m one_core.cli evaluate-foundation
 ```
 

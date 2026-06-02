@@ -188,9 +188,12 @@ The repository provides a non-destructive foundation evaluation command:
 
 ```bash
 python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli validate-state
 ```
 
-It uses temporary state to check continuity anchors, dry-run non-mutation, adapter event deduplication, and identity overwrite gating. It does not write test episodes into the real `work/01_state`.
+`evaluate-foundation` uses temporary state to check state invariants, continuity anchors, dry-run non-mutation, adapter event deduplication, and identity overwrite gating. It does not write test episodes into the real `work/01_state`.
+
+`validate-state` checks the real state structure under the current `--state-dir` without mutating it.
 
 ## 9. Drift Check
 

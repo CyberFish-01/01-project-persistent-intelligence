@@ -278,10 +278,17 @@ It uses temporary state and does not pollute the real `work/01_state`.
 
 Current checks:
 
+- state invariants hold;
 - continuity anchors are complete;
 - dry-run does not write state;
 - adapter events deduplicate;
 - single-turn identity overwrite is gated and recorded as a conflict.
+
+The real current state can also be checked directly:
+
+```bash
+python3 -m one_core.cli validate-state
+```
 
 This is not the full evaluation system. It is the first runnable set of checks for the foundation invariants.
 

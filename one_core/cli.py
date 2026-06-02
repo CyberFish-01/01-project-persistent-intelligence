@@ -17,6 +17,7 @@ from .dream import DreamEngine
 from .evaluation import run_foundation_evaluation
 from .importer import import_text_file
 from .state import DEFAULT_STATE_DIR, StateStore
+from .validation import validate_state
 
 
 def main() -> None:
@@ -71,6 +72,10 @@ def main() -> None:
     subparsers.add_parser(
         "evaluate-foundation",
         help="Run non-destructive foundation invariant checks.",
+    )
+    subparsers.add_parser(
+        "validate-state",
+        help="Validate the current state structure without mutating it.",
     )
 
     remote_parser = subparsers.add_parser(
@@ -157,6 +162,8 @@ def main() -> None:
         print_json(store.build_context_package())
     elif args.command == "evaluate-foundation":
         print_json(run_foundation_evaluation())
+    elif args.command == "validate-state":
+        print_json(validate_state(store.load(), store.list_episodes()))
     elif args.command == "remote":
         client = OneCoreClient(args.api_base_url)
         if args.remote_command == "health":
