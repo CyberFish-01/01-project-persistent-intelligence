@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from .state import (
     StateStore,
@@ -48,6 +48,7 @@ class DreamEngine:
         conflicts = detect_conflicts(selected_items, state)
         forgetting = forgetting_proposals(selected)
         identity_updates = identity_update_proposals(conflicts)
+        procedural = procedural_candidates(state)
         proposals = build_dream_proposals(
             semantic_candidates=semantic,
             identity_update_proposals=identity_updates,
@@ -69,6 +70,7 @@ class DreamEngine:
             "conflicts": conflicts,
             "identity_update_proposals": identity_updates,
             "forgetting_proposals": forgetting,
+            "procedural_candidates": procedural,
             "proposals": proposals,
             "rubric": rubric,
             "rubric_summary": summarize_rubric(rubric),
@@ -106,6 +108,12 @@ class DreamEngine:
                 claim_ids.append(claim["claim_id"])
             conflict["claim_id"] = claim["claim_id"]
         report["claim_graph_updates"] = claim_ids
+        procedural_ids = []
+        for candidate in report["procedural_candidates"]:
+            stored = add_procedural_candidate(state, candidate, now, report["id"])
+            if stored:
+                procedural_ids.append(stored["candidate_id"])
+        report["procedural_candidate_updates"] = procedural_ids
         artifact = build_dream_artifact(
             report=report,
             selected_items=selected_items,
@@ -152,6 +160,7 @@ class DreamEngine:
                 "artifact_id": artifact["artifact_id"],
                 "candidate_memories": report["candidate_memories"],
                 "claim_graph_updates": report["claim_graph_updates"],
+                "procedural_candidate_updates": report["procedural_candidate_updates"],
             },
             state=state,
         )
@@ -210,6 +219,12 @@ class DreamEngine:
                     "count": len(report["conflicts"]),
                     "claim_graph_updates": report["claim_graph_updates"],
                 },
+                {
+                    "operation": "procedural_candidate_review",
+                    "target": "task_hub.procedural_candidates",
+                    "count": len(report["procedural_candidate_updates"]),
+                    "memory_ids": report["procedural_candidate_updates"],
+                },
             ],
             review_events=[
                 {
@@ -228,6 +243,7 @@ class DreamEngine:
             ],
             summary=report["summary"],
             audit_event_ids=[audit_event["id"]],
+            state=state,
         )
         self.store.record_dream_artifact(artifact)
         self.store.append_jsonl(self.store.dreams_path, report)
@@ -272,6 +288,138 @@ def semantic_candidates(items: List[dict]) -> List[dict]:
                 }
             )
     return candidates
+
+
+def procedural_candidates(state: dict) -> List[dict]:
+    trace = state.get("task_hub", {}).get("action_trace", [])
+    if not isinstance(trace, list):
+        return []
+
+    successful_by_workflow: dict[str, List[dict]] = {}
+    for action in trace:
+        if not isinstance(action, dict):
+            continue
+        workflow = str(action.get("workflow") or "").strip()
+        if not workflow or action.get("status") != "completed":
+            continue
+        successful_by_workflow.setdefault(workflow, []).append(action)
+
+    existing_workflows = {
+        str(candidate.get("workflow"))
+        for candidate in state.get("task_hub", {}).get("procedural_candidates", [])
+        if isinstance(candidate, dict)
+    }
+    candidates = []
+    for workflow, actions in sorted(successful_by_workflow.items()):
+        if workflow in existing_workflows or len(actions) < 2:
+            continue
+        evidence = [action["action_id"] for action in actions[-5:] if action.get("action_id")]
+        candidates.append(
+            {
+                "workflow": workflow,
+                "statement": (
+                    f"Repeated successful workflow '{workflow}' may be reusable "
+                    "procedural memory after review."
+                ),
+                "evidence": evidence,
+                "confidence": min(0.85, 0.45 + len(actions) * 0.1),
+                "risk": "low",
+                "recommended_action": "review_then_promote",
+                "steps": procedural_steps_for_workflow(workflow),
+            }
+        )
+    return candidates
+
+
+def procedural_steps_for_workflow(workflow: str) -> List[str]:
+    known = {
+        "record_episode": [
+            "Build an episode preview from the incoming event.",
+            "Append the episode to episodic memory.",
+            "Update working state and queue Dream consolidation.",
+            "Record audit and trace evidence.",
+        ],
+        "memory_import": [
+            "Read external memory source.",
+            "Filter sensitive or duplicate chunks.",
+            "Stage imported memory without identity updates.",
+            "Queue Dream review for imported memories.",
+        ],
+        "dream_consolidation": [
+            "Collect pending episodes and imported memories.",
+            "Create semantic candidates and conflict records.",
+            "Store reviewable artifacts without active identity mutation.",
+            "Record audit, trace, and procedural evidence.",
+        ],
+        "candidate_memory_review": [
+            "Review candidate evidence.",
+            "Archive, discard, or quarantine without direct identity mutation.",
+            "Record decision, snapshot, audit, and trace metadata.",
+        ],
+        "candidate_memory_promotion": [
+            "Review candidate evidence.",
+            "Create or reuse semantic memory.",
+            "Link promotion to decision and rollback metadata.",
+            "Record audit and trace metadata.",
+        ],
+        "memory_lifecycle_action": [
+            "Review target memory and lifecycle action.",
+            "Apply archive, discard, or quarantine metadata.",
+            "Preserve audit trail and snapshot metadata.",
+        ],
+    }
+    return known.get(
+        workflow,
+        [
+            "Review the action trace evidence.",
+            "Confirm the workflow is repeatable and low risk.",
+            "Promote only after manual procedural review.",
+        ],
+    )
+
+
+def add_procedural_candidate(
+    state: dict,
+    candidate: dict,
+    timestamp: str,
+    dream_id: str,
+) -> Optional[dict]:
+    task_hub = state.setdefault("task_hub", {})
+    procedural_store = task_hub.setdefault("procedural_candidates", [])
+    workflow = str(candidate.get("workflow") or "").strip()
+    if not workflow:
+        return None
+    existing = next(
+        (
+            item
+            for item in procedural_store
+            if isinstance(item, dict) and item.get("workflow") == workflow
+        ),
+        None,
+    )
+    if existing:
+        return existing
+    stored = {
+        "candidate_id": new_id("proc"),
+        "timestamp": timestamp,
+        "workflow": workflow,
+        "statement": candidate.get("statement", ""),
+        "steps": candidate.get("steps", []),
+        "evidence": candidate.get("evidence", []),
+        "confidence": candidate.get("confidence", 0.5),
+        "risk": candidate.get("risk", "medium"),
+        "review_status": "pending",
+        "recommended_action": candidate.get("recommended_action", "manual_review_required"),
+        "source_dream_id": dream_id,
+        "provenance": [
+            {
+                "type": "dream_procedural_candidate",
+                "dream_id": dream_id,
+            }
+        ],
+    }
+    procedural_store.append(stored)
+    return stored
 
 
 def preference_change_candidates(items: List[dict]) -> List[dict]:
@@ -683,6 +831,11 @@ def build_dream_artifact(
             "claim_graph_updates": report.get("claim_graph_updates", []),
             "semantic_candidates": report["semantic_candidates"],
             "candidate_memories": report.get("candidate_memories", []),
+            "procedural_candidates": report.get("procedural_candidates", []),
+            "procedural_candidate_updates": report.get(
+                "procedural_candidate_updates",
+                [],
+            ),
         },
         "proposals": proposals,
         "rubric": report.get("rubric", {}),
@@ -709,6 +862,7 @@ def build_dream_artifact(
                 for proposal in proposals
                 if proposal["type"] == "forgetting_candidate"
             ],
+            "procedural_candidates": report.get("procedural_candidates", []),
         },
         "decision_log": [
             {

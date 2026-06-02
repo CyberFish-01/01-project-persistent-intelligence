@@ -109,6 +109,32 @@ class StateValidationTests(unittest.TestCase):
             self.assertIn("claim_graph.claims[0].provenance", paths)
             self.assertIn("claim_graph.claims[0].resolution", paths)
 
+    def test_task_hub_requires_action_and_procedural_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["task_hub"]["action_trace"].append(
+                {
+                    "action_id": "action_bad",
+                    "workflow": "record_episode",
+                }
+            )
+            state["task_hub"]["procedural_candidates"].append(
+                {
+                    "candidate_id": "proc_bad",
+                    "workflow": "record_episode",
+                    "evidence": [],
+                    "review_status": "pending",
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("task_hub.action_trace[0].trace_id", paths)
+            self.assertIn("task_hub.action_trace[0].timestamp", paths)
+            self.assertIn("task_hub.procedural_candidates[0].evidence", paths)
+
 
 if __name__ == "__main__":
     unittest.main()

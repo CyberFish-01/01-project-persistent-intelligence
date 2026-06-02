@@ -10,7 +10,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from .seed import make_identity_seed
 
 
-STATE_VERSION = "0.7"
+STATE_VERSION = "0.8"
 DEFAULT_STATE_DIR = Path("work/01_state")
 
 DEFAULT_REGISTERED_ADAPTERS = (
@@ -107,6 +107,70 @@ def default_claim_graph() -> dict:
         "claims": [],
         "links": [],
     }
+
+
+def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> dict:
+    tasks = tasks_from_current_plan(working_state or {}, timestamp)
+    return {
+        "active_tasks": [
+            task
+            for task in tasks
+            if task.get("status") in {"active", "pending", "in_progress"}
+        ],
+        "completed_tasks": [
+            task for task in tasks if task.get("status") == "completed"
+        ],
+        "blocked_tasks": [
+            task for task in tasks if task.get("status") == "blocked"
+        ],
+        "recurring_duties": [],
+        "action_trace": [],
+        "procedural_candidates": [],
+    }
+
+
+def tasks_from_current_plan(working_state: dict, timestamp: str) -> List[dict]:
+    tasks = []
+    current_plan = working_state.get("current_plan", [])
+    if not isinstance(current_plan, list):
+        return tasks
+    for index, item in enumerate(current_plan):
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("step") or item.get("title") or "").strip()
+        if not title:
+            continue
+        raw_status = str(item.get("status") or "pending").strip().lower()
+        status = normalize_task_status(raw_status)
+        tasks.append(
+            {
+                "task_id": new_id("task"),
+                "title": title,
+                "status": status,
+                "created_at": timestamp,
+                "updated_at": timestamp,
+                "source": "working_state.current_plan",
+                "source_index": index,
+                "source_key": task_source_key(index=index, title=title),
+                "evidence": ["working_state.current_plan"],
+            }
+        )
+    return tasks
+
+
+def normalize_task_status(status: str) -> str:
+    if status in {"done", "complete", "completed"}:
+        return "completed"
+    if status in {"active", "pending", "in_progress"}:
+        return status
+    if status in {"blocked", "stalled"}:
+        return "blocked"
+    return "pending"
+
+
+def task_source_key(index: int, title: str) -> str:
+    normalized = re.sub(r"\s+", " ", title.strip().lower())
+    return f"working_state.current_plan:{index}:{normalized}"
 
 
 def default_lifecycle(
@@ -277,6 +341,101 @@ def ensure_claim_graph(state: dict, timestamp: str) -> bool:
     return changed
 
 
+def ensure_task_hub(state: dict, timestamp: str) -> bool:
+    changed = False
+    working_state = state.get("working_state", {})
+    task_hub = state.get("task_hub")
+    if not isinstance(task_hub, dict):
+        state["task_hub"] = default_task_hub(timestamp, working_state)
+        return True
+
+    for key in (
+        "active_tasks",
+        "completed_tasks",
+        "blocked_tasks",
+        "recurring_duties",
+        "action_trace",
+        "procedural_candidates",
+    ):
+        if not isinstance(task_hub.get(key), list):
+            task_hub[key] = []
+            changed = True
+
+    existing_source_keys = {
+        str(task.get("source_key"))
+        for bucket in (
+            task_hub["active_tasks"],
+            task_hub["completed_tasks"],
+            task_hub["blocked_tasks"],
+        )
+        for task in bucket
+        if isinstance(task, dict) and task.get("source_key")
+    }
+    for task in tasks_from_current_plan(working_state, timestamp):
+        if task["source_key"] in existing_source_keys:
+            continue
+        if task["status"] == "completed":
+            task_hub["completed_tasks"].append(task)
+        elif task["status"] == "blocked":
+            task_hub["blocked_tasks"].append(task)
+        else:
+            task_hub["active_tasks"].append(task)
+        changed = True
+
+    if len(task_hub["action_trace"]) > 200:
+        task_hub["action_trace"] = task_hub["action_trace"][-200:]
+        changed = True
+    return changed
+
+
+def append_task_action_trace(state: dict, trace: dict, status: str = "completed") -> dict:
+    timestamp = str(trace.get("ended_at") or trace.get("started_at") or utc_now())
+    action = {
+        "action_id": new_id("action"),
+        "trace_id": trace["trace_id"],
+        "timestamp": timestamp,
+        "workflow": trace.get("workflow", ""),
+        "status": status,
+        "summary": trace.get("summary", ""),
+        "audit_event_ids": trace.get("audit_event_ids", []),
+        "memory_events": trace.get("memory_events", []),
+        "review_events": trace.get("review_events", []),
+        "errors": trace.get("errors", []),
+        "evidence": task_action_evidence(trace),
+    }
+    task_hub = state.setdefault(
+        "task_hub",
+        default_task_hub(timestamp, state.get("working_state", {})),
+    )
+    task_hub.setdefault("action_trace", []).append(action)
+    task_hub["action_trace"] = task_hub["action_trace"][-200:]
+    return action
+
+
+def task_action_evidence(trace: dict) -> List[str]:
+    evidence: List[str] = []
+    for event in trace.get("memory_events", []):
+        if not isinstance(event, dict):
+            continue
+        for key in ("memory_id", "episode_id", "candidate_id", "semantic_memory_id"):
+            value = event.get(key)
+            if value:
+                evidence.append(str(value))
+        for key in ("memory_ids", "episodes", "imports"):
+            values = event.get(key)
+            if isinstance(values, list):
+                evidence.extend(str(value) for value in values if value)
+    evidence.extend(str(value) for value in trace.get("audit_event_ids", []) if value)
+    seen = set()
+    deduped = []
+    for item in evidence:
+        if item in seen:
+            continue
+        seen.add(item)
+        deduped.append(item)
+    return deduped
+
+
 def inferred_memory_provenance(store_name: str, memory: dict) -> List[dict]:
     if store_name == "imported_memory":
         return [
@@ -350,51 +509,52 @@ class StateStore:
             return self.load()
 
         now = utc_now()
+        working_state = {
+            "current_context": {
+                "location": "local",
+                "session_id": new_id("session"),
+                "user_id": "local_user",
+                "timestamp": now,
+            },
+            "active_intent": {
+                "goal": "Begin building the 01 continuity runtime.",
+                "status": "active",
+                "confidence": 0.75,
+            },
+            "current_plan": [
+                {
+                    "step": "Initialize identity and state storage",
+                    "status": "completed",
+                },
+                {
+                    "step": "Record episodes from interactions",
+                    "status": "active",
+                },
+                {
+                    "step": "Run dream cycles to consolidate experience",
+                    "status": "pending",
+                },
+            ],
+            "blockers": [],
+            "assumptions": [
+                {
+                    "text": "The first prototype should prove continuity before external platform integration.",
+                    "confidence": 0.8,
+                }
+            ],
+            "context_anchors": {
+                "who_am_i": "01, an identity seed for a state-continuous intelligence experiment.",
+                "where_am_i": "Inside the local 01 Core runtime.",
+                "what_am_i_doing": "Building and testing state transfer across sessions.",
+            },
+        }
         state = {
             "state_version": STATE_VERSION,
             "agent_id": "01",
             "created_at": now,
             "updated_at": now,
             "identity_core": make_identity_seed(),
-            "working_state": {
-                "current_context": {
-                    "location": "local",
-                    "session_id": new_id("session"),
-                    "user_id": "local_user",
-                    "timestamp": now,
-                },
-                "active_intent": {
-                    "goal": "Begin building the 01 continuity runtime.",
-                    "status": "active",
-                    "confidence": 0.75,
-                },
-                "current_plan": [
-                    {
-                        "step": "Initialize identity and state storage",
-                        "status": "completed",
-                    },
-                    {
-                        "step": "Record episodes from interactions",
-                        "status": "active",
-                    },
-                    {
-                        "step": "Run dream cycles to consolidate experience",
-                        "status": "pending",
-                    },
-                ],
-                "blockers": [],
-                "assumptions": [
-                    {
-                        "text": "The first prototype should prove continuity before external platform integration.",
-                        "confidence": 0.8,
-                    }
-                ],
-                "context_anchors": {
-                    "who_am_i": "01, an identity seed for a state-continuous intelligence experiment.",
-                    "where_am_i": "Inside the local 01 Core runtime.",
-                    "what_am_i_doing": "Building and testing state transfer across sessions.",
-                },
-            },
+            "working_state": working_state,
             "memory_stores": {
                 "imported_memory": [],
                 "episodic_memory": [],
@@ -513,6 +673,7 @@ class StateStore:
             "adapter_event_index": {},
             "open_conflicts": [],
             "claim_graph": default_claim_graph(),
+            "task_hub": default_task_hub(now, working_state),
             "dream_queue": [],
             "snapshots": [],
             "audit_log": [],
@@ -728,6 +889,25 @@ class StateStore:
                     "before": "open_conflicts_without_claim_graph",
                     "after": "claim_graph_initialized",
                     "evidence": ["claim_graph_v0.7"],
+                    "gate": "low",
+                    "confidence": 1.0,
+                    "rollback": {"reversible": True},
+                }
+            )
+            changed = True
+        if ensure_task_hub(state, now):
+            state["state_version"] = STATE_VERSION
+            state["updated_at"] = now
+            state.setdefault("update_log", []).append(
+                {
+                    "id": new_id("update"),
+                    "timestamp": now,
+                    "actor": "state_store",
+                    "target_path": "task_hub",
+                    "operation": "migrate",
+                    "before": "working_state.current_plan_without_task_hub",
+                    "after": "task_hub_initialized",
+                    "evidence": ["task_hub_v0.8"],
                     "gate": "low",
                     "confidence": 1.0,
                     "rollback": {"reversible": True},
@@ -1185,6 +1365,7 @@ class StateStore:
             ],
             summary=f"Promoted candidate {candidate_id} into semantic memory {semantic_id}.",
             audit_event_ids=[audit_event["id"]],
+            state=state,
         )
         self.save(state)
         return {
@@ -1369,6 +1550,7 @@ class StateStore:
             ],
             summary=f"Reviewed candidate {candidate_id} with action {action}.",
             audit_event_ids=[audit_event["id"]],
+            state=state,
         )
         self.save(state)
         return {
@@ -1583,6 +1765,7 @@ class StateStore:
             ],
             summary=f"Applied lifecycle action {normalized_action} to {normalized_store}:{memory_id}.",
             audit_event_ids=[audit_event["id"]],
+            state=state,
         )
         self.save(state)
         return {
@@ -1678,6 +1861,8 @@ class StateStore:
         errors: Optional[List[dict]] = None,
         summary: str = "",
         audit_event_ids: Optional[List[str]] = None,
+        state: Optional[dict] = None,
+        status: str = "completed",
     ) -> dict:
         now = utc_now()
         trace = {
@@ -1694,6 +1879,12 @@ class StateStore:
             "audit_event_ids": audit_event_ids or [],
         }
         self.append_jsonl(self.traces_path, trace)
+        if state is not None:
+            append_task_action_trace(
+                state=state,
+                trace=trace,
+                status=status,
+            )
         return trace
 
     def record_episode(
@@ -1844,6 +2035,7 @@ class StateStore:
             ],
             summary=f"Recorded episode {episode_id} and queued dream consolidation.",
             audit_event_ids=[audit_event["id"]],
+            state=state,
         )
         self.save(state)
         return episode
@@ -1879,6 +2071,17 @@ class StateStore:
         state = self.load()
         working_state = state["working_state"]
         current_plan = working_state.get("current_plan", [])
+        task_hub = state.get("task_hub", default_task_hub(utc_now(), working_state))
+        active_tasks = [
+            task
+            for task in task_hub.get("active_tasks", [])
+            if isinstance(task, dict)
+        ]
+        action_trace = [
+            action
+            for action in task_hub.get("action_trace", [])
+            if isinstance(action, dict)
+        ][-10:]
         policy = default_context_policy()
         task_terms = context_task_terms(working_state)
         relationship_context = build_relationship_context(state)
@@ -1921,6 +2124,15 @@ class StateStore:
             "active_intent": working_state["active_intent"],
             "current_plan": current_plan,
             "next_actions": next_actions_from_plan(current_plan),
+            "task_hub": {
+                "active_tasks": active_tasks,
+                "blocked_tasks": task_hub.get("blocked_tasks", []),
+                "recent_actions": action_trace,
+                "procedural_candidates": task_hub.get("procedural_candidates", []),
+            },
+            "active_tasks": active_tasks,
+            "action_trace": action_trace,
+            "procedural_candidates": task_hub.get("procedural_candidates", []),
             "blockers": working_state.get("blockers", []),
             "assumptions": working_state.get("assumptions", []),
             "continuity_anchors": working_state["context_anchors"],

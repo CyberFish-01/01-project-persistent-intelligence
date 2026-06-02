@@ -5,6 +5,7 @@ import sqlite3
 from pathlib import Path
 
 from one_core.cleaner import clean_memory_files
+from one_core.api import OneCoreAPI
 from one_core.dream import DreamEngine
 from one_core.importer import import_text_file, split_memory_text
 from one_core.state import STATE_VERSION, StateStore
@@ -29,6 +30,9 @@ class CoreStateTests(unittest.TestCase):
             self.assertIn("session_policy", state)
             self.assertIn("claim_graph", state)
             self.assertEqual(state["claim_graph"], {"claims": [], "links": []})
+            self.assertIn("task_hub", state)
+            self.assertTrue(state["task_hub"]["active_tasks"])
+            self.assertEqual(state["task_hub"]["action_trace"], [])
             self.assertIn("candidate_memory", state["memory_stores"])
             self.assertEqual(state["session_policy"]["default_action"], "dry_run_only")
             self.assertTrue(state["memory_stores"]["semantic_memory"][0]["provenance"])
@@ -207,6 +211,31 @@ class CoreStateTests(unittest.TestCase):
                 ["claim_graph_v0.7"],
             )
 
+    def test_load_migrates_current_plan_into_task_hub(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state.pop("task_hub")
+            state["state_version"] = "0.7"
+            store.state_path.write_text(
+                json.dumps(state, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            migrated = store.load()
+            self.assertEqual(migrated["state_version"], STATE_VERSION)
+            self.assertIn("task_hub", migrated)
+            task_titles = {
+                task["title"]
+                for task in migrated["task_hub"]["active_tasks"]
+                + migrated["task_hub"]["completed_tasks"]
+            }
+            self.assertIn("Record episodes from interactions", task_titles)
+            self.assertEqual(
+                migrated["update_log"][-1]["evidence"],
+                ["task_hub_v0.8"],
+            )
+
     def test_load_migrates_legacy_reviewed_candidate_decision_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))
@@ -326,6 +355,51 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(audit_events[-1]["evidence"], [episode["id"]])
             self.assertEqual(traces[-1]["workflow"], "record_episode")
             self.assertEqual(state["audit_log"][-1]["id"], audit_events[-1]["id"])
+            action_trace = state["task_hub"]["action_trace"]
+            self.assertEqual(action_trace[-1]["workflow"], "record_episode")
+            self.assertEqual(action_trace[-1]["trace_id"], traces[-1]["trace_id"])
+            self.assertIn(episode["id"], action_trace[-1]["evidence"])
+
+    def test_dry_run_does_not_update_task_hub_action_trace(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            before = len(store.load()["task_hub"]["action_trace"])
+
+            status, response = OneCoreAPI(store).handle_post(
+                "/v1/adapter/ingest",
+                {
+                    "adapter_id": "local_generic_adapter",
+                    "dry_run": True,
+                    "event": {
+                        "event_id": "dry-run-task-hub",
+                        "text": "Preview should not become task action history.",
+                        "source": {"channel": "local", "session_id": "dry-run"},
+                    },
+                },
+            )
+
+            state = store.load()
+            self.assertEqual(status, 200)
+            self.assertEqual(response["status"], "preview")
+            self.assertEqual(len(state["task_hub"]["action_trace"]), before)
+
+    def test_dream_proposes_procedural_candidate_from_repeated_actions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("第一次记录行动结构。")
+            store.record_episode("第二次记录行动结构。")
+
+            report = DreamEngine(store).run()
+            state = store.load()
+            procedural = state["task_hub"]["procedural_candidates"]
+
+            self.assertTrue(report["procedural_candidate_updates"])
+            self.assertTrue(procedural)
+            self.assertEqual(procedural[0]["workflow"], "record_episode")
+            self.assertEqual(procedural[0]["review_status"], "pending")
+            self.assertGreaterEqual(len(procedural[0]["evidence"]), 2)
 
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:

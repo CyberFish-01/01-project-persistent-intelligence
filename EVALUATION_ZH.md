@@ -310,8 +310,9 @@ python3 -m one_core.cli evaluate-scenarios
 - `multi_user_boundary`：检查当 privacy boundary 禁止跨用户共享时，另一个用户不会看到前一个用户的私有 episode。
 - `lifecycle_retrieval_suppression`：检查被 archive 的 semantic memory 会进入 archived memory，并从 active context retrieval 中被压制。
 - `claim_graph_conflict_provenance`：检查 false-memory conflict 会创建带 evidence 的 claim node，并且不会修改 semantic memory 或 Identity Core。
+- `task_hub_action_resume`：检查 Task Hub 能在中断后保留 active task、next action、action history，并从重复成功行动中提出 procedural candidate。
 
-v0.2 runner 会报告 stateless、retrieval-only、summary-only baseline metadata，但还不执行这些 baseline。真实 baseline 对比属于后续评估扩展。
+v0.3 runner 会报告 stateless、retrieval-only、summary-only baseline metadata，但还不执行这些 baseline。真实 baseline 对比属于后续评估扩展。
 
 当前 metrics summary 包含：
 
@@ -320,6 +321,8 @@ v0.2 runner 会报告 stateless、retrieval-only、summary-only baseline metadat
 - archived memory retrieval count；
 - claim count；
 - unreviewed memory mutation count；
+- task hub resume score；
+- procedural candidate count；
 - scenario passed / failed counts。
 
 ## 11. 什么会反证这个方向？

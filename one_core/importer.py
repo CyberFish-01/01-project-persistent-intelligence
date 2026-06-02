@@ -238,6 +238,7 @@ def import_text_file(
         ],
         summary="Imported external memories into staged imported_memory without identity update.",
         audit_event_ids=[audit_event["id"]],
+        state=state,
     )
     store.save(state)
     return import_report

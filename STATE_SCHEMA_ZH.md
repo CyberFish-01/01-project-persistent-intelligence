@@ -9,7 +9,7 @@
 ## 1. 顶层状态
 
 ```yaml
-state_version: "0.7"
+state_version: "0.8"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -27,6 +27,13 @@ open_conflicts: []
 claim_graph:
   claims: []
   links: []
+task_hub:
+  active_tasks: []
+  completed_tasks: []
+  blocked_tasks: []
+  recurring_duties: []
+  action_trace: []
+  procedural_candidates: []
 dream_queue: []
 snapshots: []
 audit_log: []
@@ -601,7 +608,68 @@ claim_graph:
 
 当前 Dream conflict detection 会同时写入 `open_conflicts` 和对应 claim nodes。Claim graph entry 是 review/audit material；它本身不会执行 resolution action。
 
-## 13. Dream Queue
+## 13. Task Hub
+
+Task Hub 保存任务连续性和行动结构。
+
+它不是平台 todo，也不是 adapter 状态。它是 01 Core 用于回答“我正在推进什么、刚才做了什么、下一步怎么继续”的本地状态层。
+
+```yaml
+task_hub:
+  active_tasks:
+    - task_id: "task_0001"
+      title: "Record action trace into task hub"
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      updated_at: "ISO-8601 timestamp"
+      source: "working_state.current_plan"
+      source_index: 1
+      source_key: "working_state.current_plan:1:record action trace into task hub"
+      evidence:
+        - "working_state.current_plan"
+  completed_tasks: []
+  blocked_tasks: []
+  recurring_duties: []
+  action_trace:
+    - action_id: "action_0001"
+      trace_id: "trace_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "record_episode"
+      status: "completed"
+      summary: "Recorded episode and queued dream consolidation."
+      audit_event_ids:
+        - "audit_0001"
+      memory_events: []
+      review_events: []
+      errors: []
+      evidence:
+        - "episode_0001"
+  procedural_candidates:
+    - candidate_id: "proc_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "record_episode"
+      statement: "Repeated successful workflow may be reusable procedural memory after review."
+      steps: []
+      evidence:
+        - "action_0001"
+        - "action_0002"
+      confidence: 0.65
+      risk: "low"
+      review_status: "pending"
+      recommended_action: "review_then_promote"
+      source_dream_id: "dream_0001"
+      provenance:
+        - type: "dream_procedural_candidate"
+          dream_id: "dream_0001"
+```
+
+`working_state.current_plan` 仍然保留为 legacy/compatibility 字段。P10 会把它迁移为 `task_hub.active_tasks`、`completed_tasks` 或 `blocked_tasks`，但不删除旧字段。
+
+真实状态变更的 trace 会进入 `task_hub.action_trace`。`dry_run` preview 可以写 audit / trace，但不能写 episode、dream job、adapter event index，也不能写入 `task_hub.action_trace`。
+
+Dream 可以从重复成功的 action trace 里提出 `procedural_candidates`。这些候选不等于已采用的 procedural memory，必须等待 review。
+
+## 14. Dream Queue
 
 ```yaml
 dream_queue:
@@ -618,7 +686,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 14. Audit Log
+## 15. Audit Log
 
 Audit log 记录运行时发生过什么。
 
@@ -664,7 +732,7 @@ dream_artifact:
   rollback_metadata: {}
 ```
 
-## 15. Update Log
+## 16. Update Log
 
 每个 durable update 都必须记录。
 
@@ -687,7 +755,7 @@ update_log:
       reversible: true
 ```
 
-## 16. Snapshots
+## 17. Snapshots
 
 Snapshots 是轻量审计锚点，在 candidate promote、archive、discard 或 quarantine 等 review action 前记录。
 
@@ -705,7 +773,7 @@ snapshots:
     metadata:
       review_decision_id: "review_decision_0001"
       candidate_id: "cand_0001"
-    state_version: "0.6"
+    state_version: "0.8"
     memory_counts:
       semantic_memory: 3
       candidate_memory: 2
@@ -715,7 +783,7 @@ snapshots:
       note: "Automatic rollback is not implemented yet."
 ```
 
-## 17. State Transfer Package
+## 18. State Transfer Package
 
 Session 开始时不应该加载全部状态。
 
@@ -728,6 +796,14 @@ state_transfer_package:
   active_intent: {}
   current_plan: []
   next_actions: []
+  task_hub:
+    active_tasks: []
+    blocked_tasks: []
+    recent_actions: []
+    procedural_candidates: []
+  active_tasks: []
+  action_trace: []
+  procedural_candidates: []
   blockers: []
   assumptions: []
   context_policy:
@@ -756,7 +832,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 18. 最小不变量
+## 19. 最小不变量
 
 一个有效的 01 state 必须满足：
 
@@ -772,4 +848,6 @@ state_transfer_package:
 - `dry_run` 的 audit / trace 不等同于 episode 写入；
 - 每个 state snapshot 都有 schema version；
 - 每个 review/promotion rollback reference 都能指向 snapshot metadata；
+- `task_hub.action_trace` 只记录真实状态变更，不记录 non-mutating dry-run；
+- procedural candidate 必须有 workflow、evidence 和 pending review status；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

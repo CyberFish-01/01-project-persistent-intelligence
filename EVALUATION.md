@@ -308,8 +308,9 @@ It uses temporary state and currently runs:
 - `multi_user_boundary`: verifies that a second user does not receive another user's private episode when privacy boundaries disallow cross-user sharing.
 - `lifecycle_retrieval_suppression`: verifies that archived semantic memory is copied to archived memory and suppressed from active context retrieval.
 - `claim_graph_conflict_provenance`: verifies that false-memory conflicts create evidence-backed claim nodes without mutating semantic memory or Identity Core.
+- `task_hub_action_resume`: verifies that Task Hub preserves active tasks, next actions, and action history after interruption, and proposes procedural candidates from repeated successful actions.
 
-The v0.2 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
+The v0.3 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
 
 Current metrics summary includes:
 
@@ -318,6 +319,8 @@ Current metrics summary includes:
 - archived memory retrieval count,
 - claim count,
 - unreviewed memory mutation count,
+- task hub resume score,
+- procedural candidate count,
 - passed and failed scenario counts.
 
 ## 11. What Would Falsify the Approach?

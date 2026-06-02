@@ -20,6 +20,7 @@ REQUIRED_TOP_LEVEL_KEYS = [
     "adapter_event_index",
     "open_conflicts",
     "claim_graph",
+    "task_hub",
     "dream_queue",
     "snapshots",
     "audit_log",
@@ -67,6 +68,7 @@ def validate_state(state: dict[str, Any], episodes: Iterable[dict] | None = None
     issues.extend(validate_session_policy(state))
     issues.extend(validate_adapter_event_index(state, episodes or []))
     issues.extend(validate_claim_graph(state))
+    issues.extend(validate_task_hub(state))
     issues.extend(validate_snapshots(state))
     return {
         "status": "passed" if not issues else "failed",
@@ -633,6 +635,67 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
         for key in ("from", "to", "type"):
             if key not in link:
                 issues.append(ValidationIssue(path + f".{key}", "Claim graph link key is missing."))
+    return issues
+
+
+def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
+    task_hub = state.get("task_hub")
+    if not isinstance(task_hub, dict):
+        return [ValidationIssue("task_hub", "Task hub must be an object.")]
+
+    issues: list[ValidationIssue] = []
+    for key in (
+        "active_tasks",
+        "completed_tasks",
+        "blocked_tasks",
+        "recurring_duties",
+        "action_trace",
+        "procedural_candidates",
+    ):
+        if not isinstance(task_hub.get(key), list):
+            issues.append(ValidationIssue(f"task_hub.{key}", "Task hub key must be a list."))
+
+    for bucket_name in ("active_tasks", "completed_tasks", "blocked_tasks"):
+        tasks = task_hub.get(bucket_name, [])
+        if not isinstance(tasks, list):
+            continue
+        for index, task in enumerate(tasks):
+            path = f"task_hub.{bucket_name}[{index}]"
+            if not isinstance(task, dict):
+                issues.append(ValidationIssue(path, "Task must be an object."))
+                continue
+            for key in ("task_id", "title", "status", "created_at"):
+                if not task.get(key):
+                    issues.append(ValidationIssue(path + f".{key}", "Task key is missing."))
+
+    action_trace = task_hub.get("action_trace", [])
+    if isinstance(action_trace, list):
+        for index, action in enumerate(action_trace):
+            path = f"task_hub.action_trace[{index}]"
+            if not isinstance(action, dict):
+                issues.append(ValidationIssue(path, "Action trace entry must be an object."))
+                continue
+            for key in ("action_id", "trace_id", "timestamp", "workflow", "status"):
+                if not action.get(key):
+                    issues.append(ValidationIssue(path + f".{key}", "Action trace key is missing."))
+
+    candidates = task_hub.get("procedural_candidates", [])
+    if isinstance(candidates, list):
+        for index, candidate in enumerate(candidates):
+            path = f"task_hub.procedural_candidates[{index}]"
+            if not isinstance(candidate, dict):
+                issues.append(ValidationIssue(path, "Procedural candidate must be an object."))
+                continue
+            for key in ("candidate_id", "workflow", "evidence", "review_status"):
+                if key not in candidate:
+                    issues.append(ValidationIssue(path + f".{key}", "Procedural candidate key is missing."))
+            if not isinstance(candidate.get("evidence"), list) or not candidate.get("evidence"):
+                issues.append(
+                    ValidationIssue(
+                        path + ".evidence",
+                        "Procedural candidate requires non-empty evidence.",
+                    )
+                )
     return issues
 
 

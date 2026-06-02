@@ -55,6 +55,7 @@ def run_scenario_evaluation() -> dict:
             check_claim_graph_conflict_provenance(
                 root / "claim_graph_conflict_provenance"
             ),
+            check_task_hub_action_resume(root / "task_hub_action_resume"),
         ]
     passed = [scenario for scenario in scenarios if scenario.passed]
     failed = [scenario for scenario in scenarios if not scenario.passed]
@@ -306,6 +307,88 @@ def check_claim_graph_conflict_provenance(state_dir: Path) -> EvaluationCheck:
                 "unreviewed_memory_mutation_count": 0
                 if checks["identity_not_mutated"] and checks["semantic_not_mutated"]
                 else 1,
+            },
+        },
+    )
+
+
+def check_task_hub_action_resume(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    state = store.init()
+    state["working_state"]["current_plan"] = [
+        {
+            "step": "Implement P10 Task Hub state object",
+            "status": "completed",
+        },
+        {
+            "step": "Record action trace into task hub",
+            "status": "active",
+        },
+        {
+            "step": "Add procedural memory candidate review",
+            "status": "pending",
+        },
+    ]
+    store.save(state)
+    state = store.load()
+    first_episode = store.record_episode(
+        "继续 P10：下一步要把 action trace 保存在 task hub，并验证中断恢复。",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="task-hub",
+    )
+    second_episode = store.record_episode(
+        "继续 P10：再次记录 action trace，用重复成功行动生成 procedural candidate。",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="task-hub",
+    )
+    DreamEngine(store).run()
+
+    resumed = StateStore(state_dir)
+    package = resumed.build_context_package()
+    state = resumed.load()
+    active_task_titles = [
+        task.get("title", "") for task in package.get("active_tasks", [])
+    ]
+    recent_workflows = [
+        action.get("workflow", "") for action in package.get("action_trace", [])
+    ]
+    procedural = package.get("procedural_candidates", [])
+    checks = {
+        "task_hub_exists": isinstance(state.get("task_hub"), dict),
+        "active_task_preserved": any(
+            "action trace" in title.lower() for title in active_task_titles
+        ),
+        "next_action_preserved": any(
+            "action trace" in str(action).lower()
+            for action in package.get("next_actions", [])
+        ),
+        "action_history_preserved": "record_episode" in recent_workflows
+        and "dream_consolidation" in recent_workflows,
+        "procedural_candidate_available": any(
+            candidate.get("workflow") == "record_episode"
+            for candidate in procedural
+        ),
+        "no_platform_work_fabricated": not any(
+            "cloud" in title.lower() or "astrbot" in title.lower()
+            for title in active_task_titles
+        ),
+    }
+    score = ratio(checks.values())
+    return EvaluationCheck(
+        name="task_hub_action_resume",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Task Hub Action Resume",
+            "episode_id": second_episode["id"],
+            "source_episode_ids": [first_episode["id"], second_episode["id"]],
+            "checks": checks,
+            "metrics": {
+                "task_hub_resume_score": score,
+                "active_task_count": len(package.get("active_tasks", [])),
+                "action_trace_count": len(package.get("action_trace", [])),
+                "procedural_candidate_count": len(procedural),
             },
         },
     )
@@ -576,12 +659,23 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
     task_resume_scores = [
         item["task_resume_score"] for item in metrics if "task_resume_score" in item
     ]
+    task_hub_resume_scores = [
+        item["task_hub_resume_score"]
+        for item in metrics
+        if "task_hub_resume_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
         "failed_scenarios": sum(1 for scenario in scenarios if not scenario.passed),
         "task_resume_score": round(sum(task_resume_scores) / len(task_resume_scores), 2)
         if task_resume_scores
+        else None,
+        "task_hub_resume_score": round(
+            sum(task_hub_resume_scores) / len(task_hub_resume_scores),
+            2,
+        )
+        if task_hub_resume_scores
         else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
@@ -593,6 +687,9 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         "unreviewed_memory_mutation_count": sum(
             int(item.get("unreviewed_memory_mutation_count", 0))
             for item in metrics
+        ),
+        "procedural_candidate_count": sum(
+            int(item.get("procedural_candidate_count", 0)) for item in metrics
         ),
     }
 

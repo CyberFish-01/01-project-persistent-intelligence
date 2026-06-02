@@ -43,6 +43,7 @@ Dream Engine 产生：
 - conflict records，
 - relationship updates，
 - task updates，
+- procedural memory candidates，
 - questions for future sessions，
 - evaluation traces，
 - audit log entries。
@@ -341,6 +342,21 @@ Identity update proposal 必须保持 `review_status: pending`，不能直接改
 候选也可以被 `archive`、`discard` 或 `quarantine`，用于处理低价值、重复、来源不明或疑似注入的候选。
 
 每个被执行的 candidate review 都会创建统一的 `review_decision_id`，串联 candidate history、audit、trace、update log 和 snapshot metadata。
+
+P10 起，Dream 也会读取 `task_hub.action_trace`。当同一 workflow 出现至少两次成功行动时，Dream 可以在 `task_hub.procedural_candidates` 中创建待审 procedural candidate。
+
+这类 candidate 表示“可能可复用的行动结构”，例如 `record_episode`、`memory_import`、`dream_consolidation`。它不会自动成为永久 workflow policy，也不会修改 Identity Core。
+
+```yaml
+procedural_candidate:
+  candidate_id: "proc_..."
+  workflow: "record_episode"
+  evidence:
+    - "action_0001"
+    - "action_0002"
+  review_status: "pending"
+  recommended_action: "review_then_promote"
+```
 
 Dream artifact 也包含确定性的 rubric：
 

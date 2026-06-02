@@ -441,13 +441,15 @@ git diff --check
 
 目标：让 01 不只记得事实，还能延续行动结构。
 
+状态：已实现第一版本地 v0.8。
+
 可执行项：
 
-1. active task state；
-2. action trace；
-3. failure reflection；
-4. workflow candidate；
-5. procedural memory review。
+1. active task state - 已完成第一版；
+2. action trace - 已完成第一版；
+3. failure reflection - 尚未完成；
+4. workflow candidate - 已完成第一版；
+5. procedural memory review - 仅完成 pending candidate schema，尚未完成 review command。
 
 建议立即范围：
 
@@ -456,6 +458,22 @@ git diff --check
 3. 在 CLI/API interactions、Dream runs、reviews 和 lifecycle actions 发生时记录 action trace entries；
 4. 让 Dream 从重复成功动作中提出 procedural candidates；
 5. 增加 scenario evaluation：检查 interrupted task resume 能保留 action history 和 next action。
+
+已实现结果：
+
+- `task_hub` 现在是顶层 state object；
+- `working_state.current_plan` 会迁移为 active/completed/blocked task items，同时保留 legacy 字段；
+- 真实状态变更会写入 `task_hub.action_trace`，non-mutating dry-run 不写入；
+- Dream 会从重复成功 workflow 中提出 `procedural_candidates`；
+- scenario evaluation 增加 `task_hub_action_resume`，检查 active task、next action、action history 和 procedural candidate。
+
+剩余缺口：
+
+- 还没有 failure reflection schema；
+- 还没有 procedural candidate review/promote command；
+- 还没有正式 procedural memory store；
+- 还没有 workflow policy executor；
+- action trace 目前来自 runtime trace 摘要，还不是完整 replayable action log。
 
 ### P11 Identity Update Gate
 
@@ -475,12 +493,12 @@ git diff --check
 下一步先做：
 
 ```text
-P10 Task Hub / Procedural Memory
+P11 Identity Update Gate
 ```
 
 理由：
 
-- P7/P8/P9 已经形成第一版本地地基，并通过单元测试、foundation evaluation、scenario evaluation 和 state validation；
-- interrupted project resume 目前仍主要依赖 `working_state.current_plan`，还没有独立 task state；
-- existing trace/audit 只能说明发生了什么，还不能稳定恢复 action history、failure reflection 和 workflow policy；
-- P10 可以直接复用现有 `record_trace()`、Dream artifact 和 context package，不需要引入平台特化。
+- P7-P10 已经形成第一版本地 state-transfer foundation；
+- P10 让任务和行动结构进入状态，但 identity growth 仍然只有 proposal，没有可执行 high gate；
+- imported memory、Dream conflict 和 procedural candidate 都需要一个慢速身份更新边界来避免漂移；
+- P11 应把 identity proposal、证据阈值、non-claims check、snapshot / rollback 和 drift metric 做成可验证流程。

@@ -7,7 +7,7 @@ The schema is intentionally implementation-neutral. It can be stored as JSON, YA
 ## 1. Top-Level State
 
 ```yaml
-state_version: "0.7"
+state_version: "0.8"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -25,6 +25,13 @@ open_conflicts: []
 claim_graph:
   claims: []
   links: []
+task_hub:
+  active_tasks: []
+  completed_tasks: []
+  blocked_tasks: []
+  recurring_duties: []
+  action_trace: []
+  procedural_candidates: []
 dream_queue: []
 snapshots: []
 audit_log: []
@@ -599,7 +606,68 @@ Every claim must have evidence, provenance, status, and resolution metadata.
 
 Current Dream conflict detection writes `open_conflicts` and corresponding claim nodes. Claim graph entries are review/audit material; they do not execute resolution actions by themselves.
 
-## 13. Dream Queue
+## 13. Task Hub
+
+Task Hub preserves task continuity and action structure.
+
+It is not a platform todo list or adapter state. It is the local 01 Core state layer for answering: what am I working on, what did I just do, and how should work resume?
+
+```yaml
+task_hub:
+  active_tasks:
+    - task_id: "task_0001"
+      title: "Record action trace into task hub"
+      status: "active"
+      created_at: "ISO-8601 timestamp"
+      updated_at: "ISO-8601 timestamp"
+      source: "working_state.current_plan"
+      source_index: 1
+      source_key: "working_state.current_plan:1:record action trace into task hub"
+      evidence:
+        - "working_state.current_plan"
+  completed_tasks: []
+  blocked_tasks: []
+  recurring_duties: []
+  action_trace:
+    - action_id: "action_0001"
+      trace_id: "trace_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "record_episode"
+      status: "completed"
+      summary: "Recorded episode and queued dream consolidation."
+      audit_event_ids:
+        - "audit_0001"
+      memory_events: []
+      review_events: []
+      errors: []
+      evidence:
+        - "episode_0001"
+  procedural_candidates:
+    - candidate_id: "proc_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "record_episode"
+      statement: "Repeated successful workflow may be reusable procedural memory after review."
+      steps: []
+      evidence:
+        - "action_0001"
+        - "action_0002"
+      confidence: 0.65
+      risk: "low"
+      review_status: "pending"
+      recommended_action: "review_then_promote"
+      source_dream_id: "dream_0001"
+      provenance:
+        - type: "dream_procedural_candidate"
+          dream_id: "dream_0001"
+```
+
+`working_state.current_plan` is retained as a legacy/compatibility field. P10 migrates it into `task_hub.active_tasks`, `completed_tasks`, or `blocked_tasks` without deleting the legacy field.
+
+Trace entries for real state mutations enter `task_hub.action_trace`. `dry_run` preview may write audit / trace, but it must not write episodes, dream jobs, adapter event index entries, or `task_hub.action_trace`.
+
+Dream may propose `procedural_candidates` from repeated successful action traces. These candidates are not adopted procedural memory until reviewed.
+
+## 14. Dream Queue
 
 ```yaml
 dream_queue:
@@ -616,7 +684,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 14. Audit Log
+## 15. Audit Log
 
 Audit log records what happened at runtime.
 
@@ -662,7 +730,7 @@ dream_artifact:
   rollback_metadata: {}
 ```
 
-## 15. Update Log
+## 16. Update Log
 
 Every durable update must be recorded.
 
@@ -685,7 +753,7 @@ update_log:
       reversible: true
 ```
 
-## 16. Snapshots
+## 17. Snapshots
 
 Snapshots are lightweight audit anchors recorded before review actions such as candidate promotion, archive, discard, or quarantine.
 
@@ -703,7 +771,7 @@ snapshots:
     metadata:
       review_decision_id: "review_decision_0001"
       candidate_id: "cand_0001"
-    state_version: "0.6"
+    state_version: "0.8"
     memory_counts:
       semantic_memory: 3
       candidate_memory: 2
@@ -713,7 +781,7 @@ snapshots:
       note: "Automatic rollback is not implemented yet."
 ```
 
-## 17. State Transfer Package
+## 18. State Transfer Package
 
 At session start, the system should not load everything.
 
@@ -726,6 +794,14 @@ state_transfer_package:
   active_intent: {}
   current_plan: []
   next_actions: []
+  task_hub:
+    active_tasks: []
+    blocked_tasks: []
+    recent_actions: []
+    procedural_candidates: []
+  active_tasks: []
+  action_trace: []
+  procedural_candidates: []
   blockers: []
   assumptions: []
   context_policy:
@@ -754,7 +830,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 18. Minimal Invariants
+## 19. Minimal Invariants
 
 A valid 01 state must satisfy:
 
@@ -770,4 +846,6 @@ A valid 01 state must satisfy:
 - `dry_run` audit / trace is not equivalent to episode writing,
 - every state snapshot has a schema version,
 - every review/promotion rollback reference points to snapshot metadata,
+- `task_hub.action_trace` records real state mutations, not non-mutating dry-runs,
+- every procedural candidate has workflow, evidence, and pending review status,
 - every session can answer Identity, Context, and Intent anchors.

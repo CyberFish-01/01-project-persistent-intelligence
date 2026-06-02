@@ -441,13 +441,15 @@ Remaining gaps:
 
 Goal: let 01 preserve action structure, not only facts.
 
+Status: implemented as a first local v0.8 pass.
+
 Executable items:
 
-1. active task state;
-2. action trace;
-3. failure reflection;
-4. workflow candidate;
-5. procedural memory review.
+1. active task state - first pass done;
+2. action trace - first pass done;
+3. failure reflection - not done yet;
+4. workflow candidate - first pass done;
+5. procedural memory review - pending candidate schema only; no review command yet.
 
 Recommended immediate scope:
 
@@ -456,6 +458,22 @@ Recommended immediate scope:
 3. record action trace entries when CLI/API interactions, Dream runs, reviews, and lifecycle actions occur;
 4. let Dream propose procedural candidates from repeated successful actions;
 5. add scenario evaluation for interrupted task resume with action history and next action preservation.
+
+Implemented result:
+
+- `task_hub` is now a top-level state object;
+- `working_state.current_plan` migrates into active/completed/blocked task items while retaining the legacy field;
+- real state mutations append to `task_hub.action_trace`, while non-mutating dry-runs do not;
+- Dream proposes `procedural_candidates` from repeated successful workflows;
+- scenario evaluation adds `task_hub_action_resume`, checking active task, next action, action history, and procedural candidate preservation.
+
+Remaining gaps:
+
+- no failure reflection schema yet;
+- no procedural candidate review/promote command yet;
+- no durable procedural memory store yet;
+- no workflow policy executor yet;
+- action trace is currently a runtime trace summary, not a fully replayable action log.
 
 ### P11 Identity Update Gate
 
@@ -472,15 +490,15 @@ Executable items:
 
 ## 6. Current Recommendation
 
-Do P10 next:
+Do P11 next:
 
 ```text
-P10 Task Hub / Procedural Memory
+P11 Identity Update Gate
 ```
 
 Reason:
 
-- P7/P8/P9 now form a first local foundation and pass unit tests, foundation evaluation, scenario evaluation, and state validation;
-- interrupted project resume still mainly depends on `working_state.current_plan` rather than an independent task state;
-- existing trace/audit can show what happened, but cannot yet preserve action history, failure reflection, or workflow policy as first-class state;
-- P10 can reuse existing `record_trace()`, Dream artifacts, and context packages without introducing platform-specific work.
+- P7-P10 now form a first local state-transfer foundation;
+- P10 moves task and action structure into state, but identity growth still has proposals without an executable high gate;
+- imported memory, Dream conflicts, and procedural candidates all need a slow identity-update boundary to avoid drift;
+- P11 should make identity proposals, evidence thresholding, non-claims checks, snapshot / rollback, and drift metrics into a verifiable flow.

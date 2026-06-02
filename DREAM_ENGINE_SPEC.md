@@ -41,6 +41,7 @@ Dream Engine emits:
 - conflict records,
 - relationship updates,
 - task updates,
+- procedural memory candidates,
 - questions for future sessions,
 - evaluation traces,
 - audit log entries.
@@ -343,6 +344,21 @@ The current Dream Engine writes semantic candidates into `memory_stores.candidat
 Candidates can also be `archive`, `discard`, or `quarantine` to handle low-value, duplicate, unclear-source, or possible-injection candidates.
 
 Every executed candidate review creates a unified `review_decision_id` that links candidate history, audit, trace, update log, and snapshot metadata.
+
+Starting in P10, Dream also reads `task_hub.action_trace`. When the same workflow appears as at least two successful actions, Dream may create a reviewable procedural candidate in `task_hub.procedural_candidates`.
+
+This candidate means "possibly reusable action structure", for example `record_episode`, `memory_import`, or `dream_consolidation`. It does not automatically become permanent workflow policy and does not mutate Identity Core.
+
+```yaml
+procedural_candidate:
+  candidate_id: "proc_..."
+  workflow: "record_episode"
+  evidence:
+    - "action_0001"
+    - "action_0002"
+  review_status: "pending"
+  recommended_action: "review_then_promote"
+```
 
 Dream artifacts also include a deterministic rubric:
 
