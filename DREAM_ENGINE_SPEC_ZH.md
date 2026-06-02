@@ -362,6 +362,8 @@ P16 增加显式 procedural review。`review-procedural-candidate` 可以 approv
 
 P17 增加 failure reflection。`record-failure-reflection` 会把失败或阻塞的 workflow lesson 记录到 `task_hub.failure_reflections`，并生成一个待审的 `task_hub.cautionary_procedural_candidates` 条目。这些 cautionary candidates 只是警告型 proposal，不会执行 workflow，也不会修改 Identity Core。
 
+P18 增加 procedural memory 的已审查 retention。`procedural-lifecycle` 可以 archive、discard 或 quarantine 已采用的 `task_hub.procedural_memory`。Archived 或 quarantined procedural memory 会保留审计轨迹，但会从 active context 中被压制。这仍然是 review action，不是 workflow executor。
+
 Dream artifact 也包含确定性的 rubric：
 
 ```yaml

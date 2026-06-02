@@ -61,6 +61,9 @@ def run_scenario_evaluation() -> dict:
             check_task_hub_action_resume(root / "task_hub_action_resume"),
             check_procedural_memory_review(root / "procedural_memory_review"),
             check_failure_reflection(root / "failure_reflection"),
+            check_procedural_lifecycle_retention(
+                root / "procedural_lifecycle_retention"
+            ),
             check_identity_update_gate_review(root / "identity_update_gate_review"),
             check_event_log_replay_rollback(root / "event_log_replay_rollback"),
             check_dream_artifact_package(root / "dream_artifact_package"),
@@ -631,6 +634,83 @@ def check_failure_reflection(state_dir: Path) -> EvaluationCheck:
                 "failure_identity_mutation_count": 0
                 if state["identity_core"] == before_identity
                 else 1,
+            },
+        },
+    )
+
+
+def check_procedural_lifecycle_retention(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    first = store.record_episode(
+        "P18 should archive obsolete procedural memory without losing auditability.",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="procedural-lifecycle",
+    )
+    second = store.record_episode(
+        "P18 should keep only active procedural memory in context.",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="procedural-lifecycle",
+    )
+    DreamEngine(store).run()
+    candidate = next(
+        (
+            item
+            for item in store.load().get("task_hub", {}).get("procedural_candidates", [])
+            if item.get("workflow") == "record_episode"
+        ),
+        {},
+    )
+    review = store.review_procedural_candidate(
+        candidate.get("candidate_id", ""),
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Promote repeated workflow before lifecycle retention test.",
+    )
+    lifecycle = store.apply_procedural_lifecycle_action(
+        memory_id=review.get("procedural_memory_id", ""),
+        action="archive",
+        reviewer="scenario_eval",
+        decision_note="Archive obsolete procedural memory for retention testing.",
+    )
+    state = store.load()
+    package = store.build_context_package()
+    procedural_memory = state.get("task_hub", {}).get("procedural_memory", [])
+    lifecycle_decisions = state.get("task_hub", {}).get("procedural_lifecycle_decisions", [])
+    active_exposed = [
+        item for item in package.get("procedural_memory", []) if isinstance(item, dict)
+    ]
+    checks = {
+        "candidate_reviewed": review.get("status") == "approved",
+        "lifecycle_archived": lifecycle.get("status") == "archived",
+        "lifecycle_decision_recorded": bool(lifecycle_decisions)
+        and lifecycle_decisions[-1].get("decision_id")
+        == lifecycle.get("procedural_lifecycle_decision_id"),
+        "procedural_memory_archived": bool(procedural_memory)
+        and procedural_memory[-1].get("status") == "archived",
+        "context_hides_archived_memory": not active_exposed,
+        "identity_not_mutated": state["identity_core"] == before_identity,
+        "event_replay_passed": store.replay_events()["status"] == "passed",
+    }
+    return EvaluationCheck(
+        name="procedural_lifecycle_retention",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Procedural Lifecycle Retention",
+            "source_episode_ids": [first["id"], second["id"]],
+            "candidate_id": candidate.get("candidate_id"),
+            "checks": checks,
+            "metrics": {
+                "procedural_lifecycle_score": ratio(checks.values()),
+                "procedural_lifecycle_decision_count": len(lifecycle_decisions),
+                "procedural_archived_count": sum(
+                    1
+                    for item in procedural_memory
+                    if item.get("status") == "archived"
+                ),
+                "procedural_active_context_count": len(active_exposed),
             },
         },
     )
@@ -1237,6 +1317,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "failure_reflection_score" in item
     ]
+    procedural_lifecycle_scores = [
+        item["procedural_lifecycle_score"]
+        for item in metrics
+        if "procedural_lifecycle_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -1292,6 +1377,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         )
         if failure_reflection_scores
         else None,
+        "procedural_lifecycle_score": round(
+            sum(procedural_lifecycle_scores) / len(procedural_lifecycle_scores),
+            2,
+        )
+        if procedural_lifecycle_scores
+        else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
         ),
@@ -1323,6 +1414,16 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "failure_identity_mutation_count": sum(
             int(item.get("failure_identity_mutation_count", 0)) for item in metrics
+        ),
+        "procedural_lifecycle_decision_count": sum(
+            int(item.get("procedural_lifecycle_decision_count", 0))
+            for item in metrics
+        ),
+        "procedural_archived_count": sum(
+            int(item.get("procedural_archived_count", 0)) for item in metrics
+        ),
+        "procedural_active_context_count": sum(
+            int(item.get("procedural_active_context_count", 0)) for item in metrics
         ),
         "approved_identity_updates": sum(
             int(item.get("approved_identity_updates", 0)) for item in metrics

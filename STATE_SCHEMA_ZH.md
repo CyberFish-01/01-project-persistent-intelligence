@@ -741,6 +741,24 @@ task_hub:
       lifecycle:
         status: "active"
         review_status: "approved"
+  procedural_lifecycle_decisions:
+    - decision_id: "procedural_lifecycle_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      memory_id: "proc_mem_0001"
+      workflow: "record_episode"
+      reviewer: "manual_review"
+      action: "archive"
+      result: "archived"
+      decision_note: "Superseded by a newer procedural memory."
+      memory_status_before: "active"
+      snapshot_id: "snapshot_0002"
+      risk: "low"
+      confidence: 0.65
+      evidence:
+        - "proc_mem_0001"
+        - "action_0001"
+      rollback:
+        reversible: true
   procedural_review_decisions:
     - decision_id: "procedural_decision_0001"
       timestamp: "ISO-8601 timestamp"
@@ -759,6 +777,8 @@ task_hub:
 Dream 可以从重复成功的 action trace 里提出 `procedural_candidates`。这些候选不等于已采用的 procedural memory，必须等待 review。P16 增加 `review-procedural-candidate`；批准后会创建 `task_hub.procedural_memory`，并连接 decision、snapshot、audit、trace、update log 和 rollback metadata。它仍然不会执行 workflow policy。
 
 P17 增加显式 failure reflection。`record-failure-reflection` 会把失败或阻塞的 workflow lesson 记录到 `task_hub.failure_reflections`，并创建 pending `task_hub.cautionary_procedural_candidates` 条目。Cautionary candidates 是警告型 proposal，不是可执行 workflow policy。它们必须保持 pending，直到后续 review path 出现，并且不能修改 Identity Core。
+
+P18 增加 procedural lifecycle retention。`procedural-lifecycle` 可以对已 review 的 `task_hub.procedural_memory` 条目执行 archive、discard 或 quarantine。它会写入 snapshot、audit、trace、update log、lifecycle history 和 `task_hub.procedural_lifecycle_decisions`，但仍然不会执行 workflow policy。context package 只暴露 active procedural memory。
 
 ## 14. Identity Update Gate
 
@@ -1043,12 +1063,14 @@ state_transfer_package:
     procedural_candidates: []
     cautionary_procedural_candidates: []
     procedural_memory: []
+    procedural_lifecycle_decisions: []
   active_tasks: []
   action_trace: []
   failure_reflections: []
   procedural_candidates: []
   cautionary_procedural_candidates: []
   procedural_memory: []
+  procedural_lifecycle_decisions: []
   identity_update_gate:
     required_gate: "high"
     pending_proposals: []
@@ -1120,6 +1142,7 @@ state_transfer_package:
 - 每个 failure reflection 都有 workflow、summary、lesson、evidence、provenance 和 status；
 - procedural candidate 必须有 workflow、evidence 和 pending review status；
 - 每个 cautionary procedural candidate 都有 source reflection、avoid 指引、evidence 和 pending review status；
+- 每个 procedural lifecycle decision 都有 memory id、workflow、reviewer、action、result 和 snapshot metadata；
 - identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；
 - P11 不允许直接 patch `identity_core`，approve 只能追加 identity_memory；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

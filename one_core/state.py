@@ -52,6 +52,7 @@ LIFECYCLE_ACTION_STORES = {
 IDENTITY_REVIEW_ACTIONS = {"approve", "reject", "quarantine"}
 CLAIM_REVIEW_ACTIONS = {"resolve", "reject", "quarantine", "keep_open"}
 PROCEDURAL_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
+PROCEDURAL_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 
 
 def utc_now() -> str:
@@ -192,6 +193,7 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
         "procedural_memory": [],
+        "procedural_lifecycle_decisions": [],
         "procedural_review_decisions": [],
     }
 
@@ -510,6 +512,7 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "procedural_candidates",
         "cautionary_procedural_candidates",
         "procedural_memory",
+        "procedural_lifecycle_decisions",
         "procedural_review_decisions",
     ):
         if not isinstance(task_hub.get(key), list):
@@ -599,7 +602,15 @@ def task_action_evidence(trace: dict) -> List[str]:
     for event in trace.get("memory_events", []):
         if not isinstance(event, dict):
             continue
-        for key in ("memory_id", "episode_id", "candidate_id", "semantic_memory_id"):
+        for key in (
+            "memory_id",
+            "episode_id",
+            "candidate_id",
+            "semantic_memory_id",
+            "procedural_memory_id",
+            "lifecycle_decision_id",
+            "procedural_lifecycle_decision_id",
+        ):
             value = event.get(key)
             if value:
                 evidence.append(str(value))
@@ -2732,6 +2743,188 @@ class StateStore:
             "procedural_decision_id": decision["decision_id"],
         }
 
+    def apply_procedural_lifecycle_action(
+        self,
+        memory_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in PROCEDURAL_LIFECYCLE_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_procedural_lifecycle_action",
+                "action": action,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault("task_hub", default_task_hub(utc_now(), state.get("working_state", {})))
+        memory = next(
+            (
+                item
+                for item in task_hub.setdefault("procedural_memory", [])
+                if isinstance(item, dict) and item.get("memory_id") == memory_id
+            ),
+            None,
+        )
+        if memory is None:
+            return {
+                "status": "not_found",
+                "error": "procedural_memory_not_found",
+                "memory_id": memory_id,
+            }
+
+        before_status = memory.get("lifecycle", {}).get("status") or memory.get("status")
+        if before_status in {"archived", "discarded", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "memory_id": memory_id,
+                "lifecycle_status": before_status,
+            }
+
+        now = utc_now()
+        target_status = {
+            "archive": "archived",
+            "discard": "discarded",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        decision = {
+            "decision_id": new_id("procedural_lifecycle_decision"),
+            "timestamp": now,
+            "memory_id": memory_id,
+            "workflow": memory.get("workflow"),
+            "reviewer": reviewer,
+            "action": normalized_action,
+            "result": target_status,
+            "decision_note": decision_note,
+            "memory_status_before": before_status,
+            "snapshot_id": None,
+            "risk": memory.get("risk", "medium"),
+            "confidence": memory.get("confidence", 0.5),
+            "evidence": [memory_id] + list(memory.get("evidence", [])),
+            "rollback": {"reversible": True},
+        }
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_procedural_memory",
+            target_path="task_hub.procedural_memory",
+            evidence=[memory_id] + list(memory.get("evidence", [])),
+            metadata={
+                "procedural_lifecycle_decision_id": decision["decision_id"],
+                "memory_id": memory_id,
+                "memory_status": before_status,
+                "workflow": memory.get("workflow"),
+            },
+        )
+        memory["status"] = target_status
+        memory["review_status"] = target_status
+        memory["reviewed_at"] = now
+        memory["reviewer"] = reviewer
+        memory["decision_note"] = decision_note
+        memory["last_lifecycle_decision_id"] = decision["decision_id"]
+        memory["lifecycle"] = {
+            **memory.get("lifecycle", {}),
+            "status": target_status,
+            "last_reviewed_at": now,
+            "review_status": target_status,
+            "lifecycle_decision_id": decision["decision_id"],
+        }
+        if normalized_action == "quarantine":
+            memory["quarantine_reason"] = decision_note or "procedural_lifecycle_quarantine"
+        if normalized_action == "discard":
+            memory["discard_reason"] = decision_note or "procedural_lifecycle_discard"
+
+        decision["snapshot_id"] = snapshot["snapshot_id"]
+        task_hub.setdefault("procedural_lifecycle_decisions", []).append(decision)
+        memory.setdefault("lifecycle_history", []).append(decision)
+        memory.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": reviewer,
+                "operation": f"{normalized_action}_procedural_memory",
+                "evidence": [memory_id],
+                "procedural_lifecycle_decision_id": decision["decision_id"],
+            }
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.procedural_memory",
+                "operation": f"{normalized_action}_procedural_memory",
+                "before": before_status,
+                "after": target_status,
+                "evidence": [memory_id] + list(memory.get("evidence", [])),
+                "gate": "medium",
+                "confidence": memory.get("confidence", 0.5),
+                "procedural_lifecycle_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_procedural_memory_lifecycle",
+            target="task_hub.procedural_memory",
+            outcome=target_status,
+            evidence=[memory_id] + list(memory.get("evidence", [])),
+            metadata={
+                "procedural_lifecycle_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "memory_id": memory_id,
+                "decision_note": decision_note,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="procedural_memory_lifecycle",
+            nodes=[
+                {
+                    "id": "procedural_memory",
+                    "type": "Memory",
+                    "memory_id": memory_id,
+                },
+                {
+                    "id": "lifecycle_review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[{"from": "procedural_memory", "to": "lifecycle_review", "type": "feedback"}],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.procedural_memory",
+                    "memory_id": memory_id,
+                    "procedural_lifecycle_decision_id": decision["decision_id"],
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_procedural_memory",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "procedural_lifecycle_decision": decision,
+                }
+            ],
+            summary=f"Applied lifecycle action {normalized_action} to procedural memory {memory_id}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": target_status,
+            "memory_id": memory_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "procedural_lifecycle_decision_id": decision["decision_id"],
+        }
+
     def record_failure_reflection(
         self,
         workflow: str,
@@ -3518,6 +3711,13 @@ class StateStore:
             for action in task_hub.get("action_trace", [])
             if isinstance(action, dict)
         ][-10:]
+        active_procedural_memory = [
+            memory
+            for memory in task_hub.get("procedural_memory", [])
+            if isinstance(memory, dict)
+            and memory.get("status") == "active"
+            and memory.get("lifecycle", {}).get("status") == "active"
+        ]
         task_terms = context_task_terms(working_state)
         relationship_context = build_relationship_context(state)
         episodic, episodic_trace = activate_context_memories(
@@ -3581,7 +3781,7 @@ class StateStore:
                     "cautionary_procedural_candidates",
                     [],
                 ),
-                "procedural_memory": task_hub.get("procedural_memory", []),
+                "procedural_memory": active_procedural_memory,
             },
             "active_tasks": active_tasks,
             "action_trace": action_trace,
@@ -3591,7 +3791,7 @@ class StateStore:
                 "cautionary_procedural_candidates",
                 [],
             ),
-            "procedural_memory": task_hub.get("procedural_memory", []),
+            "procedural_memory": active_procedural_memory,
             "identity_update_gate": {
                 "required_gate": identity_gate.get("required_gate", "high"),
                 "pending_proposals": [

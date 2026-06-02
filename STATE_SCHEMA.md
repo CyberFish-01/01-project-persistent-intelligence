@@ -739,6 +739,24 @@ task_hub:
       lifecycle:
         status: "active"
         review_status: "approved"
+  procedural_lifecycle_decisions:
+    - decision_id: "procedural_lifecycle_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      memory_id: "proc_mem_0001"
+      workflow: "record_episode"
+      reviewer: "manual_review"
+      action: "archive"
+      result: "archived"
+      decision_note: "Superseded by a newer procedural memory."
+      memory_status_before: "active"
+      snapshot_id: "snapshot_0002"
+      risk: "low"
+      confidence: 0.65
+      evidence:
+        - "proc_mem_0001"
+        - "action_0001"
+      rollback:
+        reversible: true
   procedural_review_decisions:
     - decision_id: "procedural_decision_0001"
       timestamp: "ISO-8601 timestamp"
@@ -757,6 +775,8 @@ Trace entries for real state mutations enter `task_hub.action_trace`. `dry_run` 
 Dream may propose `procedural_candidates` from repeated successful action traces. These candidates are not adopted procedural memory until reviewed. P16 adds `review-procedural-candidate`; approval creates `task_hub.procedural_memory` with decision, snapshot, audit, trace, update log, and rollback metadata. It still does not execute workflow policy.
 
 P17 adds explicit failure reflection. `record-failure-reflection` records a failed or blocked workflow lesson in `task_hub.failure_reflections` and creates a pending `task_hub.cautionary_procedural_candidates` entry. Cautionary candidates are warning proposals, not executable workflow policy. They must remain pending until a later review path exists, and they must not mutate Identity Core.
+
+P18 adds procedural lifecycle retention. `procedural-lifecycle` can archive, discard, or quarantine reviewed `task_hub.procedural_memory` entries. It writes snapshot, audit, trace, update log, lifecycle history, and `task_hub.procedural_lifecycle_decisions`, but it still does not execute workflow policy. Context packages only expose active procedural memory.
 
 ## 14. Identity Update Gate
 
@@ -1041,12 +1061,14 @@ state_transfer_package:
     procedural_candidates: []
     cautionary_procedural_candidates: []
     procedural_memory: []
+    procedural_lifecycle_decisions: []
   active_tasks: []
   action_trace: []
   failure_reflections: []
   procedural_candidates: []
   cautionary_procedural_candidates: []
   procedural_memory: []
+  procedural_lifecycle_decisions: []
   identity_update_gate:
     required_gate: "high"
     pending_proposals: []
@@ -1118,6 +1140,7 @@ A valid 01 state must satisfy:
 - every failure reflection has workflow, summary, lesson, evidence, provenance, and status,
 - every procedural candidate has workflow, evidence, and pending review status,
 - every cautionary procedural candidate has a source reflection, avoid guidance, evidence, and pending review status,
+- every procedural lifecycle decision has memory id, workflow, reviewer, action, result, and snapshot metadata,
 - every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,
 - P11 must not directly patch `identity_core`; approval can only append identity_memory,
 - every session can answer Identity, Context, and Intent anchors.

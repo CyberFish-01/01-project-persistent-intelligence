@@ -99,6 +99,17 @@ python3 -m one_core.cli lifecycle semantic_memory sem_xxx \
 
 Lifecycle actions currently support `archive`, `discard`, and `quarantine` for imported, episodic, candidate, and semantic memory. Identity memory still requires a separate high gate.
 
+Apply a reviewed lifecycle action to procedural memory:
+
+```bash
+python3 -m one_core.cli procedural-lifecycle proc_mem_xxx \
+  --action archive \
+  --reviewer cyberfish \
+  --decision-note "Superseded by a newer workflow memory."
+```
+
+Procedural lifecycle actions keep audit, trace, update log, snapshot, and lifecycle decision metadata. Archived, discarded, and quarantined procedural memory is not exposed in active context.
+
 Import external memories from generic text:
 
 ```bash

@@ -653,7 +653,6 @@ git diff --check
 剩余缺口：
 
 - 还没有 workflow policy executor；
-- 还没有 procedural memory lifecycle/retention command；
 - procedural memory 还没有和具体 tool policy / safety policy 深度联动；
 
 ## 6. 当前建议
@@ -679,18 +678,37 @@ P17 Failure Reflection
 剩余缺口：
 
 - cautionary procedural candidates 还没有 review/promote 路径；
-- 还没有 procedural memory lifecycle/retention command；
+- procedural memory 还没有和具体 tool policy / safety policy 深度联动；
+- 还没有 workflow policy executor。
+
+### P18 Procedural Lifecycle / Retention
+
+目标：让已 review 的 procedural memory 可以通过可审计 retention path 保持 active、archive、discard 或 quarantine。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `procedural-lifecycle` CLI 可以 archive、discard 或 quarantine `task_hub.procedural_memory`；
+- `StateStore.apply_procedural_lifecycle_action` 会写入 snapshot、audit、trace、update log、lifecycle history 和 `task_hub.procedural_lifecycle_decisions`；
+- context package 只暴露 active procedural memory；
+- scenario evaluation 增加 `procedural_lifecycle_retention`；
+- procedural lifecycle 不修改 Identity Core，也不执行 workflow policy。
+
+剩余缺口：
+
+- cautionary procedural candidates 还没有 review/promote 路径；
 - procedural memory 还没有和具体 tool policy / safety policy 深度联动；
 - 还没有 workflow policy executor。
 
 建议下一步：
 
 ```text
-P18 Procedural Lifecycle / Retention
+P19 Cautionary Procedural Review
 ```
 
 理由：
 
-- P16 和 P17 已经能生成正向和警告型行动知识；
-- 下一层地基是决定 procedural memory 如何保持 active、变 stale、archive 或 quarantine；
-- 这仍然应该是可审查、可回滚的流程，并且不自动执行工具。
+- P17 已经能从失败中生成 warning-style procedural candidates，但它们目前只能永久 pending；
+- P18 已经给 adopted procedural memory 加上 retention lifecycle；
+- 下一层地基是给 cautionary candidates 增加 review path，让它们可以成为 active warning、archive 或 quarantine，但仍然不能变成自动执行的 tool policy。

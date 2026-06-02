@@ -948,6 +948,7 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "procedural_candidates",
         "cautionary_procedural_candidates",
         "procedural_memory",
+        "procedural_lifecycle_decisions",
         "procedural_review_decisions",
     ):
         if not isinstance(task_hub.get(key), list):
@@ -1057,11 +1058,42 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
             ):
                 if key not in memory:
                     issues.append(ValidationIssue(path + f".{key}", "Procedural memory key is missing."))
-            if memory.get("status") != "active":
+            if memory.get("status") not in {
+                "active",
+                "archived",
+                "discarded",
+                "quarantined",
+            }:
                 issues.append(
                     ValidationIssue(
                         path + ".status",
-                        "Procedural memory must be active after approval.",
+                        "Procedural memory must have a valid lifecycle status.",
+                    )
+                )
+    lifecycle_decisions = task_hub.get("procedural_lifecycle_decisions", [])
+    if isinstance(lifecycle_decisions, list):
+        for index, decision in enumerate(lifecycle_decisions):
+            path = f"task_hub.procedural_lifecycle_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Procedural lifecycle decision must be an object."))
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "memory_id",
+                "workflow",
+                "reviewer",
+                "action",
+                "result",
+                "snapshot_id",
+            ):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Procedural lifecycle decision key is missing."))
+            if decision.get("result") not in {"archived", "discarded", "quarantined"}:
+                issues.append(
+                    ValidationIssue(
+                        path + ".result",
+                        "Procedural lifecycle decision must resolve to an archived, discarded, or quarantined state.",
                     )
                 )
     decisions = task_hub.get("procedural_review_decisions", [])

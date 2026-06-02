@@ -474,6 +474,50 @@ class CoreStateTests(unittest.TestCase):
                 {item["memory_id"] for item in package["procedural_memory"]},
             )
 
+    def test_procedural_lifecycle_updates_retention_and_context(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("第一次记录行动结构。")
+            store.record_episode("第二次记录行动结构。")
+            DreamEngine(store).run()
+            candidate = store.load()["task_hub"]["procedural_candidates"][0]
+            review = store.review_procedural_candidate(
+                candidate["candidate_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Approve reviewed procedural memory for retention testing.",
+            )
+            memory_id = review["procedural_memory_id"]
+
+            result = store.apply_procedural_lifecycle_action(
+                memory_id=memory_id,
+                action="archive",
+                reviewer="unit_test",
+                decision_note="Superseded by a newer workflow memory.",
+            )
+            state = store.load()
+            memory = state["task_hub"]["procedural_memory"][0]
+            decision = state["task_hub"]["procedural_lifecycle_decisions"][0]
+            package = store.build_context_package()
+
+            self.assertEqual(result["status"], "archived")
+            self.assertEqual(memory["status"], "archived")
+            self.assertEqual(memory["lifecycle"]["status"], "archived")
+            self.assertEqual(
+                memory["lifecycle"]["lifecycle_decision_id"],
+                result["procedural_lifecycle_decision_id"],
+            )
+            self.assertEqual(
+                decision["decision_id"],
+                result["procedural_lifecycle_decision_id"],
+            )
+            self.assertEqual(store.list_traces()[-1]["workflow"], "procedural_memory_lifecycle")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertEqual(package["procedural_memory"], [])
+            self.assertEqual(package["task_hub"]["procedural_memory"], [])
+            self.assertEqual(state["task_hub"]["procedural_lifecycle_decisions"][-1]["result"], "archived")
+
     def test_failure_reflection_creates_cautionary_candidate(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

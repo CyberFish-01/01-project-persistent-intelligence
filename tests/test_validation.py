@@ -256,6 +256,31 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
 
+    def test_procedural_lifecycle_requires_valid_result(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["task_hub"]["procedural_lifecycle_decisions"].append(
+                {
+                    "decision_id": "procedural_lifecycle_bad",
+                    "timestamp": state["created_at"],
+                    "memory_id": "proc_mem_bad",
+                    "workflow": "record_episode",
+                    "reviewer": "unit_test",
+                    "action": "archive",
+                    "result": "approved",
+                    "snapshot_id": "snapshot_bad",
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn(
+                "task_hub.procedural_lifecycle_decisions[0].result",
+                paths,
+            )
+
     def test_identity_update_gate_requires_proposal_gate_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

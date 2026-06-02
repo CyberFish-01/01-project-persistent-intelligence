@@ -99,6 +99,17 @@ python3 -m one_core.cli lifecycle semantic_memory sem_xxx \
 
 Lifecycle action 当前支持对 imported、episodic、candidate、semantic memory 执行 `archive`、`discard` 和 `quarantine`。Identity memory 仍需要单独的 high gate。
 
+对 procedural memory 执行已审查生命周期动作：
+
+```bash
+python3 -m one_core.cli procedural-lifecycle proc_mem_xxx \
+  --action archive \
+  --reviewer cyberfish \
+  --decision-note "被新的 workflow memory 替代。"
+```
+
+Procedural lifecycle action 会保留 audit、trace、update log、snapshot 和 lifecycle decision metadata。Archived、discarded、quarantined procedural memory 不会进入 active context。
+
 从通用文本导入外部记忆：
 
 ```bash

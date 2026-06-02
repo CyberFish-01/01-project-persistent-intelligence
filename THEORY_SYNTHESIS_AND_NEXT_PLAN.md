@@ -653,7 +653,6 @@ Implemented result:
 Remaining gaps:
 
 - no workflow policy executor yet;
-- no procedural memory lifecycle/retention command yet;
 - procedural memory is not yet deeply linked to tool policy / safety policy;
 
 ## 6. Current Recommendation
@@ -679,18 +678,37 @@ Implemented result:
 Remaining gaps:
 
 - no review/promote path for cautionary procedural candidates yet;
-- no procedural memory lifecycle/retention command yet;
 - procedural memory is not yet deeply linked to tool policy / safety policy;
 - no workflow policy executor yet.
+
+### P18 Procedural Lifecycle / Retention
+
+Goal: let reviewed procedural memory stay active, become archived, discarded, or quarantined through an auditable retention path.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `procedural-lifecycle` CLI can archive, discard, or quarantine `task_hub.procedural_memory`;
+- `StateStore.apply_procedural_lifecycle_action` writes snapshot, audit, trace, update log, lifecycle history, and `task_hub.procedural_lifecycle_decisions`;
+- context packages expose only active procedural memory;
+- scenario evaluation adds `procedural_lifecycle_retention`;
+- procedural lifecycle does not mutate Identity Core and does not execute workflow policy.
+
+Remaining gaps:
+
+- no review/promote path for cautionary procedural candidates yet;
+- procedural memory is not yet deeply linked to tool policy / safety policy;
+- no workflow policy executor yet;
 
 Recommended next step:
 
 ```text
-P18 Procedural Lifecycle / Retention
+P19 Cautionary Procedural Review
 ```
 
 Reason:
 
-- P16 and P17 now create durable positive and cautionary action knowledge;
-- the next foundation is deciding how procedural memory stays active, becomes stale, is archived, or is quarantined;
-- this should still be reviewable and reversible, with no automatic tool execution.
+- P17 creates warning-style procedural candidates from failures, but they remain pending forever;
+- P18 gives adopted procedural memory a retention lifecycle;
+- the next foundation is a review path for cautionary candidates that can become active warnings, be archived, or be quarantined without becoming executable tool policy.

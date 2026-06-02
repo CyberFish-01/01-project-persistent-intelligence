@@ -110,6 +110,19 @@ def main() -> None:
     lifecycle_parser.add_argument("--reviewer", default="manual_review")
     lifecycle_parser.add_argument("--decision-note", default="")
 
+    procedural_lifecycle_parser = subparsers.add_parser(
+        "procedural-lifecycle",
+        help="Apply a reviewed lifecycle action to a procedural memory.",
+    )
+    procedural_lifecycle_parser.add_argument("memory_id")
+    procedural_lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["archive", "discard", "quarantine"],
+    )
+    procedural_lifecycle_parser.add_argument("--reviewer", default="manual_review")
+    procedural_lifecycle_parser.add_argument("--decision-note", default="")
+
     identity_propose_parser = subparsers.add_parser(
         "propose-identity-update",
         help="Create a high-gate identity update proposal without applying it.",
@@ -304,6 +317,15 @@ def main() -> None:
         print_json(
             store.apply_memory_lifecycle_action(
                 store_name=args.store_name,
+                memory_id=args.memory_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "procedural-lifecycle":
+        print_json(
+            store.apply_procedural_lifecycle_action(
                 memory_id=args.memory_id,
                 action=args.action,
                 reviewer=args.reviewer,

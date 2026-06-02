@@ -312,6 +312,7 @@ It uses temporary state and currently runs:
 - `task_hub_action_resume`: verifies that Task Hub preserves active tasks, next actions, and action history after interruption, and proposes procedural candidates from repeated successful actions.
 - `procedural_memory_review`: verifies `review-procedural-candidate`, durable procedural memory creation, review decision metadata, snapshot, replay, and no Identity Core mutation.
 - `failure_reflection`: verifies `record-failure-reflection`, failure reflection persistence, cautionary procedural candidate creation, context exposure, and no Identity Core mutation.
+- `procedural_lifecycle_retention`: verifies `procedural-lifecycle`, procedural lifecycle decision metadata, replay, and suppression of archived procedural memory from context.
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
 - `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, and rollback preview does not mutate state.
 - `dream_artifact_package`: verifies that Dream runs produce a complete artifact package with input manifest, provenance, review queue, patch diff, decision log, rollback metadata, and no direct Identity Core or active semantic memory write.
@@ -353,6 +354,10 @@ Current metrics summary includes:
 - failure reflection count,
 - failure caution count,
 - failure identity mutation count,
+- procedural lifecycle score,
+- procedural lifecycle decision count,
+- procedural archived count,
+- procedural active context count,
 - context builder score,
 - context activation trace count,
 - context source attribution count,
