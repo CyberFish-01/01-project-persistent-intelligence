@@ -77,6 +77,13 @@ python3 -m one_core.cli import-text memory_export.txt \
   --source-label astrbot_01_export
 ```
 
+把原始 JSON/JSONL/CSV/TXT 记忆导出清洗成通用文本：
+
+```bash
+python3 -m one_core.cli clean-memory raw_astrbot_export.json \
+  -o work/imports/astrbot_01_memory.txt
+```
+
 运行测试：
 
 ```bash

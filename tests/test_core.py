@@ -2,6 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from one_core.cleaner import clean_memory_files
 from one_core.dream import DreamEngine
 from one_core.importer import import_text_file, split_memory_text
 from one_core.state import StateStore
@@ -93,6 +94,39 @@ class CoreStateTests(unittest.TestCase):
     def test_split_memory_text_accepts_bullets(self):
         chunks = split_memory_text("- A\n- B\n- C")
         self.assertEqual(chunks, ["A", "B", "C"])
+
+    def test_clean_memory_files_extracts_json_and_dedupes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "raw.json"
+            source.write_text(
+                """
+                {
+                  "memories": [
+                    {"id": "1", "content": "01 认为 AstrBot 只是外部 adapter。"},
+                    {"id": "2", "memory": "01 认为 AstrBot 只是外部 adapter。"},
+                    {"embedding": [0.1, 0.2], "text": "Dream Engine 负责整理旧记忆。"}
+                  ]
+                }
+                """,
+                encoding="utf-8",
+            )
+            memories = clean_memory_files([source])
+            self.assertEqual(len(memories), 2)
+            self.assertIn("01 认为 AstrBot 只是外部 adapter。", memories)
+            self.assertIn("Dream Engine 负责整理旧记忆。", memories)
+
+    def test_clean_memory_files_extracts_csv(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "raw.csv"
+            source.write_text(
+                "id,memory,created_at\n"
+                "1,01 的核心状态不属于 Angel Memory,2026-06-03\n",
+                encoding="utf-8",
+            )
+            memories = clean_memory_files([source])
+            self.assertEqual(memories, ["01 的核心状态不属于 Angel Memory"])
 
 
 if __name__ == "__main__":

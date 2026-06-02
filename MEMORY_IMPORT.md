@@ -63,6 +63,8 @@ Or bullet points:
 
 ## 3. Import Command
 
+If you already have clean `.txt`:
+
 ```bash
 python3 -m one_core.cli import-text astrbot_01_memory.txt \
   --source-system astrbot_text \
@@ -77,7 +79,52 @@ python3 -m one_core.cli import-text angel_memory_export.txt \
   --source-label astrbot_angel_memory_export
 ```
 
-## 4. Where It Goes
+## 4. Clean Raw Exports
+
+If you have raw AstrBot / Angel Memory exports, clean them into generic text first.
+
+Currently supported:
+
+- `.txt`
+- `.json`
+- `.jsonl`
+- `.csv`
+
+Command:
+
+```bash
+python3 -m one_core.cli clean-memory raw_astrbot_export.json \
+  -o work/imports/astrbot_01_memory.txt
+```
+
+Multiple files can be cleaned together:
+
+```bash
+python3 -m one_core.cli clean-memory raw_1.json raw_2.jsonl raw_3.csv \
+  -o work/imports/astrbot_01_memory.txt
+```
+
+Then import:
+
+```bash
+python3 -m one_core.cli import-text work/imports/astrbot_01_memory.txt \
+  --source-system astrbot_text \
+  --source-label astrbot_01_export
+```
+
+The cleaner extracts text from common fields:
+
+```text
+content, memory, text, message, summary, description, value, fact, memo, note
+```
+
+It ignores obvious noise fields:
+
+```text
+id, uuid, timestamp, embedding, vector, metadata, session_id
+```
+
+## 5. Where It Goes
 
 Imported content is stored in:
 
@@ -98,7 +145,7 @@ promotion_policy:
 
 Imported memories are external material by default, not identity core.
 
-## 5. Why Not Identity Core
+## 6. Why Not Identity Core
 
 Old memories may contain:
 
@@ -114,20 +161,20 @@ These can be historical materials, but they should not automatically change "Who
 
 Identity Core updates must pass a high gate.
 
-## 6. Recommended Flow
+## 7. Recommended Flow
 
 1. Export old memories from AstrBot / Angel Memory.
-2. Clean them into `.txt`.
-3. Remove obvious private data, noise, and plugin internals.
+2. Run `clean-memory` to produce `.txt`.
+3. Manually review and remove obvious private data, noise, and plugin internals.
 4. Run `import-text`.
 5. Check `context` and `status`.
 6. Run `dream`.
 7. Review Dream semantic candidates.
 8. Later, add manual approval and identity update gates.
 
-## 7. Current Limits
+## 8. Current Limits
 
-The first importer does not yet:
+The first cleaner/importer does not yet:
 
 - read AstrBot databases directly;
 - parse Angel Memory proprietary formats;

@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
 from .importer import import_text_file
 from .state import DEFAULT_STATE_DIR, StateStore
@@ -35,6 +36,19 @@ def main() -> None:
     import_parser.add_argument("--source-label", default="external_memory")
     import_parser.add_argument("--source-system", default="generic_text")
     import_parser.add_argument("--confidence", type=float, default=0.55)
+
+    clean_parser = subparsers.add_parser(
+        "clean-memory",
+        help="Clean raw memory exports into generic text for import-text.",
+    )
+    clean_parser.add_argument("paths", nargs="+", help="Raw memory export files.")
+    clean_parser.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        help="Output .txt file in generic bullet format.",
+    )
+    clean_parser.add_argument("--min-chars", type=int, default=8)
 
     dream_parser = subparsers.add_parser("dream", help="Run a dream consolidation cycle.")
     dream_parser.add_argument("--limit", type=int, default=20)
@@ -101,6 +115,12 @@ def main() -> None:
             source_system=args.source_system,
             confidence=args.confidence,
         )
+        print_json(report)
+    elif args.command == "clean-memory":
+        memories = clean_memory_files(
+            [Path(path) for path in args.paths], min_chars=args.min_chars
+        )
+        report = write_cleaned_text(memories, Path(args.output))
         print_json(report)
     elif args.command == "dream":
         report = DreamEngine(store).run(limit=args.limit)

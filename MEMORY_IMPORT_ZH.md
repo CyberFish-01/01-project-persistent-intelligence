@@ -63,6 +63,8 @@ AstrBot 只是未来的外部接入层，不应该拥有 01 Core 的核心状态
 
 ## 3. 导入命令
 
+如果已经有干净的 `.txt`：
+
 ```bash
 python3 -m one_core.cli import-text astrbot_01_memory.txt \
   --source-system astrbot_text \
@@ -77,7 +79,52 @@ python3 -m one_core.cli import-text angel_memory_export.txt \
   --source-label astrbot_angel_memory_export
 ```
 
-## 4. 导入后存到哪里
+## 4. 清洗原始导出
+
+如果拿到的是 AstrBot / Angel Memory 的原始导出，可以先清洗成通用文本。
+
+当前支持：
+
+- `.txt`
+- `.json`
+- `.jsonl`
+- `.csv`
+
+命令：
+
+```bash
+python3 -m one_core.cli clean-memory raw_astrbot_export.json \
+  -o work/imports/astrbot_01_memory.txt
+```
+
+多个文件可以一起清洗：
+
+```bash
+python3 -m one_core.cli clean-memory raw_1.json raw_2.jsonl raw_3.csv \
+  -o work/imports/astrbot_01_memory.txt
+```
+
+然后再导入：
+
+```bash
+python3 -m one_core.cli import-text work/imports/astrbot_01_memory.txt \
+  --source-system astrbot_text \
+  --source-label astrbot_01_export
+```
+
+清洗器会尽量从常见字段中提取文本：
+
+```text
+content, memory, text, message, summary, description, value, fact, memo, note
+```
+
+它会忽略明显的噪声字段：
+
+```text
+id, uuid, timestamp, embedding, vector, metadata, session_id
+```
+
+## 5. 导入后存到哪里
 
 导入内容进入：
 
@@ -98,7 +145,7 @@ promotion_policy:
 
 也就是说，导入记忆默认只是“外部材料”，不是 01 的身份核心。
 
-## 5. 为什么不直接写入 Identity Core
+## 6. 为什么不直接写入 Identity Core
 
 因为旧记忆可能包含：
 
@@ -114,20 +161,20 @@ promotion_policy:
 
 Identity Core 的更新必须通过 high gate。
 
-## 6. 推荐流程
+## 7. 推荐流程
 
 1. 从 AstrBot / Angel Memory 导出旧记忆；
-2. 人工粗略清理为 `.txt`；
-3. 删除明显隐私、噪声和插件内部字段；
+2. 用 `clean-memory` 粗清洗为 `.txt`；
+3. 人工检查并删除明显隐私、噪声和插件内部字段；
 4. 用 `import-text` 导入；
 5. 查看 `context` 和 `status`；
 6. 运行 `dream`；
 7. 检查 Dream 是否提出合适的 semantic candidates；
 8. 后续再实现人工批准和 identity update gate。
 
-## 7. 当前限制
+## 8. 当前限制
 
-第一版导入器还不会：
+第一版清洗/导入器还不会：
 
 - 自动读取 AstrBot 数据库；
 - 自动解析 Angel Memory 专有格式；
