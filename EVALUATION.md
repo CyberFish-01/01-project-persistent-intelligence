@@ -309,8 +309,9 @@ It uses temporary state and currently runs:
 - `lifecycle_retrieval_suppression`: verifies that archived semantic memory is copied to archived memory and suppressed from active context retrieval.
 - `claim_graph_conflict_provenance`: verifies that false-memory conflicts create evidence-backed claim nodes without mutating semantic memory or Identity Core.
 - `task_hub_action_resume`: verifies that Task Hub preserves active tasks, next actions, and action history after interruption, and proposes procedural candidates from repeated successful actions.
+- `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
 
-The v0.3 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
+The v0.4 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
 
 Current metrics summary includes:
 
@@ -321,6 +322,10 @@ Current metrics summary includes:
 - unreviewed memory mutation count,
 - task hub resume score,
 - procedural candidate count,
+- identity gate score,
+- approved identity updates,
+- identity core mutation count,
+- identity gate quarantine count,
 - passed and failed scenario counts.
 
 ## 11. What Would Falsify the Approach?

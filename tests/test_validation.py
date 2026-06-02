@@ -135,6 +135,32 @@ class StateValidationTests(unittest.TestCase):
             self.assertIn("task_hub.action_trace[0].timestamp", paths)
             self.assertIn("task_hub.procedural_candidates[0].evidence", paths)
 
+    def test_identity_update_gate_requires_proposal_gate_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["identity_update_gate"]["proposals"].append(
+                {
+                    "proposal_id": "identity_proposal_bad",
+                    "statement": "Unsupported identity update.",
+                    "target_path": "identity_core",
+                    "evidence": [],
+                    "review_status": "pending",
+                    "may_update_identity_core": True,
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("identity_update_gate.proposals[0].gate_result", paths)
+            self.assertIn("identity_update_gate.proposals[0].drift_score", paths)
+            self.assertIn("identity_update_gate.proposals[0].non_claims_check", paths)
+            self.assertIn(
+                "identity_update_gate.proposals[0].may_update_identity_core",
+                paths,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

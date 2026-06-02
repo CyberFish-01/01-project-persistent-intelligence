@@ -7,7 +7,7 @@ The schema is intentionally implementation-neutral. It can be stored as JSON, YA
 ## 1. Top-Level State
 
 ```yaml
-state_version: "0.8"
+state_version: "0.9"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -32,6 +32,10 @@ task_hub:
   recurring_duties: []
   action_trace: []
   procedural_candidates: []
+identity_update_gate:
+  proposals: []
+  review_decisions: []
+  drift_events: []
 dream_queue: []
 snapshots: []
 audit_log: []
@@ -667,7 +671,73 @@ Trace entries for real state mutations enter `task_hub.action_trace`. `dry_run` 
 
 Dream may propose `procedural_candidates` from repeated successful action traces. These candidates are not adopted procedural memory until reviewed.
 
-## 14. Dream Queue
+## 14. Identity Update Gate
+
+Identity Update Gate manages slow identity growth.
+
+The P11 implementation can create and review identity proposals, but it does not directly rewrite `identity_core`. Even when a proposal passes the high gate, the current target is appending `memory_stores.identity_memory`.
+
+```yaml
+identity_update_gate:
+  gate_version: "0.9"
+  required_gate: "high"
+  min_supporting_evidence: 3
+  allow_identity_core_patch: false
+  proposals:
+    - proposal_id: "identity_proposal_0001"
+      timestamp: "ISO-8601 timestamp"
+      target_path: "memory_stores.identity_memory"
+      statement: "01 identity growth is evidence-backed and reviewable."
+      operation: "append_identity_memory"
+      proposer: "manual_review"
+      rationale: "Three episodes support a slow identity memory."
+      evidence:
+        - "episode_0001"
+        - "episode_0002"
+        - "episode_0003"
+      confidence: 0.82
+      gate: "high"
+      review_status: "pending|approved|rejected|quarantined"
+      gate_result:
+        eligible: true
+        required_evidence_count: 3
+        evidence_count: 3
+        reasons: []
+      non_claims_check:
+        passed: true
+        violations: []
+      drift_score:
+        score: 0.17
+        risk: "low"
+        factors: []
+      rollback_required: true
+      may_update_identity_core: false
+  review_decisions:
+    - decision_id: "identity_decision_0001"
+      proposal_id: "identity_proposal_0001"
+      action: "approve|reject|quarantine"
+      result: "approved|rejected|quarantined"
+      gate: "high"
+      snapshot_id: "snapshot_0001"
+      gate_result: {}
+  drift_events: []
+  policy:
+    non_claims_check_required: true
+    drift_threshold: 0.35
+    approved_target: "memory_stores.identity_memory"
+    identity_core_update_mode: "blocked_in_v0.9"
+```
+
+Gate rules:
+
+- high gate requires at least 3 supporting evidence ids,
+- evidence must point to known memory/action/claim ids,
+- non-claims check blocks biological emotion, consciousness, human identity, and similar claims,
+- proposals whose drift score exceeds the threshold cannot be approved,
+- identity_core patching is blocked in v0.9,
+- approval creates snapshot, audit, trace, update_log, and appends identity_memory.
+
+## 15. Dream Queue
 
 ```yaml
 dream_queue:
@@ -684,7 +754,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 15. Audit Log
+## 16. Audit Log
 
 Audit log records what happened at runtime.
 
@@ -730,7 +800,7 @@ dream_artifact:
   rollback_metadata: {}
 ```
 
-## 16. Update Log
+## 17. Update Log
 
 Every durable update must be recorded.
 
@@ -753,7 +823,7 @@ update_log:
       reversible: true
 ```
 
-## 17. Snapshots
+## 18. Snapshots
 
 Snapshots are lightweight audit anchors recorded before review actions such as candidate promotion, archive, discard, or quarantine.
 
@@ -771,7 +841,7 @@ snapshots:
     metadata:
       review_decision_id: "review_decision_0001"
       candidate_id: "cand_0001"
-    state_version: "0.8"
+    state_version: "0.9"
     memory_counts:
       semantic_memory: 3
       candidate_memory: 2
@@ -781,7 +851,7 @@ snapshots:
       note: "Automatic rollback is not implemented yet."
 ```
 
-## 18. State Transfer Package
+## 19. State Transfer Package
 
 At session start, the system should not load everything.
 
@@ -802,6 +872,11 @@ state_transfer_package:
   active_tasks: []
   action_trace: []
   procedural_candidates: []
+  identity_update_gate:
+    required_gate: "high"
+    pending_proposals: []
+    recent_decisions: []
+    recent_drift_events: []
   blockers: []
   assumptions: []
   context_policy:
@@ -830,7 +905,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 19. Minimal Invariants
+## 20. Minimal Invariants
 
 A valid 01 state must satisfy:
 
@@ -848,4 +923,6 @@ A valid 01 state must satisfy:
 - every review/promotion rollback reference points to snapshot metadata,
 - `task_hub.action_trace` records real state mutations, not non-mutating dry-runs,
 - every procedural candidate has workflow, evidence, and pending review status,
+- every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,
+- P11 must not directly patch `identity_core`; approval can only append identity_memory,
 - every session can answer Identity, Context, and Intent anchors.

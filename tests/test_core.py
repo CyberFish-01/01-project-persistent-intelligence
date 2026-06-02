@@ -33,6 +33,8 @@ class CoreStateTests(unittest.TestCase):
             self.assertIn("task_hub", state)
             self.assertTrue(state["task_hub"]["active_tasks"])
             self.assertEqual(state["task_hub"]["action_trace"], [])
+            self.assertIn("identity_update_gate", state)
+            self.assertEqual(state["identity_update_gate"]["required_gate"], "high")
             self.assertIn("candidate_memory", state["memory_stores"])
             self.assertEqual(state["session_policy"]["default_action"], "dry_run_only")
             self.assertTrue(state["memory_stores"]["semantic_memory"][0]["provenance"])
@@ -234,6 +236,26 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(
                 migrated["update_log"][-1]["evidence"],
                 ["task_hub_v0.8"],
+            )
+
+    def test_load_migrates_identity_update_gate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state.pop("identity_update_gate")
+            state["state_version"] = "0.8"
+            store.state_path.write_text(
+                json.dumps(state, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            migrated = store.load()
+            self.assertEqual(migrated["state_version"], STATE_VERSION)
+            self.assertIn("identity_update_gate", migrated)
+            self.assertEqual(migrated["identity_update_gate"]["required_gate"], "high")
+            self.assertEqual(
+                migrated["update_log"][-1]["evidence"],
+                ["identity_update_gate_v0.9"],
             )
 
     def test_load_migrates_legacy_reviewed_candidate_decision_metadata(self):
@@ -846,6 +868,102 @@ class CoreStateTests(unittest.TestCase):
                 "active",
             )
 
+    def test_identity_update_gate_rejects_insufficient_evidence_on_approve(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            episode = store.record_episode(
+                "01 应该把 identity growth 当成慢速审查流程。"
+            )
+            proposal = store.propose_identity_update(
+                "01 treats identity growth as slow reviewed state transfer.",
+                evidence=[episode["id"]],
+                proposer="unit_test",
+                rationale="Only one supporting episode should not pass high gate.",
+                confidence=0.8,
+            )
+            result = store.review_identity_update(
+                proposal["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Should be quarantined by insufficient evidence.",
+            )
+            state = store.load()
+
+            self.assertFalse(proposal["eligible"])
+            self.assertEqual(result["status"], "quarantined")
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(len(state["memory_stores"]["identity_memory"]), 1)
+
+    def test_identity_update_gate_approves_supported_identity_memory_without_core_patch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            episodes = [
+                store.record_episode("01 的身份成长必须依赖证据。"),
+                store.record_episode("01 的身份成长需要 high gate 审查。"),
+                store.record_episode("01 的身份成长应该写入 identity memory 而不是直接覆盖 core。"),
+            ]
+            proposal = store.propose_identity_update(
+                "01 identity growth is evidence-backed, high-gate, and reviewable.",
+                evidence=[episode["id"] for episode in episodes],
+                proposer="unit_test",
+                rationale="Three independent episodes support a slow identity memory.",
+                confidence=0.82,
+            )
+            result = store.review_identity_update(
+                proposal["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Approve as identity memory, not core overwrite.",
+            )
+            state = store.load()
+            identity_memory = state["memory_stores"]["identity_memory"][-1]
+
+            self.assertTrue(proposal["eligible"])
+            self.assertEqual(result["status"], "approved")
+            self.assertTrue(result["identity_memory_id"].startswith("idmem_"))
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(identity_memory["source_proposal_id"], proposal["proposal_id"])
+            self.assertEqual(identity_memory["required_gate"], "high")
+            self.assertEqual(
+                identity_memory["lifecycle"]["identity_decision_id"],
+                result["identity_decision_id"],
+            )
+            self.assertEqual(
+                state["identity_update_gate"]["review_decisions"][-1]["snapshot_id"],
+                result["snapshot_id"],
+            )
+
+    def test_identity_update_gate_blocks_non_claims_violation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episodes = [
+                store.record_episode("identity gate evidence one"),
+                store.record_episode("identity gate evidence two"),
+                store.record_episode("identity gate evidence three"),
+            ]
+            proposal = store.propose_identity_update(
+                "01 has biological emotion and consciousness.",
+                evidence=[episode["id"] for episode in episodes],
+                proposer="unit_test",
+                rationale="This should violate non-claims.",
+                confidence=0.9,
+            )
+            result = store.review_identity_update(
+                proposal["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+            )
+
+            self.assertFalse(proposal["eligible"])
+            self.assertIn(
+                "non_claims_violation",
+                proposal["gate_result"]["reasons"],
+            )
+            self.assertEqual(result["status"], "quarantined")
+
     def test_dream_identity_overwrite_proposal_does_not_change_identity(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))
@@ -877,6 +995,11 @@ class CoreStateTests(unittest.TestCase):
                     "recommended_lifecycle_action"
                 ],
                 "quarantine",
+            )
+            self.assertTrue(report["identity_gate_proposals"])
+            self.assertEqual(
+                state["identity_update_gate"]["proposals"][-1]["review_status"],
+                "pending",
             )
             self.assertFalse(store.list_dream_artifacts()[-1]["rollback_metadata"]["identity_core_changed"])
 

@@ -56,6 +56,7 @@ def run_scenario_evaluation() -> dict:
                 root / "claim_graph_conflict_provenance"
             ),
             check_task_hub_action_resume(root / "task_hub_action_resume"),
+            check_identity_update_gate_review(root / "identity_update_gate_review"),
         ]
     passed = [scenario for scenario in scenarios if scenario.passed]
     failed = [scenario for scenario in scenarios if not scenario.passed]
@@ -394,6 +395,96 @@ def check_task_hub_action_resume(state_dir: Path) -> EvaluationCheck:
     )
 
 
+def check_identity_update_gate_review(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    weak_episode = store.record_episode(
+        "Identity update gate should reject single evidence.",
+        user_id="scenario_eval",
+        channel="local",
+        session_id="identity-gate",
+    )
+    weak = store.propose_identity_update(
+        "01 identity growth should be reviewed.",
+        evidence=[weak_episode["id"]],
+        proposer="scenario_eval",
+        rationale="Single evidence should fail high gate.",
+        confidence=0.82,
+    )
+    weak_review = store.review_identity_update(
+        weak["proposal_id"],
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Should not approve single-evidence identity growth.",
+    )
+
+    supported_episodes = [
+        store.record_episode(
+            "01 identity growth requires evidence.",
+            user_id="scenario_eval",
+            channel="local",
+            session_id="identity-gate",
+        ),
+        store.record_episode(
+            "01 identity growth requires high gate review.",
+            user_id="scenario_eval",
+            channel="local",
+            session_id="identity-gate",
+        ),
+        store.record_episode(
+            "01 identity growth should append identity memory without core overwrite.",
+            user_id="scenario_eval",
+            channel="local",
+            session_id="identity-gate",
+        ),
+    ]
+    supported = store.propose_identity_update(
+        "01 identity growth is evidence-backed and high-gate reviewed.",
+        evidence=[episode["id"] for episode in supported_episodes],
+        proposer="scenario_eval",
+        rationale="Three episodes support a cautious identity memory.",
+        confidence=0.84,
+    )
+    supported_review = store.review_identity_update(
+        supported["proposal_id"],
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Approve only as identity memory.",
+    )
+    state = store.load()
+    decisions = state["identity_update_gate"]["review_decisions"]
+    checks = {
+        "weak_proposal_not_eligible": weak["eligible"] is False,
+        "weak_review_quarantined": weak_review["status"] == "quarantined",
+        "supported_proposal_eligible": supported["eligible"] is True,
+        "supported_review_approved": supported_review["status"] == "approved",
+        "identity_memory_added": bool(supported_review.get("identity_memory_id")),
+        "identity_core_not_mutated": state["identity_core"] == before_identity,
+        "decision_has_snapshot": bool(decisions[-1].get("snapshot_id")),
+        "drift_metric_recorded": bool(state["identity_update_gate"]["drift_events"]),
+    }
+    return EvaluationCheck(
+        name="identity_update_gate_review",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Identity Update Gate Review",
+            "checks": checks,
+            "metrics": {
+                "identity_gate_score": ratio(checks.values()),
+                "approved_identity_updates": 1
+                if supported_review["status"] == "approved"
+                else 0,
+                "identity_core_mutation_count": 0
+                if state["identity_core"] == before_identity
+                else 1,
+                "identity_gate_quarantine_count": 1
+                if weak_review["status"] == "quarantined"
+                else 0,
+            },
+        },
+    )
+
+
 def check_state_invariants(store: StateStore) -> EvaluationCheck:
     report = validate_state(store.load(), store.list_episodes())
     return EvaluationCheck(
@@ -664,6 +755,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "task_hub_resume_score" in item
     ]
+    identity_gate_scores = [
+        item["identity_gate_score"]
+        for item in metrics
+        if "identity_gate_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -676,6 +772,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
             2,
         )
         if task_hub_resume_scores
+        else None,
+        "identity_gate_score": round(
+            sum(identity_gate_scores) / len(identity_gate_scores),
+            2,
+        )
+        if identity_gate_scores
         else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
@@ -690,6 +792,15 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "procedural_candidate_count": sum(
             int(item.get("procedural_candidate_count", 0)) for item in metrics
+        ),
+        "approved_identity_updates": sum(
+            int(item.get("approved_identity_updates", 0)) for item in metrics
+        ),
+        "identity_core_mutation_count": sum(
+            int(item.get("identity_core_mutation_count", 0)) for item in metrics
+        ),
+        "identity_gate_quarantine_count": sum(
+            int(item.get("identity_gate_quarantine_count", 0)) for item in metrics
         ),
     }
 

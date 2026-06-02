@@ -21,6 +21,7 @@ REQUIRED_TOP_LEVEL_KEYS = [
     "open_conflicts",
     "claim_graph",
     "task_hub",
+    "identity_update_gate",
     "dream_queue",
     "snapshots",
     "audit_log",
@@ -69,6 +70,7 @@ def validate_state(state: dict[str, Any], episodes: Iterable[dict] | None = None
     issues.extend(validate_adapter_event_index(state, episodes or []))
     issues.extend(validate_claim_graph(state))
     issues.extend(validate_task_hub(state))
+    issues.extend(validate_identity_update_gate(state))
     issues.extend(validate_snapshots(state))
     return {
         "status": "passed" if not issues else "failed",
@@ -696,6 +698,65 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                         "Procedural candidate requires non-empty evidence.",
                     )
                 )
+    return issues
+
+
+def validate_identity_update_gate(state: dict[str, Any]) -> list[ValidationIssue]:
+    gate = state.get("identity_update_gate")
+    if not isinstance(gate, dict):
+        return [ValidationIssue("identity_update_gate", "Identity update gate must be an object.")]
+
+    issues: list[ValidationIssue] = []
+    for key in ("proposals", "review_decisions", "drift_events"):
+        if not isinstance(gate.get(key), list):
+            issues.append(ValidationIssue(f"identity_update_gate.{key}", "Identity update gate key must be a list."))
+    if gate.get("required_gate") != "high":
+        issues.append(
+            ValidationIssue(
+                "identity_update_gate.required_gate",
+                "Identity update gate must require high gate.",
+            )
+        )
+
+    proposals = gate.get("proposals", [])
+    if isinstance(proposals, list):
+        for index, proposal in enumerate(proposals):
+            path = f"identity_update_gate.proposals[{index}]"
+            if not isinstance(proposal, dict):
+                issues.append(ValidationIssue(path, "Identity proposal must be an object."))
+                continue
+            for key in (
+                "proposal_id",
+                "statement",
+                "target_path",
+                "evidence",
+                "review_status",
+                "gate_result",
+                "drift_score",
+                "non_claims_check",
+            ):
+                if key not in proposal:
+                    issues.append(ValidationIssue(path + f".{key}", "Identity proposal key is missing."))
+            if not isinstance(proposal.get("evidence"), list):
+                issues.append(ValidationIssue(path + ".evidence", "Identity proposal evidence must be a list."))
+            if proposal.get("may_update_identity_core") is not False:
+                issues.append(
+                    ValidationIssue(
+                        path + ".may_update_identity_core",
+                        "P11 proposals must not directly update Identity Core.",
+                    )
+                )
+
+    decisions = gate.get("review_decisions", [])
+    if isinstance(decisions, list):
+        for index, decision in enumerate(decisions):
+            path = f"identity_update_gate.review_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Identity review decision must be an object."))
+                continue
+            for key in ("decision_id", "proposal_id", "action", "result", "snapshot_id", "gate_result"):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Identity review decision key is missing."))
     return issues
 
 

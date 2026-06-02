@@ -4,6 +4,7 @@ from collections import Counter
 from pathlib import Path
 from typing import List, Optional
 
+from .schema_defaults import default_identity_update_gate
 from .state import (
     StateStore,
     add_claim_to_graph,
@@ -89,6 +90,19 @@ class DreamEngine:
             if candidate_memory:
                 candidate_memories.append(candidate_memory)
         report["candidate_memories"] = [memory["id"] for memory in candidate_memories]
+        identity_gate_ids = []
+        for proposal in report["proposals"]:
+            if proposal.get("type") != "identity_update_candidate":
+                continue
+            stored = add_identity_gate_proposal_from_dream(
+                state=state,
+                proposal=proposal,
+                timestamp=now,
+                dream_id=report["id"],
+            )
+            if stored:
+                identity_gate_ids.append(stored["proposal_id"])
+        report["identity_gate_proposals"] = identity_gate_ids
 
         claim_graph = state.setdefault(
             "claim_graph",
@@ -161,6 +175,7 @@ class DreamEngine:
                 "candidate_memories": report["candidate_memories"],
                 "claim_graph_updates": report["claim_graph_updates"],
                 "procedural_candidate_updates": report["procedural_candidate_updates"],
+                "identity_gate_proposals": report["identity_gate_proposals"],
             },
             state=state,
         )
@@ -218,6 +233,12 @@ class DreamEngine:
                     "target": "open_conflicts_and_claim_graph",
                     "count": len(report["conflicts"]),
                     "claim_graph_updates": report["claim_graph_updates"],
+                },
+                {
+                    "operation": "identity_gate_proposal",
+                    "target": "identity_update_gate.proposals",
+                    "count": len(report["identity_gate_proposals"]),
+                    "memory_ids": report["identity_gate_proposals"],
                 },
                 {
                     "operation": "procedural_candidate_review",
@@ -419,6 +440,90 @@ def add_procedural_candidate(
         ],
     }
     procedural_store.append(stored)
+    return stored
+
+
+def add_identity_gate_proposal_from_dream(
+    state: dict,
+    proposal: dict,
+    timestamp: str,
+    dream_id: str,
+) -> Optional[dict]:
+    payload = proposal.get("payload", {})
+    evidence = [str(item) for item in proposal.get("evidence", []) if item]
+    statement = str(payload.get("rationale") or payload.get("after") or "").strip()
+    if not statement:
+        statement = "Dream detected a high-gate identity update candidate."
+    gate = state.setdefault("identity_update_gate", default_identity_update_gate(timestamp))
+    existing = next(
+        (
+            item
+            for item in gate.setdefault("proposals", [])
+            if isinstance(item, dict)
+            and item.get("source_dream_id") == dream_id
+            and item.get("source_proposal_id") == proposal.get("proposal_id")
+        ),
+        None,
+    )
+    if existing:
+        return existing
+
+    gate_result = {
+        "eligible": False,
+        "required_evidence_count": 3,
+        "evidence_count": len(evidence),
+        "missing_evidence": [],
+        "target_allowed": False,
+        "non_claims_check": {"passed": True, "violations": []},
+        "drift_score": {
+            "score": 0.65,
+            "risk": "high",
+            "factors": [
+                {"name": "dream_identity_candidate_requires_review", "value": 0.65}
+            ],
+        },
+        "reasons": ["dream_identity_candidate_requires_manual_high_gate"],
+    }
+    stored = {
+        "proposal_id": new_id("identity_proposal"),
+        "timestamp": timestamp,
+        "target_path": "identity_core",
+        "statement": statement,
+        "operation": "blocked_identity_core_patch",
+        "proposer": "dream_engine",
+        "rationale": payload.get("rationale", ""),
+        "evidence": evidence,
+        "confidence": proposal.get("confidence", 0.5),
+        "gate": "high",
+        "review_status": "pending",
+        "gate_result": gate_result,
+        "non_claims_check": gate_result["non_claims_check"],
+        "drift_score": gate_result["drift_score"],
+        "required_evidence_count": gate_result["required_evidence_count"],
+        "rollback_required": True,
+        "may_update_identity_core": False,
+        "recommended_action": "manual_review_required",
+        "source_dream_id": dream_id,
+        "source_proposal_id": proposal.get("proposal_id"),
+        "provenance": [
+            {
+                "type": "dream_identity_update_candidate",
+                "dream_id": dream_id,
+                "proposal_id": proposal.get("proposal_id"),
+            }
+        ],
+    }
+    gate["proposals"].append(stored)
+    gate.setdefault("drift_events", []).append(
+        {
+            "proposal_id": stored["proposal_id"],
+            "timestamp": timestamp,
+            "drift_score": gate_result["drift_score"]["score"],
+            "risk": gate_result["drift_score"]["risk"],
+            "eligible": False,
+            "reasons": gate_result["reasons"],
+        }
+    )
     return stored
 
 
@@ -831,6 +936,7 @@ def build_dream_artifact(
             "claim_graph_updates": report.get("claim_graph_updates", []),
             "semantic_candidates": report["semantic_candidates"],
             "candidate_memories": report.get("candidate_memories", []),
+            "identity_gate_proposals": report.get("identity_gate_proposals", []),
             "procedural_candidates": report.get("procedural_candidates", []),
             "procedural_candidate_updates": report.get(
                 "procedural_candidate_updates",

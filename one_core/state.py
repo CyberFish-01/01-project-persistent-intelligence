@@ -7,10 +7,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+from .schema_defaults import default_identity_update_gate
 from .seed import make_identity_seed
 
 
-STATE_VERSION = "0.8"
+STATE_VERSION = "0.9"
 DEFAULT_STATE_DIR = Path("work/01_state")
 
 DEFAULT_REGISTERED_ADAPTERS = (
@@ -48,6 +49,7 @@ LIFECYCLE_ACTION_STORES = {
     "candidate_memory",
     "semantic_memory",
 }
+IDENTITY_REVIEW_ACTIONS = {"approve", "reject", "quarantine"}
 
 
 def utc_now() -> str:
@@ -388,6 +390,33 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
     return changed
 
 
+def ensure_identity_update_gate(state: dict, timestamp: str) -> bool:
+    gate = state.get("identity_update_gate")
+    if not isinstance(gate, dict):
+        state["identity_update_gate"] = default_identity_update_gate(timestamp)
+        return True
+
+    changed = False
+    default_gate = default_identity_update_gate(timestamp)
+    for key, value in default_gate.items():
+        if key not in gate:
+            gate[key] = value
+            changed = True
+    for key in ("proposals", "review_decisions", "drift_events"):
+        if not isinstance(gate.get(key), list):
+            gate[key] = []
+            changed = True
+    if not isinstance(gate.get("policy"), dict):
+        gate["policy"] = default_gate["policy"]
+        changed = True
+    else:
+        for key, value in default_gate["policy"].items():
+            if key not in gate["policy"]:
+                gate["policy"][key] = value
+                changed = True
+    return changed
+
+
 def append_task_action_trace(state: dict, trace: dict, status: str = "completed") -> dict:
     timestamp = str(trace.get("ended_at") or trace.get("started_at") or utc_now())
     action = {
@@ -434,6 +463,146 @@ def task_action_evidence(trace: dict) -> List[str]:
         seen.add(item)
         deduped.append(item)
     return deduped
+
+
+def evaluate_identity_gate(
+    state: dict,
+    statement: str,
+    evidence: List[str],
+    target_path: str,
+    confidence: float,
+) -> dict:
+    gate = state.get("identity_update_gate", {})
+    policy = gate.get("policy", {}) if isinstance(gate, dict) else {}
+    required_count = int(
+        gate.get("min_supporting_evidence")
+        or state.get("identity_core", {})
+        .get("update_policy", {})
+        .get("min_supporting_episodes", 3)
+    )
+    evidence_ids = [str(item) for item in evidence if item]
+    known_evidence = known_memory_ids(state)
+    missing_evidence = [
+        item for item in evidence_ids if item not in known_evidence and not item.startswith("identity_seed")
+    ]
+    non_claims = identity_non_claims_check(statement)
+    drift = identity_drift_score(
+        state=state,
+        statement=statement,
+        confidence=confidence,
+        evidence_count=len(evidence_ids),
+        non_claims_check=non_claims,
+        target_path=target_path,
+    )
+    target_allowed = target_path == policy.get(
+        "approved_target",
+        "memory_stores.identity_memory",
+    )
+    reasons = []
+    if len(evidence_ids) < required_count:
+        reasons.append("insufficient_evidence")
+    if missing_evidence:
+        reasons.append("unknown_evidence")
+    if not non_claims["passed"]:
+        reasons.append("non_claims_violation")
+    if not target_allowed:
+        reasons.append("identity_core_patch_blocked")
+    if drift["score"] > float(policy.get("drift_threshold", 0.35)):
+        reasons.append("drift_score_too_high")
+    eligible = not reasons
+    return {
+        "eligible": eligible,
+        "required_evidence_count": required_count,
+        "evidence_count": len(evidence_ids),
+        "missing_evidence": missing_evidence,
+        "target_allowed": target_allowed,
+        "non_claims_check": non_claims,
+        "drift_score": drift,
+        "reasons": reasons,
+    }
+
+
+def known_memory_ids(state: dict) -> set[str]:
+    ids = set()
+    for memories in state.get("memory_stores", {}).values():
+        if not isinstance(memories, list):
+            continue
+        for memory in memories:
+            if isinstance(memory, dict) and memory.get("id"):
+                ids.add(str(memory["id"]))
+    for action in state.get("task_hub", {}).get("action_trace", []):
+        if isinstance(action, dict) and action.get("action_id"):
+            ids.add(str(action["action_id"]))
+    for claim in state.get("claim_graph", {}).get("claims", []):
+        if isinstance(claim, dict) and claim.get("claim_id"):
+            ids.add(str(claim["claim_id"]))
+    return ids
+
+
+def identity_non_claims_check(statement: str) -> dict:
+    lowered = statement.lower()
+    banned = [
+        ("biological emotion", "biological_emotion_claim"),
+        ("conscious", "consciousness_claim"),
+        ("sentient", "sentience_claim"),
+        ("human", "human_identity_claim"),
+        ("生物情绪", "biological_emotion_claim"),
+        ("意识", "consciousness_claim"),
+        ("人类", "human_identity_claim"),
+    ]
+    violations = [
+        code
+        for marker, code in banned
+        if marker in lowered or marker in statement
+    ]
+    return {
+        "passed": not violations,
+        "violations": violations,
+    }
+
+
+def identity_drift_score(
+    state: dict,
+    statement: str,
+    confidence: float,
+    evidence_count: int,
+    non_claims_check: dict,
+    target_path: str,
+) -> dict:
+    score = 0.05
+    factors = [{"name": "base_identity_change_risk", "value": 0.05}]
+    lowered = statement.lower()
+    overwrite_markers = [
+        "not 01",
+        "不是01",
+        "replace identity",
+        "真实身份改成",
+        "完全不同",
+    ]
+    if any(marker in lowered or marker in statement for marker in overwrite_markers):
+        score += 0.45
+        factors.append({"name": "identity_overwrite_marker", "value": 0.45})
+    if target_path != "memory_stores.identity_memory":
+        score += 0.3
+        factors.append({"name": "identity_core_patch_target", "value": 0.3})
+    if not non_claims_check.get("passed"):
+        score += 0.4
+        factors.append({"name": "non_claims_violation", "value": 0.4})
+    if evidence_count < 3:
+        penalty = (3 - evidence_count) * 0.12
+        score += penalty
+        factors.append({"name": "evidence_shortfall", "value": round(penalty, 2)})
+    confidence_value = max(0.0, min(float(confidence or 0.0), 1.0))
+    if confidence_value < 0.7:
+        score += 0.08
+        factors.append({"name": "low_confidence", "value": 0.08})
+    bounded = round(max(0.0, min(score, 1.0)), 2)
+    risk = "low" if bounded <= 0.25 else "medium" if bounded <= 0.45 else "high"
+    return {
+        "score": bounded,
+        "risk": risk,
+        "factors": factors,
+    }
 
 
 def inferred_memory_provenance(store_name: str, memory: dict) -> List[dict]:
@@ -674,6 +843,7 @@ class StateStore:
             "open_conflicts": [],
             "claim_graph": default_claim_graph(),
             "task_hub": default_task_hub(now, working_state),
+            "identity_update_gate": default_identity_update_gate(now),
             "dream_queue": [],
             "snapshots": [],
             "audit_log": [],
@@ -908,6 +1078,25 @@ class StateStore:
                     "before": "working_state.current_plan_without_task_hub",
                     "after": "task_hub_initialized",
                     "evidence": ["task_hub_v0.8"],
+                    "gate": "low",
+                    "confidence": 1.0,
+                    "rollback": {"reversible": True},
+                }
+            )
+            changed = True
+        if ensure_identity_update_gate(state, now):
+            state["state_version"] = STATE_VERSION
+            state["updated_at"] = now
+            state.setdefault("update_log", []).append(
+                {
+                    "id": new_id("update"),
+                    "timestamp": now,
+                    "actor": "state_store",
+                    "target_path": "identity_update_gate",
+                    "operation": "migrate",
+                    "before": None,
+                    "after": "identity_update_gate_initialized",
+                    "evidence": ["identity_update_gate_v0.9"],
                     "gate": "low",
                     "confidence": 1.0,
                     "rollback": {"reversible": True},
@@ -1561,6 +1750,358 @@ class StateStore:
             "review_decision_id": decision["decision_id"],
         }
 
+    def propose_identity_update(
+        self,
+        statement: str,
+        evidence: List[str],
+        proposer: str = "manual_review",
+        rationale: str = "",
+        target_path: str = "memory_stores.identity_memory",
+        confidence: float = 0.6,
+    ) -> dict:
+        state = self.load()
+        now = utc_now()
+        normalized_statement = str(statement or "").strip()
+        if not normalized_statement:
+            return {
+                "status": "rejected",
+                "error": "missing_statement",
+            }
+
+        evidence_ids = [str(item) for item in evidence if item]
+        gate_result = evaluate_identity_gate(
+            state=state,
+            statement=normalized_statement,
+            evidence=evidence_ids,
+            target_path=target_path,
+            confidence=confidence,
+        )
+        proposal = {
+            "proposal_id": new_id("identity_proposal"),
+            "timestamp": now,
+            "target_path": target_path,
+            "statement": normalized_statement,
+            "operation": "append_identity_memory"
+            if target_path == "memory_stores.identity_memory"
+            else "blocked_identity_core_patch",
+            "proposer": proposer,
+            "rationale": rationale,
+            "evidence": evidence_ids,
+            "confidence": round(float(confidence or 0.0), 2),
+            "gate": "high",
+            "review_status": "pending",
+            "gate_result": gate_result,
+            "non_claims_check": gate_result["non_claims_check"],
+            "drift_score": gate_result["drift_score"],
+            "required_evidence_count": gate_result["required_evidence_count"],
+            "rollback_required": True,
+            "may_update_identity_core": False,
+            "recommended_action": "review_then_approve"
+            if gate_result["eligible"]
+            else "manual_review_required",
+            "provenance": [
+                {
+                    "type": "identity_update_proposal",
+                    "proposer": proposer,
+                }
+            ],
+        }
+        state.setdefault("identity_update_gate", default_identity_update_gate(now))
+        state["identity_update_gate"].setdefault("proposals", []).append(proposal)
+        state["identity_update_gate"].setdefault("drift_events", []).append(
+            {
+                "proposal_id": proposal["proposal_id"],
+                "timestamp": now,
+                "drift_score": gate_result["drift_score"]["score"],
+                "risk": gate_result["drift_score"]["risk"],
+                "eligible": gate_result["eligible"],
+                "reasons": gate_result["reasons"],
+            }
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": proposer,
+                "target_path": "identity_update_gate.proposals",
+                "operation": "propose_identity_update",
+                "before": None,
+                "after": proposal["proposal_id"],
+                "evidence": evidence_ids,
+                "gate": "high",
+                "confidence": proposal["confidence"],
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=proposer,
+            action="propose_identity_update",
+            target="identity_update_gate.proposals",
+            outcome="pending",
+            evidence=evidence_ids,
+            metadata={
+                "proposal_id": proposal["proposal_id"],
+                "eligible": gate_result["eligible"],
+                "drift_score": gate_result["drift_score"]["score"],
+                "target_path": target_path,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="identity_update_proposal",
+            nodes=[
+                {
+                    "id": "proposal",
+                    "type": "Review",
+                    "proposal_id": proposal["proposal_id"],
+                    "target_path": target_path,
+                },
+                {
+                    "id": "gate",
+                    "type": "Decision",
+                    "eligible": gate_result["eligible"],
+                    "drift_score": gate_result["drift_score"]["score"],
+                },
+            ],
+            review_events=[
+                {
+                    "operation": "identity_gate_preview",
+                    "proposal_id": proposal["proposal_id"],
+                    "gate_result": gate_result,
+                }
+            ],
+            summary=f"Created identity update proposal {proposal['proposal_id']} pending high-gate review.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": "pending",
+            "proposal_id": proposal["proposal_id"],
+            "eligible": gate_result["eligible"],
+            "gate_result": gate_result,
+        }
+
+    def review_identity_update(
+        self,
+        proposal_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in IDENTITY_REVIEW_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_identity_review_action",
+                "action": action,
+            }
+        state = self.load()
+        gate = state.setdefault("identity_update_gate", default_identity_update_gate(utc_now()))
+        proposal = next(
+            (
+                item
+                for item in gate.setdefault("proposals", [])
+                if isinstance(item, dict) and item.get("proposal_id") == proposal_id
+            ),
+            None,
+        )
+        if proposal is None:
+            return {
+                "status": "not_found",
+                "error": "identity_proposal_not_found",
+                "proposal_id": proposal_id,
+            }
+        if proposal.get("review_status") in {"approved", "rejected", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "proposal_id": proposal_id,
+                "review_status": proposal.get("review_status"),
+            }
+
+        now = utc_now()
+        gate_result = proposal.get("gate_result") or evaluate_identity_gate(
+            state=state,
+            statement=str(proposal.get("statement") or ""),
+            evidence=proposal.get("evidence", []),
+            target_path=str(proposal.get("target_path") or ""),
+            confidence=float(proposal.get("confidence") or 0.0),
+        )
+        if normalized_action == "approve" and not gate_result.get("eligible"):
+            normalized_action = "quarantine"
+            decision_note = decision_note or "Gate requirements were not satisfied."
+
+        review_status = {
+            "approve": "approved",
+            "reject": "rejected",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_identity_update",
+            target_path="identity_update_gate",
+            evidence=[proposal_id] + list(proposal.get("evidence", [])),
+            metadata={
+                "proposal_id": proposal_id,
+                "review_action": normalized_action,
+                "gate_eligible": gate_result.get("eligible"),
+            },
+        )
+        decision = {
+            "decision_id": new_id("identity_decision"),
+            "timestamp": now,
+            "proposal_id": proposal_id,
+            "reviewer": reviewer,
+            "action": normalized_action,
+            "result": review_status,
+            "decision_note": decision_note,
+            "gate": "high",
+            "gate_result": gate_result,
+            "snapshot_id": snapshot["snapshot_id"],
+            "target_path": proposal.get("target_path"),
+            "rollback": {
+                "snapshot_id": snapshot["snapshot_id"],
+                "reversible": True,
+            },
+        }
+
+        identity_memory_id = None
+        if normalized_action == "approve":
+            identity_memory = {
+                "id": new_id("idmem"),
+                "statement": proposal["statement"],
+                "derived_from": proposal.get("evidence", []),
+                "confidence": proposal.get("confidence", 0.7),
+                "required_gate": "high",
+                "source_proposal_id": proposal_id,
+                "lifecycle": {
+                    "status": "active",
+                    "created_at": now,
+                    "last_reviewed_at": now,
+                    "review_status": "approved",
+                    "identity_decision_id": decision["decision_id"],
+                },
+                "provenance": [
+                    {
+                        "type": "identity_update_gate",
+                        "proposal_id": proposal_id,
+                        "decision_id": decision["decision_id"],
+                    }
+                ],
+                "update_history": [
+                    {
+                        "timestamp": now,
+                        "actor": reviewer,
+                        "operation": "approve_identity_update",
+                        "evidence": proposal.get("evidence", []),
+                        "identity_decision_id": decision["decision_id"],
+                    }
+                ],
+            }
+            state["memory_stores"].setdefault("identity_memory", []).append(identity_memory)
+            identity_memory_id = identity_memory["id"]
+            decision["after"] = identity_memory_id
+        else:
+            decision["after"] = proposal_id
+
+        proposal["review_status"] = review_status
+        proposal["reviewed_at"] = now
+        proposal["reviewer"] = reviewer
+        proposal["decision_note"] = decision_note
+        proposal["last_review_decision_id"] = decision["decision_id"]
+        gate.setdefault("review_decisions", []).append(decision)
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "memory_stores.identity_memory"
+                if identity_memory_id
+                else "identity_update_gate.proposals",
+                "operation": f"{normalized_action}_identity_update",
+                "before": proposal_id,
+                "after": identity_memory_id or proposal_id,
+                "evidence": proposal.get("evidence", []),
+                "gate": "high",
+                "confidence": proposal.get("confidence", 0.6),
+                "identity_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_identity_update",
+            target="memory_stores.identity_memory"
+            if identity_memory_id
+            else "identity_update_gate.proposals",
+            outcome=review_status,
+            evidence=[proposal_id] + list(proposal.get("evidence", [])),
+            metadata={
+                "identity_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "identity_memory_id": identity_memory_id,
+                "decision_note": decision_note,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="identity_update_review",
+            nodes=[
+                {
+                    "id": "proposal",
+                    "type": "Review",
+                    "proposal_id": proposal_id,
+                },
+                {
+                    "id": "gate",
+                    "type": "Decision",
+                    "action": normalized_action,
+                    "eligible": gate_result.get("eligible"),
+                },
+                {
+                    "id": "identity_memory",
+                    "type": "Memory",
+                    "operation": "append_identity_memory"
+                    if identity_memory_id
+                    else "no_identity_memory_write",
+                    "identity_memory_id": identity_memory_id,
+                },
+            ],
+            memory_events=[
+                {
+                    "operation": "append" if identity_memory_id else "no_write",
+                    "target": "identity_memory",
+                    "memory_id": identity_memory_id,
+                    "proposal_id": proposal_id,
+                    "identity_decision_id": decision["decision_id"],
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_identity_update",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "identity_decision": decision,
+                }
+            ],
+            summary=f"Reviewed identity proposal {proposal_id} with action {normalized_action}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": review_status,
+            "proposal_id": proposal_id,
+            "identity_memory_id": identity_memory_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "identity_decision_id": decision["decision_id"],
+            "gate_result": gate_result,
+        }
+
     def apply_memory_lifecycle_action(
         self,
         store_name: str,
@@ -2072,6 +2613,10 @@ class StateStore:
         working_state = state["working_state"]
         current_plan = working_state.get("current_plan", [])
         task_hub = state.get("task_hub", default_task_hub(utc_now(), working_state))
+        identity_gate = state.get(
+            "identity_update_gate",
+            default_identity_update_gate(utc_now()),
+        )
         active_tasks = [
             task
             for task in task_hub.get("active_tasks", [])
@@ -2133,6 +2678,25 @@ class StateStore:
             "active_tasks": active_tasks,
             "action_trace": action_trace,
             "procedural_candidates": task_hub.get("procedural_candidates", []),
+            "identity_update_gate": {
+                "required_gate": identity_gate.get("required_gate", "high"),
+                "pending_proposals": [
+                    proposal
+                    for proposal in identity_gate.get("proposals", [])
+                    if isinstance(proposal, dict)
+                    and proposal.get("review_status") == "pending"
+                ],
+                "recent_decisions": [
+                    decision
+                    for decision in identity_gate.get("review_decisions", [])
+                    if isinstance(decision, dict)
+                ][-5:],
+                "recent_drift_events": [
+                    event
+                    for event in identity_gate.get("drift_events", [])
+                    if isinstance(event, dict)
+                ][-5:],
+            },
             "blockers": working_state.get("blockers", []),
             "assumptions": working_state.get("assumptions", []),
             "continuity_anchors": working_state["context_anchors"],

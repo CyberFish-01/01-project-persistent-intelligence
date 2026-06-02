@@ -9,7 +9,7 @@
 ## 1. 顶层状态
 
 ```yaml
-state_version: "0.8"
+state_version: "0.9"
 agent_id: "01"
 created_at: "ISO-8601 timestamp"
 updated_at: "ISO-8601 timestamp"
@@ -34,6 +34,10 @@ task_hub:
   recurring_duties: []
   action_trace: []
   procedural_candidates: []
+identity_update_gate:
+  proposals: []
+  review_decisions: []
+  drift_events: []
 dream_queue: []
 snapshots: []
 audit_log: []
@@ -669,7 +673,73 @@ task_hub:
 
 Dream 可以从重复成功的 action trace 里提出 `procedural_candidates`。这些候选不等于已采用的 procedural memory，必须等待 review。
 
-## 14. Dream Queue
+## 14. Identity Update Gate
+
+Identity Update Gate 管理慢速身份成长。
+
+P11 的实现允许创建和审查 identity proposal，但不会直接改写 `identity_core`。即使 proposal 通过 high gate，当前也只会追加 `memory_stores.identity_memory`。
+
+```yaml
+identity_update_gate:
+  gate_version: "0.9"
+  required_gate: "high"
+  min_supporting_evidence: 3
+  allow_identity_core_patch: false
+  proposals:
+    - proposal_id: "identity_proposal_0001"
+      timestamp: "ISO-8601 timestamp"
+      target_path: "memory_stores.identity_memory"
+      statement: "01 identity growth is evidence-backed and reviewable."
+      operation: "append_identity_memory"
+      proposer: "manual_review"
+      rationale: "Three episodes support a slow identity memory."
+      evidence:
+        - "episode_0001"
+        - "episode_0002"
+        - "episode_0003"
+      confidence: 0.82
+      gate: "high"
+      review_status: "pending|approved|rejected|quarantined"
+      gate_result:
+        eligible: true
+        required_evidence_count: 3
+        evidence_count: 3
+        reasons: []
+      non_claims_check:
+        passed: true
+        violations: []
+      drift_score:
+        score: 0.17
+        risk: "low"
+        factors: []
+      rollback_required: true
+      may_update_identity_core: false
+  review_decisions:
+    - decision_id: "identity_decision_0001"
+      proposal_id: "identity_proposal_0001"
+      action: "approve|reject|quarantine"
+      result: "approved|rejected|quarantined"
+      gate: "high"
+      snapshot_id: "snapshot_0001"
+      gate_result: {}
+  drift_events: []
+  policy:
+    non_claims_check_required: true
+    drift_threshold: 0.35
+    approved_target: "memory_stores.identity_memory"
+    identity_core_update_mode: "blocked_in_v0.9"
+```
+
+Gate 规则：
+
+- high gate 至少需要 3 个 supporting evidence；
+- evidence 必须能指向已知 memory/action/claim；
+- non-claims check 会阻止 biological emotion、consciousness、human identity 等声明；
+- drift score 超过阈值时不能 approve；
+- identity_core patch 在 v0.9 中被阻止；
+- approve 会创建 snapshot、audit、trace、update_log，并追加 identity_memory。
+
+## 15. Dream Queue
 
 ```yaml
 dream_queue:
@@ -686,7 +756,7 @@ dream_queue:
     status: "pending"
 ```
 
-## 15. Audit Log
+## 16. Audit Log
 
 Audit log 记录运行时发生过什么。
 
@@ -732,7 +802,7 @@ dream_artifact:
   rollback_metadata: {}
 ```
 
-## 16. Update Log
+## 17. Update Log
 
 每个 durable update 都必须记录。
 
@@ -755,7 +825,7 @@ update_log:
       reversible: true
 ```
 
-## 17. Snapshots
+## 18. Snapshots
 
 Snapshots 是轻量审计锚点，在 candidate promote、archive、discard 或 quarantine 等 review action 前记录。
 
@@ -773,7 +843,7 @@ snapshots:
     metadata:
       review_decision_id: "review_decision_0001"
       candidate_id: "cand_0001"
-    state_version: "0.8"
+    state_version: "0.9"
     memory_counts:
       semantic_memory: 3
       candidate_memory: 2
@@ -783,7 +853,7 @@ snapshots:
       note: "Automatic rollback is not implemented yet."
 ```
 
-## 18. State Transfer Package
+## 19. State Transfer Package
 
 Session 开始时不应该加载全部状态。
 
@@ -804,6 +874,11 @@ state_transfer_package:
   active_tasks: []
   action_trace: []
   procedural_candidates: []
+  identity_update_gate:
+    required_gate: "high"
+    pending_proposals: []
+    recent_decisions: []
+    recent_drift_events: []
   blockers: []
   assumptions: []
   context_policy:
@@ -832,7 +907,7 @@ state_transfer_package:
     what_am_i_doing: "..."
 ```
 
-## 19. 最小不变量
+## 20. 最小不变量
 
 一个有效的 01 state 必须满足：
 
@@ -850,4 +925,6 @@ state_transfer_package:
 - 每个 review/promotion rollback reference 都能指向 snapshot metadata；
 - `task_hub.action_trace` 只记录真实状态变更，不记录 non-mutating dry-run；
 - procedural candidate 必须有 workflow、evidence 和 pending review status；
+- identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；
+- P11 不允许直接 patch `identity_core`，approve 只能追加 identity_memory；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

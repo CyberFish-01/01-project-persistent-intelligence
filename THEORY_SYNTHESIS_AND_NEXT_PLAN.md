@@ -479,26 +479,45 @@ Remaining gaps:
 
 Goal: allow evidence-backed slow identity growth while protecting Identity Core.
 
+Status: implemented as a first local v0.9 pass.
+
 Executable items:
 
-1. identity proposal schema;
-2. high gate review;
-3. non-claims check;
-4. evidence threshold;
-5. rollback snapshot;
-6. drift metric.
+1. identity proposal schema - done;
+2. high gate review - first pass done;
+3. non-claims check - first pass done;
+4. evidence threshold - done;
+5. rollback snapshot - metadata-only done;
+6. drift metric - first pass done.
+
+Implemented result:
+
+- `identity_update_gate` is now a top-level state object;
+- identity proposals keep gate_result, non_claims_check, drift_score, and evidence;
+- high gate requires at least 3 supporting evidence ids;
+- non-claims violations and excessive drift scores block approval;
+- approval appends `identity_memory` and does not directly patch `identity_core`;
+- scenario evaluation adds `identity_update_gate_review`.
+
+Remaining gaps:
+
+- rollback is still metadata-only;
+- drift metric is still a deterministic heuristic;
+- no identity_core patch proposal executor yet;
+- no deep claim_graph dependency integration with identity proposals yet;
+- no human review UI yet.
 
 ## 6. Current Recommendation
 
-Do P11 next:
+Do P12 next:
 
 ```text
-P11 Identity Update Gate
+P12 Event Log / Replay / Rollback
 ```
 
 Reason:
 
-- P7-P10 now form a first local state-transfer foundation;
-- P10 moves task and action structure into state, but identity growth still has proposals without an executable high gate;
-- imported memory, Dream conflicts, and procedural candidates all need a slow identity-update boundary to avoid drift;
-- P11 should make identity proposals, evidence thresholding, non-claims checks, snapshot / rollback, and drift metrics into a verifiable flow.
+- P7-P11 now make memory, conflict, task, procedural candidate, and identity gate stateful and verifiable;
+- snapshots are still metadata-only, and update_log/action_trace cannot be replayed;
+- real state transfer needs to move from "record what happened" toward "replay, compare, and preview rollback";
+- P12 should turn the Event Sourcing direction into an append-only event log, replay checks, and rollback preview.

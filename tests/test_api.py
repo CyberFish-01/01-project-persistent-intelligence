@@ -20,6 +20,8 @@ class APITests(unittest.TestCase):
             self.assertEqual(status["audit_events"], 0)
             self.assertEqual(status["traces"], 0)
             self.assertEqual(status["dream_artifacts"], 0)
+            self.assertEqual(status["pending_identity_proposals"], 0)
+            self.assertEqual(status["identity_review_decisions"], 0)
             self.assertGreaterEqual(status["session_policy_rules"], 1)
 
             status_code, adapters = api.handle_get("/v1/adapters")

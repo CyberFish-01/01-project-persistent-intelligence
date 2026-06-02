@@ -479,26 +479,45 @@ git diff --check
 
 目标：允许被证据支持的慢速 identity growth，同时保护 Identity Core。
 
+状态：已实现第一版本地 v0.9。
+
 可执行项：
 
-1. identity proposal schema；
-2. high gate review；
-3. non-claims check；
-4. evidence threshold；
-5. rollback snapshot；
-6. drift metric。
+1. identity proposal schema - 已完成；
+2. high gate review - 已完成第一版；
+3. non-claims check - 已完成第一版；
+4. evidence threshold - 已完成；
+5. rollback snapshot - 已完成 metadata-only；
+6. drift metric - 已完成第一版。
+
+已实现结果：
+
+- `identity_update_gate` 现在是顶层 state object；
+- identity proposal 会保存 gate_result、non_claims_check、drift_score 和 evidence；
+- high gate 要求至少 3 个 supporting evidence；
+- non-claims violation 和 drift score 过高会阻止 approve；
+- approve 只追加 `identity_memory`，不会直接 patch `identity_core`；
+- scenario evaluation 增加 `identity_update_gate_review`。
+
+剩余缺口：
+
+- rollback 仍是 metadata-only；
+- drift metric 仍是 deterministic heuristic；
+- 还没有 identity_core patch proposal executor；
+- 还没有 claim_graph dependency 与 identity proposal 的深层联动；
+- 还没有人工 review UI。
 
 ## 6. 当前建议
 
 下一步先做：
 
 ```text
-P11 Identity Update Gate
+P12 Event Log / Replay / Rollback
 ```
 
 理由：
 
-- P7-P10 已经形成第一版本地 state-transfer foundation；
-- P10 让任务和行动结构进入状态，但 identity growth 仍然只有 proposal，没有可执行 high gate；
-- imported memory、Dream conflict 和 procedural candidate 都需要一个慢速身份更新边界来避免漂移；
-- P11 应把 identity proposal、证据阈值、non-claims check、snapshot / rollback 和 drift metric 做成可验证流程。
+- P7-P11 已经让 memory、conflict、task、procedural candidate 和 identity gate 都进入了可验证状态；
+- 现在 snapshots 仍是 metadata-only，update_log/action_trace 还不能 replay；
+- 真正的 state transfer 需要从“记录发生过什么”推进到“可以重放、比较、回滚”；
+- P12 应把 Event Sourcing 方向落成 append-only event log、replay check 和 rollback preview。

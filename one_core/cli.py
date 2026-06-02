@@ -110,6 +110,38 @@ def main() -> None:
     lifecycle_parser.add_argument("--reviewer", default="manual_review")
     lifecycle_parser.add_argument("--decision-note", default="")
 
+    identity_propose_parser = subparsers.add_parser(
+        "propose-identity-update",
+        help="Create a high-gate identity update proposal without applying it.",
+    )
+    identity_propose_parser.add_argument("statement")
+    identity_propose_parser.add_argument(
+        "--evidence",
+        action="append",
+        default=[],
+        help="Supporting memory/action/claim id. Repeat for multiple evidence ids.",
+    )
+    identity_propose_parser.add_argument("--proposer", default="manual_review")
+    identity_propose_parser.add_argument("--rationale", default="")
+    identity_propose_parser.add_argument(
+        "--target-path",
+        default="memory_stores.identity_memory",
+    )
+    identity_propose_parser.add_argument("--confidence", type=float, default=0.7)
+
+    identity_review_parser = subparsers.add_parser(
+        "review-identity-update",
+        help="Review an identity update proposal through the high gate.",
+    )
+    identity_review_parser.add_argument("proposal_id")
+    identity_review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["approve", "reject", "quarantine"],
+    )
+    identity_review_parser.add_argument("--reviewer", default="manual_review")
+    identity_review_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -227,6 +259,26 @@ def main() -> None:
             store.apply_memory_lifecycle_action(
                 store_name=args.store_name,
                 memory_id=args.memory_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "propose-identity-update":
+        print_json(
+            store.propose_identity_update(
+                statement=args.statement,
+                evidence=args.evidence,
+                proposer=args.proposer,
+                rationale=args.rationale,
+                target_path=args.target_path,
+                confidence=args.confidence,
+            )
+        )
+    elif args.command == "review-identity-update":
+        print_json(
+            store.review_identity_update(
+                proposal_id=args.proposal_id,
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,

@@ -15,6 +15,7 @@ PROTOCOL_VERSION = "0.6"
 
 def state_summary(store: StateStore) -> dict:
     state = store.load()
+    identity_gate = state.get("identity_update_gate", {})
     return {
         "agent_id": state["agent_id"],
         "updated_at": state["updated_at"],
@@ -40,6 +41,19 @@ def state_summary(store: StateStore) -> dict:
         "audit_events": len(store.list_audit_events()),
         "traces": len(store.list_traces()),
         "dream_artifacts": len(store.list_dream_artifacts()),
+        "pending_identity_proposals": len(
+            [
+                proposal
+                for proposal in identity_gate.get("proposals", [])
+                if isinstance(proposal, dict)
+                and proposal.get("review_status") == "pending"
+            ]
+        ),
+        "identity_review_decisions": len(
+            identity_gate.get("review_decisions", [])
+            if isinstance(identity_gate.get("review_decisions"), list)
+            else []
+        ),
         "pending_dream_jobs": len(
             [job for job in state.get("dream_queue", []) if job.get("status") == "pending"]
         ),
