@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .dream import DreamEngine
+from .importer import import_text_file
 from .state import DEFAULT_STATE_DIR, StateStore
 
 
@@ -26,6 +27,14 @@ def main() -> None:
     interact_parser.add_argument("message", help="User message to record as an episode.")
     interact_parser.add_argument("--user-id", default="local_user")
     interact_parser.add_argument("--channel", default="cli")
+
+    import_parser = subparsers.add_parser(
+        "import-text", help="Import external memories from a plain text file."
+    )
+    import_parser.add_argument("path", help="Text file containing memories.")
+    import_parser.add_argument("--source-label", default="external_memory")
+    import_parser.add_argument("--source-system", default="generic_text")
+    import_parser.add_argument("--confidence", type=float, default=0.55)
 
     dream_parser = subparsers.add_parser("dream", help="Run a dream consolidation cycle.")
     dream_parser.add_argument("--limit", type=int, default=20)
@@ -54,6 +63,9 @@ def main() -> None:
                 "identity": state["identity_core"]["self_model"]["summary"],
                 "active_intent": state["working_state"]["active_intent"],
                 "anchors": state["working_state"]["context_anchors"],
+                "imported_memories": len(
+                    state["memory_stores"].get("imported_memory", [])
+                ),
                 "episodes": len(state["memory_stores"]["episodic_memory"]),
                 "semantic_memories": len(state["memory_stores"]["semantic_memory"]),
                 "open_conflicts": len(state.get("open_conflicts", [])),
@@ -81,6 +93,15 @@ def main() -> None:
                 "anchors": package["continuity_anchors"],
             }
         )
+    elif args.command == "import-text":
+        report = import_text_file(
+            store,
+            Path(args.path),
+            source_label=args.source_label,
+            source_system=args.source_system,
+            confidence=args.confidence,
+        )
+        print_json(report)
     elif args.command == "dream":
         report = DreamEngine(store).run(limit=args.limit)
         print_json(report)

@@ -103,6 +103,39 @@ working_state:
 
 ## 4. Memory Stores
 
+### Imported Memory
+
+Imported memory 保存从 AstrBot、Angel Memory 或其他记忆系统导入的外部材料。
+
+默认状态是 staged。
+
+它不能直接更新 Identity Core。
+
+```yaml
+imported_memory:
+  - id: "import_0001"
+    timestamp: "ISO-8601 timestamp"
+    source_system: "astrbot_text"
+    source_label: "astrbot_01_export"
+    source_path: "astrbot_01_memory.txt"
+    source_index: 1
+    content: "01 treats continuity as State Transfer."
+    summary: "01 treats continuity as State Transfer."
+    tags:
+      - "state_transfer"
+    salience: 0.65
+    confidence: 0.55
+    status: "staged"
+    promotion_policy:
+      default_target: "semantic_memory_candidate"
+      requires_dream_review: true
+      may_update_identity_core: false
+    provenance:
+      - type: "external_text_import"
+        source_system: "astrbot_text"
+        source_label: "astrbot_01_export"
+```
+
 ### Episodic Memory
 
 ```yaml

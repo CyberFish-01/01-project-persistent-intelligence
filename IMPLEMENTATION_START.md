@@ -69,6 +69,14 @@ Print the State Transfer Package:
 python3 -m one_core.cli context
 ```
 
+Import external memories from generic text:
+
+```bash
+python3 -m one_core.cli import-text memory_export.txt \
+  --source-system astrbot_text \
+  --source-label astrbot_01_export
+```
+
 Run tests:
 
 ```bash

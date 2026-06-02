@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from one_core.dream import DreamEngine
+from one_core.importer import import_text_file, split_memory_text
 from one_core.state import StateStore
 
 
@@ -43,6 +44,55 @@ class CoreStateTests(unittest.TestCase):
                 "The project repeatedly treats continuity as state transfer rather than memory retrieval.",
                 statements,
             )
+
+    def test_import_text_stages_external_memory_without_identity_update(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "astrbot_01_memory.txt"
+            source.write_text(
+                "- 01 认为连续性是 State Transfer。\n"
+                "- AstrBot 只是外部身体，不应该拥有 01 Core 状态。\n",
+                encoding="utf-8",
+            )
+            store = StateStore(root / "state")
+            before_identity = store.init()["identity_core"]
+            report = import_text_file(
+                store,
+                source,
+                source_label="astrbot_01_export",
+                source_system="astrbot_text",
+            )
+            state = store.load()
+            self.assertEqual(report["imported_count"], 2)
+            self.assertEqual(len(state["memory_stores"]["imported_memory"]), 2)
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertFalse(
+                state["memory_stores"]["imported_memory"][0]["promotion_policy"][
+                    "may_update_identity_core"
+                ]
+            )
+
+    def test_dream_reviews_imported_memory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "memory.txt"
+            source.write_text("01 的连续性来自 State Transfer。", encoding="utf-8")
+            store = StateStore(root / "state")
+            store.init()
+            report = import_text_file(
+                store,
+                source,
+                source_label="astrbot_01_export",
+                source_system="astrbot_text",
+            )
+            dream = DreamEngine(store).run()
+            self.assertEqual(len(report["memory_ids"]), 1)
+            self.assertEqual(dream["input_imports"], report["memory_ids"])
+            self.assertTrue(dream["semantic_candidates"])
+
+    def test_split_memory_text_accepts_bullets(self):
+        chunks = split_memory_text("- A\n- B\n- C")
+        self.assertEqual(chunks, ["A", "B", "C"])
 
 
 if __name__ == "__main__":

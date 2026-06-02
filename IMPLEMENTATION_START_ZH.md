@@ -69,6 +69,14 @@ python3 -m one_core.cli dream
 python3 -m one_core.cli context
 ```
 
+从通用文本导入外部记忆：
+
+```bash
+python3 -m one_core.cli import-text memory_export.txt \
+  --source-system astrbot_text \
+  --source-label astrbot_01_export
+```
+
 运行测试：
 
 ```bash

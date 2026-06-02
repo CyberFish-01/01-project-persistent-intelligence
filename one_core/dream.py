@@ -22,6 +22,9 @@ class DreamEngine:
             for job in pending_jobs
             for episode_id in job.get("input_episodes", [])
         }
+        pending_import_ids = {
+            import_id for job in pending_jobs for import_id in job.get("input_imports", [])
+        }
 
         if pending_episode_ids:
             selected = [ep for ep in episodes if ep["id"] in pending_episode_ids]
@@ -29,14 +32,20 @@ class DreamEngine:
             selected = episodes[-limit:]
 
         selected = selected[-limit:]
+        imported = state.get("memory_stores", {}).get("imported_memory", [])
+        selected_imports = [
+            memory for memory in imported if memory["id"] in pending_import_ids
+        ][:limit]
+        selected_items = selected + selected_imports
         now = utc_now()
         report = {
             "id": new_id("dream"),
             "timestamp": now,
             "input_episodes": [ep["id"] for ep in selected],
-            "summary": summarize_episodes(selected),
-            "semantic_candidates": semantic_candidates(selected),
-            "conflicts": detect_conflicts(selected, state),
+            "input_imports": [memory["id"] for memory in selected_imports],
+            "summary": summarize_items(selected_items),
+            "semantic_candidates": semantic_candidates(selected_items),
+            "conflicts": detect_conflicts(selected_items, state),
             "identity_update_proposals": [],
             "forgetting_proposals": forgetting_proposals(selected),
             "next_questions": [
@@ -77,7 +86,7 @@ class DreamEngine:
                 "operation": "propose_and_apply_medium_gate",
                 "before": None,
                 "after": [c["statement"] for c in report["semantic_candidates"]],
-                "evidence": report["input_episodes"],
+                "evidence": report["input_episodes"] + report["input_imports"],
                 "gate": "medium",
                 "confidence": 0.75,
                 "rollback": {"reversible": True},
@@ -88,18 +97,18 @@ class DreamEngine:
         return report
 
 
-def summarize_episodes(episodes: List[dict]) -> str:
-    if not episodes:
-        return "No episodes were available for consolidation."
-    tags = Counter(tag for ep in episodes for tag in ep.get("tags", []))
+def summarize_items(items: List[dict]) -> str:
+    if not items:
+        return "No episodes or imported memories were available for consolidation."
+    tags = Counter(tag for item in items for tag in item.get("tags", []))
     top_tags = ", ".join(tag for tag, _ in tags.most_common(4))
-    return f"Consolidated {len(episodes)} episode(s). Main themes: {top_tags or 'general'}."
+    return f"Consolidated {len(items)} item(s). Main themes: {top_tags or 'general'}."
 
 
-def semantic_candidates(episodes: List[dict]) -> List[dict]:
-    if not episodes:
+def semantic_candidates(items: List[dict]) -> List[dict]:
+    if not items:
         return []
-    tags = Counter(tag for ep in episodes for tag in ep.get("tags", []))
+    tags = Counter(tag for item in items for tag in item.get("tags", []))
     candidates = []
     for tag, count in tags.most_common():
         if count < 2 and tag != "state_transfer":
@@ -119,7 +128,7 @@ def semantic_candidates(episodes: List[dict]) -> List[dict]:
                 {
                     "statement": statement,
                     "derived_from": [
-                        ep["id"] for ep in episodes if tag in ep.get("tags", [])
+                        item["id"] for item in items if tag in item.get("tags", [])
                     ],
                     "confidence": min(0.9, 0.55 + count * 0.1),
                 }
@@ -127,17 +136,17 @@ def semantic_candidates(episodes: List[dict]) -> List[dict]:
     return candidates
 
 
-def detect_conflicts(episodes: List[dict], state: dict) -> List[dict]:
+def detect_conflicts(items: List[dict], state: dict) -> List[dict]:
     conflicts = []
-    for ep in episodes:
-        message = ep.get("message", "")
+    for item in items:
+        message = item.get("message") or item.get("content", "")
         if "不是01" in message.replace(" ", "") or "not 01" in message.lower():
             conflicts.append(
                 {
                     "id": new_id("conflict"),
                     "type": "identity_overwrite_attempt",
                     "summary": "An episode may be trying to overwrite 01 identity from a single interaction.",
-                    "evidence": [ep["id"]],
+                    "evidence": [item["id"]],
                     "severity": "medium",
                     "status": "open",
                     "proposed_resolution": "Route through high gate and treat as temporary role instruction by default.",

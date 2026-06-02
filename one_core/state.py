@@ -42,6 +42,7 @@ class StateStore:
         self.state_path = self.state_dir / "state.json"
         self.episodes_path = self.state_dir / "episodes.jsonl"
         self.dreams_path = self.state_dir / "dreams.jsonl"
+        self.imports_path = self.state_dir / "imports.jsonl"
 
     def exists(self) -> bool:
         return self.state_path.exists()
@@ -97,6 +98,7 @@ class StateStore:
                 },
             },
             "memory_stores": {
+                "imported_memory": [],
                 "episodic_memory": [],
                 "semantic_memory": [
                     {
@@ -191,6 +193,7 @@ class StateStore:
         self.episodes_path.parent.mkdir(parents=True, exist_ok=True)
         self.episodes_path.touch(exist_ok=True)
         self.dreams_path.touch(exist_ok=True)
+        self.imports_path.touch(exist_ok=True)
         return state
 
     def load(self) -> dict:
@@ -224,6 +227,9 @@ class StateStore:
 
     def list_dreams(self) -> List[dict]:
         return self.read_jsonl(self.dreams_path)
+
+    def list_imports(self) -> List[dict]:
+        return self.read_jsonl(self.imports_path)
 
     def record_episode(
         self,
@@ -304,6 +310,7 @@ class StateStore:
             "identity_summary": state["identity_core"]["self_model"]["summary"],
             "active_intent": state["working_state"]["active_intent"],
             "continuity_anchors": state["working_state"]["context_anchors"],
+            "imported_memories": state["memory_stores"].get("imported_memory", [])[-5:],
             "recent_episodes": episodic,
             "relevant_semantic_memories": semantic,
             "open_conflicts": state.get("open_conflicts", []),
