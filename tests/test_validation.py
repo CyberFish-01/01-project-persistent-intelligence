@@ -235,6 +235,29 @@ class StateValidationTests(unittest.TestCase):
                     "workflow": "tool_use",
                     "statement": "Avoid repeating failure.",
                     "review_status": "approved",
+                    "last_review_decision_id": "cautionary_decision_missing",
+                }
+            )
+            state["task_hub"]["cautionary_procedural_memory"].append(
+                {
+                    "memory_id": "caution_mem_bad",
+                    "workflow": "tool_use",
+                    "statement": "Avoid repeating failure.",
+                    "avoid": "Missing required input.",
+                    "status": "active",
+                    "executable_policy": True,
+                }
+            )
+            state["task_hub"]["cautionary_review_decisions"].append(
+                {
+                    "decision_id": "cautionary_decision_bad",
+                    "candidate_id": "caution_bad",
+                    "workflow": "tool_use",
+                    "reviewer": "unit_test",
+                    "action": "approve",
+                    "result": "approved",
+                    "snapshot_id": "snapshot_bad",
+                    "executable_policy_created": True,
                 }
             )
 
@@ -252,7 +275,23 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
             self.assertIn(
-                "task_hub.cautionary_procedural_candidates[0].review_status",
+                "task_hub.cautionary_procedural_candidates[0].review_history",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.cautionary_procedural_memory[0].evidence",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.cautionary_procedural_memory[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.cautionary_review_decisions[0].timestamp",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.cautionary_review_decisions[0].executable_policy_created",
                 paths,
             )
 

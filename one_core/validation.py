@@ -947,6 +947,8 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
+        "cautionary_procedural_memory",
+        "cautionary_review_decisions",
         "procedural_memory",
         "procedural_lifecycle_decisions",
         "procedural_review_decisions",
@@ -1031,11 +1033,77 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
             for key in ("candidate_id", "workflow", "statement", "avoid", "evidence", "review_status", "source_reflection_id"):
                 if key not in caution:
                     issues.append(ValidationIssue(path + f".{key}", "Cautionary procedural candidate key is missing."))
-            if caution.get("review_status") != "pending":
+            if not isinstance(caution.get("evidence"), list) or not caution.get("evidence"):
+                issues.append(
+                    ValidationIssue(
+                        path + ".evidence",
+                        "Cautionary procedural candidate requires non-empty evidence.",
+                    )
+                )
+            if caution.get("review_status") in {"approved", "rejected", "archived", "quarantined"}:
+                history = caution.get("review_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(
+                        ValidationIssue(
+                            path + ".review_history",
+                            "Reviewed cautionary procedural candidate requires review history.",
+                        )
+                    )
+                elif history[-1].get("decision_id") != caution.get("last_review_decision_id"):
+                    issues.append(
+                        ValidationIssue(
+                            path + ".last_review_decision_id",
+                            "Cautionary candidate last_review_decision_id must match latest decision.",
+                        )
+                    )
+            elif caution.get("review_status") != "pending":
                 issues.append(
                     ValidationIssue(
                         path + ".review_status",
-                        "Cautionary procedural candidate must remain pending.",
+                        "Cautionary procedural candidate must be pending or reviewed.",
+                    )
+                )
+    cautionary_memory = task_hub.get("cautionary_procedural_memory", [])
+    if isinstance(cautionary_memory, list):
+        for index, memory in enumerate(cautionary_memory):
+            path = f"task_hub.cautionary_procedural_memory[{index}]"
+            if not isinstance(memory, dict):
+                issues.append(ValidationIssue(path, "Cautionary procedural memory must be an object."))
+                continue
+            for key in (
+                "memory_id",
+                "workflow",
+                "statement",
+                "avoid",
+                "evidence",
+                "status",
+                "review_decision_id",
+                "source_candidate_id",
+                "source_reflection_id",
+                "provenance",
+                "lifecycle",
+                "update_history",
+                "executable_policy",
+            ):
+                if key not in memory:
+                    issues.append(ValidationIssue(path + f".{key}", "Cautionary procedural memory key is missing."))
+            if memory.get("executable_policy") is not False:
+                issues.append(
+                    ValidationIssue(
+                        path + ".executable_policy",
+                        "Cautionary procedural memory must not be executable policy.",
+                    )
+                )
+            if memory.get("status") not in {
+                "active",
+                "archived",
+                "discarded",
+                "quarantined",
+            }:
+                issues.append(
+                    ValidationIssue(
+                        path + ".status",
+                        "Cautionary procedural memory must have a valid lifecycle status.",
                     )
                 )
     procedural_memory = task_hub.get("procedural_memory", [])
@@ -1106,6 +1174,33 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
             for key in ("decision_id", "timestamp", "candidate_id", "workflow", "reviewer", "action", "result", "snapshot_id"):
                 if key not in decision:
                     issues.append(ValidationIssue(path + f".{key}", "Procedural review decision key is missing."))
+    cautionary_decisions = task_hub.get("cautionary_review_decisions", [])
+    if isinstance(cautionary_decisions, list):
+        for index, decision in enumerate(cautionary_decisions):
+            path = f"task_hub.cautionary_review_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Cautionary review decision must be an object."))
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "candidate_id",
+                "workflow",
+                "reviewer",
+                "action",
+                "result",
+                "snapshot_id",
+                "executable_policy_created",
+            ):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Cautionary review decision key is missing."))
+            if decision.get("executable_policy_created") is not False:
+                issues.append(
+                    ValidationIssue(
+                        path + ".executable_policy_created",
+                        "Cautionary review must not create executable policy.",
+                    )
+                )
     return issues
 
 

@@ -577,6 +577,82 @@ class CoreStateTests(unittest.TestCase):
                 },
             )
 
+    def test_cautionary_procedural_candidate_review_creates_active_warning(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            state = store.load()
+            store.record_trace(
+                workflow="tool_use",
+                nodes=[
+                    {
+                        "id": "failed_tool",
+                        "type": "Action",
+                        "summary": "Tool failed because required input was missing.",
+                    }
+                ],
+                errors=[
+                    {
+                        "error": "missing_input",
+                        "message": "Required input was missing.",
+                    }
+                ],
+                summary="Tool workflow failed because input was missing.",
+                state=state,
+                status="failed",
+            )
+            store.save(state)
+            failed_action = state["task_hub"]["action_trace"][-1]
+            reflection = store.record_failure_reflection(
+                workflow="tool_use",
+                action_id=failed_action["action_id"],
+                summary="Tried a tool workflow before collecting required input.",
+                lesson="Check required inputs before tool execution.",
+                next_action="Ask for or infer required input first.",
+                reviewer="unit_test",
+            )
+
+            result = store.review_cautionary_procedural_candidate(
+                reflection["cautionary_candidate_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Keep this as an active warning, not executable policy.",
+            )
+            state = store.load()
+            reviewed = state["task_hub"]["cautionary_procedural_candidates"][-1]
+            warning = state["task_hub"]["cautionary_procedural_memory"][-1]
+
+            self.assertEqual(result["status"], "approved")
+            self.assertTrue(result["cautionary_memory_id"].startswith("caution_mem_"))
+            self.assertEqual(reviewed["review_status"], "approved")
+            self.assertEqual(reviewed["promoted_to"], result["cautionary_memory_id"])
+            self.assertEqual(
+                warning["review_decision_id"],
+                result["cautionary_decision_id"],
+            )
+            self.assertEqual(warning["workflow"], "tool_use")
+            self.assertFalse(warning["executable_policy"])
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertTrue(state["task_hub"]["cautionary_review_decisions"])
+            self.assertTrue(result["snapshot_id"].startswith("snapshot_"))
+            self.assertEqual(store.list_traces()[-1]["workflow"], "cautionary_procedural_review")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            package = store.build_context_package()
+            self.assertIn(
+                result["cautionary_memory_id"],
+                {
+                    item["memory_id"]
+                    for item in package["cautionary_procedural_memory"]
+                },
+            )
+            self.assertIn(
+                result["cautionary_memory_id"],
+                {
+                    item["memory_id"]
+                    for item in package["task_hub"]["cautionary_procedural_memory"]
+                },
+            )
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

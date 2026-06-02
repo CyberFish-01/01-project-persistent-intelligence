@@ -724,6 +724,26 @@ task_hub:
       provenance:
         - type: "failure_reflection_caution"
           reflection_id: "failure_reflection_0001"
+  cautionary_procedural_memory:
+    - memory_id: "caution_mem_0001"
+      timestamp: "ISO-8601 timestamp"
+      workflow: "tool_use"
+      statement: "Failure reflection for workflow 'tool_use': Check required inputs before tool execution."
+      avoid: "Tried a tool workflow before collecting required input."
+      next_action: "Ask for or infer required input first."
+      evidence:
+        - "failure_reflection_0001"
+        - "action_0002"
+      confidence: 0.6
+      risk: "medium"
+      status: "active"
+      source_candidate_id: "caution_0001"
+      source_reflection_id: "failure_reflection_0001"
+      review_decision_id: "cautionary_decision_0001"
+      executable_policy: false
+      lifecycle:
+        status: "active"
+        review_status: "approved"
   procedural_memory:
     - memory_id: "proc_mem_0001"
       timestamp: "ISO-8601 timestamp"
@@ -768,6 +788,17 @@ task_hub:
       action: "approve"
       result: "approved"
       snapshot_id: "snapshot_0001"
+  cautionary_review_decisions:
+    - decision_id: "cautionary_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      candidate_id: "caution_0001"
+      workflow: "tool_use"
+      source_reflection_id: "failure_reflection_0001"
+      reviewer: "manual_review"
+      action: "approve"
+      result: "approved"
+      snapshot_id: "snapshot_0003"
+      executable_policy_created: false
 ```
 
 `working_state.current_plan` 仍然保留为 legacy/compatibility 字段。P10 会把它迁移为 `task_hub.active_tasks`、`completed_tasks` 或 `blocked_tasks`，但不删除旧字段。
@@ -776,9 +807,11 @@ task_hub:
 
 Dream 可以从重复成功的 action trace 里提出 `procedural_candidates`。这些候选不等于已采用的 procedural memory，必须等待 review。P16 增加 `review-procedural-candidate`；批准后会创建 `task_hub.procedural_memory`，并连接 decision、snapshot、audit、trace、update log 和 rollback metadata。它仍然不会执行 workflow policy。
 
-P17 增加显式 failure reflection。`record-failure-reflection` 会把失败或阻塞的 workflow lesson 记录到 `task_hub.failure_reflections`，并创建 pending `task_hub.cautionary_procedural_candidates` 条目。Cautionary candidates 是警告型 proposal，不是可执行 workflow policy。它们必须保持 pending，直到后续 review path 出现，并且不能修改 Identity Core。
+P17 增加显式 failure reflection。`record-failure-reflection` 会把失败或阻塞的 workflow lesson 记录到 `task_hub.failure_reflections`，并创建 pending `task_hub.cautionary_procedural_candidates` 条目。Cautionary candidates 是警告型 proposal，不是可执行 workflow policy，并且不能修改 Identity Core。
 
 P18 增加 procedural lifecycle retention。`procedural-lifecycle` 可以对已 review 的 `task_hub.procedural_memory` 条目执行 archive、discard 或 quarantine。它会写入 snapshot、audit、trace、update log、lifecycle history 和 `task_hub.procedural_lifecycle_decisions`，但仍然不会执行 workflow policy。context package 只暴露 active procedural memory。
+
+P19 增加 cautionary procedural review。`review-cautionary-procedural-candidate` 可以 approve、reject、archive 或 quarantine warning candidates。批准后会创建 active `task_hub.cautionary_procedural_memory`，未来 context 会把它作为 active warning 暴露。它明确记录 `executable_policy: false`，写入 snapshot、audit、trace、update log、review decision 和 rollback metadata，并且仍然不会执行 workflow policy。
 
 ## 14. Identity Update Gate
 
@@ -1062,6 +1095,7 @@ state_transfer_package:
     failure_reflections: []
     procedural_candidates: []
     cautionary_procedural_candidates: []
+    cautionary_procedural_memory: []
     procedural_memory: []
     procedural_lifecycle_decisions: []
   active_tasks: []
@@ -1069,6 +1103,7 @@ state_transfer_package:
   failure_reflections: []
   procedural_candidates: []
   cautionary_procedural_candidates: []
+  cautionary_procedural_memory: []
   procedural_memory: []
   procedural_lifecycle_decisions: []
   identity_update_gate:
@@ -1141,7 +1176,8 @@ state_transfer_package:
 - `task_hub.action_trace` 只记录真实状态变更，不记录 non-mutating dry-run；
 - 每个 failure reflection 都有 workflow、summary、lesson、evidence、provenance 和 status；
 - procedural candidate 必须有 workflow、evidence 和 pending review status；
-- 每个 cautionary procedural candidate 都有 source reflection、avoid 指引、evidence 和 pending review status；
+- 每个 cautionary procedural candidate 都有 source reflection、avoid 指引、evidence，以及 pending 或带 review history 的已审查状态；
+- 每个 cautionary procedural memory 都有 evidence、lifecycle metadata、provenance、update history，并且 `executable_policy: false`；
 - 每个 procedural lifecycle decision 都有 memory id、workflow、reviewer、action、result 和 snapshot metadata；
 - identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；
 - P11 不允许直接 patch `identity_core`，approve 只能追加 identity_memory；

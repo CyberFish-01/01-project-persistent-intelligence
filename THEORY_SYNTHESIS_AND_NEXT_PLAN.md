@@ -657,7 +657,7 @@ Remaining gaps:
 
 ## 6. Current Recommendation
 
-P17 is now the immediate foundation to finish and review:
+P17-P19 are now implemented as the current Task Hub / procedural safety foundation:
 
 ```text
 P17 Failure Reflection
@@ -677,7 +677,6 @@ Implemented result:
 
 Remaining gaps:
 
-- no review/promote path for cautionary procedural candidates yet;
 - procedural memory is not yet deeply linked to tool policy / safety policy;
 - no workflow policy executor yet.
 
@@ -697,18 +696,39 @@ Implemented result:
 
 Remaining gaps:
 
-- no review/promote path for cautionary procedural candidates yet;
 - procedural memory is not yet deeply linked to tool policy / safety policy;
 - no workflow policy executor yet;
+
+### P19 Cautionary Procedural Review
+
+Goal: let warning-style failure candidates become active, reviewable caution memory without becoming executable policy.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `review-cautionary-procedural-candidate` CLI can approve, reject, archive, or quarantine `task_hub.cautionary_procedural_candidates`;
+- approval creates active `task_hub.cautionary_procedural_memory`;
+- context packages expose active cautionary procedural memory as warnings;
+- review writes snapshot, audit, trace, update log, review decision, and rollback metadata;
+- cautionary procedural memory explicitly records `executable_policy: false`;
+- scenario evaluation adds `cautionary_procedural_review`;
+- cautionary review does not mutate Identity Core and does not execute workflow policy.
+
+Remaining gaps:
+
+- active cautionary warnings do not yet have a retention lifecycle;
+- cautionary warnings are not yet linked to tool policy / safety policy;
+- no workflow policy executor yet.
 
 Recommended next step:
 
 ```text
-P19 Cautionary Procedural Review
+P20 Cautionary Warning Lifecycle
 ```
 
 Reason:
 
-- P17 creates warning-style procedural candidates from failures, but they remain pending forever;
-- P18 gives adopted procedural memory a retention lifecycle;
-- the next foundation is a review path for cautionary candidates that can become active warnings, be archived, or be quarantined without becoming executable tool policy.
+- P19 gives failure-derived warnings a review path and active context presence;
+- active warnings also need retention so obsolete or overbroad cautions can be archived, discarded, or quarantined;
+- this is still foundation work because it controls how warning state persists through time without becoming automatic behavior policy.

@@ -312,6 +312,7 @@ It uses temporary state and currently runs:
 - `task_hub_action_resume`: verifies that Task Hub preserves active tasks, next actions, and action history after interruption, and proposes procedural candidates from repeated successful actions.
 - `procedural_memory_review`: verifies `review-procedural-candidate`, durable procedural memory creation, review decision metadata, snapshot, replay, and no Identity Core mutation.
 - `failure_reflection`: verifies `record-failure-reflection`, failure reflection persistence, cautionary procedural candidate creation, context exposure, and no Identity Core mutation.
+- `cautionary_procedural_review`: verifies `review-cautionary-procedural-candidate`, active warning creation, review decision metadata, context exposure, replay, `executable_policy: false`, and no Identity Core mutation.
 - `procedural_lifecycle_retention`: verifies `procedural-lifecycle`, procedural lifecycle decision metadata, replay, and suppression of archived procedural memory from context.
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
 - `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, and rollback preview does not mutate state.

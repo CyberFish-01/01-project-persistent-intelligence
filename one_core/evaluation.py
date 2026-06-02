@@ -61,6 +61,9 @@ def run_scenario_evaluation() -> dict:
             check_task_hub_action_resume(root / "task_hub_action_resume"),
             check_procedural_memory_review(root / "procedural_memory_review"),
             check_failure_reflection(root / "failure_reflection"),
+            check_cautionary_procedural_review(
+                root / "cautionary_procedural_review"
+            ),
             check_procedural_lifecycle_retention(
                 root / "procedural_lifecycle_retention"
             ),
@@ -632,6 +635,100 @@ def check_failure_reflection(state_dir: Path) -> EvaluationCheck:
                 "failure_reflection_count": len(reflections),
                 "failure_caution_count": len(cautions),
                 "failure_identity_mutation_count": 0
+                if state["identity_core"] == before_identity
+                else 1,
+            },
+        },
+    )
+
+
+def check_cautionary_procedural_review(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    state = store.load()
+    store.record_trace(
+        workflow="tool_use",
+        nodes=[
+            {
+                "id": "failed_tool",
+                "type": "Action",
+                "summary": "Tool failed because required input was missing.",
+            }
+        ],
+        errors=[
+            {
+                "error": "missing_input",
+                "message": "Required input was missing.",
+            }
+        ],
+        summary="Tool workflow failed because input was missing.",
+        state=state,
+        status="failed",
+    )
+    store.save(state)
+    failed_action = state["task_hub"]["action_trace"][-1]
+    reflection = store.record_failure_reflection(
+        workflow="tool_use",
+        action_id=failed_action["action_id"],
+        summary="Tried a tool workflow before collecting required input.",
+        lesson="Check required inputs before tool execution.",
+        next_action="Ask for or infer required input first.",
+        reviewer="scenario_eval",
+    )
+    review = store.review_cautionary_procedural_candidate(
+        candidate_id=reflection.get("cautionary_candidate_id", ""),
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Keep as an active warning, not executable policy.",
+    )
+    state = store.load()
+    package = store.build_context_package()
+    candidates = state.get("task_hub", {}).get("cautionary_procedural_candidates", [])
+    warnings = state.get("task_hub", {}).get("cautionary_procedural_memory", [])
+    decisions = state.get("task_hub", {}).get("cautionary_review_decisions", [])
+    active_context = [
+        item
+        for item in package.get("cautionary_procedural_memory", [])
+        if isinstance(item, dict)
+    ]
+    latest_warning = warnings[-1] if warnings else {}
+    checks = {
+        "candidate_reviewed": bool(candidates)
+        and candidates[-1].get("review_status") == "approved",
+        "warning_created": bool(warnings)
+        and warnings[-1].get("memory_id") == review.get("cautionary_memory_id"),
+        "decision_recorded": bool(decisions)
+        and decisions[-1].get("decision_id") == review.get("cautionary_decision_id"),
+        "context_exposes_active_warning": review.get("cautionary_memory_id")
+        in {
+            item.get("memory_id")
+            for item in active_context
+            if isinstance(item, dict)
+        },
+        "warning_not_executable_policy": latest_warning.get("executable_policy") is False,
+        "identity_not_mutated": state["identity_core"] == before_identity,
+        "event_replay_passed": store.replay_events()["status"] == "passed",
+    }
+    return EvaluationCheck(
+        name="cautionary_procedural_review",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Cautionary Procedural Review",
+            "candidate_id": reflection.get("cautionary_candidate_id"),
+            "cautionary_memory_id": review.get("cautionary_memory_id"),
+            "checks": checks,
+            "metrics": {
+                "cautionary_review_score": ratio(checks.values()),
+                "cautionary_warning_count": len(warnings),
+                "cautionary_review_decision_count": len(decisions),
+                "cautionary_executable_policy_count": sum(
+                    1
+                    for item in warnings
+                    if isinstance(item, dict)
+                    and item.get("executable_policy") is not False
+                ),
+                "cautionary_active_context_count": len(active_context),
+                "cautionary_identity_mutation_count": 0
                 if state["identity_core"] == before_identity
                 else 1,
             },
@@ -1322,6 +1419,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "procedural_lifecycle_score" in item
     ]
+    cautionary_review_scores = [
+        item["cautionary_review_score"]
+        for item in metrics
+        if "cautionary_review_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -1383,6 +1485,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         )
         if procedural_lifecycle_scores
         else None,
+        "cautionary_review_score": round(
+            sum(cautionary_review_scores) / len(cautionary_review_scores),
+            2,
+        )
+        if cautionary_review_scores
+        else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
         ),
@@ -1424,6 +1532,24 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "procedural_active_context_count": sum(
             int(item.get("procedural_active_context_count", 0)) for item in metrics
+        ),
+        "cautionary_warning_count": sum(
+            int(item.get("cautionary_warning_count", 0)) for item in metrics
+        ),
+        "cautionary_review_decision_count": sum(
+            int(item.get("cautionary_review_decision_count", 0))
+            for item in metrics
+        ),
+        "cautionary_executable_policy_count": sum(
+            int(item.get("cautionary_executable_policy_count", 0))
+            for item in metrics
+        ),
+        "cautionary_active_context_count": sum(
+            int(item.get("cautionary_active_context_count", 0)) for item in metrics
+        ),
+        "cautionary_identity_mutation_count": sum(
+            int(item.get("cautionary_identity_mutation_count", 0))
+            for item in metrics
         ),
         "approved_identity_updates": sum(
             int(item.get("approved_identity_updates", 0)) for item in metrics

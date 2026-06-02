@@ -657,7 +657,7 @@ git diff --check
 
 ## 6. 当前建议
 
-P17 是当前需要完成和复审的地基：
+P17-P19 已经构成当前 Task Hub / procedural safety 地基：
 
 ```text
 P17 Failure Reflection
@@ -677,7 +677,6 @@ P17 Failure Reflection
 
 剩余缺口：
 
-- cautionary procedural candidates 还没有 review/promote 路径；
 - procedural memory 还没有和具体 tool policy / safety policy 深度联动；
 - 还没有 workflow policy executor。
 
@@ -697,18 +696,39 @@ P17 Failure Reflection
 
 剩余缺口：
 
-- cautionary procedural candidates 还没有 review/promote 路径；
 - procedural memory 还没有和具体 tool policy / safety policy 深度联动；
+- 还没有 workflow policy executor。
+
+### P19 Cautionary Procedural Review
+
+目标：让 warning-style failure candidates 可以成为 active、可审查的 caution memory，但不会变成 executable policy。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `review-cautionary-procedural-candidate` CLI 可以 approve、reject、archive 或 quarantine `task_hub.cautionary_procedural_candidates`；
+- approve 会创建 active `task_hub.cautionary_procedural_memory`；
+- context package 会把 active cautionary procedural memory 作为 warning 暴露；
+- review 会写入 snapshot、audit、trace、update log、review decision 和 rollback metadata；
+- cautionary procedural memory 明确记录 `executable_policy: false`；
+- scenario evaluation 增加 `cautionary_procedural_review`；
+- cautionary review 不修改 Identity Core，也不执行 workflow policy。
+
+剩余缺口：
+
+- active cautionary warnings 还没有 retention lifecycle；
+- cautionary warnings 还没有和 tool policy / safety policy 联动；
 - 还没有 workflow policy executor。
 
 建议下一步：
 
 ```text
-P19 Cautionary Procedural Review
+P20 Cautionary Warning Lifecycle
 ```
 
 理由：
 
-- P17 已经能从失败中生成 warning-style procedural candidates，但它们目前只能永久 pending；
-- P18 已经给 adopted procedural memory 加上 retention lifecycle；
-- 下一层地基是给 cautionary candidates 增加 review path，让它们可以成为 active warning、archive 或 quarantine，但仍然不能变成自动执行的 tool policy。
+- P19 已经让失败衍生的 warning 有了 review path 和 active context presence；
+- active warnings 也需要 retention，才能让过时或过宽的 caution 被 archive、discard 或 quarantine；
+- 这仍然属于地基工作，因为它控制 warning state 如何穿过时间，而不是把 warning 变成自动行为策略。

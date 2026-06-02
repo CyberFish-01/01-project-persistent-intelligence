@@ -181,6 +181,19 @@ def main() -> None:
     procedural_review_parser.add_argument("--reviewer", default="manual_review")
     procedural_review_parser.add_argument("--decision-note", default="")
 
+    cautionary_review_parser = subparsers.add_parser(
+        "review-cautionary-procedural-candidate",
+        help="Review a cautionary procedural warning candidate.",
+    )
+    cautionary_review_parser.add_argument("candidate_id")
+    cautionary_review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["approve", "reject", "archive", "quarantine"],
+    )
+    cautionary_review_parser.add_argument("--reviewer", default="manual_review")
+    cautionary_review_parser.add_argument("--decision-note", default="")
+
     failure_reflection_parser = subparsers.add_parser(
         "record-failure-reflection",
         help="Record a failure reflection and cautionary procedural candidate.",
@@ -364,6 +377,15 @@ def main() -> None:
     elif args.command == "review-procedural-candidate":
         print_json(
             store.review_procedural_candidate(
+                candidate_id=args.candidate_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "review-cautionary-procedural-candidate":
+        print_json(
+            store.review_cautionary_procedural_candidate(
                 candidate_id=args.candidate_id,
                 action=args.action,
                 reviewer=args.reviewer,

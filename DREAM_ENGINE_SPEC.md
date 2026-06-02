@@ -366,6 +366,8 @@ P17 adds failure reflection. `record-failure-reflection` records a failed or blo
 
 P18 adds reviewed retention for procedural memory. `procedural-lifecycle` can archive, discard, or quarantine adopted `task_hub.procedural_memory` entries. Archived or quarantined procedural memory is retained for audit but suppressed from active context. This remains a review action, not a workflow executor.
 
+P19 adds cautionary procedural review. `review-cautionary-procedural-candidate` can approve, reject, archive, or quarantine warning candidates. Approval creates `task_hub.cautionary_procedural_memory`, which is exposed as active warning context. It explicitly records `executable_policy: false`, so it remains guidance about what to avoid, not an automatic tool or workflow policy.
+
 Dream artifacts also include a deterministic rubric:
 
 ```yaml
