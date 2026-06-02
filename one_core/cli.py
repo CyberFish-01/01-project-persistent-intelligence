@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .api import run_server, state_summary
 from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
 from .importer import import_text_file
@@ -50,6 +51,10 @@ def main() -> None:
     )
     clean_parser.add_argument("--min-chars", type=int, default=8)
 
+    serve_parser = subparsers.add_parser("serve", help="Run the local 01 Core HTTP API.")
+    serve_parser.add_argument("--host", default="127.0.0.1")
+    serve_parser.add_argument("--port", type=int, default=8765)
+
     dream_parser = subparsers.add_parser("dream", help="Run a dream consolidation cycle.")
     dream_parser.add_argument("--limit", type=int, default=20)
 
@@ -69,29 +74,7 @@ def main() -> None:
             }
         )
     elif args.command == "status":
-        state = store.load()
-        print_json(
-            {
-                "agent_id": state["agent_id"],
-                "updated_at": state["updated_at"],
-                "identity": state["identity_core"]["self_model"]["summary"],
-                "active_intent": state["working_state"]["active_intent"],
-                "anchors": state["working_state"]["context_anchors"],
-                "imported_memories": len(
-                    state["memory_stores"].get("imported_memory", [])
-                ),
-                "episodes": len(state["memory_stores"]["episodic_memory"]),
-                "semantic_memories": len(state["memory_stores"]["semantic_memory"]),
-                "open_conflicts": len(state.get("open_conflicts", [])),
-                "pending_dream_jobs": len(
-                    [
-                        job
-                        for job in state.get("dream_queue", [])
-                        if job.get("status") == "pending"
-                    ]
-                ),
-            }
-        )
+        print_json(state_summary(store))
     elif args.command == "interact":
         episode = store.record_episode(
             args.message, user_id=args.user_id, channel=args.channel
@@ -122,6 +105,8 @@ def main() -> None:
         )
         report = write_cleaned_text(memories, Path(args.output))
         print_json(report)
+    elif args.command == "serve":
+        run_server(host=args.host, port=args.port, state_dir=Path(args.state_dir))
     elif args.command == "dream":
         report = DreamEngine(store).run(limit=args.limit)
         print_json(report)

@@ -27,6 +27,7 @@
 - [LITERATURE_MAP.md](./LITERATURE_MAP.md) / [LITERATURE_MAP_ZH.md](./LITERATURE_MAP_ZH.md)：与 LLM Agent、认知架构、心理学、神经科学、持续学习相关的文献地图。
 - [IMPLEMENTATION_START.md](./IMPLEMENTATION_START.md) / [IMPLEMENTATION_START_ZH.md](./IMPLEMENTATION_START_ZH.md)：第一版可运行本地 01 Core 原型。
 - [MEMORY_IMPORT.md](./MEMORY_IMPORT.md) / [MEMORY_IMPORT_ZH.md](./MEMORY_IMPORT_ZH.md)：如何把 AstrBot、Angel Memory 或其他系统的记忆以通用文本形式导入。
+- [API.md](./API.md) / [API_ZH.md](./API_ZH.md)：给 AstrBot 等 adapter 使用的本地 HTTP API。
 
 ## 核心命题
 
@@ -55,6 +56,12 @@ python3 -m one_core.cli status
 ```
 
 默认状态目录是 `work/01_state`。
+
+启动本地 API：
+
+```bash
+python3 -m one_core.cli serve
+```
 
 ```text
 01 Project
