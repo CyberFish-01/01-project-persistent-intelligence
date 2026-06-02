@@ -1,0 +1,14 @@
+[Unit]
+Description=01 Core Persistent Intelligence API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/01-project-persistent-intelligence
+ExecStart=/usr/bin/python3 -m one_core.cli --state-dir /root/01_state serve --host 127.0.0.1 --port 8765
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
