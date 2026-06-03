@@ -417,6 +417,10 @@ def main() -> None:
         "reconstruction-evidence-schema-report",
         help="Draft report-only evidence schema requirements for future reconstruction.",
     )
+    subparsers.add_parser(
+        "reconstruction-evidence-coverage-map",
+        help="Map current event workflows to reconstruction evidence schema gaps.",
+    )
     payload_capture_policy_parser = subparsers.add_parser(
         "propose-event-payload-capture-policy",
         help="Create a review-only event payload capture policy proposal.",
@@ -779,6 +783,8 @@ def main() -> None:
         print_json(store.event_replayability_assessment())
     elif args.command == "reconstruction-evidence-schema-report":
         print_json(store.reconstruction_evidence_schema_report())
+    elif args.command == "reconstruction-evidence-coverage-map":
+        print_json(store.reconstruction_evidence_coverage_mapping())
     elif args.command == "propose-event-payload-capture-policy":
         print_json(
             store.propose_event_payload_capture_policy(

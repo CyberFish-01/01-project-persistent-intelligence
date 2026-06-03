@@ -2860,6 +2860,73 @@ class CoreStateTests(unittest.TestCase):
                 before_event_ids,
             )
 
+    def test_reconstruction_evidence_coverage_mapping_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P43 workflow coverage mapping episode")
+            store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create a second workflow for P43 mapping.",
+            )
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.reconstruction_evidence_coverage_mapping()
+            after = store.load()
+
+            workflows = {
+                item["workflow"]: item for item in report["workflow_mappings"]
+            }
+            section_coverage = {
+                item["section"]: item for item in report["section_coverage"]
+            }
+
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(
+                report["mode"],
+                "reconstruction_evidence_coverage_mapping_v0.1",
+            )
+            self.assertEqual(report["mapping_status"], "report_only")
+            self.assertGreaterEqual(report["workflow_count"], 2)
+            self.assertGreaterEqual(report["workflow_gap_count"], 1)
+            self.assertIn("record_episode", workflows)
+            self.assertIn("event_retention_review", workflows)
+            self.assertIn(
+                "object_evidence",
+                workflows["record_episode"]["required_schema_sections"],
+            )
+            self.assertIn(
+                "object_payload",
+                workflows["record_episode"]["missing_capabilities"],
+            )
+            self.assertIn(
+                "rollback_snapshot",
+                workflows["record_episode"]["missing_capabilities"],
+            )
+            self.assertIn(
+                "object_evidence",
+                section_coverage,
+            )
+            self.assertGreaterEqual(
+                section_coverage["object_evidence"]["workflow_count"],
+                1,
+            )
+            self.assertTrue(report["report_only"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["reconstruction_executed"])
+            self.assertFalse(report["event_payload_capture_executed"])
+            self.assertFalse(report["event_schema_mutation_allowed"])
+            self.assertFalse(report["event_compaction_executed"])
+            self.assertFalse(report["automatic_rollback_executed"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

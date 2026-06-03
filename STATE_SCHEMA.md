@@ -1578,6 +1578,40 @@ reconstruction_evidence_schema_report:
 
 P42 is not an event schema migration. It defines the minimum evidence vocabulary for future object/state reconstruction research while keeping event records unchanged.
 
+P43 adds a read-only evidence coverage mapping:
+
+```bash
+python3 -m one_core.cli reconstruction-evidence-coverage-map
+```
+
+This report maps current event workflows to the P42 evidence sections so the project can see which workflow families need payload, diff, snapshot, or seed/pre-event references before any schema mutation.
+
+```yaml
+reconstruction_evidence_coverage_mapping:
+  mode: "reconstruction_evidence_coverage_mapping_v0.1"
+  mapping_status: "report_only"
+  workflow_mappings:
+    - workflow: "record_episode"
+      required_schema_sections:
+        - "object_evidence"
+        - "reconstruction_metadata"
+      missing_capabilities:
+        - "object_payload"
+        - "object_diff"
+        - "rollback_snapshot"
+      coverage_status: "needs_object_diff"
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P43 is still coverage analysis only. It does not write the proposed fields into events.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml

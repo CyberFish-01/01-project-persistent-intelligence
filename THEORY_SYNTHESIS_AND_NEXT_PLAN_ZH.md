@@ -1373,7 +1373,7 @@ P42 Reconstruction Evidence Schema Research
 - replay 仍然不能从 empty seed 重建 object state；
 - 还没有 payload 或 diff capture implementation。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P43 Evidence Schema Coverage Mapping
@@ -1384,6 +1384,34 @@ P43 Evidence Schema Coverage Mapping
 - P42 定义了 evidence vocabulary，但项目还需要一个 read-only mapping，把当前 event families/workflows 映射到 required schema sections；
 - 这一步应该在任何 schema mutation 之前，说明哪些 workflow families 需要 object payload、object diff、snapshot link 或 seed/pre-event references；
 - 它继续服务 Priority A/B 地基，不实现 capture、reconstruction、compaction、rollback 或 adapters。
+
+已实现结果：
+
+- `reconstruction-evidence-coverage-map` CLI 会输出 `reconstruction_evidence_coverage_mapping_v0.1`；
+- report 会把当前 event workflows 映射到 required P42 schema sections 和 minimum fields；
+- 它会暴露 workflow-level payload gaps、diff gaps、snapshot gaps、transition gaps、target paths 和 example event IDs；
+- 它会汇总 section coverage，让项目看到哪些 schema sections 被当前 events 需要；
+- 它保持 `event_schema_mutation_allowed: false`、`event_payload_capture_executed: false`、`reconstruction_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`report_only: true` 和 `would_modify_state: false`；
+- scenario evaluation 会验证 workflow mapping 存在、gap visibility 非零、state 保持不变，并且不会执行 capture、schema mutation 或 reconstruction。
+
+剩余缺口：
+
+- workflow gaps 已经被映射，但还没有按 reconstruction value、risk 和 expected implementation cost 排序；
+- 还没有 event schema migration；
+- 还没有 payload 或 diff capture implementation；
+- replay 仍然不能从 empty seed 重建 object state。
+
+建议下一步：
+
+```text
+P44 Evidence Gap Prioritization Report
+```
+
+理由：
+
+- P43 已经映射哪些 workflows 有 evidence gaps，但项目还需要一个 read-only 方法，按 reconstruction value、risk 和 expected implementation cost 给这些 gaps 排序；
+- 这能帮助决定哪些 event families 最值得先做 schema work，但不执行 schema mutation 或 payload capture；
+- 它仍然停留在 Event-Sourcing Groundwork，不进入 executor、rollback、compaction、adapters 或 product surfaces。
 
 期望验收：
 

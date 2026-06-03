@@ -1621,6 +1621,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_reconstruction_schema = store.load()
     reconstruction_schema = store.reconstruction_evidence_schema_report()
     after_reconstruction_schema = store.load()
+    before_reconstruction_mapping = store.load()
+    reconstruction_mapping = store.reconstruction_evidence_coverage_mapping()
+    after_reconstruction_mapping = store.load()
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -1825,6 +1828,34 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
         and reconstruction_schema.get("event_schema_mutation_allowed") is False
         and reconstruction_schema.get("event_compaction_executed") is False
         and reconstruction_schema.get("automatic_rollback_executed") is False,
+        "reconstruction_evidence_coverage_mapped": reconstruction_mapping.get("mode")
+        == "reconstruction_evidence_coverage_mapping_v0.1",
+        "reconstruction_evidence_coverage_read_only": reconstruction_mapping.get(
+            "would_modify_state"
+        )
+        is False
+        and reconstruction_mapping.get("report_only") is True
+        and reconstruction_mapping.get("state_unchanged") is True
+        and after_reconstruction_mapping == before_reconstruction_mapping,
+        "reconstruction_evidence_coverage_has_workflows": reconstruction_mapping.get(
+            "workflow_count",
+            0,
+        )
+        > 0
+        and bool(reconstruction_mapping.get("workflow_mappings")),
+        "reconstruction_evidence_coverage_gap_visible": reconstruction_mapping.get(
+            "workflow_gap_count",
+            0,
+        )
+        > 0,
+        "reconstruction_evidence_coverage_non_executing": reconstruction_mapping.get(
+            "reconstruction_executed"
+        )
+        is False
+        and reconstruction_mapping.get("event_payload_capture_executed") is False
+        and reconstruction_mapping.get("event_schema_mutation_allowed") is False
+        and reconstruction_mapping.get("event_compaction_executed") is False
+        and reconstruction_mapping.get("automatic_rollback_executed") is False,
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
         "event_payload_capture_policy_approved": capture_policy_review.get("status")
@@ -2093,6 +2124,33 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 else 0,
                 "reconstruction_evidence_state_mutation_count": 0
                 if after_reconstruction_schema == before_reconstruction_schema
+                else 1,
+                "reconstruction_evidence_coverage_mapping_count": 1
+                if reconstruction_mapping.get("mode")
+                == "reconstruction_evidence_coverage_mapping_v0.1"
+                else 0,
+                "reconstruction_evidence_coverage_workflow_count": reconstruction_mapping.get(
+                    "workflow_count",
+                    0,
+                ),
+                "reconstruction_evidence_coverage_workflow_gap_count": reconstruction_mapping.get(
+                    "workflow_gap_count",
+                    0,
+                ),
+                "reconstruction_evidence_coverage_section_count": len(
+                    reconstruction_mapping.get("section_coverage", [])
+                ),
+                "reconstruction_evidence_coverage_schema_mutation_count": 1
+                if reconstruction_mapping.get("event_schema_mutation_allowed") is True
+                else 0,
+                "reconstruction_evidence_coverage_capture_execution_count": 1
+                if reconstruction_mapping.get("event_payload_capture_executed") is True
+                else 0,
+                "reconstruction_evidence_coverage_reconstruction_execution_count": 1
+                if reconstruction_mapping.get("reconstruction_executed") is True
+                else 0,
+                "reconstruction_evidence_coverage_state_mutation_count": 0
+                if after_reconstruction_mapping == before_reconstruction_mapping
                 else 1,
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
@@ -3286,6 +3344,43 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "reconstruction_evidence_state_mutation_count": sum(
             int(item.get("reconstruction_evidence_state_mutation_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_mapping_count": sum(
+            int(item.get("reconstruction_evidence_coverage_mapping_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_workflow_count": sum(
+            int(item.get("reconstruction_evidence_coverage_workflow_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_workflow_gap_count": sum(
+            int(item.get("reconstruction_evidence_coverage_workflow_gap_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_section_count": sum(
+            int(item.get("reconstruction_evidence_coverage_section_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_schema_mutation_count": sum(
+            int(item.get("reconstruction_evidence_coverage_schema_mutation_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_capture_execution_count": sum(
+            int(item.get("reconstruction_evidence_coverage_capture_execution_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_reconstruction_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_coverage_reconstruction_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_coverage_state_mutation_count": sum(
+            int(item.get("reconstruction_evidence_coverage_state_mutation_count", 0))
             for item in metrics
         ),
         "event_payload_capture_policy_proposal_count": sum(

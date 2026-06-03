@@ -2055,6 +2055,172 @@ def build_reconstruction_evidence_schema_report(
     }
 
 
+def build_reconstruction_evidence_coverage_mapping(
+    schema_report: dict,
+    coverage: dict,
+) -> dict:
+    section_by_capability = {
+        item.get("capability"): item.get("section")
+        for item in schema_report.get("missing_evidence_requirements", [])
+        if isinstance(item, dict)
+    }
+    fields_by_capability = {
+        item.get("capability"): list(item.get("minimum_fields", []))
+        for item in schema_report.get("missing_evidence_requirements", [])
+        if isinstance(item, dict)
+    }
+    workflow_records: dict[str, dict] = {}
+    for event in coverage.get("events", []):
+        if not isinstance(event, dict):
+            continue
+        workflow = str(event.get("workflow") or "unknown")
+        missing_capabilities = list(event.get("missing_capabilities", []))
+        missing_sections = sorted(
+            {
+                section_by_capability.get(capability)
+                for capability in missing_capabilities
+                if section_by_capability.get(capability)
+            }
+        )
+        missing_fields = sorted(
+            {
+                field
+                for capability in missing_capabilities
+                for field in fields_by_capability.get(capability, [])
+            }
+        )
+        record = workflow_records.setdefault(
+            workflow,
+            {
+                "workflow": workflow,
+                "event_count": 0,
+                "target_paths": {},
+                "payload_gap_count": 0,
+                "diff_gap_count": 0,
+                "snapshot_gap_count": 0,
+                "transition_gap_count": 0,
+                "payload_hint_count": 0,
+                "diff_ready_count": 0,
+                "missing_capabilities": set(),
+                "required_schema_sections": set(),
+                "minimum_fields": set(),
+                "example_event_ids": [],
+            },
+        )
+        record["event_count"] += 1
+        target_path = str(event.get("target_path") or "unknown")
+        record["target_paths"][target_path] = record["target_paths"].get(target_path, 0) + 1
+        if "object_payload" in missing_capabilities:
+            record["payload_gap_count"] += 1
+        else:
+            record["payload_hint_count"] += 1
+        if "object_diff" in missing_capabilities:
+            record["diff_gap_count"] += 1
+        else:
+            record["diff_ready_count"] += 1
+        if "rollback_snapshot" in missing_capabilities:
+            record["snapshot_gap_count"] += 1
+        if "transition_reference" in missing_capabilities:
+            record["transition_gap_count"] += 1
+        record["missing_capabilities"].update(missing_capabilities)
+        record["required_schema_sections"].update(missing_sections)
+        record["minimum_fields"].update(missing_fields)
+        if len(record["example_event_ids"]) < 3 and event.get("event_id"):
+            record["example_event_ids"].append(event.get("event_id"))
+
+    workflow_mappings = []
+    for workflow, record in sorted(workflow_records.items()):
+        if record["transition_gap_count"]:
+            coverage_status = "missing_transition_reference"
+        elif record["diff_gap_count"]:
+            coverage_status = "needs_object_diff"
+        elif record["payload_gap_count"]:
+            coverage_status = "needs_object_payload"
+        elif record["snapshot_gap_count"]:
+            coverage_status = "needs_snapshot_link"
+        else:
+            coverage_status = "schema_covered_for_current_projection"
+        workflow_mappings.append(
+            {
+                "workflow": workflow,
+                "event_count": record["event_count"],
+                "target_paths": dict(sorted(record["target_paths"].items())),
+                "coverage_status": coverage_status,
+                "payload_gap_count": record["payload_gap_count"],
+                "diff_gap_count": record["diff_gap_count"],
+                "snapshot_gap_count": record["snapshot_gap_count"],
+                "transition_gap_count": record["transition_gap_count"],
+                "payload_hint_count": record["payload_hint_count"],
+                "diff_ready_count": record["diff_ready_count"],
+                "missing_capabilities": sorted(record["missing_capabilities"]),
+                "required_schema_sections": sorted(record["required_schema_sections"]),
+                "minimum_fields": sorted(record["minimum_fields"]),
+                "example_event_ids": record["example_event_ids"],
+                "schema_change_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "execution_prohibited": True,
+            }
+        )
+
+    section_coverage = []
+    schema_sections = schema_report.get("evidence_schema", [])
+    for section in schema_sections:
+        if not isinstance(section, dict):
+            continue
+        section_name = section.get("section")
+        workflows_requiring_section = [
+            item["workflow"]
+            for item in workflow_mappings
+            if section_name in item.get("required_schema_sections", [])
+        ]
+        section_coverage.append(
+            {
+                "section": section_name,
+                "workflow_count": len(workflows_requiring_section),
+                "workflows": workflows_requiring_section,
+                "status": "required_by_current_events"
+                if workflows_requiring_section
+                else "defined_not_currently_required",
+                "schema_change_allowed": False,
+                "capture_allowed": False,
+            }
+        )
+
+    workflows_with_gaps = [
+        item
+        for item in workflow_mappings
+        if item.get("coverage_status") != "schema_covered_for_current_projection"
+    ]
+    return {
+        "mode": "reconstruction_evidence_coverage_mapping_v0.1",
+        "status": schema_report.get("status", "blocked_by_replayability"),
+        "mapping_status": "report_only",
+        "source_reports": {
+            "reconstruction_evidence_schema_report": schema_report.get("mode"),
+            "event_payload_diff_coverage": coverage.get("mode"),
+        },
+        "event_count": coverage.get("event_count", 0),
+        "workflow_count": len(workflow_mappings),
+        "workflow_gap_count": len(workflows_with_gaps),
+        "workflow_mappings": workflow_mappings,
+        "section_coverage": section_coverage,
+        "recommended_next_actions": [
+            "review_workflow_schema_gaps",
+            "prioritize_payload_diff_mapping_by_workflow",
+            "keep_report_only_until_schema_review",
+        ],
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "report_only": True,
+        "would_modify_state": False,
+        "note": "P43 maps current event workflows to reconstruction evidence schema gaps only; it does not mutate schemas, capture payloads, reconstruct state, compact events, or roll back state.",
+    }
+
+
 def event_payload_capture_requirements_from_coverage(coverage: dict) -> List[dict]:
     requirements = []
     target_paths = coverage.get("target_paths", {})
@@ -7008,6 +7174,17 @@ class StateStore:
         )
         report["state_unchanged"] = before_state == self.load()
         return report
+
+    def reconstruction_evidence_coverage_mapping(self) -> dict:
+        before_state = self.load()
+        schema_report = self.reconstruction_evidence_schema_report()
+        coverage = build_event_payload_diff_coverage(self.list_events())
+        mapping = build_reconstruction_evidence_coverage_mapping(
+            schema_report=schema_report,
+            coverage=coverage,
+        )
+        mapping["state_unchanged"] = before_state == self.load()
+        return mapping
 
     def propose_event_payload_capture_policy(
         self,

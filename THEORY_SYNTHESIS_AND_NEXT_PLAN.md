@@ -1382,7 +1382,7 @@ Remaining gaps:
 - replay still cannot rebuild object state from empty seed;
 - no payload or diff capture implementation exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
 P43 Evidence Schema Coverage Mapping
@@ -1393,6 +1393,34 @@ Reason:
 - P42 defines the evidence vocabulary, but the project still needs a read-only mapping from current event families/workflows to required schema sections;
 - this should identify which workflow families need object payloads, object diffs, snapshot links, or seed/pre-event references before any schema mutation is considered;
 - it continues Priority A/B groundwork without implementing capture, reconstruction, compaction, rollback, or adapters.
+
+Implemented result:
+
+- `reconstruction-evidence-coverage-map` CLI reports `reconstruction_evidence_coverage_mapping_v0.1`;
+- the report maps current event workflows to required P42 schema sections and minimum fields;
+- it exposes workflow-level payload gaps, diff gaps, snapshot gaps, transition gaps, target paths, and example event IDs;
+- it summarizes section coverage so the project can see which schema sections are required by current events;
+- it keeps `event_schema_mutation_allowed: false`, `event_payload_capture_executed: false`, `reconstruction_executed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `report_only: true`, and `would_modify_state: false`;
+- scenario evaluation verifies that workflow mapping exists, gap visibility is nonzero, state remains unchanged, and no capture/schema mutation/reconstruction executes.
+
+Remaining gaps:
+
+- workflow gaps are mapped but not prioritized by reconstruction value or risk;
+- no event schema migration exists;
+- no payload or diff capture implementation exists;
+- replay still cannot rebuild object state from empty seed.
+
+Recommended next step:
+
+```text
+P44 Evidence Gap Prioritization Report
+```
+
+Reason:
+
+- P43 maps which workflows have evidence gaps, but the project still needs a read-only way to rank those gaps by reconstruction value, risk, and expected implementation cost;
+- this should help decide which event families deserve schema work first without performing schema mutation or payload capture;
+- it remains inside Event-Sourcing Groundwork and avoids executor, rollback, compaction, adapters, or product surfaces.
 
 Desired acceptance:
 
