@@ -396,6 +396,11 @@ def main() -> None:
         "replay-events",
         help="Check append-only event log consistency against current update_log.",
     )
+    event_report_parser = subparsers.add_parser(
+        "event-report",
+        help="Report replay projection coverage and retention suggestions without mutating state.",
+    )
+    event_report_parser.add_argument("--retention-limit", type=int, default=200)
     rollback_parser = subparsers.add_parser(
         "rollback-preview",
         help="Preview rollback metadata for a snapshot without mutating state.",
@@ -713,6 +718,8 @@ def main() -> None:
         )
     elif args.command == "replay-events":
         print_json(store.replay_events())
+    elif args.command == "event-report":
+        print_json(store.event_projection_report(retention_limit=args.retention_limit))
     elif args.command == "rollback-preview":
         print_json(store.rollback_preview(args.snapshot_id))
     elif args.command == "remote":

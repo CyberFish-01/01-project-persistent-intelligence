@@ -1157,6 +1157,50 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P37 Event Retention / Projection Validation CLI
+
+Goal: expose replay projection health and event retention pressure through a dedicated read-only command before introducing any compaction workflow.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `event-report --retention-limit <n>` reports `mode: "event_projection_report_v0.1"`;
+- the report includes replay status, projection mode, full `projection_validation`, coverage gap paths, and coverage gap count;
+- retention output is explicitly `mode: "report_only"` and reports limit, event count, excess event count, oldest/newest event ids, and suggested action;
+- when event count exceeds the supplied limit, the suggested action is `review_compaction_policy`;
+- `event-report` preserves `would_modify_state: false`, `report_only: true`, and `state_unchanged`;
+- scenario evaluation now verifies event report success, read-only behavior, and retention suggestion metrics.
+
+Remaining gaps:
+
+- event retention still has no review lifecycle or durable decision record;
+- no event compaction, summarization, deletion, or rewrite exists yet;
+- replay projection remains transition-level rather than full object-payload reconstruction;
+- rollback remains preview-only and non-mutating.
+
+Recommended next step:
+
+```text
+P38 Event Retention Review Lifecycle
+```
+
+Reason:
+
+- P37 can detect retention pressure but cannot record a human review decision yet;
+- the next foundation step should create a review-only lifecycle record for retention planning before any destructive compaction is considered;
+- this keeps event governance auditable while preserving the current non-mutating replay and rollback boundary.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P19 Cautionary Procedural Review
 
 Goal: let warning-style failure candidates become active, reviewable caution memory without becoming executable policy.

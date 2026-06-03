@@ -1148,6 +1148,50 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P37 Event Retention / Projection Validation CLI
+
+目标：在引入任何 compaction workflow 之前，用独立只读命令暴露 replay projection health 和 event retention pressure。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `event-report --retention-limit <n>` 会报告 `mode: "event_projection_report_v0.1"`；
+- report 包含 replay status、projection mode、完整 `projection_validation`、coverage gap paths 和 coverage gap count；
+- retention output 明确是 `mode: "report_only"`，并报告 limit、event count、excess event count、oldest/newest event ids 和 suggested action；
+- 当 event count 超过指定 limit 时，suggested action 是 `review_compaction_policy`；
+- `event-report` 保持 `would_modify_state: false`、`report_only: true` 和 `state_unchanged`；
+- scenario evaluation 现在会验证 event report 成功、read-only 行为和 retention suggestion metrics。
+
+剩余缺口：
+
+- event retention 仍没有 review lifecycle 或 durable decision record；
+- 还没有 event compaction、summarization、deletion 或 rewrite；
+- replay projection 仍是 transition-level，还不是完整 object-payload reconstruction；
+- rollback 仍是 preview-only、non-mutating。
+
+建议下一步：
+
+```text
+P38 Event Retention Review Lifecycle
+```
+
+理由：
+
+- P37 可以发现 retention pressure，但还不能记录 human review decision；
+- 下一个地基步骤应先建立 review-only retention planning lifecycle record，再考虑任何 destructive compaction；
+- 这能让 event governance 保持可审计，同时守住当前 replay 和 rollback 的 non-mutating 边界。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P33 Context Attribution Coverage Review Lifecycle
 
 目标：让 durable attribution coverage review records 可以通过可审计 lifecycle path 被 acknowledge、archive 或 quarantine。

@@ -1236,6 +1236,28 @@ def validate_event_replay_projection(state: dict, projection: dict) -> dict:
     }
 
 
+def event_retention_suggestion(events: List[dict], retention_limit: int) -> dict:
+    limit = max(int(retention_limit or 0), 0)
+    event_count = len(events)
+    if limit == 0:
+        excess_count = 0
+    else:
+        excess_count = max(event_count - limit, 0)
+    return {
+        "mode": "report_only",
+        "retention_limit": limit,
+        "event_count": event_count,
+        "exceeds_limit": bool(limit and event_count > limit),
+        "excess_event_count": excess_count,
+        "oldest_event_id": events[0].get("event_id") if events else None,
+        "newest_event_id": events[-1].get("event_id") if events else None,
+        "suggested_action": "review_compaction_policy"
+        if excess_count
+        else "no_retention_action_needed",
+        "would_modify_state": False,
+    }
+
+
 def inferred_memory_provenance(store_name: str, memory: dict) -> List[dict]:
     if store_name == "imported_memory":
         return [
@@ -5752,6 +5774,36 @@ class StateStore:
             "coverage_note": "P35 replay validates event references and rebuilds a target-path transition projection; pre-P12 state updates may be uncovered.",
             "last_event_id": events[-1]["event_id"] if events else None,
         }
+
+    def event_projection_report(self, retention_limit: int = 200) -> dict:
+        events = self.list_events()
+        before_state = self.load()
+        replay = self.replay_events()
+        validation = replay.get("projection_validation", {})
+        checked = validation.get("checked", {})
+        coverage_gaps = {
+            path: record
+            for path, record in checked.items()
+            if int(record.get("coverage_gap_count", 0)) > 0
+        }
+        report = {
+            "status": "passed"
+            if replay.get("status") == "passed"
+            and not validation.get("count_mismatches")
+            else "failed",
+            "mode": "event_projection_report_v0.1",
+            "event_count": len(events),
+            "replay_status": replay.get("status"),
+            "projection_mode": replay.get("projection", {}).get("projection_mode"),
+            "projection_validation": validation,
+            "coverage_gap_paths": sorted(coverage_gaps),
+            "coverage_gap_count": len(coverage_gaps),
+            "retention": event_retention_suggestion(events, retention_limit),
+            "would_modify_state": False,
+            "report_only": True,
+        }
+        report["state_unchanged"] = before_state == self.load()
+        return report
 
     def rollback_preview(self, snapshot_id: str) -> dict:
         state = self.load()

@@ -1608,6 +1608,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_preview = store.load()
     replay = store.replay_events()
     preview = store.rollback_preview(review["snapshot_id"])
+    before_report = store.load()
+    event_report = store.event_projection_report(retention_limit=3)
+    after_report = store.load()
     after_preview = store.load()
     projection = replay.get("projection", {})
     projection_validation = replay.get("projection_validation", {})
@@ -1642,6 +1645,14 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
         in preview.get("affected_state_paths", []),
         "rollback_projection_lists_impact": "memory_stores.identity_memory"
         in projected_impact.get("target_paths", []),
+        "event_report_passed": event_report.get("status") == "passed",
+        "event_report_read_only": event_report.get("would_modify_state") is False
+        and event_report.get("state_unchanged") is True
+        and after_report == before_report,
+        "event_report_retention_suggested": event_report.get("retention", {}).get(
+            "suggested_action"
+        )
+        == "review_compaction_policy",
         "state_unchanged_after_preview": after_preview == before_preview,
     }
     return EvaluationCheck(
@@ -1678,6 +1689,17 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                     "would_remove_event_count",
                     0,
                 ),
+                "event_report_count": 1
+                if event_report.get("status") == "passed"
+                else 0,
+                "event_report_coverage_gap_count": event_report.get(
+                    "coverage_gap_count",
+                    0,
+                ),
+                "event_report_retention_excess_count": event_report.get(
+                    "retention",
+                    {},
+                ).get("excess_event_count", 0),
                 "rollback_preview_count": 1 if preview.get("status") == "preview" else 0,
                 "rollback_mutation_count": 0 if after_preview == before_preview else 1,
             },
@@ -2679,6 +2701,17 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "event_projection_mismatch_count": sum(
             int(item.get("event_projection_mismatch_count", 0))
+            for item in metrics
+        ),
+        "event_report_count": sum(
+            int(item.get("event_report_count", 0)) for item in metrics
+        ),
+        "event_report_coverage_gap_count": sum(
+            int(item.get("event_report_coverage_gap_count", 0))
+            for item in metrics
+        ),
+        "event_report_retention_excess_count": sum(
+            int(item.get("event_report_retention_excess_count", 0))
             for item in metrics
         ),
         "rollback_preview_count": sum(

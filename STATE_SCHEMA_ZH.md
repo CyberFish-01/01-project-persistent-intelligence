@@ -1313,6 +1313,25 @@ P36 replay 支持仍然保持保守，但比最初的 P12 audit check 更强：
 - `rollback-preview <snapshot_id>` 会报告 snapshot metadata、affected event ids、affected state paths 和 projected rollback impact，但不修改 state；
 - `dry_run` preview 不写入 state event。
 
+P37 增加独立的只读 event report：
+
+```bash
+python3 -m one_core.cli event-report --retention-limit 200
+```
+
+这个 report 会把 replay projection validation 和 retention review hints 包在一起，但不会修改 state：
+
+- `mode: "event_projection_report_v0.1"`；
+- `replay_status` 和 `projection_mode`；
+- 来自 replay 的完整 `projection_validation` 对象；
+- `coverage_gap_paths` 和 `coverage_gap_count`，用于报告当前 state 中存在、但 event log 还不能重建的 seed 或 pre-event state；
+- `retention.mode: "report_only"`；
+- `retention.retention_limit`、`event_count`、`exceeds_limit` 和 `excess_event_count`；
+- 当 event count 超过指定 limit 时，`retention.suggested_action: "review_compaction_policy"`；
+- `would_modify_state: false`、`report_only: true` 和 `state_unchanged`。
+
+这不是 event compaction。它不会删除、总结、重写或 rollback events。它只是在真正的 compaction lifecycle 存在之前，让 projection coverage 和未来 retention 压力变得可见。
+
 这个 projection 还不是完整 object-level state rebuild。它是一个可复现的 audit layer，用于在项目尝试 automatic rollback 之前，检查 event log 能否重建 transition references。
 
 Dream artifact 用于保存一次 Dream run 的完整审查材料：

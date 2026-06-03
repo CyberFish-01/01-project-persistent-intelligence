@@ -2415,6 +2415,56 @@ class CoreStateTests(unittest.TestCase):
             )
             self.assertEqual(episode["id"], event["after"])
 
+    def test_event_projection_report_is_read_only_with_retention_suggestion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episodes = [
+                store.record_episode("event report evidence one"),
+                store.record_episode("event report evidence two"),
+                store.record_episode("event report evidence three"),
+            ]
+            proposal = store.propose_identity_update(
+                "01 replay projection reports coverage gaps without mutation.",
+                evidence=[episode["id"] for episode in episodes],
+                proposer="unit_test",
+                confidence=0.82,
+            )
+            store.review_identity_update(
+                proposal["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+            )
+            before = store.load()
+
+            report = store.event_projection_report(retention_limit=3)
+            after = store.load()
+
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(report["mode"], "event_projection_report_v0.1")
+            self.assertEqual(report["event_count"], 5)
+            self.assertEqual(report["replay_status"], "passed")
+            self.assertEqual(
+                report["projection_mode"],
+                "target_path_transition_projection_v0.2",
+            )
+            self.assertIn(
+                "memory_stores.identity_memory",
+                report["coverage_gap_paths"],
+            )
+            self.assertGreaterEqual(report["coverage_gap_count"], 1)
+            self.assertTrue(report["retention"]["exceeds_limit"])
+            self.assertEqual(report["retention"]["excess_event_count"], 2)
+            self.assertEqual(
+                report["retention"]["suggested_action"],
+                "review_compaction_policy",
+            )
+            self.assertFalse(report["retention"]["would_modify_state"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["report_only"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertEqual(after, before)
+
     def test_identity_update_gate_blocks_non_claims_violation(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

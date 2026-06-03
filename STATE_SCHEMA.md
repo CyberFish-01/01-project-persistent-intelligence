@@ -1311,6 +1311,25 @@ P36 replay support is still conservative, but stronger than the original P12 aud
 - `rollback-preview <snapshot_id>` reports snapshot metadata, affected event ids, affected state paths, and projected rollback impact without mutating state,
 - `dry_run` previews do not write state events.
 
+P37 adds a standalone read-only event report:
+
+```bash
+python3 -m one_core.cli event-report --retention-limit 200
+```
+
+The report wraps replay projection validation and retention review hints without changing state:
+
+- `mode: "event_projection_report_v0.1"`;
+- `replay_status` and `projection_mode`;
+- the full `projection_validation` object from replay;
+- `coverage_gap_paths` and `coverage_gap_count` for seed or pre-event state that is visible in current state but not reconstructable from the event log yet;
+- `retention.mode: "report_only"`;
+- `retention.retention_limit`, `event_count`, `exceeds_limit`, and `excess_event_count`;
+- `retention.suggested_action: "review_compaction_policy"` when the event count exceeds the supplied limit;
+- `would_modify_state: false`, `report_only: true`, and `state_unchanged`.
+
+This is not event compaction. It does not delete, summarize, rewrite, or roll back events. It only makes projection coverage and future retention pressure visible before a real compaction lifecycle exists.
+
 This projection is not a full object-level state rebuild yet. It is a reproducible audit layer for checking that the event log can reconstruct transition references before the project attempts automatic rollback.
 
 Dream artifacts keep the full review material for one Dream run:
