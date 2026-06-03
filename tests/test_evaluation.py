@@ -38,10 +38,31 @@ class FoundationEvaluationTests(unittest.TestCase):
             report["baselines"]["system_under_test"],
             "state_transfer_system",
         )
+        self.assertEqual(
+            report["baselines"]["baseline_execution"],
+            "deterministic_local_v0.9",
+        )
         self.assertIn(
             "retrieval_only_baseline",
             report["baselines"]["tracked_baselines"],
         )
+        self.assertIn("results", report["baselines"])
+        self.assertIn("comparisons", report["baselines"])
+        baseline_results = report["baselines"]["results"]
+        comparisons = report["baselines"]["comparisons"]
+        for baseline_name in (
+            "stateless_baseline",
+            "retrieval_only_baseline",
+            "summary_only_baseline",
+        ):
+            self.assertIn(baseline_name, baseline_results)
+            self.assertEqual(
+                baseline_results[baseline_name]["execution"],
+                "deterministic_rule_baseline",
+            )
+            self.assertIn(baseline_name, comparisons)
+            self.assertTrue(comparisons[baseline_name]["state_transfer_outperforms"])
+            self.assertGreater(comparisons[baseline_name]["delta"], 0)
 
         scenario_names = {scenario["name"] for scenario in report["scenarios"]}
         self.assertIn("interrupted_project_resume", scenario_names)

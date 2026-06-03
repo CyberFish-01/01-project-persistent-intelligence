@@ -323,7 +323,7 @@ python3 -m one_core.cli evaluate-scenarios
 - `dream_artifact_package`：检查 Dream run 会生成完整 artifact package，包含 input manifest、provenance、review queue、patch diff、decision log、rollback metadata，并且不直接写 Identity Core 或 active semantic memory。
 - `context_builder_policy_trace`：检查 Context Builder v0.3 policy、持久 activation trace、source attribution budget、来自 identity gate、claim graph、governance proposal-link evidence 和 Dream artifact 的 activation signals，以及 signal attribution records、持久 attribution summaries、review-only attribution coverage reports、coverage lifecycle retention、archived review context suppression，并确认不会创建 executable policy。
 
-v0.8 runner 会报告 stateless、retrieval-only、summary-only baseline metadata，但还不执行这些 baseline。真实 baseline 对比属于后续评估扩展。
+v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、retrieval-only、summary-only systems。它们不调用模型，而是为 task resumption、stale memory control、identity attack resistance、conflict repair auditability 和 selective forgetting 提供可复现的对照层。
 
 当前 metrics summary 包含：
 

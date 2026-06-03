@@ -42,12 +42,11 @@
 
 缺口：
 
-- 没有 stateless / retrieval-only / summary-only baseline；
-- 没有多场景 scenario runner；
-- 没有定量指标输出；
-- multi-user boundary 还没有可执行测试；
-- interrupted project / long gap / context loss 还没有集成测试；
-- lifecycle action 对 retrieval 影响还没有评估。
+- scenario evaluation 已有 deterministic local rule baselines，但还没有独立 baseline agents；
+- quantitative metrics 仍是本地规则派生；
+- replay 仍是 audit-reference validation，还不是完整 state rebuild；
+- rollback preview 仍是 metadata-only；
+- long-gap continuity 仍需要更广的 endurance-style tests。
 
 ### 2.2 Context Builder 还太浅
 
@@ -395,7 +394,7 @@ git diff --check
 剩余缺口：
 
 - 还没有 vector retrieval；
-- 还没有真实 baseline 对比执行；
+- 还没有独立 baseline-agent 对比；
 - 还没有 claim graph dependency model；
 - 还没有可配置 policy 文件；
 - activation trace 目前只随 context response 返回，还没有单独持久化。
@@ -626,7 +625,7 @@ git diff --check
 - signal weights 仍然是 deterministic heuristic；
 - context policy 还没有独立 CLI/API 编辑命令；
 - activation trace 还没有 retention / compaction 审查流程；
-- 还没有真实 baseline 对比验证 context policy 的收益。
+- 还没有独立 baseline-agent 对比验证 context policy 的收益。
 
 ### P16 Procedural Memory Review
 
@@ -1018,6 +1017,48 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P34 Evaluation Baseline Execution
+
+目标：把 scenario baselines 从 metadata-only tracking 推进到 deterministic、可执行的本地对照层。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `evaluate-scenarios` 现在会报告 `baseline_execution: "deterministic_local_v0.9"`；
+- stateless、retrieval-only、summary-only baselines 都会产生 deterministic rule-based scores；
+- baseline dimensions 覆盖 task resumption、stale memory control、identity attack resistance、conflict repair auditability 和 selective forgetting；
+- scenario output 包含 baseline `results` 和 state-transfer `comparisons`；
+- tests 会验证 state transfer 在本地规则对比中优于每个 baseline。
+
+剩余缺口：
+
+- baseline execution 仍是 deterministic rule-based，还没有运行独立 baseline agents；
+- replay 仍在验证 audit references，还不是从 event log rebuild state；
+- rollback 仍是 metadata-only preview。
+
+建议下一步：
+
+```text
+P35 Event Replay Rebuild / Stronger Rollback Preview
+```
+
+理由：
+
+- P34 让 evaluation 更像实验，但 replay 仍是最弱的工程证明；
+- 更强的 replay/rebuild 会支撑 baseline comparison、auditability 和 long-run durability；
+- rollback preview 应更具体解释 affected state paths，同时仍然保持 non-mutating。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P33 Context Attribution Coverage Review Lifecycle
 
 目标：让 durable attribution coverage review records 可以通过可审计 lifecycle path 被 acknowledge、archive 或 quarantine。
@@ -1035,7 +1076,7 @@ git diff --check
 
 剩余缺口：
 
-- scenario baselines 仍然只是 metadata-only；
+- scenario baselines 已经运行 deterministic local rule comparisons，但还没有独立 baseline agents；
 - replay 仍是 audit-reference validation，还不是完整 state rebuild；
 - 还没有 executable policy layer，当前也不应该引入。
 

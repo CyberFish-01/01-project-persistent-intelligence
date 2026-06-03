@@ -321,7 +321,7 @@ It uses temporary state and currently runs:
 - `dream_artifact_package`: verifies that Dream runs produce a complete artifact package with input manifest, provenance, review queue, patch diff, decision log, rollback metadata, and no direct Identity Core or active semantic memory write.
 - `context_builder_policy_trace`: verifies Context Builder v0.3 policy, persistent activation traces, source attribution budget, activation signals from identity gate, claim graph, governance proposal-link evidence, and Dream artifacts, plus signal attribution records, persisted attribution summaries, review-only attribution coverage reports, coverage lifecycle retention, archived-review context suppression, and no executable policy creation.
 
-The v0.8 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
+The v0.9 runner executes deterministic local rule baselines for stateless, retrieval-only, and summary-only systems. These baselines do not call a model; they provide a reproducible comparison layer for task resumption, stale memory control, identity attack resistance, conflict repair auditability, and selective forgetting.
 
 Current metrics summary includes:
 

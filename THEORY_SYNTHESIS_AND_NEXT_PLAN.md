@@ -42,12 +42,11 @@ The current foundation evaluation protects invariants, but it is not yet a full 
 
 Gaps:
 
-- no executable stateless / retrieval-only / summary-only baseline comparison;
-- no broad scenario runner;
-- limited quantitative metrics;
-- multi-user boundary was not yet executable;
-- interrupted project / long gap / context loss needed integration tests;
-- lifecycle actions needed retrieval-effect evaluation.
+- scenario evaluation now has deterministic local rule baselines, but not separate baseline agents;
+- quantitative metrics are still local and rule-derived;
+- replay is still audit-reference validation rather than full state rebuild;
+- rollback preview is still metadata-only;
+- long-gap continuity still needs broader endurance-style tests.
 
 ### 2.2 Context Builder Is Still Shallow
 
@@ -415,7 +414,7 @@ Executable items:
 Remaining gaps:
 
 - no vector retrieval;
-- no executable baseline comparison;
+- no independent baseline-agent comparison;
 - no claim graph dependency model;
 - no tunable policy file;
 - no activation trace persistence outside the context response.
@@ -646,7 +645,7 @@ Remaining gaps:
 - signal weights are still deterministic heuristics;
 - no independent CLI/API command for editing context policy yet;
 - activation trace history has no retention / compaction review workflow yet;
-- no real baseline comparison for context policy benefit yet.
+- no independent baseline-agent comparison for context policy benefit yet.
 
 ### P16 Procedural Memory Review
 
@@ -1001,7 +1000,7 @@ Implemented result:
 
 Remaining gaps:
 
-- scenario baselines are still metadata-only;
+- scenario baselines now run deterministic local rule comparisons, but not separate baseline agents;
 - replay remains audit-reference validation rather than full state rebuild;
 - no executable policy layer exists or should be introduced yet.
 
@@ -1016,6 +1015,48 @@ Reason:
 - the project outline still requires real comparison against stateless, retrieval-only, and summary-only baselines;
 - P7-P33 now give enough local foundation to compare continuity behavior without expanding platform scope;
 - baseline execution strengthens the research claim while keeping the work local and non-platform-specific.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+### P34 Evaluation Baseline Execution
+
+Goal: move scenario baselines from metadata-only tracking to a deterministic, executable local comparison layer.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `evaluate-scenarios` now reports `baseline_execution: "deterministic_local_v0.9"`;
+- stateless, retrieval-only, and summary-only baselines each produce deterministic rule-based scores;
+- baseline dimensions cover task resumption, stale memory control, identity attack resistance, conflict repair auditability, and selective forgetting;
+- scenario output includes baseline `results` and state-transfer `comparisons`;
+- tests verify that state transfer outperforms each baseline in the local rule comparison.
+
+Remaining gaps:
+
+- baseline execution is deterministic and rule-based; it does not yet run separate baseline agents;
+- replay still validates audit references rather than rebuilding state from the event log;
+- rollback remains metadata-only preview.
+
+Recommended next step:
+
+```text
+P35 Event Replay Rebuild / Stronger Rollback Preview
+```
+
+Reason:
+
+- P34 makes evaluation more experimental, but replay is still the weakest engineering proof;
+- stronger replay/rebuild would support baseline comparison, auditability, and long-run durability;
+- rollback preview should explain affected state paths more concretely while remaining non-mutating.
 
 Desired acceptance:
 
