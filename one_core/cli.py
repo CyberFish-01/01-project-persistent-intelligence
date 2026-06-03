@@ -425,6 +425,10 @@ def main() -> None:
         "reconstruction-evidence-gap-priorities",
         help="Rank reconstruction evidence gaps for review without mutating state.",
     )
+    subparsers.add_parser(
+        "reconstruction-evidence-schema-review-checklist",
+        help="Build a review-only schema checklist from prioritized reconstruction evidence gaps.",
+    )
     payload_capture_policy_parser = subparsers.add_parser(
         "propose-event-payload-capture-policy",
         help="Create a review-only event payload capture policy proposal.",
@@ -791,6 +795,8 @@ def main() -> None:
         print_json(store.reconstruction_evidence_coverage_mapping())
     elif args.command == "reconstruction-evidence-gap-priorities":
         print_json(store.reconstruction_evidence_gap_prioritization())
+    elif args.command == "reconstruction-evidence-schema-review-checklist":
+        print_json(store.reconstruction_evidence_schema_review_checklist())
     elif args.command == "propose-event-payload-capture-policy":
         print_json(
             store.propose_event_payload_capture_policy(

@@ -1432,12 +1432,11 @@ Implemented result:
 
 Remaining gaps:
 
-- prioritized gaps are not yet turned into a durable review checklist;
 - no schema approval workflow exists;
 - no event schema migration exists;
 - no payload or diff capture implementation exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
 P45 Reconstruction Evidence Schema Review Checklist
@@ -1448,6 +1447,33 @@ Reason:
 - P44 ranks the gaps, but the project still needs a review-only checklist that turns top-ranked workflow gaps into explicit review questions, acceptance criteria, and required evidence before any schema work begins;
 - this keeps governance ahead of implementation and avoids automatic schema mutation, payload capture, reconstruction execution, rollback, compaction, or adapters;
 - it connects Priority A/B research to Priority C governance without becoming a product surface.
+
+Implemented result:
+
+- `reconstruction-evidence-schema-review-checklist` CLI reports `reconstruction_evidence_schema_review_checklist_v0.1`;
+- each prioritized workflow becomes a review-only checklist item with review questions, acceptance criteria, required evidence, allowed review decisions, and explicit non-execution flags;
+- checklist items preserve P44 `recommended_order`, `recommended_priority`, target paths, missing capabilities, minimum fields, and example event IDs;
+- the report keeps `event_schema_mutation_allowed: false`, `event_payload_capture_executed: false`, `reconstruction_executed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `identity_mutation_allowed: false`, `report_only: true`, and `would_modify_state: false`;
+- scenario evaluation verifies checklist material exists, remains read-only, and does not execute schema mutation, payload capture, reconstruction, identity mutation, rollback, or compaction.
+
+Remaining gaps:
+
+- checklist decisions are not yet recorded as durable review records;
+- no schema approval workflow exists;
+- no event schema migration exists;
+- no payload or diff capture implementation exists.
+
+Recommended next step:
+
+```text
+P46 Reconstruction Schema Checklist Review Record
+```
+
+Reason:
+
+- P45 prepares review material, but the project still needs a durable, non-executable record for human decisions on each checklist item;
+- this should capture reviewer, decision, rationale, requested evidence, and approval scope without performing schema mutation or payload capture;
+- it keeps the project in Event-Sourcing Groundwork while creating a bridge from review checklist to future schema design.
 
 Desired acceptance:
 

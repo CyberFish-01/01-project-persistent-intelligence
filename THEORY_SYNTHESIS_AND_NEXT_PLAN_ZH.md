@@ -1423,12 +1423,11 @@ P44 Evidence Gap Prioritization Report
 
 剩余缺口：
 
-- prioritized gaps 还没有变成 durable review checklist；
 - 还没有 schema approval workflow；
 - 还没有 event schema migration；
 - 还没有 payload 或 diff capture implementation。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P45 Reconstruction Evidence Schema Review Checklist
@@ -1439,6 +1438,33 @@ P45 Reconstruction Evidence Schema Review Checklist
 - P44 已经给 gaps 排序，但项目还需要一个 review-only checklist，把 top-ranked workflow gaps 转成明确 review questions、acceptance criteria 和 required evidence，之后才考虑任何 schema work；
 - 这让治理先于实现，避免 automatic schema mutation、payload capture、reconstruction execution、rollback、compaction 或 adapters；
 - 它把 Priority A/B research 接到 Priority C governance，但不变成 product surface。
+
+已实现结果：
+
+- `reconstruction-evidence-schema-review-checklist` CLI 会输出 `reconstruction_evidence_schema_review_checklist_v0.1`；
+- 每个 prioritized workflow 会变成 review-only checklist item，包含 review questions、acceptance criteria、required evidence、allowed review decisions 和明确 non-execution flags；
+- checklist items 会保留 P44 的 `recommended_order`、`recommended_priority`、target paths、missing capabilities、minimum fields 和 example event IDs；
+- report 保持 `event_schema_mutation_allowed: false`、`event_payload_capture_executed: false`、`reconstruction_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`identity_mutation_allowed: false`、`report_only: true` 和 `would_modify_state: false`；
+- scenario evaluation 会验证 checklist material 存在、保持 read-only，并且不执行 schema mutation、payload capture、reconstruction、identity mutation、rollback 或 compaction。
+
+剩余缺口：
+
+- checklist decisions 还没有作为 durable review records 记录；
+- 还没有 schema approval workflow；
+- 还没有 event schema migration；
+- 还没有 payload 或 diff capture implementation。
+
+建议下一步：
+
+```text
+P46 Reconstruction Schema Checklist Review Record
+```
+
+理由：
+
+- P45 准备了 review material，但项目仍然需要一个 durable、non-executable record 来记录人类对每个 checklist item 的决定；
+- 这一步应该记录 reviewer、decision、rationale、requested evidence 和 approval scope，但不执行 schema mutation 或 payload capture；
+- 它让项目继续停留在 Event-Sourcing Groundwork，同时把 review checklist 接到未来 schema design。
 
 期望验收：
 

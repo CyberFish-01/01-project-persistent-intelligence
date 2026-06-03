@@ -2375,6 +2375,248 @@ def build_reconstruction_evidence_gap_prioritization(mapping: dict) -> dict:
     }
 
 
+def reconstruction_review_questions_for_capabilities(
+    missing_capabilities: List[str],
+) -> List[str]:
+    questions = [
+        "Which event envelope fields are required to explain actor, source, time, and provenance for this workflow?",
+        "Which target state paths must be reconstructable from this workflow before schema work can proceed?",
+    ]
+    if "transition_reference" in missing_capabilities:
+        questions.append(
+            "Which transition references are required to link this event to the exact state path it changes?"
+        )
+    if "object_payload" in missing_capabilities:
+        questions.append(
+            "What minimum object payload is required to reconstruct the changed object without reading current state?"
+        )
+    if "object_diff" in missing_capabilities:
+        questions.append(
+            "What before and after diff evidence is required to prove the transition deterministically?"
+        )
+    if "rollback_snapshot" in missing_capabilities:
+        questions.append(
+            "Which snapshot or checkpoint reference is required before rollback or reconstruction can be considered?"
+        )
+    questions.append(
+        "Which privacy, sensitivity, or identity-protection constraints limit what evidence may be captured later?"
+    )
+    return questions
+
+
+def reconstruction_required_evidence_for_checklist_item(
+    required_schema_sections: List[str],
+    minimum_fields: List[str],
+    missing_capabilities: List[str],
+) -> List[dict]:
+    section_fields = {
+        "event_envelope": [
+            "event_id",
+            "event_type",
+            "created_at",
+            "actor",
+            "source",
+        ],
+        "transition_payload": [
+            "operation",
+            "target_path",
+            "before_ref",
+            "after_ref",
+        ],
+        "object_evidence": [
+            "object_id",
+            "object_type",
+            "payload_ref",
+            "diff_ref",
+        ],
+        "reconstruction_metadata": [
+            "schema_version",
+            "replay_order",
+            "snapshot_ref",
+            "validation_status",
+        ],
+    }
+    required = []
+    for section in required_schema_sections:
+        fields = section_fields.get(section, [])
+        required.append(
+            {
+                "section": section,
+                "required_fields": fields,
+                "minimum_fields": [
+                    field for field in minimum_fields if field in set(fields)
+                ],
+                "review_required": True,
+                "capture_executed": False,
+            }
+        )
+    for capability in missing_capabilities:
+        required.append(
+            {
+                "capability": capability,
+                "evidence_status": "missing",
+                "review_required": True,
+                "capture_executed": False,
+            }
+        )
+    return required
+
+
+def reconstruction_acceptance_criteria_for_checklist_item(
+    missing_capabilities: List[str],
+) -> List[dict]:
+    criteria = [
+        {
+            "criterion": "workflow_scope_defined",
+            "question": "Is the event workflow and target state path scope explicit?",
+            "required": True,
+            "satisfied": False,
+        },
+        {
+            "criterion": "minimum_evidence_fields_named",
+            "question": "Are minimum evidence fields named before any schema mutation?",
+            "required": True,
+            "satisfied": False,
+        },
+        {
+            "criterion": "replayability_impact_explained",
+            "question": "Does the review explain how the fields improve future reconstruction?",
+            "required": True,
+            "satisfied": False,
+        },
+        {
+            "criterion": "identity_and_privacy_constraints_checked",
+            "question": "Does the review protect Identity Core and sensitive payloads?",
+            "required": True,
+            "satisfied": False,
+        },
+    ]
+    if "object_payload" in missing_capabilities:
+        criteria.append(
+            {
+                "criterion": "object_payload_need_justified",
+                "question": "Is object payload capture justified as necessary rather than convenient?",
+                "required": True,
+                "satisfied": False,
+            }
+        )
+    if "object_diff" in missing_capabilities:
+        criteria.append(
+            {
+                "criterion": "object_diff_need_justified",
+                "question": "Is before/after diff capture justified for deterministic replay?",
+                "required": True,
+                "satisfied": False,
+            }
+        )
+    if "rollback_snapshot" in missing_capabilities:
+        criteria.append(
+            {
+                "criterion": "snapshot_reference_need_justified",
+                "question": "Is snapshot linkage justified without enabling automatic rollback?",
+                "required": True,
+                "satisfied": False,
+            }
+        )
+    return criteria
+
+
+def build_reconstruction_evidence_schema_review_checklist(
+    prioritization: dict,
+) -> dict:
+    checklist_items = []
+    for prioritized in prioritization.get("prioritized_workflows", []):
+        if not isinstance(prioritized, dict):
+            continue
+        workflow = prioritized.get("workflow")
+        missing_capabilities = list(prioritized.get("missing_capabilities", []))
+        required_schema_sections = list(
+            prioritized.get("required_schema_sections", [])
+        )
+        minimum_fields = list(prioritized.get("minimum_fields", []))
+        priority = prioritized.get("priority", {})
+        recommended_order = prioritized.get("recommended_order")
+        checklist_items.append(
+            {
+                "checklist_id": f"schema_review_{recommended_order}_{workflow}",
+                "workflow": workflow,
+                "recommended_order": recommended_order,
+                "recommended_priority": priority.get("recommended_priority"),
+                "priority_score": priority.get("priority_score", 0.0),
+                "coverage_status": prioritized.get("coverage_status"),
+                "target_paths": prioritized.get("target_paths", {}),
+                "missing_capabilities": missing_capabilities,
+                "required_schema_sections": required_schema_sections,
+                "minimum_fields": minimum_fields,
+                "example_event_ids": prioritized.get("example_event_ids", []),
+                "review_questions": reconstruction_review_questions_for_capabilities(
+                    missing_capabilities
+                ),
+                "acceptance_criteria": reconstruction_acceptance_criteria_for_checklist_item(
+                    missing_capabilities
+                ),
+                "required_evidence": reconstruction_required_evidence_for_checklist_item(
+                    required_schema_sections,
+                    minimum_fields,
+                    missing_capabilities,
+                ),
+                "allowed_review_decisions": [
+                    "approve_for_schema_design",
+                    "request_more_evidence",
+                    "reject_as_low_value",
+                    "defer",
+                ],
+                "review_status": "needs_human_review",
+                "review_only": True,
+                "execution_prohibited": True,
+                "executable_policy": False,
+                "schema_change_allowed": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "identity_mutation_allowed": False,
+            }
+        )
+
+    return {
+        "mode": "reconstruction_evidence_schema_review_checklist_v0.1",
+        "status": prioritization.get("status", "blocked_by_replayability"),
+        "checklist_status": "review_only",
+        "source_reports": {
+            "reconstruction_evidence_gap_prioritization": prioritization.get("mode"),
+        },
+        "event_count": prioritization.get("event_count", 0),
+        "workflow_count": prioritization.get("workflow_count", 0),
+        "workflow_gap_count": prioritization.get("workflow_gap_count", 0),
+        "checklist_item_count": len(checklist_items),
+        "high_priority_checklist_item_count": sum(
+            1
+            for item in checklist_items
+            if item.get("recommended_priority") == "high"
+        ),
+        "top_priority_workflow": checklist_items[0].get("workflow")
+        if checklist_items
+        else None,
+        "checklist_items": checklist_items,
+        "recommended_next_actions": [
+            "review_checklist_before_schema_design",
+            "record_human_review_decisions_separately",
+            "keep_report_only_until_schema_approval",
+        ],
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "identity_mutation_allowed": False,
+        "report_only": True,
+        "would_modify_state": False,
+        "note": "P45 converts prioritized reconstruction evidence gaps into review-only checklist items; it does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity.",
+    }
+
+
 def event_payload_capture_requirements_from_coverage(coverage: dict) -> List[dict]:
     requirements = []
     target_paths = coverage.get("target_paths", {})
@@ -7346,6 +7588,15 @@ class StateStore:
         report = build_reconstruction_evidence_gap_prioritization(mapping=mapping)
         report["state_unchanged"] = before_state == self.load()
         return report
+
+    def reconstruction_evidence_schema_review_checklist(self) -> dict:
+        before_state = self.load()
+        prioritization = self.reconstruction_evidence_gap_prioritization()
+        checklist = build_reconstruction_evidence_schema_review_checklist(
+            prioritization=prioritization
+        )
+        checklist["state_unchanged"] = before_state == self.load()
+        return checklist
 
     def propose_event_payload_capture_policy(
         self,

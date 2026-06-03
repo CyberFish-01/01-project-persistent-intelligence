@@ -1627,6 +1627,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_reconstruction_priorities = store.load()
     reconstruction_priorities = store.reconstruction_evidence_gap_prioritization()
     after_reconstruction_priorities = store.load()
+    before_reconstruction_checklist = store.load()
+    reconstruction_checklist = store.reconstruction_evidence_schema_review_checklist()
+    after_reconstruction_checklist = store.load()
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -1889,6 +1892,46 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
         and reconstruction_priorities.get("event_schema_mutation_allowed") is False
         and reconstruction_priorities.get("event_compaction_executed") is False
         and reconstruction_priorities.get("automatic_rollback_executed") is False,
+        "reconstruction_evidence_schema_checklist_created": reconstruction_checklist.get(
+            "mode"
+        )
+        == "reconstruction_evidence_schema_review_checklist_v0.1",
+        "reconstruction_evidence_schema_checklist_read_only": reconstruction_checklist.get(
+            "would_modify_state"
+        )
+        is False
+        and reconstruction_checklist.get("report_only") is True
+        and reconstruction_checklist.get("state_unchanged") is True
+        and after_reconstruction_checklist == before_reconstruction_checklist,
+        "reconstruction_evidence_schema_checklist_has_items": bool(
+            reconstruction_checklist.get("checklist_items")
+        )
+        and reconstruction_checklist.get("checklist_item_count", 0) > 0,
+        "reconstruction_evidence_schema_checklist_review_material": all(
+            bool(item.get("review_questions"))
+            and bool(item.get("acceptance_criteria"))
+            and bool(item.get("required_evidence"))
+            and item.get("review_only") is True
+            for item in reconstruction_checklist.get("checklist_items", [])
+            if isinstance(item, dict)
+        ),
+        "reconstruction_evidence_schema_checklist_non_executing": reconstruction_checklist.get(
+            "reconstruction_executed"
+        )
+        is False
+        and reconstruction_checklist.get("event_payload_capture_executed") is False
+        and reconstruction_checklist.get("event_schema_mutation_allowed") is False
+        and reconstruction_checklist.get("event_compaction_executed") is False
+        and reconstruction_checklist.get("automatic_rollback_executed") is False
+        and reconstruction_checklist.get("identity_mutation_allowed") is False
+        and all(
+            item.get("execution_prohibited") is True
+            and item.get("executable_policy") is False
+            and item.get("schema_change_allowed") is False
+            and item.get("identity_mutation_allowed") is False
+            for item in reconstruction_checklist.get("checklist_items", [])
+            if isinstance(item, dict)
+        ),
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
         "event_payload_capture_policy_approved": capture_policy_review.get("status")
@@ -2223,6 +2266,48 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 else 0,
                 "reconstruction_evidence_priority_state_mutation_count": 0
                 if after_reconstruction_priorities == before_reconstruction_priorities
+                else 1,
+                "reconstruction_evidence_schema_checklist_count": 1
+                if reconstruction_checklist.get("mode")
+                == "reconstruction_evidence_schema_review_checklist_v0.1"
+                else 0,
+                "reconstruction_evidence_schema_checklist_item_count": reconstruction_checklist.get(
+                    "checklist_item_count",
+                    0,
+                ),
+                "reconstruction_evidence_schema_checklist_high_priority_count": reconstruction_checklist.get(
+                    "high_priority_checklist_item_count",
+                    0,
+                ),
+                "reconstruction_evidence_schema_checklist_question_count": sum(
+                    len(item.get("review_questions", []))
+                    for item in reconstruction_checklist.get("checklist_items", [])
+                    if isinstance(item, dict)
+                ),
+                "reconstruction_evidence_schema_checklist_acceptance_count": sum(
+                    len(item.get("acceptance_criteria", []))
+                    for item in reconstruction_checklist.get("checklist_items", [])
+                    if isinstance(item, dict)
+                ),
+                "reconstruction_evidence_schema_checklist_required_evidence_count": sum(
+                    len(item.get("required_evidence", []))
+                    for item in reconstruction_checklist.get("checklist_items", [])
+                    if isinstance(item, dict)
+                ),
+                "reconstruction_evidence_schema_checklist_schema_mutation_count": 1
+                if reconstruction_checklist.get("event_schema_mutation_allowed") is True
+                else 0,
+                "reconstruction_evidence_schema_checklist_capture_execution_count": 1
+                if reconstruction_checklist.get("event_payload_capture_executed") is True
+                else 0,
+                "reconstruction_evidence_schema_checklist_reconstruction_execution_count": 1
+                if reconstruction_checklist.get("reconstruction_executed") is True
+                else 0,
+                "reconstruction_evidence_schema_checklist_identity_mutation_count": 1
+                if reconstruction_checklist.get("identity_mutation_allowed") is True
+                else 0,
+                "reconstruction_evidence_schema_checklist_state_mutation_count": 0
+                if after_reconstruction_checklist == before_reconstruction_checklist
                 else 1,
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
@@ -3493,6 +3578,90 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "reconstruction_evidence_priority_state_mutation_count": sum(
             int(item.get("reconstruction_evidence_priority_state_mutation_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_count": sum(
+            int(item.get("reconstruction_evidence_schema_checklist_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_item_count": sum(
+            int(item.get("reconstruction_evidence_schema_checklist_item_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_high_priority_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_high_priority_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_question_count": sum(
+            int(item.get("reconstruction_evidence_schema_checklist_question_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_acceptance_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_acceptance_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_required_evidence_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_required_evidence_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_schema_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_schema_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_capture_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_capture_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_reconstruction_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_reconstruction_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_identity_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_identity_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_checklist_state_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_schema_checklist_state_mutation_count",
+                    0,
+                )
+            )
             for item in metrics
         ),
         "event_payload_capture_policy_proposal_count": sum(

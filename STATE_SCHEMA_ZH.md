@@ -1649,6 +1649,50 @@ reconstruction_evidence_gap_prioritization:
 
 P44 不会选择、批准或执行 schema change。它只为之后的人工治理显式化 review order。
 
+P45 增加 review-only schema review checklist：
+
+```bash
+python3 -m one_core.cli reconstruction-evidence-schema-review-checklist
+```
+
+这个 report 会在任何 schema work 开始之前，把 prioritized workflow gaps 转成 review questions、acceptance criteria 和 required evidence。
+
+```yaml
+reconstruction_evidence_schema_review_checklist:
+  mode: "reconstruction_evidence_schema_review_checklist_v0.1"
+  checklist_status: "review_only"
+  checklist_items:
+    - checklist_id: "schema_review_1_record_episode"
+      workflow: "record_episode"
+      recommended_order: 1
+      review_status: "needs_human_review"
+      review_questions: []
+      acceptance_criteria:
+        - criterion: "workflow_scope_defined"
+          required: true
+          satisfied: false
+      required_evidence: []
+      allowed_review_decisions:
+        - "approve_for_schema_design"
+        - "request_more_evidence"
+        - "reject_as_low_value"
+        - "defer"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  identity_mutation_allowed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P45 不会批准 schema changes、capture payloads、reconstruct state、compact events、rollback state 或 mutate identity。它只为之后的 schema design 准备人工审查材料。
+
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
 ```yaml

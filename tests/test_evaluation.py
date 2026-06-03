@@ -306,6 +306,49 @@ class FoundationEvaluationTests(unittest.TestCase):
             metrics["reconstruction_evidence_priority_state_mutation_count"],
             0,
         )
+        self.assertEqual(metrics["reconstruction_evidence_schema_checklist_count"], 1)
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_schema_checklist_item_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_schema_checklist_question_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_schema_checklist_acceptance_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics[
+                "reconstruction_evidence_schema_checklist_required_evidence_count"
+            ],
+            1,
+        )
+        self.assertEqual(
+            metrics["reconstruction_evidence_schema_checklist_schema_mutation_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_evidence_schema_checklist_capture_execution_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_evidence_schema_checklist_reconstruction_execution_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_evidence_schema_checklist_identity_mutation_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_evidence_schema_checklist_state_mutation_count"],
+            0,
+        )
         self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,

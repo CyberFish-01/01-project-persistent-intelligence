@@ -1647,6 +1647,50 @@ reconstruction_evidence_gap_prioritization:
 
 P44 does not select, approve, or execute a schema change. It only makes review order explicit for later human governance.
 
+P45 adds a review-only schema review checklist:
+
+```bash
+python3 -m one_core.cli reconstruction-evidence-schema-review-checklist
+```
+
+This report converts prioritized workflow gaps into review questions, acceptance criteria, and required evidence before any schema work begins.
+
+```yaml
+reconstruction_evidence_schema_review_checklist:
+  mode: "reconstruction_evidence_schema_review_checklist_v0.1"
+  checklist_status: "review_only"
+  checklist_items:
+    - checklist_id: "schema_review_1_record_episode"
+      workflow: "record_episode"
+      recommended_order: 1
+      review_status: "needs_human_review"
+      review_questions: []
+      acceptance_criteria:
+        - criterion: "workflow_scope_defined"
+          required: true
+          satisfied: false
+      required_evidence: []
+      allowed_review_decisions:
+        - "approve_for_schema_design"
+        - "request_more_evidence"
+        - "reject_as_low_value"
+        - "defer"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  identity_mutation_allowed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P45 does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity. It only prepares human review material for future schema design.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml

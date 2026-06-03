@@ -2986,6 +2986,76 @@ class CoreStateTests(unittest.TestCase):
                 before_event_ids,
             )
 
+    def test_reconstruction_evidence_schema_review_checklist_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P45 schema review checklist episode")
+            store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create retention workflow gap for P45 checklist.",
+            )
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.reconstruction_evidence_schema_review_checklist()
+            after = store.load()
+
+            items = report["checklist_items"]
+
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(
+                report["mode"],
+                "reconstruction_evidence_schema_review_checklist_v0.1",
+            )
+            self.assertEqual(report["checklist_status"], "review_only")
+            self.assertTrue(items)
+            self.assertEqual(report["checklist_item_count"], len(items))
+            self.assertEqual(report["top_priority_workflow"], items[0]["workflow"])
+            self.assertEqual(items[0]["recommended_order"], 1)
+            for item in items:
+                self.assertTrue(item["checklist_id"].startswith("schema_review_"))
+                self.assertTrue(item["review_questions"])
+                self.assertTrue(item["acceptance_criteria"])
+                self.assertTrue(item["required_evidence"])
+                self.assertEqual(item["review_status"], "needs_human_review")
+                self.assertIn(
+                    "approve_for_schema_design",
+                    item["allowed_review_decisions"],
+                )
+                self.assertTrue(item["review_only"])
+                self.assertTrue(item["execution_prohibited"])
+                self.assertFalse(item["executable_policy"])
+                self.assertFalse(item["schema_change_allowed"])
+                self.assertFalse(item["event_schema_mutation_allowed"])
+                self.assertFalse(item["event_payload_capture_executed"])
+                self.assertFalse(item["reconstruction_executed"])
+                self.assertFalse(item["event_compaction_executed"])
+                self.assertFalse(item["automatic_rollback_executed"])
+                self.assertFalse(item["identity_mutation_allowed"])
+                self.assertTrue(
+                    all(
+                        criterion["required"] is True
+                        and criterion["satisfied"] is False
+                        for criterion in item["acceptance_criteria"]
+                    )
+                )
+            self.assertTrue(report["report_only"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["reconstruction_executed"])
+            self.assertFalse(report["event_payload_capture_executed"])
+            self.assertFalse(report["event_schema_mutation_allowed"])
+            self.assertFalse(report["event_compaction_executed"])
+            self.assertFalse(report["automatic_rollback_executed"])
+            self.assertFalse(report["identity_mutation_allowed"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))
