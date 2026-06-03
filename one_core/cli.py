@@ -401,6 +401,25 @@ def main() -> None:
         help="Report replay projection coverage and retention suggestions without mutating state.",
     )
     event_report_parser.add_argument("--retention-limit", type=int, default=200)
+    event_retention_review_parser = subparsers.add_parser(
+        "review-event-retention",
+        help="Record a review-only event retention planning record.",
+    )
+    event_retention_review_parser.add_argument("--retention-limit", type=int, default=200)
+    event_retention_review_parser.add_argument("--reviewer", default="manual_review")
+    event_retention_review_parser.add_argument("--note", default="")
+    event_retention_lifecycle_parser = subparsers.add_parser(
+        "event-retention-lifecycle",
+        help="Apply a review-only lifecycle action to an event retention review.",
+    )
+    event_retention_lifecycle_parser.add_argument("review_id")
+    event_retention_lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["acknowledge", "archive", "quarantine"],
+    )
+    event_retention_lifecycle_parser.add_argument("--reviewer", default="manual_review")
+    event_retention_lifecycle_parser.add_argument("--decision-note", default="")
     rollback_parser = subparsers.add_parser(
         "rollback-preview",
         help="Preview rollback metadata for a snapshot without mutating state.",
@@ -720,6 +739,23 @@ def main() -> None:
         print_json(store.replay_events())
     elif args.command == "event-report":
         print_json(store.event_projection_report(retention_limit=args.retention_limit))
+    elif args.command == "review-event-retention":
+        print_json(
+            store.review_event_retention(
+                reviewer=args.reviewer,
+                retention_limit=args.retention_limit,
+                note=args.note,
+            )
+        )
+    elif args.command == "event-retention-lifecycle":
+        print_json(
+            store.apply_event_retention_lifecycle_action(
+                review_id=args.review_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
     elif args.command == "rollback-preview":
         print_json(store.rollback_preview(args.snapshot_id))
     elif args.command == "remote":

@@ -198,6 +198,16 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["event_report_count"], 1)
         self.assertGreaterEqual(metrics["event_report_coverage_gap_count"], 1)
         self.assertGreaterEqual(metrics["event_report_retention_excess_count"], 1)
+        self.assertGreaterEqual(metrics["event_retention_review_count"], 1)
+        self.assertGreaterEqual(
+            metrics["event_retention_lifecycle_decision_count"],
+            1,
+        )
+        self.assertGreaterEqual(metrics["event_retention_archived_count"], 1)
+        self.assertEqual(metrics["event_retention_active_context_count"], 0)
+        self.assertEqual(metrics["event_retention_compaction_count"], 0)
+        self.assertEqual(metrics["event_retention_events_modified_count"], 0)
+        self.assertEqual(metrics["event_retention_replay_after_count"], 1)
         self.assertEqual(metrics["rollback_preview_count"], 1)
         self.assertGreaterEqual(metrics["rollback_affected_path_count"], 1)
         self.assertGreaterEqual(metrics["rollback_projected_impact_count"], 1)

@@ -61,6 +61,11 @@ CONTEXT_ATTRIBUTION_COVERAGE_LIFECYCLE_ACTIONS = {
     "archive",
     "quarantine",
 }
+EVENT_RETENTION_LIFECYCLE_ACTIONS = {
+    "acknowledge",
+    "archive",
+    "quarantine",
+}
 TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 TOOL_SAFETY_POLICY_LINK_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
@@ -226,6 +231,8 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "tool_safety_policy_link_lifecycle_decisions": [],
         "tool_safety_policy_decisions": [],
         "tool_safety_policy_lifecycle_decisions": [],
+        "event_retention_reviews": [],
+        "event_retention_lifecycle_decisions": [],
         "failure_reflections": [],
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
@@ -620,6 +627,8 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "tool_safety_policy_link_lifecycle_decisions",
         "tool_safety_policy_decisions",
         "tool_safety_policy_lifecycle_decisions",
+        "event_retention_reviews",
+        "event_retention_lifecycle_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -754,6 +763,8 @@ def task_action_evidence(trace: dict) -> List[str]:
             "cautionary_lifecycle_decision_id",
             "reflection_id",
             "reflection_verification_id",
+            "event_retention_review_id",
+            "event_retention_lifecycle_decision_id",
         ):
             value = event.get(key)
             if value:
@@ -980,6 +991,30 @@ def scalar_state_ref(value: object) -> Optional[str]:
 
 
 def target_identity_for(update: dict) -> Optional[str]:
+    operation = str(update.get("operation") or "").strip().lower()
+    target_path = str(update.get("target_path") or "")
+    event_retention_lifecycle = (
+        target_path == "task_hub.event_retention_reviews"
+        and operation in {
+            "acknowledge_event_retention_review",
+            "archive_event_retention_review",
+            "quarantine_event_retention_review",
+        }
+    )
+    if (
+        operation_class_for(update.get("operation")) == "lifecycle_transition"
+        or event_retention_lifecycle
+    ):
+        evidence_identity = next(
+            (
+                str(item)
+                for item in update.get("evidence", [])
+                if isinstance(item, (str, int, float, bool)) and str(item)
+            ),
+            None,
+        )
+        if evidence_identity:
+            return evidence_identity
     return (
         scalar_state_ref(update.get("after"))
         or scalar_state_ref(update.get("before"))
@@ -1255,6 +1290,131 @@ def event_retention_suggestion(events: List[dict], retention_limit: int) -> dict
         if excess_count
         else "no_retention_action_needed",
         "would_modify_state": False,
+    }
+
+
+def build_event_retention_review(
+    report: dict,
+    reviewer: str,
+    timestamp: str,
+    note: str = "",
+) -> dict:
+    retention = report.get("retention") if isinstance(report.get("retention"), dict) else {}
+    status = "needs_review" if retention.get("exceeds_limit") else "passed"
+    review_signals = []
+    if retention.get("exceeds_limit"):
+        review_signals.append(
+            {
+                "signal": "event_retention_limit_exceeded",
+                "severity": "medium",
+                "event_count": retention.get("event_count", 0),
+                "retention_limit": retention.get("retention_limit", 0),
+                "excess_event_count": retention.get("excess_event_count", 0),
+                "suggested_action": retention.get("suggested_action"),
+                "review_only": True,
+            }
+        )
+    if report.get("coverage_gap_count", 0):
+        review_signals.append(
+            {
+                "signal": "event_projection_coverage_gap",
+                "severity": "low",
+                "coverage_gap_count": report.get("coverage_gap_count", 0),
+                "coverage_gap_paths": report.get("coverage_gap_paths", []),
+                "review_only": True,
+            }
+        )
+    evidence = [
+        item
+        for item in (
+            retention.get("oldest_event_id"),
+            retention.get("newest_event_id"),
+        )
+        if item
+    ]
+    return {
+        "review_id": new_id("event_retention_review"),
+        "timestamp": timestamp,
+        "reviewer": reviewer,
+        "status": status,
+        "mode": "event_retention_review_v0.1",
+        "report_mode": report.get("mode"),
+        "projection_mode": report.get("projection_mode"),
+        "replay_status": report.get("replay_status"),
+        "event_count": report.get("event_count", 0),
+        "coverage_gap_count": report.get("coverage_gap_count", 0),
+        "coverage_gap_paths": report.get("coverage_gap_paths", []),
+        "retention": retention,
+        "review_signals": review_signals,
+        "note": note,
+        "evidence": evidence,
+        "recommended_action": retention.get("suggested_action"),
+        "review_only": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "event_compaction_executed": False,
+        "events_modified": False,
+        "lifecycle": {
+            "status": "active",
+            "created_at": timestamp,
+            "last_reviewed_at": None,
+            "review_status": status,
+        },
+        "review_history": [],
+        "lifecycle_history": [],
+        "update_history": [
+            {
+                "timestamp": timestamp,
+                "actor": reviewer,
+                "operation": "review_event_retention",
+                "evidence": evidence,
+            }
+        ],
+        "confidence": 0.85 if report.get("status") == "passed" else 0.5,
+        "rollback": {"reversible": True},
+    }
+
+
+def build_event_retention_lifecycle_decision(
+    review: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: str,
+    timestamp: str,
+    before_status: str,
+) -> dict:
+    retention = review.get("retention") if isinstance(review.get("retention"), dict) else {}
+    return {
+        "decision_id": new_id("event_retention_lifecycle_decision"),
+        "timestamp": timestamp,
+        "review_id": review.get("review_id"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "review_status_before": before_status,
+        "snapshot_id": snapshot_id,
+        "evidence": review.get("evidence", []),
+        "event_count": review.get("event_count", 0),
+        "retention_limit": retention.get("retention_limit", 0),
+        "excess_event_count": retention.get("excess_event_count", 0),
+        "coverage_gap_count": review.get("coverage_gap_count", 0),
+        "recommended_action": review.get("recommended_action"),
+        "review_only": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "event_compaction_executed": False,
+        "events_modified": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
     }
 
 
@@ -5805,6 +5965,357 @@ class StateStore:
         report["state_unchanged"] = before_state == self.load()
         return report
 
+    def review_event_retention(
+        self,
+        reviewer: str = "manual_review",
+        retention_limit: int = 200,
+        note: str = "",
+    ) -> dict:
+        state = self.load()
+        now = utc_now()
+        before_event_ids = [event.get("event_id") for event in self.list_events()]
+        report = self.event_projection_report(retention_limit=retention_limit)
+        after_report_event_ids = [event.get("event_id") for event in self.list_events()]
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(now, state.get("working_state", {})),
+        )
+        review = build_event_retention_review(
+            report=report,
+            reviewer=reviewer,
+            timestamp=now,
+            note=note,
+        )
+        review["events_unchanged_by_report"] = before_event_ids == after_report_event_ids
+        task_hub.setdefault("event_retention_reviews", []).append(review)
+        task_hub["event_retention_reviews"] = task_hub["event_retention_reviews"][-20:]
+        state.setdefault("update_log", []).append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.event_retention_reviews",
+                "operation": "review_event_retention",
+                "before": None,
+                "after": review["review_id"],
+                "evidence": review["evidence"],
+                "gate": "low",
+                "confidence": review["confidence"],
+                "review_only": True,
+                "execution_prohibited": True,
+                "executable_policy": False,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+                "event_compaction_executed": False,
+                "events_modified": False,
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action="review_event_retention",
+            target="task_hub.event_retention_reviews",
+            outcome=review["status"],
+            evidence=review["evidence"],
+            metadata={
+                "review_id": review["review_id"],
+                "event_count": review["event_count"],
+                "retention_limit": review["retention"].get("retention_limit"),
+                "excess_event_count": review["retention"].get("excess_event_count"),
+                "review_only": True,
+                "event_compaction_executed": False,
+                "events_modified": False,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="event_retention_review",
+            nodes=[
+                {
+                    "id": "event_report",
+                    "type": "EventProjectionReport",
+                    "event_count": review["event_count"],
+                    "coverage_gap_count": review["coverage_gap_count"],
+                },
+                {
+                    "id": "retention_review",
+                    "type": "ReviewSignal",
+                    "review_id": review["review_id"],
+                    "status": review["status"],
+                    "review_only": True,
+                },
+            ],
+            edges=[
+                {
+                    "from": "event_report",
+                    "to": "retention_review",
+                    "type": "retention_review",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": "review",
+                    "target": "task_hub.event_retention_reviews",
+                    "event_retention_review_id": review["review_id"],
+                    "event_compaction_executed": False,
+                    "events_modified": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "review_event_retention",
+                    "reviewer": reviewer,
+                    "review": review,
+                }
+            ],
+            summary="Reviewed event projection coverage and retention pressure.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        after_save_event_ids = [event.get("event_id") for event in self.list_events()]
+        return {
+            "status": review["status"],
+            "review_id": review["review_id"],
+            "event_count": review["event_count"],
+            "retention": review["retention"],
+            "review_signals": review["review_signals"],
+            "event_compaction_executed": False,
+            "events_modified": before_event_ids != after_save_event_ids[: len(before_event_ids)],
+        }
+
+    def apply_event_retention_lifecycle_action(
+        self,
+        review_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in EVENT_RETENTION_LIFECYCLE_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_event_retention_lifecycle_action",
+                "action": action,
+            }
+
+        before_event_ids = [event.get("event_id") for event in self.list_events()]
+        state = self.load()
+        now = utc_now()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(now, state.get("working_state", {})),
+        )
+        review = next(
+            (
+                item
+                for item in task_hub.setdefault("event_retention_reviews", [])
+                if isinstance(item, dict) and item.get("review_id") == review_id
+            ),
+            None,
+        )
+        if review is None:
+            return {
+                "status": "not_found",
+                "error": "event_retention_review_not_found",
+                "review_id": review_id,
+            }
+
+        lifecycle = review.get("lifecycle") if isinstance(review.get("lifecycle"), dict) else {}
+        before_status = lifecycle.get("status") or "active"
+        if before_status in {"archived", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "review_id": review_id,
+                "lifecycle_status": before_status,
+            }
+        if before_status == "acknowledged" and normalized_action == "acknowledge":
+            return {
+                "status": "already_reviewed",
+                "review_id": review_id,
+                "lifecycle_status": before_status,
+            }
+
+        target_status = {
+            "acknowledge": "acknowledged",
+            "archive": "archived",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        evidence = [review_id] + [
+            item
+            for item in review.get("evidence", [])
+            if isinstance(item, str) and item
+        ]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_event_retention_review",
+            target_path="task_hub.event_retention_reviews",
+            evidence=evidence,
+            metadata={
+                "event_retention_lifecycle_decision_id": None,
+                "review_id": review_id,
+                "review_status": review.get("status"),
+                "event_compaction_executed": False,
+                "events_modified": False,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+        )
+        decision = build_event_retention_lifecycle_decision(
+            review=review,
+            action=normalized_action,
+            result=target_status,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+            before_status=before_status,
+        )
+        snapshot["metadata"]["event_retention_lifecycle_decision_id"] = decision[
+            "decision_id"
+        ]
+
+        review["lifecycle"] = {
+            **lifecycle,
+            "status": target_status,
+            "last_reviewed_at": now,
+            "review_status": target_status,
+            "lifecycle_decision_id": decision["decision_id"],
+        }
+        review["last_lifecycle_decision_id"] = decision["decision_id"]
+        review["reviewed_at"] = now
+        review["reviewer"] = reviewer
+        review["decision_note"] = decision_note
+        review["review_only"] = True
+        review["execution_prohibited"] = True
+        review["executable_policy"] = False
+        review["executable_policy_created"] = False
+        review["identity_mutation_allowed"] = False
+        review["event_compaction_executed"] = False
+        review["events_modified"] = False
+        if normalized_action == "quarantine":
+            review["quarantine_reason"] = (
+                decision_note or "event_retention_lifecycle_quarantine"
+            )
+        review.setdefault("lifecycle_history", []).append(decision)
+        review.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": reviewer,
+                "operation": f"{normalized_action}_event_retention_review",
+                "evidence": evidence,
+                "event_retention_lifecycle_decision_id": decision["decision_id"],
+            }
+        )
+        task_hub.setdefault("event_retention_lifecycle_decisions", []).append(decision)
+
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.event_retention_reviews",
+                "operation": f"{normalized_action}_event_retention_review",
+                "before": before_status,
+                "after": target_status,
+                "evidence": evidence,
+                "gate": "medium",
+                "confidence": review.get("confidence", 0.5),
+                "event_retention_lifecycle_decision_id": decision["decision_id"],
+                "review_only": True,
+                "execution_prohibited": True,
+                "executable_policy": False,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+                "event_compaction_executed": False,
+                "events_modified": False,
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_event_retention_review",
+            target="task_hub.event_retention_reviews",
+            outcome=target_status,
+            evidence=evidence,
+            metadata={
+                "event_retention_lifecycle_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "review_id": review_id,
+                "decision_note": decision_note,
+                "review_only": True,
+                "event_compaction_executed": False,
+                "events_modified": False,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="event_retention_lifecycle",
+            nodes=[
+                {
+                    "id": "event_retention_review",
+                    "type": "ReviewSignal",
+                    "review_id": review_id,
+                    "review_status": review.get("status"),
+                    "review_only": True,
+                },
+                {
+                    "id": "lifecycle_review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[
+                {
+                    "from": "event_retention_review",
+                    "to": "lifecycle_review",
+                    "type": "feedback",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.event_retention_reviews",
+                    "event_retention_review_id": review_id,
+                    "event_retention_lifecycle_decision_id": decision[
+                        "decision_id"
+                    ],
+                    "event_compaction_executed": False,
+                    "events_modified": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_event_retention_review",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "event_retention_lifecycle_decision": decision,
+                }
+            ],
+            summary=f"Applied lifecycle action {normalized_action} to event retention review {review_id}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        after_event_ids = [event.get("event_id") for event in self.list_events()]
+        return {
+            "status": target_status,
+            "review_id": review_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "event_retention_lifecycle_decision_id": decision["decision_id"],
+            "event_compaction_executed": False,
+            "events_modified": before_event_ids != after_event_ids[: len(before_event_ids)],
+        }
+
     def rollback_preview(self, snapshot_id: str) -> dict:
         state = self.load()
         snapshot = next(
@@ -6376,6 +6887,17 @@ class StateStore:
             ).get("status", "active")
             in {"active", "acknowledged"}
         ][-8:]
+        active_event_retention_reviews = [
+            review
+            for review in task_hub.get("event_retention_reviews", [])
+            if isinstance(review, dict)
+            and (
+                review.get("lifecycle", {})
+                if isinstance(review.get("lifecycle"), dict)
+                else {}
+            ).get("status", "active")
+            in {"active", "acknowledged"}
+        ][-8:]
         reflection_log = [
             reflection
             for reflection in task_hub.get("reflection_log", [])
@@ -6460,6 +6982,7 @@ class StateStore:
                 "reflection_guidance_queue": reflection_guidance_queue,
                 "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
                 "tool_safety_policy_links": active_tool_safety_policy_links,
+                "event_retention_reviews": active_event_retention_reviews,
                 "cautionary_procedural_memory": active_cautionary_memory,
                 "procedural_memory": active_procedural_memory,
             },
@@ -6476,6 +6999,7 @@ class StateStore:
             "reflection_guidance_queue": reflection_guidance_queue,
             "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
             "tool_safety_policy_links": active_tool_safety_policy_links,
+            "event_retention_reviews": active_event_retention_reviews,
             "cautionary_procedural_memory": active_cautionary_memory,
             "procedural_memory": active_procedural_memory,
             "identity_update_gate": {

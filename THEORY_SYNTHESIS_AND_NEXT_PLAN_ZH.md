@@ -1192,6 +1192,51 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P38 Event Retention Review Lifecycle
+
+目标：在任何 event compaction 机制存在之前，先把 event retention pressure 变成 durable、review-only governance record。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `review-event-retention --retention-limit <n>` 会记录 `task_hub.event_retention_reviews`；
+- `event-retention-lifecycle <review_id>` 可以 acknowledge、archive 或 quarantine retention reviews；
+- active 和 acknowledged retention reviews 可以进入 context package，archived/quarantined reviews 会被压制；
+- lifecycle decisions 会存入 `task_hub.event_retention_lifecycle_decisions`；
+- records 保持 `review_only: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- P38 明确记录 `event_compaction_executed: false` 和 `events_modified: false`；
+- scenario evaluation 会验证 retention review creation、lifecycle archival、context suppression、retention governance 后 replay 仍通过、没有 compaction，以及没有 rewrite 旧 events。
+
+剩余缺口：
+
+- event compaction 仍然刻意不存在；
+- retention reviews 还不能选择具体 compaction windows 或 payload preservation rules；
+- replay projection 仍是 transition-level，还不能重建完整 object payload；
+- rollback 仍是 preview-only、non-mutating。
+
+建议下一步：
+
+```text
+P39 Event Payload / Diff Coverage Preview
+```
+
+理由：
+
+- 在设计 event compaction 之前，项目需要先知道哪些 state transitions 有足够 payload/diff detail 可以被安全保留；
+- 这一步仍应保持 report-only，不删除、总结或重写 events；
+- 它会为未来 retention policy 打地基，同时守住 append-only ledger 边界。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P33 Context Attribution Coverage Review Lifecycle
 
 目标：让 durable attribution coverage review records 可以通过可审计 lifecycle path 被 acknowledge、archive 或 quarantine。

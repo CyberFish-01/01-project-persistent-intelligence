@@ -1335,6 +1335,8 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "tool_safety_policy_link_lifecycle_decisions",
         "tool_safety_policy_decisions",
         "tool_safety_policy_lifecycle_decisions",
+        "event_retention_reviews",
+        "event_retention_lifecycle_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -1797,6 +1799,121 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                 issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy lifecycle decision must not allow Identity Core mutation."))
             if "proposal_score" in decision:
                 issues.extend(validate_tool_safety_policy_score(path + ".proposal_score", decision.get("proposal_score")))
+    raw_event_retention_reviews = task_hub.get("event_retention_reviews", [])
+    event_retention_reviews = (
+        raw_event_retention_reviews
+        if isinstance(raw_event_retention_reviews, list)
+        else []
+    )
+    event_retention_review_ids = {
+        item.get("review_id")
+        for item in event_retention_reviews
+        if isinstance(item, dict) and item.get("review_id")
+    }
+    if isinstance(raw_event_retention_reviews, list):
+        for index, review in enumerate(event_retention_reviews):
+            path = f"task_hub.event_retention_reviews[{index}]"
+            if not isinstance(review, dict):
+                issues.append(ValidationIssue(path, "Event retention review must be an object."))
+                continue
+            for key in (
+                "review_id",
+                "timestamp",
+                "reviewer",
+                "status",
+                "mode",
+                "event_count",
+                "retention",
+                "review_only",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+                "event_compaction_executed",
+                "events_modified",
+                "lifecycle",
+                "update_history",
+            ):
+                if key not in review:
+                    issues.append(ValidationIssue(path + f".{key}", "Event retention review key is missing."))
+            if review.get("status") not in {"passed", "needs_review"}:
+                issues.append(ValidationIssue(path + ".status", "Event retention review status is invalid."))
+            if review.get("mode") != "event_retention_review_v0.1":
+                issues.append(ValidationIssue(path + ".mode", "Event retention review mode is invalid."))
+            if review.get("review_only") is not True:
+                issues.append(ValidationIssue(path + ".review_only", "Event retention review must remain review-only."))
+            if review.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Event retention review must prohibit execution."))
+            if review.get("executable_policy") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy", "Event retention review must not be executable policy."))
+            if review.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Event retention review must not create executable policy."))
+            if review.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Event retention review must not allow Identity Core mutation."))
+            if review.get("event_compaction_executed") is not False:
+                issues.append(ValidationIssue(path + ".event_compaction_executed", "Event retention review must not execute compaction."))
+            if review.get("events_modified") is not False:
+                issues.append(ValidationIssue(path + ".events_modified", "Event retention review must not modify events."))
+            lifecycle = review.get("lifecycle") if isinstance(review.get("lifecycle"), dict) else {}
+            lifecycle_status = lifecycle.get("status", "active")
+            if lifecycle_status not in {"active", "acknowledged", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".lifecycle.status", "Event retention review lifecycle status is invalid."))
+            if lifecycle_status in {"acknowledged", "archived", "quarantined"}:
+                decision_id = lifecycle.get("lifecycle_decision_id")
+                if not decision_id:
+                    issues.append(ValidationIssue(path + ".lifecycle.lifecycle_decision_id", "Event retention review lifecycle must reference a decision."))
+                elif decision_id != review.get("last_lifecycle_decision_id"):
+                    issues.append(ValidationIssue(path + ".last_lifecycle_decision_id", "Event retention review last lifecycle decision id must match lifecycle."))
+                history = review.get("lifecycle_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(ValidationIssue(path + ".lifecycle_history", "Event retention review lifecycle action requires history."))
+                elif history[-1].get("decision_id") != review.get("last_lifecycle_decision_id"):
+                    issues.append(ValidationIssue(path + ".lifecycle_history", "Event retention review lifecycle history must reference latest decision."))
+    event_retention_lifecycle_decisions = task_hub.get("event_retention_lifecycle_decisions", [])
+    if isinstance(event_retention_lifecycle_decisions, list):
+        for index, decision in enumerate(event_retention_lifecycle_decisions):
+            path = f"task_hub.event_retention_lifecycle_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Event retention lifecycle decision must be an object."))
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "review_id",
+                "reviewer",
+                "action",
+                "result",
+                "snapshot_id",
+                "review_only",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+                "event_compaction_executed",
+                "events_modified",
+            ):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Event retention lifecycle decision key is missing."))
+            if decision.get("review_id") not in event_retention_review_ids:
+                issues.append(ValidationIssue(path + ".review_id", "Event retention lifecycle decision must reference an existing review."))
+            if decision.get("action") not in {"acknowledge", "archive", "quarantine"}:
+                issues.append(ValidationIssue(path + ".action", "Event retention lifecycle action is invalid."))
+            if decision.get("result") not in {"acknowledged", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".result", "Event retention lifecycle result is invalid."))
+            if decision.get("review_only") is not True:
+                issues.append(ValidationIssue(path + ".review_only", "Event retention lifecycle decision must remain review-only."))
+            if decision.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Event retention lifecycle decision must prohibit execution."))
+            if decision.get("executable_policy") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy", "Event retention lifecycle decision must not be executable policy."))
+            if decision.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Event retention lifecycle decision must not create executable policy."))
+            if decision.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Event retention lifecycle decision must not allow Identity Core mutation."))
+            if decision.get("event_compaction_executed") is not False:
+                issues.append(ValidationIssue(path + ".event_compaction_executed", "Event retention lifecycle decision must not execute compaction."))
+            if decision.get("events_modified") is not False:
+                issues.append(ValidationIssue(path + ".events_modified", "Event retention lifecycle decision must not modify events."))
     cautions = task_hub.get("cautionary_procedural_candidates", [])
     if isinstance(cautions, list):
         for index, caution in enumerate(cautions):

@@ -317,7 +317,7 @@ It uses temporary state and currently runs:
 - `reflection_log_verification`: verifies `record-reflection`, `verify-reflection`, reflection log persistence, verification history, context exposure, policy-adjacent advisory guidance from verified reflections, durable guidance queue review, non-executable tool/safety policy proposal review, proposal evidence/scope/staleness scoring, review-only proposal relationship links, proposal-link claim-graph evidence bridging, proposal link lifecycle retention, proposal lifecycle retention, archived proposal/link context suppression, replay, no executable policy creation, and no Identity Core mutation.
 - `procedural_lifecycle_retention`: verifies `procedural-lifecycle`, procedural lifecycle decision metadata, replay, and suppression of archived procedural memory from context.
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
-- `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, event replay builds a target-path transition projection with operation class, target identity, and report-only coverage validation, `event-report` exposes read-only projection coverage and retention suggestions, and rollback preview reports affected state paths and projected impact without mutating state.
+- `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, event replay builds a target-path transition projection with operation class, target identity, and report-only coverage validation, `event-report` exposes read-only projection coverage and retention suggestions, event retention review lifecycle records planning decisions without compaction or event rewrite, and rollback preview reports affected state paths and projected impact without mutating state.
 - `dream_artifact_package`: verifies that Dream runs produce a complete artifact package with input manifest, provenance, review queue, patch diff, decision log, rollback metadata, and no direct Identity Core or active semantic memory write.
 - `context_builder_policy_trace`: verifies Context Builder v0.3 policy, persistent activation traces, source attribution budget, activation signals from identity gate, claim graph, governance proposal-link evidence, and Dream artifacts, plus signal attribution records, persisted attribution summaries, review-only attribution coverage reports, coverage lifecycle retention, archived-review context suppression, and no executable policy creation.
 
@@ -348,6 +348,13 @@ Current metrics summary includes:
 - event report count,
 - event report coverage gap count,
 - event report retention excess count,
+- event retention review count,
+- event retention lifecycle decision count,
+- event retention archived count,
+- event retention active context count,
+- event retention compaction count,
+- event retention events modified count,
+- event retention replay after count,
 - rollback preview count,
 - rollback affected path count,
 - rollback projected impact count,

@@ -1332,6 +1332,55 @@ python3 -m one_core.cli event-report --retention-limit 200
 
 这不是 event compaction。它不会删除、总结、重写或 rollback events。它只是在真正的 compaction lifecycle 存在之前，让 projection coverage 和未来 retention 压力变得可见。
 
+P38 增加 review-only event retention lifecycle：
+
+```bash
+python3 -m one_core.cli review-event-retention --retention-limit 200
+python3 -m one_core.cli event-retention-lifecycle <review_id> --action acknowledge
+python3 -m one_core.cli event-retention-lifecycle <review_id> --action archive
+python3 -m one_core.cli event-retention-lifecycle <review_id> --action quarantine
+```
+
+`review-event-retention` 会在 `task_hub.event_retention_reviews` 里记录 durable planning record。`event-retention-lifecycle` 会在 `task_hub.event_retention_lifecycle_decisions` 里记录 lifecycle decisions。Active 和 acknowledged retention reviews 可以进入 context package；archived 和 quarantined reviews 会被压制。
+
+```yaml
+task_hub:
+  event_retention_reviews:
+    - review_id: "event_retention_review_0001"
+      mode: "event_retention_review_v0.1"
+      status: "needs_review"
+      event_count: 240
+      retention:
+        mode: "report_only"
+        retention_limit: 200
+        exceeds_limit: true
+        excess_event_count: 40
+        suggested_action: "review_compaction_policy"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_compaction_executed: false
+      events_modified: false
+      lifecycle:
+        status: "active"
+  event_retention_lifecycle_decisions:
+    - decision_id: "event_retention_lifecycle_decision_0001"
+      review_id: "event_retention_review_0001"
+      action: "archive"
+      result: "archived"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_compaction_executed: false
+      events_modified: false
+```
+
+P38 仍然不会 compact、delete、summarize 或 rewrite `events.jsonl`。它只是在设计任何 destructive compaction 机制之前，先记录 human-reviewable retention governance。
+
 这个 projection 还不是完整 object-level state rebuild。它是一个可复现的 audit layer，用于在项目尝试 automatic rollback 之前，检查 event log 能否重建 transition references。
 
 Dream artifact 用于保存一次 Dream run 的完整审查材料：

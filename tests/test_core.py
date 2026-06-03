@@ -2465,6 +2465,117 @@ class CoreStateTests(unittest.TestCase):
             self.assertTrue(report["state_unchanged"])
             self.assertEqual(after, before)
 
+    def test_event_retention_review_lifecycle_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("event retention review evidence one")
+            store.record_episode("event retention review evidence two")
+            store.record_episode("event retention review evidence three")
+            before_identity = store.load()["identity_core"]
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            created = store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Review retention pressure without compaction.",
+            )
+            state = store.load()
+            review = state["task_hub"]["event_retention_reviews"][-1]
+            after_review_event_ids = [event["event_id"] for event in store.list_events()]
+
+            self.assertEqual(created["status"], "needs_review")
+            self.assertEqual(review["review_id"], created["review_id"])
+            self.assertEqual(review["mode"], "event_retention_review_v0.1")
+            self.assertTrue(review["retention"]["exceeds_limit"])
+            self.assertEqual(review["retention"]["suggested_action"], "review_compaction_policy")
+            self.assertTrue(review["review_only"])
+            self.assertTrue(review["execution_prohibited"])
+            self.assertFalse(review["executable_policy"])
+            self.assertFalse(review["executable_policy_created"])
+            self.assertFalse(review["identity_mutation_allowed"])
+            self.assertFalse(review["event_compaction_executed"])
+            self.assertFalse(review["events_modified"])
+            self.assertEqual(after_review_event_ids[: len(before_event_ids)], before_event_ids)
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(store.list_traces()[-1]["workflow"], "event_retention_review")
+
+            acknowledged = store.apply_event_retention_lifecycle_action(
+                review_id=created["review_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Retention pressure acknowledged for planning.",
+            )
+            state = store.load()
+            review = state["task_hub"]["event_retention_reviews"][-1]
+            decision = state["task_hub"]["event_retention_lifecycle_decisions"][-1]
+            package = store.build_context_package()
+            after_ack_event_ids = [event["event_id"] for event in store.list_events()]
+
+            self.assertEqual(acknowledged["status"], "acknowledged")
+            self.assertEqual(review["lifecycle"]["status"], "acknowledged")
+            self.assertEqual(
+                review["last_lifecycle_decision_id"],
+                acknowledged["event_retention_lifecycle_decision_id"],
+            )
+            self.assertEqual(decision["result"], "acknowledged")
+            self.assertTrue(decision["review_only"])
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertFalse(decision["event_compaction_executed"])
+            self.assertFalse(decision["events_modified"])
+            self.assertIn(
+                created["review_id"],
+                {
+                    item["review_id"]
+                    for item in package["event_retention_reviews"]
+                },
+            )
+            self.assertEqual(after_ack_event_ids[: len(before_event_ids)], before_event_ids)
+            self.assertEqual(state["identity_core"], before_identity)
+
+            archived = store.apply_event_retention_lifecycle_action(
+                review_id=created["review_id"],
+                action="archive",
+                reviewer="unit_test",
+                decision_note="Archive reviewed retention pressure record.",
+            )
+            state = store.load()
+            review = state["task_hub"]["event_retention_reviews"][-1]
+            package = store.build_context_package()
+            replay_report = store.event_projection_report(retention_limit=1)
+            lifecycle_events = [
+                event
+                for event in store.list_events()
+                if event.get("workflow") == "event_retention_lifecycle"
+            ]
+            after_archive_event_ids = [event["event_id"] for event in store.list_events()]
+
+            self.assertEqual(archived["status"], "archived")
+            self.assertEqual(review["lifecycle"]["status"], "archived")
+            self.assertEqual(store.list_traces()[-1]["workflow"], "event_retention_lifecycle")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertEqual(lifecycle_events[-1]["target_identity"], created["review_id"])
+            self.assertNotEqual(lifecycle_events[-1]["target_identity"], "archived")
+            self.assertEqual(replay_report["projection_validation"]["count_mismatches"], [])
+            self.assertEqual(
+                replay_report["projection_validation"]["checked"][
+                    "task_hub.event_retention_reviews"
+                ]["projected_target_identity_count"],
+                1,
+            )
+            self.assertNotIn(
+                created["review_id"],
+                {
+                    item["review_id"]
+                    for item in package["event_retention_reviews"]
+                },
+            )
+            self.assertEqual(after_archive_event_ids[: len(before_event_ids)], before_event_ids)
+            self.assertEqual(state["identity_core"], before_identity)
+
     def test_identity_update_gate_blocks_non_claims_violation(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

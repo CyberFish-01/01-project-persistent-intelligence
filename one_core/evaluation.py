@@ -1608,10 +1608,38 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_preview = store.load()
     replay = store.replay_events()
     preview = store.rollback_preview(review["snapshot_id"])
+    after_preview = store.load()
     before_report = store.load()
     event_report = store.event_projection_report(retention_limit=3)
     after_report = store.load()
-    after_preview = store.load()
+    before_retention_event_ids = [
+        event.get("event_id") for event in store.list_events()
+    ]
+    retention_review = store.review_event_retention(
+        reviewer="scenario_eval",
+        retention_limit=3,
+        note="Review event retention pressure without compaction.",
+    )
+    retention_lifecycle = store.apply_event_retention_lifecycle_action(
+        review_id=retention_review["review_id"],
+        action="archive",
+        reviewer="scenario_eval",
+        decision_note="Archive reviewed event retention planning record.",
+    )
+    after_retention_event_ids = [
+        event.get("event_id") for event in store.list_events()
+    ]
+    retention_state = store.load()
+    retention_reviews = retention_state.get("task_hub", {}).get(
+        "event_retention_reviews",
+        [],
+    )
+    retention_lifecycle_decisions = retention_state.get("task_hub", {}).get(
+        "event_retention_lifecycle_decisions",
+        [],
+    )
+    retention_context = store.build_context_package()
+    replay_after_retention = store.replay_events()
     projection = replay.get("projection", {})
     projection_validation = replay.get("projection_validation", {})
     projected_identity_memory = projection.get("target_paths", {}).get(
@@ -1630,7 +1658,7 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
         "replay_passed": replay["status"] == "passed",
         "event_coverage_nonzero": replay["event_coverage_count"] > 0,
         "replay_projection_built": projection.get("rebuildable_event_count", 0)
-        == len(store.list_events()),
+        == replay.get("event_count"),
         "replay_projection_has_identity_memory": projected_identity_memory.get(
             "latest_after"
         )
@@ -1653,6 +1681,41 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
             "suggested_action"
         )
         == "review_compaction_policy",
+        "event_retention_review_created": retention_review.get("status")
+        == "needs_review",
+        "event_retention_lifecycle_archived": retention_lifecycle.get("status")
+        == "archived",
+        "event_retention_decision_recorded": bool(retention_lifecycle_decisions)
+        and retention_lifecycle_decisions[-1].get("decision_id")
+        == retention_lifecycle.get("event_retention_lifecycle_decision_id"),
+        "event_retention_non_executable": all(
+            item.get("review_only") is True
+            and item.get("execution_prohibited") is True
+            and item.get("executable_policy") is False
+            and item.get("executable_policy_created") is False
+            and item.get("identity_mutation_allowed") is False
+            for item in retention_reviews + retention_lifecycle_decisions
+            if isinstance(item, dict)
+        ),
+        "event_retention_no_compaction": retention_review.get(
+            "event_compaction_executed"
+        )
+        is False
+        and retention_lifecycle.get("event_compaction_executed") is False,
+        "event_retention_event_prefix_preserved": after_retention_event_ids[
+            : len(before_retention_event_ids)
+        ]
+        == before_retention_event_ids,
+        "event_retention_context_suppressed_after_archive": retention_review[
+            "review_id"
+        ]
+        not in {
+            item.get("review_id")
+            for item in retention_context.get("event_retention_reviews", [])
+            if isinstance(item, dict)
+        },
+        "event_retention_replay_still_passed": replay_after_retention.get("status")
+        == "passed",
         "state_unchanged_after_preview": after_preview == before_preview,
     }
     return EvaluationCheck(
@@ -1700,6 +1763,32 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                     "retention",
                     {},
                 ).get("excess_event_count", 0),
+                "event_retention_review_count": len(retention_reviews),
+                "event_retention_lifecycle_decision_count": len(
+                    retention_lifecycle_decisions
+                ),
+                "event_retention_archived_count": sum(
+                    1
+                    for item in retention_reviews
+                    if isinstance(item, dict)
+                    and item.get("lifecycle", {}).get("status") == "archived"
+                ),
+                "event_retention_active_context_count": len(
+                    retention_context.get("event_retention_reviews", [])
+                ),
+                "event_retention_compaction_count": sum(
+                    1
+                    for item in retention_reviews + retention_lifecycle_decisions
+                    if isinstance(item, dict)
+                    and item.get("event_compaction_executed") is True
+                ),
+                "event_retention_events_modified_count": int(
+                    after_retention_event_ids[: len(before_retention_event_ids)]
+                    != before_retention_event_ids
+                ),
+                "event_retention_replay_after_count": 1
+                if replay_after_retention.get("status") == "passed"
+                else 0,
                 "rollback_preview_count": 1 if preview.get("status") == "preview" else 0,
                 "rollback_mutation_count": 0 if after_preview == before_preview else 1,
             },
@@ -2712,6 +2801,31 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "event_report_retention_excess_count": sum(
             int(item.get("event_report_retention_excess_count", 0))
+            for item in metrics
+        ),
+        "event_retention_review_count": sum(
+            int(item.get("event_retention_review_count", 0)) for item in metrics
+        ),
+        "event_retention_lifecycle_decision_count": sum(
+            int(item.get("event_retention_lifecycle_decision_count", 0))
+            for item in metrics
+        ),
+        "event_retention_archived_count": sum(
+            int(item.get("event_retention_archived_count", 0)) for item in metrics
+        ),
+        "event_retention_active_context_count": sum(
+            int(item.get("event_retention_active_context_count", 0))
+            for item in metrics
+        ),
+        "event_retention_compaction_count": sum(
+            int(item.get("event_retention_compaction_count", 0)) for item in metrics
+        ),
+        "event_retention_events_modified_count": sum(
+            int(item.get("event_retention_events_modified_count", 0))
+            for item in metrics
+        ),
+        "event_retention_replay_after_count": sum(
+            int(item.get("event_retention_replay_after_count", 0))
             for item in metrics
         ),
         "rollback_preview_count": sum(

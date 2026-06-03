@@ -246,6 +246,99 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
 
+    def test_task_hub_validates_event_retention_review_flags(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["task_hub"]["event_retention_reviews"].append(
+                {
+                    "review_id": "event_retention_review_bad",
+                    "timestamp": state["created_at"],
+                    "reviewer": "unit_test",
+                    "status": "needs_review",
+                    "mode": "event_retention_review_v0.1",
+                    "event_count": 10,
+                    "retention": {},
+                    "review_only": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "event_compaction_executed": True,
+                    "events_modified": True,
+                    "lifecycle": {"status": "archived"},
+                    "update_history": [],
+                }
+            )
+            state["task_hub"]["event_retention_lifecycle_decisions"].append(
+                {
+                    "decision_id": "event_retention_lifecycle_decision_bad",
+                    "timestamp": state["created_at"],
+                    "review_id": "event_retention_review_missing",
+                    "reviewer": "unit_test",
+                    "action": "execute",
+                    "result": "compacted",
+                    "snapshot_id": "snapshot_missing",
+                    "review_only": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "event_compaction_executed": True,
+                    "events_modified": True,
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn("task_hub.event_retention_reviews[0].review_only", paths)
+            self.assertIn(
+                "task_hub.event_retention_reviews[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_reviews[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_reviews[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_reviews[0].identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_reviews[0].event_compaction_executed",
+                paths,
+            )
+            self.assertIn("task_hub.event_retention_reviews[0].events_modified", paths)
+            self.assertIn(
+                "task_hub.event_retention_reviews[0].lifecycle.lifecycle_decision_id",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_lifecycle_decisions[0].review_id",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_lifecycle_decisions[0].action",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_lifecycle_decisions[0].result",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_lifecycle_decisions[0].event_compaction_executed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_retention_lifecycle_decisions[0].events_modified",
+                paths,
+            )
+
     def test_adapter_event_index_must_point_to_episode(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

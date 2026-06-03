@@ -1330,6 +1330,55 @@ The report wraps replay projection validation and retention review hints without
 
 This is not event compaction. It does not delete, summarize, rewrite, or roll back events. It only makes projection coverage and future retention pressure visible before a real compaction lifecycle exists.
 
+P38 adds a review-only event retention lifecycle:
+
+```bash
+python3 -m one_core.cli review-event-retention --retention-limit 200
+python3 -m one_core.cli event-retention-lifecycle <review_id> --action acknowledge
+python3 -m one_core.cli event-retention-lifecycle <review_id> --action archive
+python3 -m one_core.cli event-retention-lifecycle <review_id> --action quarantine
+```
+
+`review-event-retention` records a durable planning record in `task_hub.event_retention_reviews`. `event-retention-lifecycle` records lifecycle decisions in `task_hub.event_retention_lifecycle_decisions`. Active and acknowledged retention reviews may enter the context package; archived and quarantined reviews are suppressed.
+
+```yaml
+task_hub:
+  event_retention_reviews:
+    - review_id: "event_retention_review_0001"
+      mode: "event_retention_review_v0.1"
+      status: "needs_review"
+      event_count: 240
+      retention:
+        mode: "report_only"
+        retention_limit: 200
+        exceeds_limit: true
+        excess_event_count: 40
+        suggested_action: "review_compaction_policy"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_compaction_executed: false
+      events_modified: false
+      lifecycle:
+        status: "active"
+  event_retention_lifecycle_decisions:
+    - decision_id: "event_retention_lifecycle_decision_0001"
+      review_id: "event_retention_review_0001"
+      action: "archive"
+      result: "archived"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_compaction_executed: false
+      events_modified: false
+```
+
+P38 still does not compact, delete, summarize, or rewrite `events.jsonl`. It records human-reviewable retention governance before any destructive compaction mechanism is designed.
+
 This projection is not a full object-level state rebuild yet. It is a reproducible audit layer for checking that the event log can reconstruct transition references before the project attempts automatic rollback.
 
 Dream artifacts keep the full review material for one Dream run:

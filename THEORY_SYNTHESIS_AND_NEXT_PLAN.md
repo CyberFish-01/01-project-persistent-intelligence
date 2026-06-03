@@ -1201,6 +1201,51 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P38 Event Retention Review Lifecycle
+
+Goal: let event retention pressure become a durable, review-only governance record before any event compaction mechanism exists.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `review-event-retention --retention-limit <n>` records `task_hub.event_retention_reviews`;
+- `event-retention-lifecycle <review_id>` can acknowledge, archive, or quarantine retention reviews;
+- active and acknowledged retention reviews can enter the context package, while archived/quarantined reviews are suppressed;
+- lifecycle decisions are stored in `task_hub.event_retention_lifecycle_decisions`;
+- records preserve `review_only: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- P38 explicitly records `event_compaction_executed: false` and `events_modified: false`;
+- scenario evaluation verifies retention review creation, lifecycle archival, context suppression, replay after retention governance, no compaction, and no old event rewrite.
+
+Remaining gaps:
+
+- event compaction still intentionally does not exist;
+- retention reviews do not yet choose concrete compaction windows or payload preservation rules;
+- replay projection is still transition-level and does not reconstruct full object payloads;
+- rollback remains preview-only and non-mutating.
+
+Recommended next step:
+
+```text
+P39 Event Payload / Diff Coverage Preview
+```
+
+Reason:
+
+- before designing event compaction, the project needs to know which state transitions have enough payload/diff detail to be preserved safely;
+- this should remain report-only and should not delete, summarize, or rewrite events;
+- it prepares the ground for future retention policy without breaking the append-only ledger boundary.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P19 Cautionary Procedural Review
 
 Goal: let warning-style failure candidates become active, reviewable caution memory without becoming executable policy.
