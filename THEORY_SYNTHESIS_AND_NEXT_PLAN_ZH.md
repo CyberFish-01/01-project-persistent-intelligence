@@ -1345,7 +1345,7 @@ P41 Event Replayability Assessment
 - approved capture guidance 仍然缺少单独的 lifecycle path；
 - 本地 JSON state writes 在 file lock 或 transactional store 出现前，仍然只适合串行操作。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P42 Reconstruction Evidence Schema Research
@@ -1356,6 +1356,34 @@ P42 Reconstruction Evidence Schema Research
 - P41 现在能说明缺什么，但项目还需要设计 object payload、object diff、transition payload 和 reconstruction metadata 的最小证据 schema；
 - 在任何 event schema mutation 或 payload capture 实现之前，这一步仍应保持 research/report-only；
 - 它直接服务 Priority A 和 Priority B，不增加聊天、平台或 companion 外层能力。
+
+已实现结果：
+
+- `reconstruction-evidence-schema-report` CLI 会输出 `reconstruction_evidence_schema_report_v0.1`；
+- report 会定义四个 draft evidence sections：`event_envelope`、`transition_payload`、`object_evidence` 和 `reconstruction_metadata`；
+- 它会把 P41 missing capabilities 映射到最小字段，例如 `object_payload`、`object_diff`、`rollback_snapshot_id`、`seed_state_ref` 和 validation metadata；
+- 它会报告 deterministic replay、transition projection、object reconstruction 和 full-state reconstruction 的 readiness gates；
+- 它保持 `reconstruction_executed: false`、`event_payload_capture_executed: false`、`event_schema_mutation_allowed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`report_only: true` 和 `would_modify_state: false`；
+- scenario evaluation 会验证 schema report 存在、保持 read-only、暴露 target-path requirements，并且不会执行 capture、schema mutation 或 reconstruction。
+
+剩余缺口：
+
+- 这个 schema 仍然只是 draft report，不是 event schema migration；
+- event families 还没有映射到新的 schema sections；
+- replay 仍然不能从 empty seed 重建 object state；
+- 还没有 payload 或 diff capture implementation。
+
+建议下一步：
+
+```text
+P43 Evidence Schema Coverage Mapping
+```
+
+理由：
+
+- P42 定义了 evidence vocabulary，但项目还需要一个 read-only mapping，把当前 event families/workflows 映射到 required schema sections；
+- 这一步应该在任何 schema mutation 之前，说明哪些 workflow families 需要 object payload、object diff、snapshot link 或 seed/pre-event references；
+- 它继续服务 Priority A/B 地基，不实现 capture、reconstruction、compaction、rollback 或 adapters。
 
 期望验收：
 

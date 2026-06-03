@@ -1618,6 +1618,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_replayability_assessment = store.load()
     replayability_assessment = store.event_replayability_assessment()
     after_replayability_assessment = store.load()
+    before_reconstruction_schema = store.load()
+    reconstruction_schema = store.reconstruction_evidence_schema_report()
+    after_reconstruction_schema = store.load()
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -1788,6 +1791,40 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
         and replayability_assessment.get("event_payload_capture_executed") is False
         and replayability_assessment.get("event_compaction_executed") is False
         and replayability_assessment.get("automatic_rollback_executed") is False,
+        "reconstruction_evidence_schema_reported": reconstruction_schema.get("mode")
+        == "reconstruction_evidence_schema_report_v0.1",
+        "reconstruction_evidence_schema_read_only": reconstruction_schema.get(
+            "would_modify_state"
+        )
+        is False
+        and reconstruction_schema.get("report_only") is True
+        and reconstruction_schema.get("state_unchanged") is True
+        and after_reconstruction_schema == before_reconstruction_schema,
+        "reconstruction_evidence_schema_has_sections": {
+            item.get("section")
+            for item in reconstruction_schema.get("evidence_schema", [])
+            if isinstance(item, dict)
+        }
+        >= {
+            "event_envelope",
+            "transition_payload",
+            "object_evidence",
+            "reconstruction_metadata",
+        },
+        "reconstruction_evidence_schema_missing_payload_diff": {
+            item.get("capability")
+            for item in reconstruction_schema.get("missing_evidence_requirements", [])
+            if isinstance(item, dict)
+        }
+        >= {"object_payload", "object_diff", "rollback_snapshot"},
+        "reconstruction_evidence_schema_non_executing": reconstruction_schema.get(
+            "reconstruction_executed"
+        )
+        is False
+        and reconstruction_schema.get("event_payload_capture_executed") is False
+        and reconstruction_schema.get("event_schema_mutation_allowed") is False
+        and reconstruction_schema.get("event_compaction_executed") is False
+        and reconstruction_schema.get("automatic_rollback_executed") is False,
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
         "event_payload_capture_policy_approved": capture_policy_review.get("status")
@@ -2032,6 +2069,31 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                     )
                     if replayability_assessment.get(key) is True
                 ),
+                "reconstruction_evidence_schema_report_count": 1
+                if reconstruction_schema.get("mode")
+                == "reconstruction_evidence_schema_report_v0.1"
+                else 0,
+                "reconstruction_evidence_schema_section_count": len(
+                    reconstruction_schema.get("evidence_schema", [])
+                ),
+                "reconstruction_evidence_missing_requirement_count": len(
+                    reconstruction_schema.get("missing_evidence_requirements", [])
+                ),
+                "reconstruction_evidence_target_path_requirement_count": len(
+                    reconstruction_schema.get("target_path_requirements", [])
+                ),
+                "reconstruction_evidence_schema_mutation_count": 1
+                if reconstruction_schema.get("event_schema_mutation_allowed") is True
+                else 0,
+                "reconstruction_evidence_capture_execution_count": 1
+                if reconstruction_schema.get("event_payload_capture_executed") is True
+                else 0,
+                "reconstruction_evidence_reconstruction_execution_count": 1
+                if reconstruction_schema.get("reconstruction_executed") is True
+                else 0,
+                "reconstruction_evidence_state_mutation_count": 0
+                if after_reconstruction_schema == before_reconstruction_schema
+                else 1,
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
                 ),
@@ -3192,6 +3254,38 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "event_replayability_execution_count": sum(
             int(item.get("event_replayability_execution_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_report_count": sum(
+            int(item.get("reconstruction_evidence_schema_report_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_section_count": sum(
+            int(item.get("reconstruction_evidence_schema_section_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_missing_requirement_count": sum(
+            int(item.get("reconstruction_evidence_missing_requirement_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_target_path_requirement_count": sum(
+            int(item.get("reconstruction_evidence_target_path_requirement_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_schema_mutation_count": sum(
+            int(item.get("reconstruction_evidence_schema_mutation_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_capture_execution_count": sum(
+            int(item.get("reconstruction_evidence_capture_execution_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_reconstruction_execution_count": sum(
+            int(item.get("reconstruction_evidence_reconstruction_execution_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_state_mutation_count": sum(
+            int(item.get("reconstruction_evidence_state_mutation_count", 0))
             for item in metrics
         ),
         "event_payload_capture_policy_proposal_count": sum(

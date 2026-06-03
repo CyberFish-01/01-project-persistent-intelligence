@@ -1541,6 +1541,43 @@ P41 does not reconstruct state, capture payloads, mutate the event schema, compa
 
 This projection is not a full object-level state rebuild yet. It is a reproducible audit layer for checking that the event log can reconstruct transition references before the project attempts automatic rollback.
 
+P42 adds a report-only reconstruction evidence schema draft:
+
+```bash
+python3 -m one_core.cli reconstruction-evidence-schema-report
+```
+
+This report turns P41 missing capabilities into minimum evidence sections and fields before any event schema migration exists:
+
+```yaml
+reconstruction_evidence_schema_report:
+  mode: "reconstruction_evidence_schema_report_v0.1"
+  schema_status: "draft_report_only"
+  evidence_schema:
+    - section: "event_envelope"
+      required_fields: ["event_id", "sequence", "timestamp", "target_path"]
+    - section: "transition_payload"
+      required_fields: ["before_ref", "after_ref", "transition_reference"]
+    - section: "object_evidence"
+      required_fields: ["object_payload", "object_diff", "payload_hash"]
+    - section: "reconstruction_metadata"
+      required_fields: ["rollback_snapshot_id", "seed_state_ref"]
+  missing_capabilities:
+    - "object_payload"
+    - "object_diff"
+    - "rollback_snapshot"
+  reconstruction_executed: false
+  event_payload_capture_executed: false
+  event_schema_mutation_allowed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P42 is not an event schema migration. It defines the minimum evidence vocabulary for future object/state reconstruction research while keeping event records unchanged.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml

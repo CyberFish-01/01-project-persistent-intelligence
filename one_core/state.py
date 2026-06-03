@@ -1316,6 +1316,142 @@ DIFF_HINT_KEYS = {
     "payload_diff",
 }
 
+RECONSTRUCTION_EVIDENCE_SCHEMA_SECTIONS = (
+    {
+        "section": "event_envelope",
+        "purpose": "Make event identity, order, actor, and target auditable.",
+        "required_fields": (
+            "event_id",
+            "sequence",
+            "timestamp",
+            "event_type",
+            "workflow",
+            "operation",
+            "operation_class",
+            "target_path",
+            "target_identity",
+            "actor",
+            "state_version",
+        ),
+        "required_for": ("deterministic_replay", "audit_explanation"),
+    },
+    {
+        "section": "transition_payload",
+        "purpose": "Describe the state transition without relying on retrieval.",
+        "required_fields": (
+            "before_ref",
+            "after_ref",
+            "transition_reference",
+            "evidence",
+            "update_id",
+            "trace_id",
+            "audit_event_ids",
+        ),
+        "required_for": ("transition_projection", "state_evolution_explanation"),
+    },
+    {
+        "section": "object_evidence",
+        "purpose": "Carry enough object material for future object reconstruction.",
+        "required_fields": (
+            "object_payload",
+            "object_diff",
+            "payload_hash",
+            "diff_hash",
+            "payload_schema_version",
+            "redaction_policy",
+        ),
+        "required_for": ("object_reconstruction", "payload_diff_validation"),
+    },
+    {
+        "section": "reconstruction_metadata",
+        "purpose": "Link reconstruction to snapshots, seeds, provenance, and checks.",
+        "required_fields": (
+            "rollback_snapshot_id",
+            "snapshot_hash",
+            "seed_state_ref",
+            "pre_event_state_ref",
+            "projection_validation",
+            "reconstruction_strategy",
+            "provenance_refs",
+        ),
+        "required_for": ("full_state_reconstruction", "replay_verification"),
+    },
+)
+
+RECONSTRUCTION_CAPABILITY_REQUIREMENTS = {
+    "event_history": {
+        "section": "event_envelope",
+        "minimum_fields": ("event_id", "sequence", "timestamp"),
+        "required_for": ("deterministic_replay",),
+    },
+    "contiguous_event_sequence": {
+        "section": "event_envelope",
+        "minimum_fields": ("sequence",),
+        "required_for": ("deterministic_replay",),
+    },
+    "rebuildable_event_envelope": {
+        "section": "event_envelope",
+        "minimum_fields": (
+            "event_id",
+            "operation",
+            "target_path",
+            "target_identity",
+        ),
+        "required_for": ("transition_projection",),
+    },
+    "projection_count_consistency": {
+        "section": "reconstruction_metadata",
+        "minimum_fields": ("projection_validation",),
+        "required_for": ("replay_verification",),
+    },
+    "transition_reference": {
+        "section": "transition_payload",
+        "minimum_fields": (
+            "before_ref",
+            "after_ref",
+            "transition_reference",
+            "evidence",
+        ),
+        "required_for": ("transition_projection",),
+    },
+    "object_payload": {
+        "section": "object_evidence",
+        "minimum_fields": (
+            "object_payload",
+            "payload_hash",
+            "payload_schema_version",
+        ),
+        "required_for": ("object_reconstruction",),
+    },
+    "object_diff": {
+        "section": "object_evidence",
+        "minimum_fields": ("object_diff", "diff_hash"),
+        "required_for": ("object_reconstruction", "state_diff_replay"),
+    },
+    "rollback_snapshot": {
+        "section": "reconstruction_metadata",
+        "minimum_fields": ("rollback_snapshot_id", "snapshot_hash"),
+        "required_for": ("full_state_reconstruction",),
+    },
+    "seed_or_pre_event_state_coverage": {
+        "section": "reconstruction_metadata",
+        "minimum_fields": ("seed_state_ref", "pre_event_state_ref"),
+        "required_for": ("full_state_reconstruction",),
+    },
+}
+
+RECONSTRUCTION_CAPABILITY_ORDER = (
+    "event_history",
+    "contiguous_event_sequence",
+    "rebuildable_event_envelope",
+    "projection_count_consistency",
+    "transition_reference",
+    "object_payload",
+    "object_diff",
+    "rollback_snapshot",
+    "seed_or_pre_event_state_coverage",
+)
+
 
 def structured_payload(value: object) -> bool:
     return isinstance(value, (dict, list)) and bool(value)
@@ -1700,6 +1836,222 @@ def build_event_replayability_assessment(replay: dict, coverage: dict) -> dict:
         "report_only": True,
         "would_modify_state": False,
         "note": "P41 assesses replayability only; it does not reconstruct state, capture payloads, compact events, mutate schemas, or roll back state.",
+    }
+
+
+def reconstruction_evidence_requirements_for_capabilities(
+    capabilities: Iterable[str],
+) -> List[dict]:
+    requirements = []
+    seen = set()
+    capability_set = set(capabilities)
+    ordered = [
+        capability
+        for capability in RECONSTRUCTION_CAPABILITY_ORDER
+        if capability in capability_set
+    ]
+    ordered.extend(
+        sorted(
+            capability
+            for capability in capability_set
+            if capability not in RECONSTRUCTION_CAPABILITY_ORDER
+        )
+    )
+    for capability in ordered:
+        if capability in seen:
+            continue
+        seen.add(capability)
+        requirement = RECONSTRUCTION_CAPABILITY_REQUIREMENTS.get(
+            capability,
+            {
+                "section": "reconstruction_metadata",
+                "minimum_fields": ("review_note",),
+                "required_for": ("manual_review",),
+            },
+        )
+        requirements.append(
+            {
+                "capability": capability,
+                "section": requirement["section"],
+                "minimum_fields": list(requirement["minimum_fields"]),
+                "required_for": list(requirement["required_for"]),
+                "status": "missing",
+                "capture_allowed": False,
+                "schema_change_allowed": False,
+                "execution_prohibited": True,
+            }
+        )
+    return requirements
+
+
+def build_reconstruction_evidence_schema_report(
+    replayability: dict,
+    coverage: dict,
+) -> dict:
+    summary = replayability.get("summary", {})
+    missing_capability_set = set(summary.get("missing_capabilities", []))
+    for assessment in replayability.get("target_path_assessments", []):
+        if not isinstance(assessment, dict):
+            continue
+        missing_capability_set.update(assessment.get("missing_capabilities", []))
+    missing_capabilities = [
+        capability
+        for capability in RECONSTRUCTION_CAPABILITY_ORDER
+        if capability in missing_capability_set
+    ]
+    missing_capabilities.extend(
+        sorted(
+            capability
+            for capability in missing_capability_set
+            if capability not in RECONSTRUCTION_CAPABILITY_ORDER
+        )
+    )
+    requirements = reconstruction_evidence_requirements_for_capabilities(
+        missing_capabilities
+    )
+    requirement_by_capability = {
+        item["capability"]: item for item in requirements if isinstance(item, dict)
+    }
+    section_gap_counts = {
+        section["section"]: 0 for section in RECONSTRUCTION_EVIDENCE_SCHEMA_SECTIONS
+    }
+    for requirement in requirements:
+        section = requirement.get("section", "reconstruction_metadata")
+        section_gap_counts[section] = section_gap_counts.get(section, 0) + 1
+
+    target_path_requirements = []
+    for assessment in replayability.get("target_path_assessments", []):
+        if not isinstance(assessment, dict):
+            continue
+        missing = list(assessment.get("missing_capabilities", []))
+        target_path_requirements.append(
+            {
+                "target_path": assessment.get("target_path"),
+                "event_count": assessment.get("event_count", 0),
+                "reconstruction_status": assessment.get("reconstruction_status"),
+                "capture_mode": assessment.get("capture_mode"),
+                "missing_capabilities": missing,
+                "evidence_requirements": [
+                    requirement_by_capability[capability]
+                    for capability in missing
+                    if capability in requirement_by_capability
+                ],
+                "minimum_schema_sections": sorted(
+                    {
+                        requirement_by_capability[capability]["section"]
+                        for capability in missing
+                        if capability in requirement_by_capability
+                    }
+                ),
+                "payload_gap_count": assessment.get("payload_gap_count", 0),
+                "diff_gap_count": assessment.get("diff_gap_count", 0),
+                "snapshot_gap_count": assessment.get("snapshot_gap_count", 0),
+                "coverage_gap_count": assessment.get("coverage_gap_count", 0),
+                "schema_change_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "execution_prohibited": True,
+            }
+        )
+
+    readiness_gates = {
+        "deterministic_replay": {
+            "ready": summary.get("deterministic_replay_ready") is True,
+            "blocked_by": [
+                capability
+                for capability in (
+                    "event_history",
+                    "contiguous_event_sequence",
+                    "rebuildable_event_envelope",
+                    "projection_count_consistency",
+                )
+                if capability in missing_capabilities
+            ],
+        },
+        "transition_projection": {
+            "ready": summary.get("transition_projection_ready") is True,
+            "blocked_by": [
+                capability
+                for capability in (
+                    "transition_reference",
+                    "projection_count_consistency",
+                )
+                if capability in missing_capabilities
+            ],
+        },
+        "object_reconstruction": {
+            "ready": summary.get("object_reconstruction_ready") is True,
+            "blocked_by": [
+                capability
+                for capability in ("object_payload", "object_diff")
+                if capability in missing_capabilities
+            ],
+        },
+        "full_state_reconstruction": {
+            "ready": summary.get("full_state_reconstruction_ready") is True,
+            "blocked_by": [
+                capability
+                for capability in (
+                    "object_payload",
+                    "object_diff",
+                    "rollback_snapshot",
+                    "seed_or_pre_event_state_coverage",
+                    "projection_count_consistency",
+                )
+                if capability in missing_capabilities
+            ],
+        },
+    }
+
+    return {
+        "mode": "reconstruction_evidence_schema_report_v0.1",
+        "status": "passed"
+        if replayability.get("status") == "passed"
+        else "blocked_by_replayability",
+        "schema_status": "draft_report_only",
+        "source_reports": {
+            "event_replayability_assessment": replayability.get("mode"),
+            "event_payload_diff_coverage": coverage.get("mode"),
+        },
+        "event_count": summary.get("event_count", coverage.get("event_count", 0)),
+        "evidence_schema": [
+            {
+                "section": section["section"],
+                "purpose": section["purpose"],
+                "required_fields": list(section["required_fields"]),
+                "required_for": list(section["required_for"]),
+                "gap_count": section_gap_counts.get(section["section"], 0),
+                "status": "has_gaps"
+                if section_gap_counts.get(section["section"], 0)
+                else "defined",
+                "schema_change_allowed": False,
+                "capture_allowed": False,
+            }
+            for section in RECONSTRUCTION_EVIDENCE_SCHEMA_SECTIONS
+        ],
+        "missing_capabilities": missing_capabilities,
+        "missing_evidence_requirements": requirements,
+        "target_path_requirements": target_path_requirements,
+        "readiness_gates": readiness_gates,
+        "minimum_next_schema_questions": [
+            "Which event families require full object payloads instead of references?",
+            "Which target paths require object diffs for deterministic reconstruction?",
+            "Which snapshot links are sufficient to anchor full-state reconstruction?",
+            "Which seed or pre-event state references are required before replay from zero?",
+        ],
+        "recommended_next_actions": [
+            "draft_reconstruction_evidence_schema",
+            "map_schema_sections_to_event_families",
+            "keep_report_only_until_schema_review",
+        ],
+        "reconstruction_executed": False,
+        "event_payload_capture_executed": False,
+        "event_schema_mutation_allowed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "report_only": True,
+        "would_modify_state": False,
+        "note": "P42 defines reconstruction evidence schema requirements only; it does not mutate event records, capture payloads, reconstruct state, compact events, or roll back state.",
     }
 
 
@@ -6645,6 +6997,17 @@ class StateStore:
         )
         assessment["state_unchanged"] = before_state == self.load()
         return assessment
+
+    def reconstruction_evidence_schema_report(self) -> dict:
+        before_state = self.load()
+        replayability = self.event_replayability_assessment()
+        coverage = build_event_payload_diff_coverage(self.list_events())
+        report = build_reconstruction_evidence_schema_report(
+            replayability=replayability,
+            coverage=coverage,
+        )
+        report["state_unchanged"] = before_state == self.load()
+        return report
 
     def propose_event_payload_capture_policy(
         self,

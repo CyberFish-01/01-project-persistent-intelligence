@@ -2793,6 +2793,73 @@ class CoreStateTests(unittest.TestCase):
             summary["recommended_next_actions"],
         )
 
+    def test_reconstruction_evidence_schema_report_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P42 reconstruction schema evidence one")
+            store.record_episode("P42 reconstruction schema evidence two")
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.reconstruction_evidence_schema_report()
+            after = store.load()
+
+            sections = {item["section"] for item in report["evidence_schema"]}
+            missing = {
+                item["capability"]
+                for item in report["missing_evidence_requirements"]
+            }
+
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(
+                report["mode"],
+                "reconstruction_evidence_schema_report_v0.1",
+            )
+            self.assertEqual(report["schema_status"], "draft_report_only")
+            self.assertEqual(
+                sections,
+                {
+                    "event_envelope",
+                    "transition_payload",
+                    "object_evidence",
+                    "reconstruction_metadata",
+                },
+            )
+            self.assertIn("object_payload", missing)
+            self.assertIn("object_diff", missing)
+            self.assertIn("rollback_snapshot", missing)
+            self.assertFalse(report["readiness_gates"]["object_reconstruction"]["ready"])
+            self.assertFalse(
+                report["readiness_gates"]["full_state_reconstruction"]["ready"]
+            )
+            self.assertIn(
+                "object_payload",
+                report["readiness_gates"]["object_reconstruction"]["blocked_by"],
+            )
+            self.assertIn(
+                "rollback_snapshot",
+                report["readiness_gates"]["full_state_reconstruction"]["blocked_by"],
+            )
+            self.assertTrue(report["target_path_requirements"])
+            self.assertIn(
+                "object_evidence",
+                report["target_path_requirements"][0]["minimum_schema_sections"],
+            )
+            self.assertTrue(report["report_only"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["reconstruction_executed"])
+            self.assertFalse(report["event_payload_capture_executed"])
+            self.assertFalse(report["event_schema_mutation_allowed"])
+            self.assertFalse(report["event_compaction_executed"])
+            self.assertFalse(report["automatic_rollback_executed"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

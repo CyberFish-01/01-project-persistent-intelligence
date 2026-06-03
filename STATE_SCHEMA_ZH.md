@@ -1543,6 +1543,43 @@ P41 不会 reconstruct state、capture payload、修改 event schema、compact e
 
 这个 projection 还不是完整 object-level state rebuild。它是一个可复现的 audit layer，用于在项目尝试 automatic rollback 之前，检查 event log 能否重建 transition references。
 
+P42 增加 report-only reconstruction evidence schema draft：
+
+```bash
+python3 -m one_core.cli reconstruction-evidence-schema-report
+```
+
+这个 report 会在任何 event schema migration 存在之前，把 P41 missing capabilities 转成最小 evidence sections 和 fields：
+
+```yaml
+reconstruction_evidence_schema_report:
+  mode: "reconstruction_evidence_schema_report_v0.1"
+  schema_status: "draft_report_only"
+  evidence_schema:
+    - section: "event_envelope"
+      required_fields: ["event_id", "sequence", "timestamp", "target_path"]
+    - section: "transition_payload"
+      required_fields: ["before_ref", "after_ref", "transition_reference"]
+    - section: "object_evidence"
+      required_fields: ["object_payload", "object_diff", "payload_hash"]
+    - section: "reconstruction_metadata"
+      required_fields: ["rollback_snapshot_id", "seed_state_ref"]
+  missing_capabilities:
+    - "object_payload"
+    - "object_diff"
+    - "rollback_snapshot"
+  reconstruction_executed: false
+  event_payload_capture_executed: false
+  event_schema_mutation_allowed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P42 不是 event schema migration。它只为未来 object/state reconstruction research 定义最小 evidence vocabulary，同时保持 event records 不变。
+
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
 ```yaml

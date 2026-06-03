@@ -228,6 +228,26 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertGreaterEqual(metrics["event_replayability_diff_gap_count"], 1)
         self.assertEqual(metrics["event_replayability_state_mutation_count"], 0)
         self.assertEqual(metrics["event_replayability_execution_count"], 0)
+        self.assertEqual(metrics["reconstruction_evidence_schema_report_count"], 1)
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_schema_section_count"],
+            4,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_missing_requirement_count"],
+            3,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_target_path_requirement_count"],
+            1,
+        )
+        self.assertEqual(metrics["reconstruction_evidence_schema_mutation_count"], 0)
+        self.assertEqual(metrics["reconstruction_evidence_capture_execution_count"], 0)
+        self.assertEqual(
+            metrics["reconstruction_evidence_reconstruction_execution_count"],
+            0,
+        )
+        self.assertEqual(metrics["reconstruction_evidence_state_mutation_count"], 0)
         self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,

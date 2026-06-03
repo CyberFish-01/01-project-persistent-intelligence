@@ -1354,7 +1354,7 @@ Remaining gaps:
 - approved capture guidance still lacks a separate lifecycle path;
 - local JSON state writes remain serial-operation oriented until a file lock or transactional store exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
 P42 Reconstruction Evidence Schema Research
@@ -1365,6 +1365,34 @@ Reason:
 - P41 can now say what is missing, but the project still needs to design the minimum evidence schema for object payloads, object diffs, transition payloads, and reconstruction metadata;
 - this should remain research/report-only before any event schema mutation or payload capture is implemented;
 - it directly serves Priority A and Priority B without adding chat, platform, or companion surface area.
+
+Implemented result:
+
+- `reconstruction-evidence-schema-report` CLI reports `reconstruction_evidence_schema_report_v0.1`;
+- the report defines four draft evidence sections: `event_envelope`, `transition_payload`, `object_evidence`, and `reconstruction_metadata`;
+- it maps P41 missing capabilities to minimum fields such as `object_payload`, `object_diff`, `rollback_snapshot_id`, `seed_state_ref`, and validation metadata;
+- it reports readiness gates for deterministic replay, transition projection, object reconstruction, and full-state reconstruction;
+- it keeps `reconstruction_executed: false`, `event_payload_capture_executed: false`, `event_schema_mutation_allowed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `report_only: true`, and `would_modify_state: false`;
+- scenario evaluation verifies that the schema report exists, remains read-only, exposes target-path requirements, and does not execute capture, schema mutation, or reconstruction.
+
+Remaining gaps:
+
+- the schema is still a draft report, not an event schema migration;
+- event families are not yet mapped to the new schema sections;
+- replay still cannot rebuild object state from empty seed;
+- no payload or diff capture implementation exists.
+
+Recommended next step:
+
+```text
+P43 Evidence Schema Coverage Mapping
+```
+
+Reason:
+
+- P42 defines the evidence vocabulary, but the project still needs a read-only mapping from current event families/workflows to required schema sections;
+- this should identify which workflow families need object payloads, object diffs, snapshot links, or seed/pre-event references before any schema mutation is considered;
+- it continues Priority A/B groundwork without implementing capture, reconstruction, compaction, rollback, or adapters.
 
 Desired acceptance:
 
