@@ -871,7 +871,7 @@ Remaining gaps:
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
 - proposal link claim-graph evidence bridging is handled by P29;
-- context builder treats bridged governance evidence as generic claim graph evidence.
+- governance proposal-link evidence signal calibration is handled by P30.
 
 ### P29 Proposal Link Claim-Graph Evidence Bridge
 
@@ -884,7 +884,7 @@ Implemented result:
 - `claim_graph.proposal_link_evidence` records review-only evidence bridged from tool/safety proposal links;
 - `bridge-proposal-link-claim-evidence` creates a proposal link evidence record and a claim graph support link;
 - duplicate active bridges for the same source link are suppressed;
-- bridged evidence enters claim graph activation signals through `claim_graph_evidence`;
+- bridged evidence enters Context Builder activation through the separate `governance_proposal_link_evidence` signal after P30;
 - validation rejects executable policy flags, claim rewrite flags, semantic memory mutation flags, invalid link types, and missing evidence;
 - scenario evaluation verifies bridge creation, claim graph link creation, no claim rewrite, no executable policy creation, and no Identity Core mutation.
 
@@ -892,20 +892,43 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- context builder treats bridged governance evidence as generic claim graph evidence;
-- activation traces do not yet distinguish identity-gate, claim-conflict, Dream, and governance proposal-link evidence.
+- activation traces now distinguish identity-gate, claim-conflict, Dream, and governance proposal-link evidence through P30;
+- activation traces do not yet provide a compact source-bucket attribution report for each selected item.
+
+### P30 Context Builder Governance Signal Calibration
+
+Goal: make governance proposal-link evidence visible as its own Context Builder activation signal before any executable policy layer is considered.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `context_builder.policy.selection_dimensions` now includes `governance_evidence_signal`;
+- `context_builder.policy.signal_weights` now includes `governance_proposal_link_evidence`;
+- `build_context_signal_index` keeps `claim_graph.proposal_link_evidence` in a governance-specific bucket instead of folding it into generic `claim_graph_evidence`;
+- selected context items can receive a `governance_proposal_link_evidence` activation reason;
+- context signal summaries expose `governance_proposal_link_evidence_count`;
+- scenario metrics expose `context_governance_signal_count`;
+- validation requires the governance selection dimension and signal weight;
+- scenario evaluation verifies that governance proposal-link evidence activates independently from identity, claim, and Dream signals.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- activation traces identify signal reasons but do not yet explain source buckets and evidence records in a compact per-item report.
 
 Recommended next step:
 
 ```text
-P30 Context Builder Governance Signal Calibration
+P31 Context Signal Attribution Report
 ```
 
 Reason:
 
-- P29 makes proposal links visible to the claim graph, but Context Builder still uses one coarse `claim_graph_evidence` signal;
-- governance evidence should be traceable as its own activation reason and metric before any future policy executor is considered;
-- this improves state transfer quality by making why a safety/proposal relation entered context more legible;
+- P30 separates the governance signal, but the trace still only lists reason labels;
+- state transfer quality depends on being able to inspect why a selected memory entered context, which source bucket produced the signal, and which evidence ids were involved;
+- source-bucket attribution is review/evidence infrastructure, not executable policy;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:

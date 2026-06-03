@@ -1717,6 +1717,63 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
         proposer="scenario_eval",
         rationale="Context Builder signal test.",
     )
+    recorded = store.record_reflection_log(
+        reflection_type="policy_review",
+        workflow="context_builder",
+        observation="Governance proposal-link evidence should be visible in context activation.",
+        lesson="Separate governance proposal-link evidence from generic claim evidence.",
+        expected_behavior="Context Builder reports governance evidence as its own signal.",
+        actor="scenario_eval",
+        source_ids=[identity_episode["id"]],
+        evidence=[identity_episode["id"]],
+        risk="high",
+        confidence=0.9,
+    )
+    store.verify_reflection(
+        recorded.get("reflection_log_id", ""),
+        result="verified",
+        verifier="scenario_eval",
+        evidence=[identity_episode["id"]],
+    )
+    guidance_item = store.build_context_package()["reflection_guidance_queue"][0]
+    store.review_reflection_guidance(
+        guidance_item.get("guidance_item_id", ""),
+        action="acknowledge",
+        reviewer="scenario_eval",
+        decision_note="Use as governance signal evidence.",
+    )
+    broad = store.propose_tool_safety_policy(
+        guidance_item_id=guidance_item.get("guidance_item_id", ""),
+        policy_scope="context_builder.activation",
+        proposed_rule="Keep governance evidence visible in activation traces.",
+        proposer="scenario_eval",
+        rationale="Broad context activation proposal.",
+        risk="high",
+        confidence=0.82,
+    )
+    narrow = store.propose_tool_safety_policy(
+        guidance_item_id=guidance_item.get("guidance_item_id", ""),
+        policy_scope="context_builder.activation.governance_signal",
+        proposed_rule="Separate governance proposal-link evidence from claim evidence.",
+        proposer="scenario_eval",
+        rationale="Specific governance signal proposal.",
+        risk="high",
+        confidence=0.9,
+    )
+    linked = store.link_tool_safety_policy_proposals(
+        from_proposal_id=narrow.get("proposal_id", ""),
+        to_proposal_id=broad.get("proposal_id", ""),
+        link_type="supports",
+        reviewer="scenario_eval",
+        reason="Governance signal proposal supports context activation proposal.",
+        evidence=[identity_episode["id"]],
+        confidence=0.84,
+    )
+    store.bridge_tool_safety_policy_link_to_claim_graph(
+        link_id=linked.get("link_id", ""),
+        reviewer="scenario_eval",
+        rationale="Expose governance proposal relationship to Context Builder.",
+    )
     DreamEngine(store).run()
     package = store.build_context_package()
     state = store.load()
@@ -1735,6 +1792,8 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
         "source_budget_enforced": len(package.get("source_attribution", [])) <= 2,
         "identity_signal_used": "identity_gate_evidence"
         in selected.get(identity_episode["id"], {}).get("reasons", []),
+        "governance_signal_used": "governance_proposal_link_evidence"
+        in selected.get(identity_episode["id"], {}).get("reasons", []),
         "claim_signal_used": "claim_graph_evidence"
         in selected.get(claim_episode["id"], {}).get("reasons", []),
         "dream_signal_used": "dream_artifact_input"
@@ -1743,6 +1802,11 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
             "dream_artifact_input_count",
             0,
         )
+        >= 1,
+        "governance_signal_summary_nonzero": package.get(
+            "context_signal_summary",
+            {},
+        ).get("governance_proposal_link_evidence_count", 0)
         >= 1,
     }
     return EvaluationCheck(
@@ -1762,6 +1826,10 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
                     int(value)
                     for value in package.get("context_signal_summary", {}).values()
                 ),
+                "context_governance_signal_count": package.get(
+                    "context_signal_summary",
+                    {},
+                ).get("governance_proposal_link_evidence_count", 0),
             },
         },
     )
@@ -2436,6 +2504,9 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "context_signal_count": sum(
             int(item.get("context_signal_count", 0)) for item in metrics
+        ),
+        "context_governance_signal_count": sum(
+            int(item.get("context_governance_signal_count", 0)) for item in metrics
         ),
     }
 

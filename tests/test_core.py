@@ -1622,6 +1622,63 @@ class CoreStateTests(unittest.TestCase):
                 proposer="unit_test",
                 rationale="Exercise identity gate signal in context activation.",
             )
+            recorded = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="context_builder",
+                observation="Governance proposal-link evidence should be explainable.",
+                lesson="Context Builder should distinguish governance evidence.",
+                expected_behavior="Expose governance proposal-link evidence as its own signal.",
+                actor="unit_test",
+                source_ids=[episode["id"]],
+                evidence=[episode["id"]],
+                risk="high",
+                confidence=0.9,
+            )
+            store.verify_reflection(
+                recorded["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=[episode["id"]],
+            )
+            guidance_item = store.build_context_package()["reflection_guidance_queue"][0]
+            store.review_reflection_guidance(
+                guidance_item["guidance_item_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Use as governance signal evidence.",
+            )
+            broad = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="context_builder.activation",
+                proposed_rule="Keep governance evidence visible in activation traces.",
+                proposer="unit_test",
+                rationale="Broad context activation proposal.",
+                risk="high",
+                confidence=0.82,
+            )
+            narrow = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="context_builder.activation.governance_signal",
+                proposed_rule="Separate governance proposal-link evidence from claim evidence.",
+                proposer="unit_test",
+                rationale="Specific governance signal proposal.",
+                risk="high",
+                confidence=0.9,
+            )
+            linked = store.link_tool_safety_policy_proposals(
+                from_proposal_id=narrow["proposal_id"],
+                to_proposal_id=broad["proposal_id"],
+                link_type="supports",
+                reviewer="unit_test",
+                reason="Specific governance signal proposal supports broad activation proposal.",
+                evidence=[episode["id"]],
+                confidence=0.84,
+            )
+            store.bridge_tool_safety_policy_link_to_claim_graph(
+                linked["link_id"],
+                reviewer="unit_test",
+                rationale="Expose governance relationship to Context Builder.",
+            )
             package = store.build_context_package()
             state = store.load()
             trace = state["context_builder"]["activation_traces"][-1]
@@ -1648,8 +1705,18 @@ class CoreStateTests(unittest.TestCase):
                 package["activation_trace"]["metrics"]["selected_count"],
             )
             self.assertIn("identity_gate_evidence", episode_decision["reasons"])
+            self.assertIn(
+                "governance_proposal_link_evidence",
+                episode_decision["reasons"],
+            )
             self.assertEqual(
                 package["context_signal_summary"]["identity_gate_evidence_count"],
+                1,
+            )
+            self.assertGreaterEqual(
+                package["context_signal_summary"][
+                    "governance_proposal_link_evidence_count"
+                ],
                 1,
             )
             stored_proposal = store.load()["identity_update_gate"]["proposals"][-1]

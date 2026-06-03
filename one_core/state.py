@@ -163,6 +163,7 @@ def default_context_policy() -> dict:
             "source_attribution",
             "identity_gate_signal",
             "claim_review_signal",
+            "governance_evidence_signal",
             "dream_artifact_signal",
         ],
         "suppression_rules": [
@@ -173,6 +174,7 @@ def default_context_policy() -> dict:
         "signal_weights": {
             "identity_gate_evidence": 0.08,
             "claim_graph_evidence": 0.08,
+            "governance_proposal_link_evidence": 0.07,
             "dream_artifact_input": 0.06,
         },
         "persistence": {
@@ -494,6 +496,15 @@ def ensure_context_builder(state: dict, timestamp: str) -> bool:
             for key, value in default_policy["budgets"].items():
                 if key not in budgets:
                     budgets[key] = value
+                    changed = True
+        dimensions = policy.get("selection_dimensions")
+        if not isinstance(dimensions, list):
+            policy["selection_dimensions"] = list(default_policy["selection_dimensions"])
+            changed = True
+        else:
+            for dimension in default_policy["selection_dimensions"]:
+                if dimension not in dimensions:
+                    dimensions.append(dimension)
                     changed = True
         signal_weights = policy.get("signal_weights")
         if not isinstance(signal_weights, dict):
@@ -6136,11 +6147,14 @@ def build_context_signal_index(state: dict, dream_artifacts: List[dict]) -> dict
         if not isinstance(decision, dict):
             continue
         claim_evidence.update(str(item) for item in decision.get("patch_preview", {}).get("affected_evidence", []) if item)
+    governance_evidence = set()
     for evidence_record in state.get("claim_graph", {}).get("proposal_link_evidence", []):
         if not isinstance(evidence_record, dict):
             continue
-        claim_evidence.add(str(evidence_record.get("evidence_id")))
-        claim_evidence.update(str(item) for item in evidence_record.get("evidence", []) if item)
+        governance_evidence.add(str(evidence_record.get("evidence_id")))
+        governance_evidence.update(
+            str(item) for item in evidence_record.get("evidence", []) if item
+        )
 
     dream_inputs = set()
     dream_proposals = set()
@@ -6158,6 +6172,7 @@ def build_context_signal_index(state: dict, dream_artifacts: List[dict]) -> dict
     return {
         "identity_gate_evidence": identity_evidence,
         "claim_graph_evidence": claim_evidence,
+        "governance_proposal_link_evidence": governance_evidence,
         "dream_artifact_inputs": dream_inputs,
         "dream_artifact_proposals": dream_proposals,
     }
@@ -6180,6 +6195,9 @@ def context_signal_score(
     if related_ids & context_signals.get("claim_graph_evidence", set()):
         score += float(weights.get("claim_graph_evidence", 0.08))
         reasons.append("claim_graph_evidence")
+    if related_ids & context_signals.get("governance_proposal_link_evidence", set()):
+        score += float(weights.get("governance_proposal_link_evidence", 0.07))
+        reasons.append("governance_proposal_link_evidence")
     if related_ids & context_signals.get("dream_artifact_inputs", set()):
         score += float(weights.get("dream_artifact_input", 0.06))
         reasons.append("dream_artifact_input")
@@ -6326,6 +6344,9 @@ def summarize_context_signals(context_signals: dict) -> dict:
         ),
         "claim_graph_evidence_count": len(
             context_signals.get("claim_graph_evidence", set())
+        ),
+        "governance_proposal_link_evidence_count": len(
+            context_signals.get("governance_proposal_link_evidence", set())
         ),
         "dream_artifact_input_count": len(
             context_signals.get("dream_artifact_inputs", set())

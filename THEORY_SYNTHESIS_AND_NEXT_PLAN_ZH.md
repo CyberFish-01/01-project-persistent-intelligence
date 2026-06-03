@@ -905,7 +905,7 @@ P22 Reflection-Policy Linkage
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
 - proposal link claim-graph evidence bridging 已由 P29 处理；
-- context builder 仍把 bridged governance evidence 当作 generic claim graph evidence。
+- governance proposal-link evidence signal calibration 已由 P30 处理。
 
 ### P29 Proposal Link Claim-Graph Evidence Bridge
 
@@ -918,7 +918,7 @@ P22 Reflection-Policy Linkage
 - `claim_graph.proposal_link_evidence` 记录从 tool/safety proposal links 桥接来的 review-only evidence；
 - `bridge-proposal-link-claim-evidence` 会创建 proposal link evidence record 和 claim graph support link；
 - 同一个 source link 的重复 active bridge 会被压制；
-- bridged evidence 会通过 `claim_graph_evidence` 进入 claim graph activation signals；
+- P30 后，bridged evidence 会通过独立的 `governance_proposal_link_evidence` signal 进入 Context Builder activation；
 - validation 会拒绝 executable policy flags、claim rewrite flags、semantic memory mutation flags、invalid link types 和 missing evidence；
 - scenario evaluation 检查 bridge creation、claim graph link creation、不 rewrite claim、不创建 executable policy，以及不会修改 Identity Core。
 
@@ -926,20 +926,43 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- context builder 仍把 bridged governance evidence 当作 generic claim graph evidence；
-- activation traces 还不能区分 identity-gate、claim-conflict、Dream 和 governance proposal-link evidence。
+- activation traces 已通过 P30 区分 identity-gate、claim-conflict、Dream 和 governance proposal-link evidence；
+- activation traces 还没有为每个 selected item 提供紧凑的 source-bucket attribution report。
+
+### P30 Context Builder Governance Signal Calibration
+
+目标：在考虑任何 executable policy layer 之前，让 governance proposal-link evidence 作为独立 Context Builder activation signal 可见。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `context_builder.policy.selection_dimensions` 现在包含 `governance_evidence_signal`；
+- `context_builder.policy.signal_weights` 现在包含 `governance_proposal_link_evidence`；
+- `build_context_signal_index` 会把 `claim_graph.proposal_link_evidence` 保持在 governance-specific bucket 中，而不是折叠进 generic `claim_graph_evidence`；
+- selected context item 可以获得 `governance_proposal_link_evidence` activation reason；
+- context signal summary 会暴露 `governance_proposal_link_evidence_count`；
+- scenario metrics 会暴露 `context_governance_signal_count`；
+- validation 要求 governance selection dimension 和 signal weight；
+- scenario evaluation 会验证 governance proposal-link evidence 可以独立于 identity、claim 和 Dream signals 激活。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- activation traces 已能标出 signal reasons，但还没有用紧凑的 per-item report 解释 source buckets 和 evidence records。
 
 建议下一步：
 
 ```text
-P30 Context Builder Governance Signal Calibration
+P31 Context Signal Attribution Report
 ```
 
 理由：
 
-- P29 已让 proposal links 能被 claim graph 看见，但 Context Builder 仍只使用粗粒度 `claim_graph_evidence` signal；
-- governance evidence 应该先成为独立 activation reason 和 metric，再考虑任何未来 policy executor；
-- 这会提升 state transfer 质量，让“为什么某条 safety/proposal relationship 进入 context”更可解释；
+- P30 已经拆出了 governance signal，但 trace 仍主要只有 reason labels；
+- state transfer 质量依赖于能审计“为什么某条 memory 进入 context”、这个 signal 来自哪个 source bucket、涉及哪些 evidence ids；
+- source-bucket attribution 属于 review/evidence infrastructure，不是 executable policy；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

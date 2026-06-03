@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from one_core.state import StateStore
+from one_core.state import StateStore, write_json
 from one_core.validation import validate_state
 
 
@@ -46,6 +46,53 @@ class StateValidationTests(unittest.TestCase):
             self.assertIn(
                 "context_builder.activation_traces[0].context_package_id",
                 paths,
+            )
+
+    def test_context_builder_requires_governance_signal_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["context_builder"]["policy"]["selection_dimensions"].remove(
+                "governance_evidence_signal"
+            )
+            state["context_builder"]["policy"]["signal_weights"].pop(
+                "governance_proposal_link_evidence"
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn(
+                "context_builder.policy.selection_dimensions.governance_evidence_signal",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.policy.signal_weights.governance_proposal_link_evidence",
+                paths,
+            )
+
+    def test_context_builder_migrates_missing_governance_signal_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["context_builder"]["policy"]["selection_dimensions"].remove(
+                "governance_evidence_signal"
+            )
+            state["context_builder"]["policy"]["signal_weights"].pop(
+                "governance_proposal_link_evidence"
+            )
+            write_json(store.state_path, state)
+
+            migrated = store.load()
+            report = validate_state(migrated, store.list_episodes())
+            self.assertEqual(report["status"], "passed")
+            self.assertIn(
+                "governance_evidence_signal",
+                migrated["context_builder"]["policy"]["selection_dimensions"],
+            )
+            self.assertIn(
+                "governance_proposal_link_evidence",
+                migrated["context_builder"]["policy"]["signal_weights"],
             )
 
     def test_adapter_event_index_must_point_to_episode(self):

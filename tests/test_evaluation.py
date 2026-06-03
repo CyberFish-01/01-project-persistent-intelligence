@@ -181,6 +181,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["context_builder_score"], 1.0)
         self.assertGreaterEqual(metrics["context_activation_trace_count"], 1)
         self.assertGreaterEqual(metrics["context_signal_count"], 1)
+        self.assertGreaterEqual(metrics["context_governance_signal_count"], 1)
 
 
 if __name__ == "__main__":

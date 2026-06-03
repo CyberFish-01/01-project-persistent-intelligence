@@ -1484,6 +1484,18 @@ state_transfer_package:
   context_policy:
     policy_version: "0.3"
     mode: "bounded_state_activation"
+    selection_dimensions:
+      - lifecycle_status
+      - relationship_boundary
+      - task_relevance
+      - salience
+      - confidence
+      - recency
+      - source_attribution
+      - identity_gate_signal
+      - claim_review_signal
+      - governance_evidence_signal
+      - dream_artifact_signal
     budgets:
       episodic_memory: 5
       semantic_memory: 5
@@ -1493,6 +1505,7 @@ state_transfer_package:
     signal_weights:
       identity_gate_evidence: 0.08
       claim_graph_evidence: 0.08
+      governance_proposal_link_evidence: 0.07
       dream_artifact_input: 0.06
     persistence:
       activation_trace_history: true
@@ -1514,6 +1527,7 @@ state_transfer_package:
   context_signal_summary:
     identity_gate_evidence_count: 0
     claim_graph_evidence_count: 0
+    governance_proposal_link_evidence_count: 0
     dream_artifact_input_count: 0
     dream_artifact_proposal_count: 0
   open_conflicts: []

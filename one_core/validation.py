@@ -985,6 +985,28 @@ def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
                 "Context policy must declare policy_version 0.3.",
             )
         )
+    dimensions = policy.get("selection_dimensions")
+    if not isinstance(dimensions, list):
+        issues.append(
+            ValidationIssue(
+                "context_builder.policy.selection_dimensions",
+                "Context policy must include selection dimensions.",
+            )
+        )
+        dimensions = []
+    for dimension in (
+        "identity_gate_signal",
+        "claim_review_signal",
+        "governance_evidence_signal",
+        "dream_artifact_signal",
+    ):
+        if dimension not in dimensions:
+            issues.append(
+                ValidationIssue(
+                    f"context_builder.policy.selection_dimensions.{dimension}",
+                    "Context policy selection dimension is missing.",
+                )
+            )
     budgets = policy.get("budgets")
     if not isinstance(budgets, dict):
         issues.append(
@@ -1008,13 +1030,28 @@ def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
                     "Context policy budget is missing.",
                 )
             )
-    if not isinstance(policy.get("signal_weights"), dict):
+    signal_weights = policy.get("signal_weights")
+    if not isinstance(signal_weights, dict):
         issues.append(
             ValidationIssue(
                 "context_builder.policy.signal_weights",
                 "Context policy must include signal weights.",
             )
         )
+        signal_weights = {}
+    for key in (
+        "identity_gate_evidence",
+        "claim_graph_evidence",
+        "governance_proposal_link_evidence",
+        "dream_artifact_input",
+    ):
+        if key not in signal_weights:
+            issues.append(
+                ValidationIssue(
+                    f"context_builder.policy.signal_weights.{key}",
+                    "Context policy signal weight is missing.",
+                )
+            )
     if not isinstance(policy.get("persistence"), dict):
         issues.append(
             ValidationIssue(
