@@ -2927,6 +2927,65 @@ class CoreStateTests(unittest.TestCase):
                 before_event_ids,
             )
 
+    def test_reconstruction_evidence_gap_prioritization_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P44 gap prioritization episode")
+            store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create retention workflow gap for P44.",
+            )
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.reconstruction_evidence_gap_prioritization()
+            after = store.load()
+
+            priorities = report["prioritized_workflows"]
+
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(
+                report["mode"],
+                "reconstruction_evidence_gap_prioritization_v0.1",
+            )
+            self.assertEqual(report["prioritization_status"], "report_only")
+            self.assertTrue(priorities)
+            self.assertEqual(priorities[0]["recommended_order"], 1)
+            self.assertEqual(report["top_priority_workflow"], priorities[0]["workflow"])
+            self.assertGreaterEqual(
+                priorities[0]["priority"]["priority_score"],
+                priorities[-1]["priority"]["priority_score"],
+            )
+            for item in priorities:
+                priority = item["priority"]
+                self.assertEqual(priority["mode"], "reconstruction_gap_priority_v0.1")
+                self.assertTrue(priority["review_signal_only"])
+                self.assertGreaterEqual(priority["priority_score"], 0.0)
+                self.assertLessEqual(priority["priority_score"], 1.0)
+                self.assertIn(
+                    priority["recommended_priority"],
+                    {"low", "medium", "high"},
+                )
+                self.assertFalse(item["schema_change_allowed"])
+                self.assertFalse(item["event_payload_capture_executed"])
+                self.assertFalse(item["reconstruction_executed"])
+                self.assertTrue(item["execution_prohibited"])
+            self.assertTrue(report["report_only"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["reconstruction_executed"])
+            self.assertFalse(report["event_payload_capture_executed"])
+            self.assertFalse(report["event_schema_mutation_allowed"])
+            self.assertFalse(report["event_compaction_executed"])
+            self.assertFalse(report["automatic_rollback_executed"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

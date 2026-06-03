@@ -1401,7 +1401,7 @@ P43 Evidence Schema Coverage Mapping
 - 还没有 payload 或 diff capture implementation；
 - replay 仍然不能从 empty seed 重建 object state。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P44 Evidence Gap Prioritization Report
@@ -1412,6 +1412,33 @@ P44 Evidence Gap Prioritization Report
 - P43 已经映射哪些 workflows 有 evidence gaps，但项目还需要一个 read-only 方法，按 reconstruction value、risk 和 expected implementation cost 给这些 gaps 排序；
 - 这能帮助决定哪些 event families 最值得先做 schema work，但不执行 schema mutation 或 payload capture；
 - 它仍然停留在 Event-Sourcing Groundwork，不进入 executor、rollback、compaction、adapters 或 product surfaces。
+
+已实现结果：
+
+- `reconstruction-evidence-gap-priorities` CLI 会输出 `reconstruction_evidence_gap_prioritization_v0.1`；
+- 每个 workflow gap 会获得 review-only scoring：`reconstruction_value`、`preservation_risk`、`implementation_cost`、`priority_score` 和 `recommended_priority`；
+- prioritized workflows 会按 priority score 排序，并获得 `recommended_order`；
+- report 保持 `event_schema_mutation_allowed: false`、`event_payload_capture_executed: false`、`reconstruction_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`report_only: true` 和 `would_modify_state: false`；
+- scenario evaluation 会验证分数有界、priority 可见、read-only、不执行 payload capture、不修改 schema、也不执行 reconstruction。
+
+剩余缺口：
+
+- prioritized gaps 还没有变成 durable review checklist；
+- 还没有 schema approval workflow；
+- 还没有 event schema migration；
+- 还没有 payload 或 diff capture implementation。
+
+建议下一步：
+
+```text
+P45 Reconstruction Evidence Schema Review Checklist
+```
+
+理由：
+
+- P44 已经给 gaps 排序，但项目还需要一个 review-only checklist，把 top-ranked workflow gaps 转成明确 review questions、acceptance criteria 和 required evidence，之后才考虑任何 schema work；
+- 这让治理先于实现，避免 automatic schema mutation、payload capture、reconstruction execution、rollback、compaction 或 adapters；
+- 它把 Priority A/B research 接到 Priority C governance，但不变成 product surface。
 
 期望验收：
 

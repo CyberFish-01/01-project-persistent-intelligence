@@ -1624,6 +1624,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_reconstruction_mapping = store.load()
     reconstruction_mapping = store.reconstruction_evidence_coverage_mapping()
     after_reconstruction_mapping = store.load()
+    before_reconstruction_priorities = store.load()
+    reconstruction_priorities = store.reconstruction_evidence_gap_prioritization()
+    after_reconstruction_priorities = store.load()
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -1856,6 +1859,36 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
         and reconstruction_mapping.get("event_schema_mutation_allowed") is False
         and reconstruction_mapping.get("event_compaction_executed") is False
         and reconstruction_mapping.get("automatic_rollback_executed") is False,
+        "reconstruction_evidence_gap_prioritized": reconstruction_priorities.get(
+            "mode"
+        )
+        == "reconstruction_evidence_gap_prioritization_v0.1",
+        "reconstruction_evidence_gap_prioritization_read_only": reconstruction_priorities.get(
+            "would_modify_state"
+        )
+        is False
+        and reconstruction_priorities.get("report_only") is True
+        and reconstruction_priorities.get("state_unchanged") is True
+        and after_reconstruction_priorities == before_reconstruction_priorities,
+        "reconstruction_evidence_gap_priority_visible": bool(
+            reconstruction_priorities.get("prioritized_workflows")
+        )
+        and reconstruction_priorities.get("top_priority_workflow") is not None,
+        "reconstruction_evidence_gap_priority_bounded": all(
+            isinstance(item.get("priority", {}).get("priority_score"), (int, float))
+            and 0 <= float(item.get("priority", {}).get("priority_score")) <= 1
+            and item.get("priority", {}).get("review_signal_only") is True
+            for item in reconstruction_priorities.get("prioritized_workflows", [])
+            if isinstance(item, dict)
+        ),
+        "reconstruction_evidence_gap_priority_non_executing": reconstruction_priorities.get(
+            "reconstruction_executed"
+        )
+        is False
+        and reconstruction_priorities.get("event_payload_capture_executed") is False
+        and reconstruction_priorities.get("event_schema_mutation_allowed") is False
+        and reconstruction_priorities.get("event_compaction_executed") is False
+        and reconstruction_priorities.get("automatic_rollback_executed") is False,
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
         "event_payload_capture_policy_approved": capture_policy_review.get("status")
@@ -2151,6 +2184,45 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 else 0,
                 "reconstruction_evidence_coverage_state_mutation_count": 0
                 if after_reconstruction_mapping == before_reconstruction_mapping
+                else 1,
+                "reconstruction_evidence_gap_prioritization_count": 1
+                if reconstruction_priorities.get("mode")
+                == "reconstruction_evidence_gap_prioritization_v0.1"
+                else 0,
+                "reconstruction_evidence_prioritized_workflow_count": len(
+                    reconstruction_priorities.get("prioritized_workflows", [])
+                ),
+                "reconstruction_evidence_high_priority_workflow_count": sum(
+                    1
+                    for item in reconstruction_priorities.get(
+                        "prioritized_workflows",
+                        [],
+                    )
+                    if isinstance(item, dict)
+                    and item.get("priority", {}).get("recommended_priority") == "high"
+                ),
+                "reconstruction_evidence_max_priority_score": max(
+                    [
+                        float(item.get("priority", {}).get("priority_score", 0.0))
+                        for item in reconstruction_priorities.get(
+                            "prioritized_workflows",
+                            [],
+                        )
+                        if isinstance(item, dict)
+                    ]
+                    or [0.0]
+                ),
+                "reconstruction_evidence_priority_schema_mutation_count": 1
+                if reconstruction_priorities.get("event_schema_mutation_allowed") is True
+                else 0,
+                "reconstruction_evidence_priority_capture_execution_count": 1
+                if reconstruction_priorities.get("event_payload_capture_executed") is True
+                else 0,
+                "reconstruction_evidence_priority_reconstruction_execution_count": 1
+                if reconstruction_priorities.get("reconstruction_executed") is True
+                else 0,
+                "reconstruction_evidence_priority_state_mutation_count": 0
+                if after_reconstruction_priorities == before_reconstruction_priorities
                 else 1,
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
@@ -3381,6 +3453,46 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "reconstruction_evidence_coverage_state_mutation_count": sum(
             int(item.get("reconstruction_evidence_coverage_state_mutation_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_gap_prioritization_count": sum(
+            int(item.get("reconstruction_evidence_gap_prioritization_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_prioritized_workflow_count": sum(
+            int(item.get("reconstruction_evidence_prioritized_workflow_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_high_priority_workflow_count": sum(
+            int(item.get("reconstruction_evidence_high_priority_workflow_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_max_priority_score": max(
+            [
+                float(item.get("reconstruction_evidence_max_priority_score", 0.0))
+                for item in metrics
+            ]
+            or [0.0]
+        ),
+        "reconstruction_evidence_priority_schema_mutation_count": sum(
+            int(item.get("reconstruction_evidence_priority_schema_mutation_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_priority_capture_execution_count": sum(
+            int(item.get("reconstruction_evidence_priority_capture_execution_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_evidence_priority_reconstruction_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_evidence_priority_reconstruction_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_evidence_priority_state_mutation_count": sum(
+            int(item.get("reconstruction_evidence_priority_state_mutation_count", 0))
             for item in metrics
         ),
         "event_payload_capture_policy_proposal_count": sum(

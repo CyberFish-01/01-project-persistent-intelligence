@@ -1614,6 +1614,41 @@ reconstruction_evidence_coverage_mapping:
 
 P43 仍然只是 coverage analysis。它不会把 proposed fields 写入 events。
 
+P44 增加 review-only evidence gap prioritization report：
+
+```bash
+python3 -m one_core.cli reconstruction-evidence-gap-priorities
+```
+
+这个 report 会按 reconstruction value、preservation risk 和 estimated implementation cost 给 workflow gaps 排序。Scores 只是 review signals。
+
+```yaml
+reconstruction_evidence_gap_prioritization:
+  mode: "reconstruction_evidence_gap_prioritization_v0.1"
+  prioritization_status: "report_only"
+  prioritized_workflows:
+    - workflow: "record_episode"
+      recommended_order: 1
+      priority:
+        mode: "reconstruction_gap_priority_v0.1"
+        reconstruction_value: 0.75
+        preservation_risk: 0.67
+        implementation_cost: 0.76
+        priority_score: 0.62
+        recommended_priority: "medium"
+        review_signal_only: true
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P44 不会选择、批准或执行 schema change。它只为之后的人工治理显式化 review order。
+
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
 ```yaml

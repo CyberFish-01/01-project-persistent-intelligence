@@ -1410,7 +1410,7 @@ Remaining gaps:
 - no payload or diff capture implementation exists;
 - replay still cannot rebuild object state from empty seed.
 
-Recommended next step:
+Implemented next step:
 
 ```text
 P44 Evidence Gap Prioritization Report
@@ -1421,6 +1421,33 @@ Reason:
 - P43 maps which workflows have evidence gaps, but the project still needs a read-only way to rank those gaps by reconstruction value, risk, and expected implementation cost;
 - this should help decide which event families deserve schema work first without performing schema mutation or payload capture;
 - it remains inside Event-Sourcing Groundwork and avoids executor, rollback, compaction, adapters, or product surfaces.
+
+Implemented result:
+
+- `reconstruction-evidence-gap-priorities` CLI reports `reconstruction_evidence_gap_prioritization_v0.1`;
+- each workflow gap receives review-only scoring for `reconstruction_value`, `preservation_risk`, `implementation_cost`, `priority_score`, and `recommended_priority`;
+- prioritized workflows are sorted by priority score and assigned `recommended_order`;
+- the report keeps `event_schema_mutation_allowed: false`, `event_payload_capture_executed: false`, `reconstruction_executed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `report_only: true`, and `would_modify_state: false`;
+- scenario evaluation verifies bounded scores, visible priorities, read-only behavior, no payload capture, no schema mutation, and no reconstruction execution.
+
+Remaining gaps:
+
+- prioritized gaps are not yet turned into a durable review checklist;
+- no schema approval workflow exists;
+- no event schema migration exists;
+- no payload or diff capture implementation exists.
+
+Recommended next step:
+
+```text
+P45 Reconstruction Evidence Schema Review Checklist
+```
+
+Reason:
+
+- P44 ranks the gaps, but the project still needs a review-only checklist that turns top-ranked workflow gaps into explicit review questions, acceptance criteria, and required evidence before any schema work begins;
+- this keeps governance ahead of implementation and avoids automatic schema mutation, payload capture, reconstruction execution, rollback, compaction, or adapters;
+- it connects Priority A/B research to Priority C governance without becoming a product surface.
 
 Desired acceptance:
 

@@ -2221,6 +2221,160 @@ def build_reconstruction_evidence_coverage_mapping(
     }
 
 
+def reconstruction_gap_priority_for_workflow(mapping: dict) -> dict:
+    event_count = int(mapping.get("event_count", 0))
+    payload_gap_count = int(mapping.get("payload_gap_count", 0))
+    diff_gap_count = int(mapping.get("diff_gap_count", 0))
+    snapshot_gap_count = int(mapping.get("snapshot_gap_count", 0))
+    transition_gap_count = int(mapping.get("transition_gap_count", 0))
+    missing = set(mapping.get("missing_capabilities", []))
+    target_paths = mapping.get("target_paths", {})
+    target_path_count = len(target_paths) if isinstance(target_paths, dict) else 0
+
+    reconstruction_value = 0.2
+    if "object_payload" in missing:
+        reconstruction_value += 0.2
+    if "object_diff" in missing:
+        reconstruction_value += 0.25
+    if "rollback_snapshot" in missing:
+        reconstruction_value += 0.15
+    if "transition_reference" in missing:
+        reconstruction_value += 0.2
+    reconstruction_value += min(event_count, 5) * 0.03
+
+    preservation_risk = 0.1
+    if transition_gap_count:
+        preservation_risk += 0.35
+    if diff_gap_count:
+        preservation_risk += 0.25
+    if payload_gap_count:
+        preservation_risk += 0.18
+    if snapshot_gap_count:
+        preservation_risk += 0.12
+    preservation_risk += min(event_count, 5) * 0.02
+
+    implementation_cost = 0.15
+    if payload_gap_count:
+        implementation_cost += 0.18
+    if diff_gap_count:
+        implementation_cost += 0.25
+    if snapshot_gap_count:
+        implementation_cost += 0.14
+    if transition_gap_count:
+        implementation_cost += 0.08
+    implementation_cost += min(target_path_count, 4) * 0.04
+
+    reconstruction_value = round(max(0.0, min(reconstruction_value, 1.0)), 2)
+    preservation_risk = round(max(0.0, min(preservation_risk, 1.0)), 2)
+    implementation_cost = round(max(0.0, min(implementation_cost, 1.0)), 2)
+    priority_score = round(
+        max(
+            0.0,
+            min(
+                (0.45 * reconstruction_value)
+                + (0.35 * preservation_risk)
+                + (0.2 * (1 - implementation_cost)),
+                1.0,
+            ),
+        ),
+        2,
+    )
+    recommended_priority = "low"
+    if priority_score >= 0.7:
+        recommended_priority = "high"
+    elif priority_score >= 0.45:
+        recommended_priority = "medium"
+
+    return {
+        "mode": "reconstruction_gap_priority_v0.1",
+        "reconstruction_value": reconstruction_value,
+        "preservation_risk": preservation_risk,
+        "implementation_cost": implementation_cost,
+        "priority_score": priority_score,
+        "recommended_priority": recommended_priority,
+        "factors": [
+            {"name": "event_count", "value": event_count},
+            {"name": "payload_gap_count", "value": payload_gap_count},
+            {"name": "diff_gap_count", "value": diff_gap_count},
+            {"name": "snapshot_gap_count", "value": snapshot_gap_count},
+            {"name": "transition_gap_count", "value": transition_gap_count},
+            {"name": "target_path_count", "value": target_path_count},
+        ],
+        "review_signal_only": True,
+        "schema_change_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+    }
+
+
+def build_reconstruction_evidence_gap_prioritization(mapping: dict) -> dict:
+    workflow_priorities = []
+    for workflow_mapping in mapping.get("workflow_mappings", []):
+        if not isinstance(workflow_mapping, dict):
+            continue
+        priority = reconstruction_gap_priority_for_workflow(workflow_mapping)
+        workflow_priorities.append(
+            {
+                "workflow": workflow_mapping.get("workflow"),
+                "coverage_status": workflow_mapping.get("coverage_status"),
+                "event_count": workflow_mapping.get("event_count", 0),
+                "target_paths": workflow_mapping.get("target_paths", {}),
+                "missing_capabilities": workflow_mapping.get(
+                    "missing_capabilities",
+                    [],
+                ),
+                "required_schema_sections": workflow_mapping.get(
+                    "required_schema_sections",
+                    [],
+                ),
+                "minimum_fields": workflow_mapping.get("minimum_fields", []),
+                "example_event_ids": workflow_mapping.get("example_event_ids", []),
+                "priority": priority,
+                "schema_change_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "execution_prohibited": True,
+            }
+        )
+    workflow_priorities.sort(
+        key=lambda item: (
+            -float(item.get("priority", {}).get("priority_score", 0.0)),
+            str(item.get("workflow") or ""),
+        )
+    )
+    for index, item in enumerate(workflow_priorities, start=1):
+        item["recommended_order"] = index
+
+    return {
+        "mode": "reconstruction_evidence_gap_prioritization_v0.1",
+        "status": mapping.get("status", "blocked_by_replayability"),
+        "prioritization_status": "report_only",
+        "source_reports": {
+            "reconstruction_evidence_coverage_mapping": mapping.get("mode"),
+        },
+        "event_count": mapping.get("event_count", 0),
+        "workflow_count": mapping.get("workflow_count", 0),
+        "workflow_gap_count": mapping.get("workflow_gap_count", 0),
+        "prioritized_workflows": workflow_priorities,
+        "top_priority_workflow": workflow_priorities[0].get("workflow")
+        if workflow_priorities
+        else None,
+        "recommended_next_actions": [
+            "review_prioritized_schema_gaps",
+            "select_high_value_event_family_for_schema_design",
+            "keep_report_only_until_schema_review",
+        ],
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "report_only": True,
+        "would_modify_state": False,
+        "note": "P44 ranks reconstruction evidence gaps for review only; it does not mutate schemas, capture payloads, reconstruct state, compact events, or roll back state.",
+    }
+
+
 def event_payload_capture_requirements_from_coverage(coverage: dict) -> List[dict]:
     requirements = []
     target_paths = coverage.get("target_paths", {})
@@ -7185,6 +7339,13 @@ class StateStore:
         )
         mapping["state_unchanged"] = before_state == self.load()
         return mapping
+
+    def reconstruction_evidence_gap_prioritization(self) -> dict:
+        before_state = self.load()
+        mapping = self.reconstruction_evidence_coverage_mapping()
+        report = build_reconstruction_evidence_gap_prioritization(mapping=mapping)
+        report["state_unchanged"] = before_state == self.load()
+        return report
 
     def propose_event_payload_capture_policy(
         self,

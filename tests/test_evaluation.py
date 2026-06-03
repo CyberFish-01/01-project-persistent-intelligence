@@ -279,6 +279,33 @@ class FoundationEvaluationTests(unittest.TestCase):
             metrics["reconstruction_evidence_coverage_state_mutation_count"],
             0,
         )
+        self.assertEqual(metrics["reconstruction_evidence_gap_prioritization_count"], 1)
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_prioritized_workflow_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_evidence_max_priority_score"],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_evidence_priority_schema_mutation_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_evidence_priority_capture_execution_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_evidence_priority_reconstruction_execution_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_evidence_priority_state_mutation_count"],
+            0,
+        )
         self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,

@@ -385,6 +385,14 @@ v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、re
 - reconstruction evidence coverage capture execution count；
 - reconstruction evidence coverage reconstruction execution count；
 - reconstruction evidence coverage state mutation count；
+- reconstruction evidence gap prioritization count；
+- reconstruction evidence prioritized workflow count；
+- reconstruction evidence high priority workflow count；
+- reconstruction evidence max priority score；
+- reconstruction evidence priority schema mutation count；
+- reconstruction evidence priority capture execution count；
+- reconstruction evidence priority reconstruction execution count；
+- reconstruction evidence priority state mutation count；
 - event payload capture policy proposal count；
 - event payload capture policy decision count；
 - event payload capture policy approved count；

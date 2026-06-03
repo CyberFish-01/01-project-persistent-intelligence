@@ -1612,6 +1612,41 @@ reconstruction_evidence_coverage_mapping:
 
 P43 is still coverage analysis only. It does not write the proposed fields into events.
 
+P44 adds a review-only evidence gap prioritization report:
+
+```bash
+python3 -m one_core.cli reconstruction-evidence-gap-priorities
+```
+
+This report ranks workflow gaps by reconstruction value, preservation risk, and estimated implementation cost. Scores are review signals only.
+
+```yaml
+reconstruction_evidence_gap_prioritization:
+  mode: "reconstruction_evidence_gap_prioritization_v0.1"
+  prioritization_status: "report_only"
+  prioritized_workflows:
+    - workflow: "record_episode"
+      recommended_order: 1
+      priority:
+        mode: "reconstruction_gap_priority_v0.1"
+        reconstruction_value: 0.75
+        preservation_risk: 0.67
+        implementation_cost: 0.76
+        priority_score: 0.62
+        recommended_priority: "medium"
+        review_signal_only: true
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P44 does not select, approve, or execute a schema change. It only makes review order explicit for later human governance.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml
