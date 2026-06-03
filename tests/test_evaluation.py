@@ -120,12 +120,18 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertGreater(metrics["tool_safety_policy_max_evidence_strength"], 0)
         self.assertGreater(metrics["tool_safety_policy_max_scope_specificity"], 0)
         self.assertGreaterEqual(metrics["tool_safety_policy_max_staleness"], 0)
+        self.assertGreaterEqual(metrics["tool_safety_policy_link_count"], 1)
+        self.assertGreaterEqual(
+            metrics["tool_safety_policy_supersession_link_count"],
+            1,
+        )
+        self.assertEqual(metrics["tool_safety_policy_link_executable_policy_count"], 0)
         self.assertGreaterEqual(
             metrics["tool_safety_policy_lifecycle_decision_count"],
             1,
         )
         self.assertGreaterEqual(metrics["tool_safety_policy_archived_count"], 1)
-        self.assertEqual(metrics["tool_safety_policy_active_context_count"], 0)
+        self.assertGreaterEqual(metrics["tool_safety_policy_active_context_count"], 1)
         self.assertEqual(
             metrics["tool_safety_policy_lifecycle_executable_policy_count"],
             0,

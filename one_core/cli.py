@@ -298,6 +298,33 @@ def main() -> None:
     tool_safety_lifecycle_parser.add_argument("--reviewer", default="manual_review")
     tool_safety_lifecycle_parser.add_argument("--decision-note", default="")
 
+    tool_safety_link_parser = subparsers.add_parser(
+        "link-tool-safety-policy-proposals",
+        help="Create a review-only link between two tool/safety policy proposals.",
+    )
+    tool_safety_link_parser.add_argument("from_proposal_id")
+    tool_safety_link_parser.add_argument("to_proposal_id")
+    tool_safety_link_parser.add_argument(
+        "--link-type",
+        required=True,
+        choices=[
+            "supports",
+            "conflicts_with",
+            "supersedes",
+            "overlaps",
+            "depends_on",
+        ],
+    )
+    tool_safety_link_parser.add_argument("--reviewer", default="manual_review")
+    tool_safety_link_parser.add_argument("--reason", default="")
+    tool_safety_link_parser.add_argument(
+        "--evidence",
+        action="append",
+        default=[],
+        help="Supporting memory/action/proposal id. Repeat for multiple evidence ids.",
+    )
+    tool_safety_link_parser.add_argument("--confidence", type=float, default=0.5)
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -567,6 +594,18 @@ def main() -> None:
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "link-tool-safety-policy-proposals":
+        print_json(
+            store.link_tool_safety_policy_proposals(
+                from_proposal_id=args.from_proposal_id,
+                to_proposal_id=args.to_proposal_id,
+                link_type=args.link_type,
+                reviewer=args.reviewer,
+                reason=args.reason,
+                evidence=args.evidence,
+                confidence=args.confidence,
             )
         )
     elif args.command == "context":

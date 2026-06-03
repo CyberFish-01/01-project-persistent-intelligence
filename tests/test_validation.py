@@ -334,6 +334,28 @@ class StateValidationTests(unittest.TestCase):
                     },
                 }
             )
+            state["task_hub"]["tool_safety_policy_links"].append(
+                {
+                    "link_id": "tool_safety_policy_link_bad",
+                    "timestamp": state["created_at"],
+                    "from_proposal_id": "tool_safety_policy_missing",
+                    "to_proposal_id": "tool_safety_policy_bad",
+                    "link_type": "execute",
+                    "status": "active",
+                    "reviewer": "unit_test",
+                    "reason": "Bad link tries to execute policy.",
+                    "evidence": [],
+                    "confidence": 0.5,
+                    "scope_overlap": {},
+                    "relationship_mode": "executable_policy",
+                    "requires_review": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "provenance": [],
+                }
+            )
             state["task_hub"]["tool_safety_policy_lifecycle_decisions"].append(
                 {
                     "decision_id": "tool_safety_policy_lifecycle_decision_bad",
@@ -564,6 +586,42 @@ class StateValidationTests(unittest.TestCase):
             )
             self.assertIn(
                 "task_hub.tool_safety_policy_decisions[0].proposal_score.identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].from_proposal_id",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].link_type",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].evidence",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].relationship_mode",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].requires_review",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_links[0].identity_mutation_allowed",
                 paths,
             )
             self.assertIn(

@@ -58,6 +58,13 @@ CAUTIONARY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 REFLECTION_GUIDANCE_REVIEW_ACTIONS = {"acknowledge", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
+TOOL_SAFETY_POLICY_LINK_TYPES = {
+    "supports",
+    "conflicts_with",
+    "supersedes",
+    "overlaps",
+    "depends_on",
+}
 REFLECTION_VERIFICATION_RESULTS = {
     "verified",
     "not_observed",
@@ -204,6 +211,7 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "reflection_guidance_queue": [],
         "reflection_guidance_decisions": [],
         "tool_safety_policy_proposals": [],
+        "tool_safety_policy_links": [],
         "tool_safety_policy_decisions": [],
         "tool_safety_policy_lifecycle_decisions": [],
         "failure_reflections": [],
@@ -532,6 +540,7 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "reflection_guidance_queue",
         "reflection_guidance_decisions",
         "tool_safety_policy_proposals",
+        "tool_safety_policy_links",
         "tool_safety_policy_decisions",
         "tool_safety_policy_lifecycle_decisions",
         "failure_reflections",
@@ -4253,6 +4262,192 @@ class StateStore:
             "snapshot_id": snapshot["snapshot_id"],
         }
 
+    def link_tool_safety_policy_proposals(
+        self,
+        from_proposal_id: str,
+        to_proposal_id: str,
+        link_type: str,
+        reviewer: str = "manual_review",
+        reason: str = "",
+        evidence: Optional[List[str]] = None,
+        confidence: float = 0.5,
+    ) -> dict:
+        normalized_type = str(link_type or "").strip().lower()
+        if normalized_type not in TOOL_SAFETY_POLICY_LINK_TYPES:
+            return {
+                "status": "rejected",
+                "error": "unsupported_tool_safety_policy_link_type",
+                "link_type": link_type,
+            }
+        if from_proposal_id == to_proposal_id:
+            return {
+                "status": "rejected",
+                "error": "self_link_not_allowed",
+                "proposal_id": from_proposal_id,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(utc_now(), state.get("working_state", {})),
+        )
+        proposals = [
+            item
+            for item in task_hub.setdefault("tool_safety_policy_proposals", [])
+            if isinstance(item, dict)
+        ]
+        from_proposal = next(
+            (
+                item
+                for item in proposals
+                if item.get("proposal_id") == from_proposal_id
+            ),
+            None,
+        )
+        to_proposal = next(
+            (
+                item
+                for item in proposals
+                if item.get("proposal_id") == to_proposal_id
+            ),
+            None,
+        )
+        if from_proposal is None or to_proposal is None:
+            return {
+                "status": "not_found",
+                "error": "tool_safety_policy_proposal_not_found",
+                "from_proposal_id": from_proposal_id,
+                "to_proposal_id": to_proposal_id,
+            }
+
+        now = utc_now()
+        link = build_tool_safety_policy_link(
+            from_proposal=from_proposal,
+            to_proposal=to_proposal,
+            link_type=normalized_type,
+            reviewer=reviewer,
+            reason=reason,
+            evidence=evidence or [],
+            confidence=confidence,
+            timestamp=now,
+        )
+        existing = next(
+            (
+                item
+                for item in task_hub.setdefault("tool_safety_policy_links", [])
+                if isinstance(item, dict)
+                and item.get("from_proposal_id") == from_proposal_id
+                and item.get("to_proposal_id") == to_proposal_id
+                and item.get("link_type") == normalized_type
+                and item.get("status") == "active"
+            ),
+            None,
+        )
+        if existing is not None:
+            return {
+                "status": "duplicate",
+                "link_id": existing.get("link_id"),
+                "from_proposal_id": from_proposal_id,
+                "to_proposal_id": to_proposal_id,
+                "link_type": normalized_type,
+            }
+
+        task_hub.setdefault("tool_safety_policy_links", []).append(link)
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.tool_safety_policy_links",
+                "operation": "link_tool_safety_policy_proposals",
+                "before": None,
+                "after": link["link_id"],
+                "evidence": link["evidence"],
+                "gate": "medium",
+                "confidence": link["confidence"],
+                "tool_safety_policy_link_id": link["link_id"],
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action="link_tool_safety_policy_proposals",
+            target="task_hub.tool_safety_policy_links",
+            outcome="linked",
+            evidence=link["evidence"],
+            metadata={
+                "tool_safety_policy_link_id": link["link_id"],
+                "from_proposal_id": from_proposal_id,
+                "to_proposal_id": to_proposal_id,
+                "link_type": normalized_type,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="tool_safety_policy_link",
+            nodes=[
+                {
+                    "id": "from_proposal",
+                    "type": "PolicyProposal",
+                    "proposal_id": from_proposal_id,
+                    "policy_scope": from_proposal.get("policy_scope"),
+                    "executable_policy": False,
+                },
+                {
+                    "id": "to_proposal",
+                    "type": "PolicyProposal",
+                    "proposal_id": to_proposal_id,
+                    "policy_scope": to_proposal.get("policy_scope"),
+                    "executable_policy": False,
+                },
+                {
+                    "id": "proposal_link",
+                    "type": "PolicyProposalLink",
+                    "link_id": link["link_id"],
+                    "link_type": normalized_type,
+                },
+            ],
+            edges=[
+                {"from": "from_proposal", "to": "proposal_link", "type": "data_flow"},
+                {"from": "proposal_link", "to": "to_proposal", "type": normalized_type},
+            ],
+            memory_events=[
+                {
+                    "operation": "link",
+                    "target": "task_hub.tool_safety_policy_links",
+                    "tool_safety_policy_link_id": link["link_id"],
+                    "from_proposal_id": from_proposal_id,
+                    "to_proposal_id": to_proposal_id,
+                    "link_type": normalized_type,
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "link_tool_safety_policy_proposals",
+                    "reviewer": reviewer,
+                    "reason": reason,
+                    "tool_safety_policy_link": link,
+                }
+            ],
+            summary=(
+                f"Linked tool/safety policy proposal {from_proposal_id} "
+                f"to {to_proposal_id} as {normalized_type}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": "linked",
+            "link_id": link["link_id"],
+            "from_proposal_id": from_proposal_id,
+            "to_proposal_id": to_proposal_id,
+            "link_type": normalized_type,
+        }
+
     def apply_tool_safety_policy_lifecycle_action(
         self,
         proposal_id: str,
@@ -5145,6 +5340,11 @@ class StateStore:
             else 0.0,
             reverse=True,
         )[:8]
+        active_tool_safety_policy_links = [
+            link
+            for link in task_hub.get("tool_safety_policy_links", [])
+            if isinstance(link, dict) and link.get("status") == "active"
+        ][-12:]
         reflection_log = [
             reflection
             for reflection in task_hub.get("reflection_log", [])
@@ -5228,6 +5428,7 @@ class StateStore:
                 "reflection_policy_guidance": reflection_policy_guidance,
                 "reflection_guidance_queue": reflection_guidance_queue,
                 "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
+                "tool_safety_policy_links": active_tool_safety_policy_links,
                 "cautionary_procedural_memory": active_cautionary_memory,
                 "procedural_memory": active_procedural_memory,
             },
@@ -5243,6 +5444,7 @@ class StateStore:
             "reflection_policy_guidance": reflection_policy_guidance,
             "reflection_guidance_queue": reflection_guidance_queue,
             "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
+            "tool_safety_policy_links": active_tool_safety_policy_links,
             "cautionary_procedural_memory": active_cautionary_memory,
             "procedural_memory": active_procedural_memory,
             "identity_update_gate": {
@@ -6701,6 +6903,93 @@ def iso_age_days(start: str, end: str) -> Optional[float]:
     if end_dt.tzinfo is None:
         end_dt = end_dt.replace(tzinfo=timezone.utc)
     return round((end_dt - start_dt).total_seconds() / 86400, 2)
+
+
+def build_tool_safety_policy_link(
+    from_proposal: dict,
+    to_proposal: dict,
+    link_type: str,
+    reviewer: str,
+    reason: str,
+    evidence: List[str],
+    confidence: float,
+    timestamp: str,
+) -> dict:
+    from_evidence = [
+        str(item)
+        for item in from_proposal.get("evidence", [])
+        if str(item or "").strip()
+    ]
+    to_evidence = [
+        str(item)
+        for item in to_proposal.get("evidence", [])
+        if str(item or "").strip()
+    ]
+    link_evidence = list(
+        dict.fromkeys(
+            str(item).strip()
+            for item in [
+                from_proposal.get("proposal_id"),
+                to_proposal.get("proposal_id"),
+                *evidence,
+                *from_evidence[:4],
+                *to_evidence[:4],
+            ]
+            if str(item or "").strip()
+        )
+    )
+    overlap = proposal_scope_overlap(
+        from_proposal.get("policy_scope"),
+        to_proposal.get("policy_scope"),
+    )
+    return {
+        "link_id": new_id("tool_safety_policy_link"),
+        "timestamp": timestamp,
+        "from_proposal_id": from_proposal.get("proposal_id"),
+        "to_proposal_id": to_proposal.get("proposal_id"),
+        "link_type": link_type,
+        "status": "active",
+        "reviewer": reviewer,
+        "reason": reason,
+        "evidence": link_evidence,
+        "confidence": bounded_float(confidence, default=0.5),
+        "from_policy_scope": from_proposal.get("policy_scope"),
+        "to_policy_scope": to_proposal.get("policy_scope"),
+        "scope_overlap": overlap,
+        "from_proposal_score": from_proposal.get("proposal_score", {}),
+        "to_proposal_score": to_proposal.get("proposal_score", {}),
+        "relationship_mode": "review_link_only",
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "provenance": [
+            {
+                "type": "tool_safety_policy_proposal_link",
+                "from_proposal_id": from_proposal.get("proposal_id"),
+                "to_proposal_id": to_proposal.get("proposal_id"),
+            }
+        ],
+    }
+
+
+def proposal_scope_overlap(left: object, right: object) -> dict:
+    left_parts = {
+        part
+        for part in re.split(r"[.:/]", str(left or "").strip().lower())
+        if part
+    }
+    right_parts = {
+        part
+        for part in re.split(r"[.:/]", str(right or "").strip().lower())
+        if part
+    }
+    if not left_parts or not right_parts:
+        return {"score": 0.0, "shared_terms": []}
+    shared = sorted(left_parts & right_parts)
+    score = len(shared) / max(len(left_parts | right_parts), 1)
+    return {"score": round(score, 2), "shared_terms": shared}
 
 
 def build_tool_safety_policy_lifecycle_decision(

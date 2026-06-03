@@ -837,7 +837,7 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- policy proposal prioritization 已由 P26 scoring 处理，但 proposal conflicts 和 supersession links 还没有建模；
+- policy proposal prioritization 已由 P26 scoring 处理，proposal relationship links 已由 P27 处理；
 - evidence strength 和 scope specificity 已做本地评分，但还没有连接到 claim graph dependency links。
 
 ### P26 Tool/Safety Proposal Evidence Scoring
@@ -859,19 +859,43 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- proposal conflict 和 supersession links 还没有建模；
+- proposal relationship links 已由 P27 处理；
 - evidence scoring 还没有连接到 claim graph dependency links。
+
+### P27 Tool/Safety Proposal Conflict Links
+
+目标：在任何 executable policy layer 出现之前，先建模 tool/safety policy proposals 之间的关系。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `task_hub.tool_safety_policy_links` 记录 review-only proposal relationships；
+- `link-tool-safety-policy-proposals` 可以创建 `supports`、`conflicts_with`、`supersedes`、`overlaps` 和 `depends_on` links；
+- link 要求 `from_proposal_id` 和 `to_proposal_id` 都已存在，拒绝 self-link，并压制重复 active link；
+- link 记录 reviewer、reason、evidence、confidence、proposal scores 和 scope overlap；
+- context package 会把 recent active proposal links 作为关系证据暴露；
+- validation 会拒绝 missing evidence、invalid link type、损坏的 proposal reference、executable policy flags 和 Identity Core mutation flags；
+- scenario evaluation 检查 link creation、context exposure、non-execution、replay，以及不会修改 Identity Core。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- proposal links 还没有专门的 archive/discard/quarantine lifecycle command；
+- proposal links 还没有连接到 claim graph dependency/evidence links。
 
 建议下一步：
 
 ```text
-P27 Tool/Safety Proposal Conflict Links
+P28 Tool/Safety Proposal Link Lifecycle
 ```
 
 理由：
 
-- P26 已经能给 proposals 排序，但系统还不能判断两个 proposal 是否冲突、重叠或互相 supersede；
-- conflict/supersession links 是任何未来 executable policy work 之前的地基；
+- P27 已能表达关系，但 stale 或误判的 links 也需要像 proposals 一样有可审计 retention path；
+- lifecycle review 应该从 active context 压制 archived/quarantined links，同时保留 evidence；
+- 这能为之后的 claim-graph integration 准备关系层，但仍不创建 executable policy；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

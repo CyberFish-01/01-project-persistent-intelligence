@@ -803,7 +803,7 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- policy proposal prioritization is handled by P26 scoring, but proposal conflicts and supersession links are not yet modeled;
+- policy proposal prioritization is handled by P26 scoring, and proposal relationship links are handled by P27;
 - evidence strength and scope specificity are scored locally, but not yet connected to claim graph dependency links.
 
 ### P26 Tool/Safety Proposal Evidence Scoring
@@ -825,19 +825,43 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- proposal conflict and supersession links are not modeled;
+- proposal relationship links are handled by P27;
 - evidence scoring is not yet connected to claim graph dependency links.
+
+### P27 Tool/Safety Proposal Conflict Links
+
+Goal: model relationships between tool/safety policy proposals before any executable policy layer exists.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `task_hub.tool_safety_policy_links` records review-only proposal relationships;
+- `link-tool-safety-policy-proposals` can create `supports`, `conflicts_with`, `supersedes`, `overlaps`, and `depends_on` links;
+- links require existing `from_proposal_id` and `to_proposal_id`, reject self-links, and suppress duplicate active links;
+- links record reviewer, reason, evidence, confidence, proposal scores, and scope overlap;
+- context packages expose recent active proposal links as relationship evidence;
+- validation rejects missing evidence, invalid link types, broken proposal references, executable policy flags, and Identity Core mutation flags;
+- scenario evaluation verifies link creation, context exposure, non-execution, replay, and no Identity Core mutation.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- proposal links do not yet have a dedicated lifecycle command for archive/discard/quarantine;
+- proposal links are not yet connected to claim graph dependency/evidence links.
 
 Recommended next step:
 
 ```text
-P27 Tool/Safety Proposal Conflict Links
+P28 Tool/Safety Proposal Link Lifecycle
 ```
 
 Reason:
 
-- P26 can rank proposals, but the system still cannot say whether two proposals conflict, overlap, or supersede one another;
-- conflict/supersession links are a foundation step before any future executable policy work;
+- P27 can express relationships, but stale or mistaken links need the same auditable retention path as proposals;
+- lifecycle review should suppress archived/quarantined links from active context while preserving evidence;
+- this prepares the relationship layer for later claim-graph integration without creating executable policy;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:

@@ -1157,6 +1157,115 @@ class CoreStateTests(unittest.TestCase):
             )
             self.assertEqual(proposals[0]["proposal_id"], narrow["proposal_id"])
 
+    def test_tool_safety_policy_links_are_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            recorded = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="tool_use",
+                observation="Two tool safety proposals may overlap or supersede.",
+                lesson="Proposal relationships should be explicit review links.",
+                expected_behavior="Create proposal links without executable policy.",
+                actor="unit_test",
+                source_ids=["action_policy_link"],
+                evidence=["action_policy_link"],
+                risk="high",
+                confidence=0.9,
+            )
+            store.verify_reflection(
+                recorded["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=["action_policy_link"],
+            )
+            guidance_item = store.build_context_package()["reflection_guidance_queue"][0]
+            store.review_reflection_guidance(
+                guidance_item["guidance_item_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Use as proposal link evidence.",
+            )
+            broad = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="tool_use.preflight",
+                proposed_rule="Require readiness review before tool execution.",
+                proposer="unit_test",
+                rationale="Broad preflight proposal.",
+                risk="high",
+                confidence=0.82,
+            )
+            specific = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="tool_use.preflight.input_readiness",
+                proposed_rule="Require explicit input readiness before local tool execution.",
+                proposer="unit_test",
+                rationale="Specific preflight input proposal.",
+                risk="high",
+                confidence=0.9,
+            )
+
+            linked = store.link_tool_safety_policy_proposals(
+                from_proposal_id=specific["proposal_id"],
+                to_proposal_id=broad["proposal_id"],
+                link_type="supersedes",
+                reviewer="unit_test",
+                reason="Specific input readiness proposal supersedes broad preflight proposal.",
+                evidence=["action_policy_link"],
+                confidence=0.84,
+            )
+            state = store.load()
+            link = state["task_hub"]["tool_safety_policy_links"][-1]
+            package = store.build_context_package()
+
+            self.assertEqual(linked["status"], "linked")
+            self.assertEqual(link["link_type"], "supersedes")
+            self.assertEqual(link["relationship_mode"], "review_link_only")
+            self.assertTrue(link["requires_review"])
+            self.assertTrue(link["execution_prohibited"])
+            self.assertFalse(link["executable_policy"])
+            self.assertFalse(link["executable_policy_created"])
+            self.assertFalse(link["identity_mutation_allowed"])
+            self.assertGreater(link["scope_overlap"]["score"], 0)
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(store.list_traces()[-1]["workflow"], "tool_safety_policy_link")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertIn(
+                linked["link_id"],
+                {
+                    item["link_id"]
+                    for item in package["tool_safety_policy_links"]
+                },
+            )
+            link_count = len(state["task_hub"]["tool_safety_policy_links"])
+            duplicate = store.link_tool_safety_policy_proposals(
+                from_proposal_id=specific["proposal_id"],
+                to_proposal_id=broad["proposal_id"],
+                link_type="supersedes",
+                reviewer="unit_test",
+                reason="Duplicate should not create another active link.",
+                evidence=["action_policy_link"],
+                confidence=0.84,
+            )
+            self_link = store.link_tool_safety_policy_proposals(
+                from_proposal_id=specific["proposal_id"],
+                to_proposal_id=specific["proposal_id"],
+                link_type="supports",
+                reviewer="unit_test",
+                reason="Self-link should be rejected.",
+                evidence=["action_policy_link"],
+                confidence=0.84,
+            )
+            after_link_count = len(
+                store.load()["task_hub"]["tool_safety_policy_links"]
+            )
+
+            self.assertEqual(duplicate["status"], "duplicate")
+            self.assertEqual(duplicate["link_id"], linked["link_id"])
+            self.assertEqual(self_link["status"], "rejected")
+            self.assertEqual(self_link["error"], "self_link_not_allowed")
+            self.assertEqual(after_link_count, link_count)
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

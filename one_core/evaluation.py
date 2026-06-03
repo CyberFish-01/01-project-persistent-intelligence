@@ -930,11 +930,29 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         risk="high",
         confidence=0.88,
     )
+    narrower_policy_proposal = store.propose_tool_safety_policy(
+        guidance_item_id=review.get("guidance_item_id", ""),
+        policy_scope="tool_use.preflight.input_readiness",
+        proposed_rule="Require explicit input readiness before local tool execution.",
+        proposer="scenario_eval",
+        rationale="A narrower reviewed proposal can supersede a broader proposal.",
+        risk="high",
+        confidence=0.9,
+    )
     policy_review = store.review_tool_safety_policy_proposal(
         proposal_id=policy_proposal.get("proposal_id", ""),
         action="approve",
         reviewer="scenario_eval",
         decision_note="Approve as non-executable policy proposal evidence.",
+    )
+    policy_link = store.link_tool_safety_policy_proposals(
+        from_proposal_id=narrower_policy_proposal.get("proposal_id", ""),
+        to_proposal_id=policy_proposal.get("proposal_id", ""),
+        link_type="supersedes",
+        reviewer="scenario_eval",
+        reason="Narrower input-readiness proposal supersedes broader preflight proposal.",
+        evidence=[review.get("guidance_item_id", "")],
+        confidence=0.86,
     )
     pre_lifecycle_package = store.build_context_package()
     policy_lifecycle = store.apply_tool_safety_policy_lifecycle_action(
@@ -968,6 +986,7 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         "tool_safety_policy_lifecycle_decisions",
         [],
     )
+    policy_links = state.get("task_hub", {}).get("tool_safety_policy_links", [])
     reviewed_guidance_item = next(
         (
             item
@@ -1084,6 +1103,25 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
             and 0 <= float(score.get("priority_score")) <= 1
             for score in policy_scores
         ),
+        "tool_safety_policy_link_created": policy_link.get("status") == "linked",
+        "tool_safety_policy_link_context_exposed": policy_link.get("link_id")
+        in {
+            item.get("link_id")
+            for item in package.get("tool_safety_policy_links", [])
+            if isinstance(item, dict)
+        },
+        "tool_safety_policy_link_non_executable": all(
+            item.get("execution_prohibited") is True
+            and item.get("executable_policy") is False
+            and item.get("executable_policy_created") is False
+            for item in policy_links
+            if isinstance(item, dict)
+        ),
+        "tool_safety_policy_link_identity_locked": all(
+            item.get("identity_mutation_allowed") is False
+            for item in policy_links
+            if isinstance(item, dict)
+        ),
         "tool_safety_policy_lifecycle_archived": policy_lifecycle.get("status")
         == "archived",
         "tool_safety_policy_lifecycle_decision_recorded": bool(
@@ -1184,6 +1222,21 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
                 "tool_safety_policy_max_staleness": max(
                     [float(score.get("staleness", 0.0)) for score in policy_scores]
                     or [0.0]
+                ),
+                "tool_safety_policy_link_count": len(policy_links),
+                "tool_safety_policy_supersession_link_count": sum(
+                    1
+                    for item in policy_links
+                    if isinstance(item, dict) and item.get("link_type") == "supersedes"
+                ),
+                "tool_safety_policy_link_executable_policy_count": sum(
+                    1
+                    for item in policy_links
+                    if isinstance(item, dict)
+                    and (
+                        item.get("executable_policy_created") is not False
+                        or item.get("executable_policy") is not False
+                    )
                 ),
                 "tool_safety_policy_lifecycle_decision_count": len(
                     policy_lifecycle_decisions
@@ -2138,6 +2191,17 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
                 for item in metrics
             ]
             or [0.0]
+        ),
+        "tool_safety_policy_link_count": sum(
+            int(item.get("tool_safety_policy_link_count", 0)) for item in metrics
+        ),
+        "tool_safety_policy_supersession_link_count": sum(
+            int(item.get("tool_safety_policy_supersession_link_count", 0))
+            for item in metrics
+        ),
+        "tool_safety_policy_link_executable_policy_count": sum(
+            int(item.get("tool_safety_policy_link_executable_policy_count", 0))
+            for item in metrics
         ),
         "tool_safety_policy_lifecycle_decision_count": sum(
             int(item.get("tool_safety_policy_lifecycle_decision_count", 0))

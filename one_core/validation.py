@@ -987,6 +987,7 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "reflection_guidance_queue",
         "reflection_guidance_decisions",
         "tool_safety_policy_proposals",
+        "tool_safety_policy_links",
         "tool_safety_policy_decisions",
         "tool_safety_policy_lifecycle_decisions",
         "failure_reflections",
@@ -1245,6 +1246,64 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                     issues.append(ValidationIssue(path + ".lifecycle_history", "Tool/safety policy lifecycle action requires lifecycle history."))
                 elif lifecycle_history[-1].get("decision_id") != proposal.get("last_lifecycle_decision_id"):
                     issues.append(ValidationIssue(path + ".lifecycle_history", "Tool/safety policy lifecycle history must reference latest decision."))
+    proposal_links = task_hub.get("tool_safety_policy_links", [])
+    if isinstance(proposal_links, list):
+        proposal_ids = {
+            proposal.get("proposal_id")
+            for proposal in policy_proposals
+            if isinstance(proposal, dict)
+        }
+        for index, link in enumerate(proposal_links):
+            path = f"task_hub.tool_safety_policy_links[{index}]"
+            if not isinstance(link, dict):
+                issues.append(ValidationIssue(path, "Tool/safety policy link must be an object."))
+                continue
+            for key in (
+                "link_id",
+                "timestamp",
+                "from_proposal_id",
+                "to_proposal_id",
+                "link_type",
+                "status",
+                "reviewer",
+                "reason",
+                "evidence",
+                "confidence",
+                "scope_overlap",
+                "relationship_mode",
+                "requires_review",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+                "provenance",
+            ):
+                if key not in link:
+                    issues.append(ValidationIssue(path + f".{key}", "Tool/safety policy link key is missing."))
+            if link.get("from_proposal_id") not in proposal_ids:
+                issues.append(ValidationIssue(path + ".from_proposal_id", "Tool/safety policy link must reference an existing from proposal."))
+            if link.get("to_proposal_id") not in proposal_ids:
+                issues.append(ValidationIssue(path + ".to_proposal_id", "Tool/safety policy link must reference an existing to proposal."))
+            if link.get("from_proposal_id") == link.get("to_proposal_id"):
+                issues.append(ValidationIssue(path, "Tool/safety policy self-link is not allowed."))
+            if link.get("link_type") not in {"supports", "conflicts_with", "supersedes", "overlaps", "depends_on"}:
+                issues.append(ValidationIssue(path + ".link_type", "Tool/safety policy link type is invalid."))
+            if link.get("status") not in {"active", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".status", "Tool/safety policy link status is invalid."))
+            if not isinstance(link.get("evidence"), list) or not link.get("evidence"):
+                issues.append(ValidationIssue(path + ".evidence", "Tool/safety policy link requires evidence."))
+            if link.get("relationship_mode") != "review_link_only":
+                issues.append(ValidationIssue(path + ".relationship_mode", "Tool/safety policy link must remain review_link_only."))
+            if link.get("requires_review") is not True:
+                issues.append(ValidationIssue(path + ".requires_review", "Tool/safety policy link must require review."))
+            if link.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Tool/safety policy link must prohibit execution."))
+            if link.get("executable_policy") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy", "Tool/safety policy link must not be executable policy."))
+            if link.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Tool/safety policy link must not create executable policy."))
+            if link.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy link must not allow Identity Core mutation."))
     policy_decisions = task_hub.get("tool_safety_policy_decisions", [])
     if isinstance(policy_decisions, list):
         for index, decision in enumerate(policy_decisions):
