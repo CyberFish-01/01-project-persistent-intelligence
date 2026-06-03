@@ -484,6 +484,66 @@ class FoundationEvaluationTests(unittest.TestCase):
             0,
         )
         self.assertGreaterEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_decision_count"
+            ],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_satisfied_count"
+            ],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_context_signal_count"
+            ],
+            1,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_schema_mutation_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_capture_execution_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_reconstruction_execution_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_identity_mutation_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_compaction_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_events_modified_count"
+            ],
+            0,
+        )
+        self.assertGreaterEqual(
+            metrics[
+                "reconstruction_schema_evidence_request_lifecycle_replay_after_count"
+            ],
+            1,
+        )
+        self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,
         )

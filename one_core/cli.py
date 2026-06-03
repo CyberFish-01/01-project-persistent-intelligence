@@ -470,6 +470,27 @@ def main() -> None:
         "reconstruction-schema-review-evidence-requests",
         help="Track requested reconstruction schema review evidence without mutating state.",
     )
+    evidence_request_lifecycle_parser = subparsers.add_parser(
+        "reconstruction-schema-evidence-request-lifecycle",
+        help="Apply a review-only lifecycle action to a reconstruction schema evidence request.",
+    )
+    evidence_request_lifecycle_parser.add_argument("request_id")
+    evidence_request_lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["satisfy", "defer", "archive", "quarantine"],
+    )
+    evidence_request_lifecycle_parser.add_argument(
+        "--reviewer",
+        default="manual_review",
+    )
+    evidence_request_lifecycle_parser.add_argument("--decision-note", default="")
+    evidence_request_lifecycle_parser.add_argument(
+        "--evidence-ref",
+        action="append",
+        default=[],
+        help="Evidence reference used to satisfy or review the request; may be repeated.",
+    )
     payload_capture_policy_parser = subparsers.add_parser(
         "propose-event-payload-capture-policy",
         help="Create a review-only event payload capture policy proposal.",
@@ -853,6 +874,16 @@ def main() -> None:
         print_json(store.reconstruction_schema_review_coverage_map())
     elif args.command == "reconstruction-schema-review-evidence-requests":
         print_json(store.reconstruction_schema_review_evidence_request_tracker())
+    elif args.command == "reconstruction-schema-evidence-request-lifecycle":
+        print_json(
+            store.apply_reconstruction_schema_evidence_request_lifecycle_action(
+                request_id=args.request_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+                evidence_refs=args.evidence_ref,
+            )
+        )
     elif args.command == "propose-event-payload-capture-policy":
         print_json(
             store.propose_event_payload_capture_policy(

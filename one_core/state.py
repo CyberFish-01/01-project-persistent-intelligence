@@ -72,6 +72,12 @@ EVENT_PAYLOAD_CAPTURE_POLICY_REVIEW_ACTIONS = {
     "archive",
     "quarantine",
 }
+RECONSTRUCTION_SCHEMA_EVIDENCE_REQUEST_LIFECYCLE_ACTIONS = {
+    "satisfy",
+    "defer",
+    "archive",
+    "quarantine",
+}
 RECONSTRUCTION_SCHEMA_REVIEW_ACTIONS = {
     "approve_for_schema_design",
     "request_more_evidence",
@@ -254,6 +260,7 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "event_payload_capture_policy_proposals": [],
         "event_payload_capture_policy_decisions": [],
         "reconstruction_schema_review_decisions": [],
+        "reconstruction_schema_evidence_request_lifecycle_decisions": [],
         "failure_reflections": [],
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
@@ -653,6 +660,7 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "event_payload_capture_policy_proposals",
         "event_payload_capture_policy_decisions",
         "reconstruction_schema_review_decisions",
+        "reconstruction_schema_evidence_request_lifecycle_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -792,6 +800,8 @@ def task_action_evidence(trace: dict) -> List[str]:
             "event_payload_capture_policy_proposal_id",
             "event_payload_capture_policy_decision_id",
             "reconstruction_schema_review_decision_id",
+            "reconstruction_schema_evidence_request_lifecycle_decision_id",
+            "reconstruction_schema_evidence_request_id",
         ):
             value = event.get(key)
             if value:
@@ -1004,7 +1014,7 @@ def operation_class_for(operation: object) -> str:
         return prefix
     if prefix in {"approve", "reject", "acknowledge"}:
         return "review_decision"
-    if prefix in {"archive", "discard", "quarantine"}:
+    if prefix in {"archive", "discard", "quarantine", "defer", "satisfy"}:
         return "lifecycle_transition"
     return "state_transition"
 
@@ -1037,6 +1047,8 @@ def target_identity_for(update: dict) -> Optional[str]:
             "quarantine_event_payload_capture_policy",
         }
     )
+    if target_path == "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions":
+        return scalar_state_ref(update.get("after"))
     if (
         operation_class_for(update.get("operation")) == "lifecycle_transition"
         or event_retention_lifecycle
@@ -1316,6 +1328,7 @@ PAYLOAD_HINT_KEYS = {
     "review_decision",
     "event_retention_lifecycle_decision",
     "reconstruction_schema_review_decision",
+    "reconstruction_schema_evidence_request_lifecycle_decision",
     "proposal",
     "candidate",
     "reflection",
@@ -2940,6 +2953,66 @@ def build_reconstruction_schema_review_evidence_request_tracker(
         "report_only": True,
         "would_modify_state": False,
         "note": "P48 derives open evidence requests from reconstruction schema review decisions; it does not satisfy requests, approve schema changes, capture payloads, reconstruct state, compact events, roll back state, modify events, or mutate identity.",
+    }
+
+
+def build_reconstruction_schema_evidence_request_lifecycle_decision(
+    request: dict,
+    action: str,
+    reviewer: str,
+    decision_note: str,
+    evidence_refs: List[str],
+    snapshot_id: str,
+    timestamp: str,
+) -> dict:
+    result = {
+        "satisfy": "satisfied",
+        "defer": "deferred",
+        "archive": "archived",
+        "quarantine": "quarantined",
+    }[action]
+    request_id = str(request.get("request_id") or "")
+    return {
+        "decision_id": new_id("reconstruction_schema_evidence_request_lifecycle_decision"),
+        "timestamp": timestamp,
+        "request_id": request_id,
+        "source_decision_id": request.get("source_decision_id"),
+        "checklist_id": request.get("checklist_id"),
+        "workflow": request.get("workflow"),
+        "requested_evidence": request.get("requested_evidence"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "evidence_refs": evidence_refs,
+        "snapshot_id": snapshot_id,
+        "lifecycle_mode": "reconstruction_schema_evidence_request_lifecycle_v0.1",
+        "request_mode": request.get(
+            "request_mode",
+            "reconstruction_schema_review_evidence_request_v0.1",
+        ),
+        "before_status": request.get("status", "open"),
+        "after_status": result,
+        "satisfied": result == "satisfied",
+        "satisfied_by": evidence_refs if result == "satisfied" else [],
+        "requires_review": True,
+        "review_only": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "schema_change_approved": False,
+        "schema_change_allowed": False,
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "identity_mutation_allowed": False,
+        "events_modified": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
     }
 
 
@@ -8191,6 +8264,246 @@ class StateStore:
         tracker["state_unchanged"] = before_state == self.load()
         return tracker
 
+    def apply_reconstruction_schema_evidence_request_lifecycle_action(
+        self,
+        request_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+        evidence_refs: Optional[List[str]] = None,
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if (
+            normalized_action
+            not in RECONSTRUCTION_SCHEMA_EVIDENCE_REQUEST_LIFECYCLE_ACTIONS
+        ):
+            return {
+                "status": "rejected",
+                "error": "unsupported_reconstruction_schema_evidence_request_lifecycle_action",
+                "action": action,
+            }
+
+        before_event_ids = [event.get("event_id") for event in self.list_events()]
+        state = self.load()
+        now = utc_now()
+        tracker = self.reconstruction_schema_review_evidence_request_tracker()
+        request = next(
+            (
+                item
+                for item in tracker.get("evidence_requests", [])
+                if isinstance(item, dict) and item.get("request_id") == request_id
+            ),
+            None,
+        )
+        if request is None:
+            return {
+                "status": "not_found",
+                "error": "reconstruction_schema_evidence_request_not_found",
+                "request_id": request_id,
+            }
+        if normalized_action == "satisfy" and not evidence_refs:
+            return {
+                "status": "rejected",
+                "error": "satisfy_requires_evidence_refs",
+                "request_id": request_id,
+            }
+
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(now, state.get("working_state", {})),
+        )
+        refs = [str(item).strip() for item in (evidence_refs or []) if str(item).strip()]
+        evidence = [
+            item
+            for item in [
+                request_id,
+                request.get("source_decision_id"),
+                request.get("checklist_id"),
+                request.get("requested_evidence"),
+                *refs,
+            ]
+            if item
+        ]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_reconstruction_schema_evidence_request",
+            target_path="task_hub.reconstruction_schema_evidence_request_lifecycle_decisions",
+            evidence=evidence,
+            metadata={
+                "reconstruction_schema_evidence_request_lifecycle_decision_id": None,
+                "request_id": request_id,
+                "source_decision_id": request.get("source_decision_id"),
+                "review_action": normalized_action,
+                "schema_change_approved": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "identity_mutation_allowed": False,
+                "events_modified": False,
+            },
+        )
+        decision = build_reconstruction_schema_evidence_request_lifecycle_decision(
+            request=request,
+            action=normalized_action,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            evidence_refs=refs,
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+        )
+        snapshot["metadata"][
+            "reconstruction_schema_evidence_request_lifecycle_decision_id"
+        ] = decision["decision_id"]
+        task_hub.setdefault(
+            "reconstruction_schema_evidence_request_lifecycle_decisions",
+            [],
+        ).append(decision)
+        task_hub["reconstruction_schema_evidence_request_lifecycle_decisions"] = (
+            task_hub["reconstruction_schema_evidence_request_lifecycle_decisions"][
+                -50:
+            ]
+        )
+
+        state.setdefault("update_log", []).append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions",
+                "operation": f"{normalized_action}_reconstruction_schema_evidence_request",
+                "before": request.get("status", "open"),
+                "after": decision["decision_id"],
+                "evidence": evidence,
+                "gate": "medium",
+                "confidence": 0.7,
+                "reconstruction_schema_evidence_request_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+                "reconstruction_schema_evidence_request_id": request_id,
+                "review_only": True,
+                "execution_prohibited": True,
+                "executable_policy": False,
+                "executable_policy_created": False,
+                "schema_change_approved": False,
+                "schema_change_allowed": False,
+                "identity_mutation_allowed": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "events_modified": False,
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_reconstruction_schema_evidence_request",
+            target="task_hub.reconstruction_schema_evidence_request_lifecycle_decisions",
+            outcome=decision["result"],
+            evidence=evidence,
+            metadata={
+                "reconstruction_schema_evidence_request_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+                "snapshot_id": snapshot["snapshot_id"],
+                "request_id": request_id,
+                "decision_note": decision_note,
+                "review_only": True,
+                "schema_change_approved": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "identity_mutation_allowed": False,
+                "events_modified": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="reconstruction_schema_evidence_request_lifecycle",
+            nodes=[
+                {
+                    "id": "evidence_request",
+                    "type": "ReviewEvidenceRequest",
+                    "request_id": request_id,
+                    "source_decision_id": request.get("source_decision_id"),
+                    "review_only": True,
+                },
+                {
+                    "id": "lifecycle_decision",
+                    "type": "ReviewDecision",
+                    "decision_id": decision["decision_id"],
+                    "reviewer": reviewer,
+                    "action": normalized_action,
+                    "result": decision["result"],
+                    "executable_policy": False,
+                },
+            ],
+            edges=[
+                {
+                    "from": "evidence_request",
+                    "to": "lifecycle_decision",
+                    "type": "lifecycle_review",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions",
+                    "reconstruction_schema_evidence_request_id": request_id,
+                    "reconstruction_schema_evidence_request_lifecycle_decision_id": decision[
+                        "decision_id"
+                    ],
+                    "event_schema_mutation_allowed": False,
+                    "event_payload_capture_executed": False,
+                    "reconstruction_executed": False,
+                    "event_compaction_executed": False,
+                    "automatic_rollback_executed": False,
+                    "identity_mutation_allowed": False,
+                    "events_modified": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_reconstruction_schema_evidence_request",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "reconstruction_schema_evidence_request_lifecycle_decision": decision,
+                }
+            ],
+            summary=(
+                f"Applied lifecycle action {normalized_action} to reconstruction "
+                f"schema evidence request {request_id}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        after_event_ids = [event.get("event_id") for event in self.list_events()]
+        return {
+            "status": decision["result"],
+            "request_id": request_id,
+            "decision_id": decision["decision_id"],
+            "snapshot_id": snapshot["snapshot_id"],
+            "schema_change_approved": False,
+            "schema_change_allowed": False,
+            "event_schema_mutation_allowed": False,
+            "event_payload_capture_executed": False,
+            "reconstruction_executed": False,
+            "event_compaction_executed": False,
+            "automatic_rollback_executed": False,
+            "identity_mutation_allowed": False,
+            "events_modified": before_event_ids != after_event_ids[: len(before_event_ids)],
+        }
+
     def propose_event_payload_capture_policy(
         self,
         proposer: str = "manual_review",
@@ -10117,6 +10430,36 @@ def build_context_signal_index(state: dict, dream_artifacts: List[dict]) -> dict
                     "review_status": decision.get("result"),
                     "workflow": decision.get("workflow"),
                     "mode": decision.get("review_mode"),
+                }
+            )
+    for decision in state.get("task_hub", {}).get(
+        "reconstruction_schema_evidence_request_lifecycle_decisions",
+        [],
+    ):
+        if not isinstance(decision, dict):
+            continue
+        evidence_ids = [
+            str(item)
+            for item in [
+                decision.get("decision_id"),
+                decision.get("request_id"),
+                decision.get("source_decision_id"),
+                decision.get("checklist_id"),
+                decision.get("requested_evidence"),
+                *decision.get("evidence_refs", []),
+            ]
+            if item
+        ]
+        governance_evidence.update(evidence_ids)
+        if evidence_ids:
+            governance_sources.append(
+                {
+                    "source_type": "task_hub.reconstruction_schema_evidence_request_lifecycle_decision",
+                    "source_id": decision.get("decision_id"),
+                    "evidence_ids": evidence_ids,
+                    "review_status": decision.get("result"),
+                    "workflow": decision.get("workflow"),
+                    "mode": decision.get("lifecycle_mode"),
                 }
             )
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Iterable
+import uuid
 
 
 REQUIRED_TOP_LEVEL_KEYS = [
@@ -38,6 +39,11 @@ REQUIRED_MEMORY_STORES = [
     "identity_memory",
     "archived_memory",
 ]
+
+
+def stable_validation_id(prefix: str, *parts: object) -> str:
+    normalized = "|".join(str(part or "").strip().lower() for part in parts)
+    return f"{prefix}_{uuid.uuid5(uuid.NAMESPACE_URL, normalized).hex[:12]}"
 
 REQUIRED_ANCHORS = ["who_am_i", "where_am_i", "what_am_i_doing"]
 VALID_SESSION_POLICY_ACTIONS = {"allow", "dry_run_only", "reject"}
@@ -1340,6 +1346,7 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "event_payload_capture_policy_proposals",
         "event_payload_capture_policy_decisions",
         "reconstruction_schema_review_decisions",
+        "reconstruction_schema_evidence_request_lifecycle_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -2125,6 +2132,205 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                         ValidationIssue(
                             path + f".{key}",
                             "Reconstruction schema review decision must not execute changes.",
+                        )
+                    )
+
+    valid_schema_evidence_request_ids = set()
+    for decision in reconstruction_schema_review_decisions:
+        if not isinstance(decision, dict):
+            continue
+        for requested in decision.get("requested_evidence", []):
+            requested_label = str(requested).strip()
+            if not requested_label:
+                continue
+            valid_schema_evidence_request_ids.add(
+                stable_validation_id(
+                    "reconstruction_schema_evidence_request",
+                    decision.get("decision_id"),
+                    requested_label,
+                )
+            )
+
+    schema_evidence_request_lifecycle_decisions = task_hub.get(
+        "reconstruction_schema_evidence_request_lifecycle_decisions",
+        [],
+    )
+    if isinstance(schema_evidence_request_lifecycle_decisions, list):
+        for index, decision in enumerate(
+            schema_evidence_request_lifecycle_decisions
+        ):
+            path = (
+                "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions"
+                f"[{index}]"
+            )
+            if not isinstance(decision, dict):
+                issues.append(
+                    ValidationIssue(
+                        path,
+                        "Reconstruction schema evidence request lifecycle decision must be an object.",
+                    )
+                )
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "request_id",
+                "source_decision_id",
+                "checklist_id",
+                "workflow",
+                "requested_evidence",
+                "reviewer",
+                "action",
+                "result",
+                "decision_note",
+                "evidence_refs",
+                "snapshot_id",
+                "lifecycle_mode",
+                "request_mode",
+                "before_status",
+                "after_status",
+                "satisfied",
+                "satisfied_by",
+                "requires_review",
+                "review_only",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "schema_change_approved",
+                "schema_change_allowed",
+                "identity_mutation_allowed",
+                "event_schema_mutation_allowed",
+                "event_payload_capture_executed",
+                "reconstruction_executed",
+                "event_compaction_executed",
+                "automatic_rollback_executed",
+                "events_modified",
+                "rollback",
+            ):
+                if key not in decision:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Reconstruction schema evidence request lifecycle decision key is missing.",
+                        )
+                    )
+            if decision.get("request_id") not in valid_schema_evidence_request_ids:
+                issues.append(
+                    ValidationIssue(
+                        path + ".request_id",
+                        "Reconstruction schema evidence request lifecycle decision must reference a derived evidence request.",
+                    )
+                )
+            if decision.get("action") not in {
+                "satisfy",
+                "defer",
+                "archive",
+                "quarantine",
+            }:
+                issues.append(
+                    ValidationIssue(
+                        path + ".action",
+                        "Reconstruction schema evidence request lifecycle action is invalid.",
+                    )
+                )
+            if decision.get("result") not in {
+                "satisfied",
+                "deferred",
+                "archived",
+                "quarantined",
+            }:
+                issues.append(
+                    ValidationIssue(
+                        path + ".result",
+                        "Reconstruction schema evidence request lifecycle result is invalid.",
+                    )
+                )
+            if (
+                decision.get("lifecycle_mode")
+                != "reconstruction_schema_evidence_request_lifecycle_v0.1"
+            ):
+                issues.append(
+                    ValidationIssue(
+                        path + ".lifecycle_mode",
+                        "Reconstruction schema evidence request lifecycle mode is invalid.",
+                    )
+                )
+            if (
+                decision.get("request_mode")
+                != "reconstruction_schema_review_evidence_request_v0.1"
+            ):
+                issues.append(
+                    ValidationIssue(
+                        path + ".request_mode",
+                        "Reconstruction schema evidence request mode is invalid.",
+                    )
+                )
+            if not isinstance(decision.get("evidence_refs"), list):
+                issues.append(
+                    ValidationIssue(
+                        path + ".evidence_refs",
+                        "Reconstruction schema evidence request lifecycle evidence_refs must be a list.",
+                    )
+                )
+            if not isinstance(decision.get("satisfied_by"), list):
+                issues.append(
+                    ValidationIssue(
+                        path + ".satisfied_by",
+                        "Reconstruction schema evidence request lifecycle satisfied_by must be a list.",
+                    )
+                )
+            if decision.get("result") == "satisfied":
+                if decision.get("satisfied") is not True:
+                    issues.append(
+                        ValidationIssue(
+                            path + ".satisfied",
+                            "Satisfied evidence request lifecycle decisions must mark satisfied true.",
+                        )
+                    )
+                if not decision.get("satisfied_by"):
+                    issues.append(
+                        ValidationIssue(
+                            path + ".satisfied_by",
+                            "Satisfied evidence request lifecycle decisions must reference satisfying evidence.",
+                        )
+                    )
+            elif decision.get("satisfied") is not False:
+                issues.append(
+                    ValidationIssue(
+                        path + ".satisfied",
+                        "Non-satisfied evidence request lifecycle decisions must not mark satisfied true.",
+                    )
+                )
+            for key in (
+                "requires_review",
+                "review_only",
+                "execution_prohibited",
+            ):
+                if decision.get(key) is not True:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Reconstruction schema evidence request lifecycle decision must remain review-only.",
+                        )
+                    )
+            for key in (
+                "executable_policy",
+                "executable_policy_created",
+                "schema_change_approved",
+                "schema_change_allowed",
+                "identity_mutation_allowed",
+                "event_schema_mutation_allowed",
+                "event_payload_capture_executed",
+                "reconstruction_executed",
+                "event_compaction_executed",
+                "automatic_rollback_executed",
+                "events_modified",
+            ):
+                if decision.get(key) is not False:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Reconstruction schema evidence request lifecycle decision must not execute changes.",
                         )
                     )
 

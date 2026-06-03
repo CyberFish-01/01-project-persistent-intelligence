@@ -1674,6 +1674,50 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
         store.reconstruction_schema_review_evidence_request_tracker()
     )
     after_schema_review_evidence_requests = store.load()
+    schema_evidence_request = (
+        schema_review_evidence_requests.get("evidence_requests", [{}])[0]
+        if schema_review_evidence_requests.get("evidence_requests")
+        else {}
+    )
+    before_schema_evidence_request_lifecycle_event_ids = [
+        event.get("event_id") for event in store.list_events()
+    ]
+    schema_evidence_request_lifecycle = (
+        store.apply_reconstruction_schema_evidence_request_lifecycle_action(
+            request_id=schema_evidence_request.get("request_id", ""),
+            action="satisfy",
+            reviewer="scenario_eval",
+            decision_note="Record reviewed evidence reference without schema approval.",
+            evidence_refs=["review_note:object_diff_example"],
+        )
+    )
+    after_schema_evidence_request_lifecycle_event_ids = [
+        event.get("event_id") for event in store.list_events()
+    ]
+    schema_evidence_request_lifecycle_state = store.load()
+    schema_evidence_request_lifecycle_decisions = (
+        schema_evidence_request_lifecycle_state.get("task_hub", {}).get(
+            "reconstruction_schema_evidence_request_lifecycle_decisions",
+            [],
+        )
+    )
+    schema_evidence_request_lifecycle_context = store.build_context_package()
+    replay_after_schema_evidence_request_lifecycle = store.replay_events()
+    schema_evidence_request_lifecycle_projection_validation = (
+        replay_after_schema_evidence_request_lifecycle.get(
+            "projection_validation",
+            {},
+        )
+    )
+    projected_schema_evidence_request_lifecycle_validation = (
+        schema_evidence_request_lifecycle_projection_validation.get(
+            "checked",
+            {},
+        ).get(
+            "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions",
+            {},
+        )
+    )
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -2135,6 +2179,66 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 [],
             )
             if isinstance(request, dict)
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_recorded": schema_evidence_request_lifecycle.get(
+            "status"
+        )
+        == "satisfied",
+        "reconstruction_schema_evidence_request_lifecycle_decision_recorded": bool(
+            schema_evidence_request_lifecycle_decisions
+        )
+        and schema_evidence_request_lifecycle_decisions[-1].get("decision_id")
+        == schema_evidence_request_lifecycle.get("decision_id"),
+        "reconstruction_schema_evidence_request_lifecycle_non_executable": all(
+            item.get("review_only") is True
+            and item.get("requires_review") is True
+            and item.get("execution_prohibited") is True
+            and item.get("executable_policy") is False
+            and item.get("executable_policy_created") is False
+            and item.get("schema_change_approved") is False
+            and item.get("schema_change_allowed") is False
+            and item.get("identity_mutation_allowed") is False
+            and item.get("event_schema_mutation_allowed") is False
+            and item.get("event_payload_capture_executed") is False
+            and item.get("reconstruction_executed") is False
+            and item.get("event_compaction_executed") is False
+            and item.get("automatic_rollback_executed") is False
+            and item.get("events_modified") is False
+            for item in schema_evidence_request_lifecycle_decisions
+            if isinstance(item, dict)
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_events_preserved": after_schema_evidence_request_lifecycle_event_ids[
+            : len(before_schema_evidence_request_lifecycle_event_ids)
+        ]
+        == before_schema_evidence_request_lifecycle_event_ids
+        and schema_evidence_request_lifecycle.get("events_modified") is False,
+        "reconstruction_schema_evidence_request_lifecycle_context_signal_visible": schema_evidence_request_lifecycle_context.get(
+            "context_signal_summary",
+            {},
+        ).get(
+            "governance_proposal_link_evidence_count",
+            0,
+        )
+        >= schema_review_context.get("context_signal_summary", {}).get(
+            "governance_proposal_link_evidence_count",
+            0,
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_replay_still_passed": replay_after_schema_evidence_request_lifecycle.get(
+            "status"
+        )
+        == "passed",
+        "reconstruction_schema_evidence_request_lifecycle_projection_consistent": projected_schema_evidence_request_lifecycle_validation.get(
+            "count_consistent"
+        )
+        is True
+        and not any(
+            mismatch.get("target_path")
+            == "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions"
+            for mismatch in schema_evidence_request_lifecycle_projection_validation.get(
+                "count_mismatches",
+                [],
+            )
+            if isinstance(mismatch, dict)
         ),
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
@@ -2656,6 +2760,67 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 if after_schema_review_evidence_requests
                 == before_schema_review_evidence_requests
                 else 1,
+                "reconstruction_schema_evidence_request_lifecycle_decision_count": len(
+                    schema_evidence_request_lifecycle_decisions
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_satisfied_count": sum(
+                    1
+                    for item in schema_evidence_request_lifecycle_decisions
+                    if isinstance(item, dict) and item.get("result") == "satisfied"
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_context_signal_count": schema_evidence_request_lifecycle_context.get(
+                    "context_signal_summary",
+                    {},
+                ).get("governance_proposal_link_evidence_count", 0),
+                "reconstruction_schema_evidence_request_lifecycle_schema_mutation_count": sum(
+                    1
+                    for item in schema_evidence_request_lifecycle_decisions
+                    if isinstance(item, dict)
+                    and (
+                        item.get("schema_change_approved") is True
+                        or item.get("schema_change_allowed") is True
+                        or item.get("event_schema_mutation_allowed") is True
+                    )
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_capture_execution_count": sum(
+                    1
+                    for item in schema_evidence_request_lifecycle_decisions
+                    if isinstance(item, dict)
+                    and item.get("event_payload_capture_executed") is True
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_reconstruction_execution_count": sum(
+                    1
+                    for item in schema_evidence_request_lifecycle_decisions
+                    if isinstance(item, dict)
+                    and item.get("reconstruction_executed") is True
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_identity_mutation_count": sum(
+                    1
+                    for item in schema_evidence_request_lifecycle_decisions
+                    if isinstance(item, dict)
+                    and item.get("identity_mutation_allowed") is True
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_compaction_count": sum(
+                    1
+                    for item in schema_evidence_request_lifecycle_decisions
+                    if isinstance(item, dict)
+                    and item.get("event_compaction_executed") is True
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_events_modified_count": sum(
+                    1
+                    for item in schema_evidence_request_lifecycle_decisions
+                    if isinstance(item, dict) and item.get("events_modified") is True
+                )
+                + int(
+                    after_schema_evidence_request_lifecycle_event_ids[
+                        : len(before_schema_evidence_request_lifecycle_event_ids)
+                    ]
+                    != before_schema_evidence_request_lifecycle_event_ids
+                ),
+                "reconstruction_schema_evidence_request_lifecycle_replay_after_count": 1
+                if replay_after_schema_evidence_request_lifecycle.get("status")
+                == "passed"
+                else 0,
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
                 ),
@@ -4223,6 +4388,96 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
             int(
                 item.get(
                     "reconstruction_schema_review_evidence_request_state_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_decision_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_decision_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_satisfied_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_satisfied_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_context_signal_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_context_signal_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_schema_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_schema_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_capture_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_capture_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_reconstruction_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_reconstruction_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_identity_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_identity_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_compaction_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_compaction_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_events_modified_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_events_modified_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_evidence_request_lifecycle_replay_after_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_evidence_request_lifecycle_replay_after_count",
                     0,
                 )
             )

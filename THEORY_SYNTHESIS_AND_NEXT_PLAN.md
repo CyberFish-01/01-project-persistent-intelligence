@@ -1566,7 +1566,7 @@ Remaining gaps:
 - no event schema migration exists;
 - no payload or diff capture implementation exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
 P49 Reconstruction Schema Evidence Request Lifecycle
@@ -1577,6 +1577,45 @@ Reason:
 - P48 makes requested evidence auditable, but the project still needs a durable review-only lifecycle for opening, satisfying, deferring, archiving, or quarantining those requests;
 - satisfying a request must record evidence references without approving schema changes or executing payload capture;
 - this keeps governance ahead of schema mutation and preserves the post-P40 boundary against reconstruction execution, compaction, rollback, or platform work.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+Implemented result:
+
+- `reconstruction-schema-evidence-request-lifecycle` CLI records durable `reconstruction_schema_evidence_request_lifecycle_decision` objects under `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions`;
+- supported actions are `satisfy`, `defer`, `archive`, and `quarantine`;
+- `satisfy` requires evidence references and records them as `satisfied_by`, but it still does not approve schema changes;
+- decisions enter the append-only event log through `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions`;
+- decisions preserve source request id, source review decision id, checklist id, workflow, requested evidence label, reviewer, action, result, snapshot, rollback metadata, and evidence refs;
+- decisions keep `schema_change_approved: false`, `schema_change_allowed: false`, `event_schema_mutation_allowed: false`, `event_payload_capture_executed: false`, `reconstruction_executed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `identity_mutation_allowed: false`, and `events_modified: false`;
+- scenario evaluation verifies durable decision count, satisfied request count, context governance signal visibility, replay-after-lifecycle, projection consistency, and zero schema mutation / payload capture / reconstruction / event modification / identity mutation counts.
+
+Remaining gaps:
+
+- evidence refs are recorded but not yet checked for coverage quality or target-path completeness;
+- no schema approval workflow exists;
+- no event schema migration exists;
+- no payload or diff capture implementation exists.
+
+Recommended next step:
+
+```text
+P50 Reconstruction Evidence Reference Coverage Report
+```
+
+Reason:
+
+- P49 can record that an evidence request was satisfied by references, but the project still needs a report-only check that those references cover the requested object payload, object diff, snapshot, or reconstruction metadata need;
+- this should remain analytical and should not approve schema changes or execute capture;
+- it continues Event-Sourcing Groundwork by improving evidence quality before any event schema mutation or reconstruction work.
 
 Desired acceptance:
 

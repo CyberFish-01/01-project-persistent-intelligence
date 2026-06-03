@@ -1557,7 +1557,7 @@ git diff --check
 - 还没有 event schema migration；
 - 还没有 payload 或 diff capture implementation。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P49 Reconstruction Schema Evidence Request Lifecycle
@@ -1568,6 +1568,45 @@ P49 Reconstruction Schema Evidence Request Lifecycle
 - P48 让 requested evidence 可审计，但项目仍需要 durable、review-only lifecycle，支持 open、satisfy、defer、archive 或 quarantine 这些 requests；
 - satisfy request 必须只记录 evidence references，不能批准 schema changes，也不能执行 payload capture；
 - 这让 governance 继续先于 schema mutation，同时守住 P40 后禁止 reconstruction execution、compaction、rollback 或 platform work 的边界。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+已实现结果：
+
+- `reconstruction-schema-evidence-request-lifecycle` CLI 会在 `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions` 下记录 durable `reconstruction_schema_evidence_request_lifecycle_decision` objects；
+- 支持的 actions 是 `satisfy`、`defer`、`archive` 和 `quarantine`；
+- `satisfy` 需要 evidence references，并把它们记录为 `satisfied_by`，但仍然不会 approve schema changes；
+- decisions 会通过 `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions` 进入 append-only event log；
+- decisions 会保留 source request id、source review decision id、checklist id、workflow、requested evidence label、reviewer、action、result、snapshot、rollback metadata 和 evidence refs；
+- decisions 保持 `schema_change_approved: false`、`schema_change_allowed: false`、`event_schema_mutation_allowed: false`、`event_payload_capture_executed: false`、`reconstruction_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`identity_mutation_allowed: false` 和 `events_modified: false`；
+- scenario evaluation 会验证 durable decision count、satisfied request count、context governance signal visibility、lifecycle 后 replay 仍通过、projection consistency，以及 schema mutation / payload capture / reconstruction / event modification / identity mutation counts 全部为 0。
+
+剩余缺口：
+
+- evidence refs 已经被记录，但还没有检查 coverage quality 或 target-path completeness；
+- 还没有 schema approval workflow；
+- 还没有 event schema migration；
+- 还没有 payload 或 diff capture implementation。
+
+建议下一步：
+
+```text
+P50 Reconstruction Evidence Reference Coverage Report
+```
+
+理由：
+
+- P49 可以记录某个 evidence request 被 references satisfy，但项目仍需要一个 report-only check，判断这些 references 是否覆盖 requested object payload、object diff、snapshot 或 reconstruction metadata need；
+- 这一步仍应保持 analytical，不批准 schema changes，也不执行 capture；
+- 它会继续在任何 event schema mutation 或 reconstruction work 之前提升 evidence quality。
 
 期望验收：
 

@@ -1842,6 +1842,52 @@ reconstruction_schema_review_evidence_request_tracker:
 
 P48 does not satisfy evidence requests, approve schema changes, capture payloads, reconstruct state, compact events, roll back state, mutate identity, or modify events. It only makes requested evidence auditable before a durable request lifecycle exists.
 
+P49 adds durable, review-only lifecycle decisions for reconstruction schema evidence requests:
+
+```bash
+python3 -m one_core.cli reconstruction-schema-evidence-request-lifecycle \
+  reconstruction_schema_evidence_request_... \
+  --action satisfy \
+  --evidence-ref review_note:object_diff_example
+```
+
+The decision is stored under `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions` and enters the append-only event log through `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions`.
+
+```yaml
+reconstruction_schema_evidence_request_lifecycle_decision:
+  decision_id: "reconstruction_schema_evidence_request_lifecycle_decision_..."
+  lifecycle_mode: "reconstruction_schema_evidence_request_lifecycle_v0.1"
+  request_mode: "reconstruction_schema_review_evidence_request_v0.1"
+  request_id: "reconstruction_schema_evidence_request_..."
+  source_decision_id: "reconstruction_schema_review_decision_..."
+  checklist_id: "schema_review_1_record_episode"
+  workflow: "record_episode"
+  requested_evidence: "object_diff_example"
+  action: "satisfy"
+  result: "satisfied"
+  evidence_refs:
+    - "review_note:object_diff_example"
+  satisfied: true
+  satisfied_by:
+    - "review_note:object_diff_example"
+  review_only: true
+  requires_review: true
+  execution_prohibited: true
+  executable_policy: false
+  executable_policy_created: false
+  schema_change_approved: false
+  schema_change_allowed: false
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  identity_mutation_allowed: false
+  events_modified: false
+```
+
+P49 can mark a request as satisfied, deferred, archived, or quarantined for governance purposes only. `satisfied` means evidence references were recorded; it does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, mutate identity, or modify existing events.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml

@@ -1844,6 +1844,52 @@ reconstruction_schema_review_evidence_request_tracker:
 
 P48 不会 satisfy evidence requests、approve schema changes、capture payloads、reconstruct state、compact events、rollback state、mutate identity 或 modify events。它只是在 durable request lifecycle 存在之前，让 requested evidence 可审计。
 
+P49 增加 durable、review-only reconstruction schema evidence request lifecycle decisions：
+
+```bash
+python3 -m one_core.cli reconstruction-schema-evidence-request-lifecycle \
+  reconstruction_schema_evidence_request_... \
+  --action satisfy \
+  --evidence-ref review_note:object_diff_example
+```
+
+这个 decision 会存入 `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions`，并通过 `task_hub.reconstruction_schema_evidence_request_lifecycle_decisions` 进入 append-only event log。
+
+```yaml
+reconstruction_schema_evidence_request_lifecycle_decision:
+  decision_id: "reconstruction_schema_evidence_request_lifecycle_decision_..."
+  lifecycle_mode: "reconstruction_schema_evidence_request_lifecycle_v0.1"
+  request_mode: "reconstruction_schema_review_evidence_request_v0.1"
+  request_id: "reconstruction_schema_evidence_request_..."
+  source_decision_id: "reconstruction_schema_review_decision_..."
+  checklist_id: "schema_review_1_record_episode"
+  workflow: "record_episode"
+  requested_evidence: "object_diff_example"
+  action: "satisfy"
+  result: "satisfied"
+  evidence_refs:
+    - "review_note:object_diff_example"
+  satisfied: true
+  satisfied_by:
+    - "review_note:object_diff_example"
+  review_only: true
+  requires_review: true
+  execution_prohibited: true
+  executable_policy: false
+  executable_policy_created: false
+  schema_change_approved: false
+  schema_change_allowed: false
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  identity_mutation_allowed: false
+  events_modified: false
+```
+
+P49 可以把 request 标记为 satisfied、deferred、archived 或 quarantined，但只用于治理。`satisfied` 只表示 evidence references 已被记录；它不会 approve schema changes、capture payloads、reconstruct state、compact events、rollback state、mutate identity 或 modify existing events。
+
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
 ```yaml

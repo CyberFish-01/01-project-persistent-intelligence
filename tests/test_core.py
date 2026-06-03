@@ -3303,6 +3303,106 @@ class CoreStateTests(unittest.TestCase):
                 before_event_ids,
             )
 
+    def test_reconstruction_schema_evidence_request_lifecycle_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P49 schema evidence request lifecycle episode")
+            store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create retention workflow gap for P49 evidence lifecycle.",
+            )
+            checklist = store.reconstruction_evidence_schema_review_checklist()
+            checklist_id = checklist["checklist_items"][0]["checklist_id"]
+            store.review_reconstruction_schema_checklist_item(
+                checklist_id=checklist_id,
+                action="request_more_evidence",
+                reviewer="unit_test",
+                rationale="Need explicit object evidence before schema design.",
+                requested_evidence=["object_diff_example"],
+                approval_scope=["schema_design_discussion_only"],
+            )
+            tracker = store.reconstruction_schema_review_evidence_request_tracker()
+            request_id = tracker["evidence_requests"][0]["request_id"]
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            result = store.apply_reconstruction_schema_evidence_request_lifecycle_action(
+                request_id=request_id,
+                action="satisfy",
+                reviewer="unit_test",
+                decision_note="Attach reviewed object diff example as evidence only.",
+                evidence_refs=["review_note:object_diff_example"],
+            )
+            state = store.load()
+            decisions = state["task_hub"][
+                "reconstruction_schema_evidence_request_lifecycle_decisions"
+            ]
+            decision = decisions[-1]
+            replay = store.replay_events()
+            projected = replay["projection"]["target_paths"][
+                "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions"
+            ]
+            validation = replay["projection_validation"]["checked"][
+                "task_hub.reconstruction_schema_evidence_request_lifecycle_decisions"
+            ]
+            after_event_ids = [event["event_id"] for event in store.list_events()]
+
+            self.assertEqual(result["status"], "satisfied")
+            self.assertEqual(result["request_id"], request_id)
+            self.assertTrue(
+                result["decision_id"].startswith(
+                    "reconstruction_schema_evidence_request_lifecycle_decision_"
+                )
+            )
+            self.assertEqual(decision["decision_id"], result["decision_id"])
+            self.assertEqual(decision["request_id"], request_id)
+            self.assertEqual(decision["action"], "satisfy")
+            self.assertEqual(decision["result"], "satisfied")
+            self.assertEqual(
+                decision["lifecycle_mode"],
+                "reconstruction_schema_evidence_request_lifecycle_v0.1",
+            )
+            self.assertEqual(
+                decision["request_mode"],
+                "reconstruction_schema_review_evidence_request_v0.1",
+            )
+            self.assertTrue(decision["satisfied"])
+            self.assertEqual(
+                decision["satisfied_by"],
+                ["review_note:object_diff_example"],
+            )
+            self.assertTrue(decision["review_only"])
+            self.assertTrue(decision["requires_review"])
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["schema_change_approved"])
+            self.assertFalse(decision["schema_change_allowed"])
+            self.assertFalse(decision["event_schema_mutation_allowed"])
+            self.assertFalse(decision["event_payload_capture_executed"])
+            self.assertFalse(decision["reconstruction_executed"])
+            self.assertFalse(decision["event_compaction_executed"])
+            self.assertFalse(decision["automatic_rollback_executed"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertFalse(decision["events_modified"])
+            self.assertFalse(result["schema_change_approved"])
+            self.assertFalse(result["schema_change_allowed"])
+            self.assertFalse(result["event_schema_mutation_allowed"])
+            self.assertFalse(result["event_payload_capture_executed"])
+            self.assertFalse(result["reconstruction_executed"])
+            self.assertFalse(result["event_compaction_executed"])
+            self.assertFalse(result["automatic_rollback_executed"])
+            self.assertFalse(result["identity_mutation_allowed"])
+            self.assertFalse(result["events_modified"])
+            self.assertEqual(after_event_ids[: len(before_event_ids)], before_event_ids)
+            self.assertEqual(projected["latest_after"], result["decision_id"])
+            self.assertTrue(validation["count_consistent"])
+            self.assertEqual(
+                validate_state(store.load(), events=store.list_events())["status"],
+                "passed",
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))
