@@ -41,6 +41,7 @@ task_hub:
   reflection_guidance_decisions: []
   tool_safety_policy_proposals: []
   tool_safety_policy_decisions: []
+  tool_safety_policy_lifecycle_decisions: []
   procedural_candidates: []
 identity_update_gate:
   proposals: []
@@ -764,6 +765,7 @@ task_hub:
       risk: "high"
       confidence: 0.88
       proposer: "manual_review"
+      status: "active"
       review_status: "pending|approved|rejected|archived|quarantined"
       proposal_mode: "proposal_only"
       requires_review: true
@@ -778,6 +780,12 @@ task_hub:
       source_ids:
         - "action_0002"
       review_history: []
+      lifecycle:
+        status: "active"
+        created_at: "ISO-8601 timestamp"
+        last_reviewed_at: null
+        review_status: "pending"
+      update_history: []
       provenance:
         - type: "reflection_guidance_policy_proposal"
           guidance_item_id: "reflection_guidance_item_0001"
@@ -806,6 +814,33 @@ task_hub:
       identity_mutation_allowed: false
       rollback:
         snapshot_id: "snapshot_0005"
+        reversible: true
+  tool_safety_policy_lifecycle_decisions:
+    - decision_id: "tool_safety_policy_lifecycle_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      proposal_id: "tool_safety_policy_proposal_0001"
+      policy_scope: "tool_use.preflight"
+      source_guidance_item_id: "reflection_guidance_item_0001"
+      source_reflection_id: "reflection_0001"
+      reviewer: "manual_review"
+      action: "archive"
+      result: "archived"
+      decision_note: "Superseded by a more specific proposal."
+      proposal_status_before: "approved"
+      snapshot_id: "snapshot_0006"
+      evidence:
+        - "tool_safety_policy_proposal_0001"
+        - "reflection_guidance_item_0001"
+      risk: "high"
+      confidence: 0.88
+      proposal_mode: "proposal_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      rollback:
+        snapshot_id: "snapshot_0006"
         reversible: true
   failure_reflections:
     - reflection_id: "failure_reflection_0001"
@@ -973,6 +1008,8 @@ P21 adds reflection log. `record-reflection` can record a general reflection ent
 P22 adds reflection-policy guidance. `build_context_package()` derives advisory-only `reflection_policy_guidance` from verified reflection log entries. P23 adds durable `task_hub.reflection_guidance_queue` and `task_hub.reflection_guidance_decisions`; `review-reflection-guidance` can acknowledge, archive, or quarantine guidance items, writing snapshot, audit, trace, update log, and replayable event metadata. Reflection guidance remains non-executable and cannot mutate Identity Core.
 
 P24 adds a tool/safety policy proposal layer. `propose-tool-safety-policy` can create a non-executable policy proposal only from reviewed reflection guidance, and `review-tool-safety-policy-proposal` can approve, reject, archive, or quarantine that proposal. Proposal and decision records write snapshot/audit/trace/update metadata and replayable event references. They explicitly preserve `proposal_mode: "proposal_only"`, `requires_review: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`. P24 does not create a policy executor and does not mutate Identity Core.
+
+P25 adds tool/safety policy proposal lifecycle retention. `tool-safety-policy-lifecycle` can archive, discard, or quarantine reviewed policy proposals. It writes snapshot, audit, trace, update log, lifecycle history, and `task_hub.tool_safety_policy_lifecycle_decisions`, while preserving proposal-only and non-executable invariants. Context packages expose only active pending/approved proposals, so archived, discarded, and quarantined proposals are suppressed from active state transfer.
 
 ## 14. Identity Update Gate
 

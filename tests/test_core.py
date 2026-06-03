@@ -997,6 +997,89 @@ class CoreStateTests(unittest.TestCase):
                 },
             )
 
+    def test_tool_safety_policy_lifecycle_suppresses_context(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            recorded = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="tool_use",
+                observation="A tool workflow needs lifecycle retention.",
+                lesson="Tool safety proposals should be archivable before execution.",
+                expected_behavior="Archive stale proposals without creating policy.",
+                actor="unit_test",
+                source_ids=["action_policy_lifecycle"],
+                evidence=["action_policy_lifecycle"],
+                risk="high",
+                confidence=0.91,
+            )
+            store.verify_reflection(
+                recorded["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=["action_policy_lifecycle"],
+            )
+            guidance_item = store.build_context_package()["reflection_guidance_queue"][0]
+            store.review_reflection_guidance(
+                guidance_item["guidance_item_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Use this only as lifecycle proposal evidence.",
+            )
+            proposed = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="tool_use.preflight",
+                proposed_rule="Require lifecycle review before reusing a stale rule.",
+                proposer="unit_test",
+                rationale="Verified reflection guidance supports lifecycle retention.",
+                risk="high",
+                confidence=0.88,
+            )
+            store.review_tool_safety_policy_proposal(
+                proposed["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Approve as non-executable proposal evidence.",
+            )
+
+            lifecycle = store.apply_tool_safety_policy_lifecycle_action(
+                proposed["proposal_id"],
+                action="archive",
+                reviewer="unit_test",
+                decision_note="Superseded by a more specific proposal.",
+            )
+            state = store.load()
+            proposal = state["task_hub"]["tool_safety_policy_proposals"][-1]
+            decision = state["task_hub"]["tool_safety_policy_lifecycle_decisions"][-1]
+            package = store.build_context_package()
+
+            self.assertEqual(lifecycle["status"], "archived")
+            self.assertEqual(proposal["status"], "archived")
+            self.assertEqual(proposal["lifecycle"]["status"], "archived")
+            self.assertEqual(
+                proposal["last_lifecycle_decision_id"],
+                lifecycle["tool_safety_policy_lifecycle_decision_id"],
+            )
+            self.assertTrue(proposal["execution_prohibited"])
+            self.assertFalse(proposal["executable_policy"])
+            self.assertFalse(proposal["executable_policy_created"])
+            self.assertFalse(proposal["identity_mutation_allowed"])
+            self.assertEqual(decision["result"], "archived")
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(store.list_traces()[-1]["workflow"], "tool_safety_policy_lifecycle")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertNotIn(
+                proposed["proposal_id"],
+                {
+                    item["proposal_id"]
+                    for item in package["tool_safety_policy_proposals"]
+                },
+            )
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

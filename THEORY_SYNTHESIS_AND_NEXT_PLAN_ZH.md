@@ -814,20 +814,42 @@ P22 Reflection-Policy Linkage
 剩余缺口：
 
 - 还没有 tool/safety policy executor；
-- proposal lifecycle retention 还没有实现；
+- proposal lifecycle retention 已由 P25 处理；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
 - policy proposal prioritization 目前仍然只是简单 risk/confidence scoring。
+
+### P25 Tool/Safety Policy Proposal Lifecycle
+
+目标：让已经 review 的 tool/safety policy proposals 可以被 archive、discard 或 quarantine，但仍然不创建 executable policy。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `task_hub.tool_safety_policy_lifecycle_decisions` 记录 proposal lifecycle decisions；
+- `tool-safety-policy-lifecycle` 可以 archive、discard 或 quarantine 已 review 的 policy proposals；
+- lifecycle review 会写入 snapshot、audit、trace、update log、lifecycle history、rollback metadata 和可 replay 的 event metadata；
+- proposal lifecycle 保持 `proposal_mode: "proposal_only"`、`requires_review: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- context packages 只暴露 active pending/approved tool/safety policy proposals；
+- scenario evaluation 会验证 archived proposal suppression、replay、不创建 executable policy，以及不修改 Identity Core。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- policy proposal prioritization 目前仍然只是简单 risk/confidence scoring；
+- evidence strength 和 scope specificity 还没有系统评分。
 
 建议下一步：
 
 ```text
-P25 Tool/Safety Policy Proposal Lifecycle
+P26 Tool/Safety Proposal Evidence Scoring
 ```
 
 理由：
 
-- P24 创建了 reviewed proposal records，但还没有对 stale、superseded 或 quarantined proposals 做 retention 控制；
-- lifecycle handling 是任何未来 executable policy work 之前的地基；
+- P25 已能保留或压制 proposals，但系统还不能判断哪些 proposal 证据更强、scope 更窄、是否已经 stale；
+- evidence 和 scope scoring 是任何未来 executable policy work 之前的地基；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

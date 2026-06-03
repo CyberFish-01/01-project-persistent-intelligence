@@ -115,6 +115,16 @@ class FoundationEvaluationTests(unittest.TestCase):
             1,
         )
         self.assertEqual(metrics["tool_safety_policy_executable_policy_count"], 0)
+        self.assertGreaterEqual(
+            metrics["tool_safety_policy_lifecycle_decision_count"],
+            1,
+        )
+        self.assertGreaterEqual(metrics["tool_safety_policy_archived_count"], 1)
+        self.assertEqual(metrics["tool_safety_policy_active_context_count"], 0)
+        self.assertEqual(
+            metrics["tool_safety_policy_lifecycle_executable_policy_count"],
+            0,
+        )
         self.assertEqual(metrics["reflection_identity_mutation_count"], 0)
         self.assertEqual(metrics["procedural_lifecycle_score"], 1.0)
         self.assertGreaterEqual(metrics["procedural_lifecycle_decision_count"], 1)

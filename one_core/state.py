@@ -57,6 +57,7 @@ CAUTIONARY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 CAUTIONARY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 REFLECTION_GUIDANCE_REVIEW_ACTIONS = {"acknowledge", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
+TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 REFLECTION_VERIFICATION_RESULTS = {
     "verified",
     "not_observed",
@@ -204,6 +205,7 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "reflection_guidance_decisions": [],
         "tool_safety_policy_proposals": [],
         "tool_safety_policy_decisions": [],
+        "tool_safety_policy_lifecycle_decisions": [],
         "failure_reflections": [],
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
@@ -531,6 +533,7 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "reflection_guidance_decisions",
         "tool_safety_policy_proposals",
         "tool_safety_policy_decisions",
+        "tool_safety_policy_lifecycle_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -543,6 +546,24 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
     ):
         if not isinstance(task_hub.get(key), list):
             task_hub[key] = []
+            changed = True
+
+    for proposal in task_hub.get("tool_safety_policy_proposals", []):
+        if not isinstance(proposal, dict):
+            continue
+        if "status" not in proposal:
+            proposal["status"] = "active"
+            changed = True
+        if not isinstance(proposal.get("lifecycle"), dict):
+            proposal["lifecycle"] = {
+                "status": proposal.get("status", "active"),
+                "created_at": proposal.get("timestamp", timestamp),
+                "last_reviewed_at": proposal.get("reviewed_at"),
+                "review_status": proposal.get("review_status", "pending"),
+            }
+            changed = True
+        if "update_history" not in proposal:
+            proposal["update_history"] = []
             changed = True
 
     existing_source_keys = {
@@ -4217,6 +4238,225 @@ class StateStore:
             "snapshot_id": snapshot["snapshot_id"],
         }
 
+    def apply_tool_safety_policy_lifecycle_action(
+        self,
+        proposal_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_tool_safety_policy_lifecycle_action",
+                "action": action,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(utc_now(), state.get("working_state", {})),
+        )
+        proposal = next(
+            (
+                item
+                for item in task_hub.setdefault("tool_safety_policy_proposals", [])
+                if isinstance(item, dict) and item.get("proposal_id") == proposal_id
+            ),
+            None,
+        )
+        if proposal is None:
+            return {
+                "status": "not_found",
+                "error": "tool_safety_policy_proposal_not_found",
+                "proposal_id": proposal_id,
+            }
+
+        before_status = (
+            proposal.get("lifecycle", {}).get("status")
+            if isinstance(proposal.get("lifecycle"), dict)
+            else None
+        ) or proposal.get("status") or proposal.get("review_status", "pending")
+        if before_status in {"archived", "discarded", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "proposal_id": proposal_id,
+                "lifecycle_status": before_status,
+            }
+
+        now = utc_now()
+        target_status = {
+            "archive": "archived",
+            "discard": "discarded",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        decision = build_tool_safety_policy_lifecycle_decision(
+            proposal=proposal,
+            action=normalized_action,
+            result=target_status,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=None,
+            timestamp=now,
+            before_status=before_status,
+        )
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_tool_safety_policy_proposal",
+            target_path="task_hub.tool_safety_policy_proposals",
+            evidence=[proposal_id] + list(proposal.get("evidence", [])),
+            metadata={
+                "tool_safety_policy_lifecycle_decision_id": decision["decision_id"],
+                "proposal_id": proposal_id,
+                "proposal_status": before_status,
+                "policy_scope": proposal.get("policy_scope"),
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+        )
+        proposal["status"] = target_status
+        proposal["review_status"] = target_status
+        proposal["reviewed_at"] = now
+        proposal["reviewer"] = reviewer
+        proposal["decision_note"] = decision_note
+        proposal["last_lifecycle_decision_id"] = decision["decision_id"]
+        proposal["proposal_mode"] = "proposal_only"
+        proposal["requires_review"] = True
+        proposal["execution_prohibited"] = True
+        proposal["executable_policy"] = False
+        proposal["executable_policy_created"] = False
+        proposal["identity_mutation_allowed"] = False
+        proposal["lifecycle"] = {
+            **(
+                proposal.get("lifecycle", {})
+                if isinstance(proposal.get("lifecycle"), dict)
+                else {}
+            ),
+            "status": target_status,
+            "last_reviewed_at": now,
+            "review_status": target_status,
+            "lifecycle_decision_id": decision["decision_id"],
+        }
+        if normalized_action == "quarantine":
+            proposal["quarantine_reason"] = (
+                decision_note or "tool_safety_policy_lifecycle_quarantine"
+            )
+        if normalized_action == "discard":
+            proposal["discard_reason"] = (
+                decision_note or "tool_safety_policy_lifecycle_discard"
+            )
+
+        decision["snapshot_id"] = snapshot["snapshot_id"]
+        decision["rollback"]["snapshot_id"] = snapshot["snapshot_id"]
+        task_hub.setdefault("tool_safety_policy_lifecycle_decisions", []).append(
+            decision
+        )
+        proposal.setdefault("lifecycle_history", []).append(decision)
+        proposal.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": reviewer,
+                "operation": f"{normalized_action}_tool_safety_policy_proposal",
+                "evidence": [proposal_id],
+                "tool_safety_policy_lifecycle_decision_id": decision["decision_id"],
+            }
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.tool_safety_policy_proposals",
+                "operation": f"{normalized_action}_tool_safety_policy_proposal",
+                "before": before_status,
+                "after": target_status,
+                "evidence": [proposal_id] + list(proposal.get("evidence", [])),
+                "gate": "medium",
+                "confidence": proposal.get("confidence", 0.5),
+                "tool_safety_policy_lifecycle_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_tool_safety_policy_proposal_lifecycle",
+            target="task_hub.tool_safety_policy_proposals",
+            outcome=target_status,
+            evidence=[proposal_id] + list(proposal.get("evidence", [])),
+            metadata={
+                "tool_safety_policy_lifecycle_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "proposal_id": proposal_id,
+                "policy_scope": proposal.get("policy_scope"),
+                "decision_note": decision_note,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="tool_safety_policy_lifecycle",
+            nodes=[
+                {
+                    "id": "policy_proposal",
+                    "type": "PolicyProposal",
+                    "proposal_id": proposal_id,
+                    "policy_scope": proposal.get("policy_scope"),
+                    "executable_policy": False,
+                },
+                {
+                    "id": "lifecycle_review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[
+                {
+                    "from": "policy_proposal",
+                    "to": "lifecycle_review",
+                    "type": "feedback",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.tool_safety_policy_proposals",
+                    "tool_safety_policy_proposal_id": proposal_id,
+                    "tool_safety_policy_lifecycle_decision_id": decision[
+                        "decision_id"
+                    ],
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_tool_safety_policy_proposal",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "tool_safety_policy_lifecycle_decision": decision,
+                }
+            ],
+            summary=(
+                f"Applied lifecycle action {normalized_action} to tool/safety "
+                f"policy proposal {proposal_id}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": target_status,
+            "proposal_id": proposal_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "tool_safety_policy_lifecycle_decision_id": decision["decision_id"],
+        }
+
     def apply_memory_lifecycle_action(
         self,
         store_name: str,
@@ -4869,6 +5109,12 @@ class StateStore:
             for proposal in task_hub.get("tool_safety_policy_proposals", [])
             if isinstance(proposal, dict)
             and proposal.get("review_status") in {"pending", "approved"}
+            and (
+                proposal.get("lifecycle", {})
+                if isinstance(proposal.get("lifecycle"), dict)
+                else {}
+            ).get("status", proposal.get("status", "active"))
+            == "active"
         ][-8:]
         reflection_log = [
             reflection
@@ -6230,6 +6476,7 @@ def build_tool_safety_policy_proposal(
         "risk": str(risk or guidance_item.get("review_priority") or "medium"),
         "confidence": confidence,
         "proposer": proposer,
+        "status": "active",
         "review_status": "pending",
         "proposal_mode": "proposal_only",
         "requires_review": True,
@@ -6240,6 +6487,20 @@ def build_tool_safety_policy_proposal(
         "evidence": evidence,
         "source_ids": guidance_item.get("source_ids", []),
         "review_history": [],
+        "lifecycle": {
+            "status": "active",
+            "created_at": timestamp,
+            "last_reviewed_at": None,
+            "review_status": "pending",
+        },
+        "update_history": [
+            {
+                "timestamp": timestamp,
+                "actor": proposer,
+                "operation": "propose_tool_safety_policy",
+                "evidence": evidence,
+            }
+        ],
         "provenance": [
             {
                 "type": "reflection_guidance_policy_proposal",
@@ -6274,6 +6535,45 @@ def build_tool_safety_policy_decision(
         "evidence": proposal.get("evidence", []),
         "risk": proposal.get("risk", "medium"),
         "confidence": proposal.get("confidence", 0.5),
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
+    }
+
+
+def build_tool_safety_policy_lifecycle_decision(
+    proposal: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: Optional[str],
+    timestamp: str,
+    before_status: str,
+) -> dict:
+    return {
+        "decision_id": new_id("tool_safety_policy_lifecycle_decision"),
+        "timestamp": timestamp,
+        "proposal_id": proposal.get("proposal_id"),
+        "policy_scope": proposal.get("policy_scope"),
+        "source_guidance_item_id": proposal.get("source_guidance_item_id"),
+        "source_reflection_id": proposal.get("source_reflection_id"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "proposal_status_before": before_status,
+        "snapshot_id": snapshot_id,
+        "evidence": proposal.get("evidence", []),
+        "risk": proposal.get("risk", "medium"),
+        "confidence": proposal.get("confidence", 0.5),
+        "proposal_mode": "proposal_only",
         "requires_review": True,
         "execution_prohibited": True,
         "executable_policy": False,

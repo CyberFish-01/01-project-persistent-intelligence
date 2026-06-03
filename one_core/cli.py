@@ -285,6 +285,19 @@ def main() -> None:
     tool_safety_review_parser.add_argument("--reviewer", default="manual_review")
     tool_safety_review_parser.add_argument("--decision-note", default="")
 
+    tool_safety_lifecycle_parser = subparsers.add_parser(
+        "tool-safety-policy-lifecycle",
+        help="Apply a reviewed lifecycle action to a tool/safety policy proposal.",
+    )
+    tool_safety_lifecycle_parser.add_argument("proposal_id")
+    tool_safety_lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["archive", "discard", "quarantine"],
+    )
+    tool_safety_lifecycle_parser.add_argument("--reviewer", default="manual_review")
+    tool_safety_lifecycle_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -541,6 +554,15 @@ def main() -> None:
     elif args.command == "review-tool-safety-policy-proposal":
         print_json(
             store.review_tool_safety_policy_proposal(
+                proposal_id=args.proposal_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "tool-safety-policy-lifecycle":
+        print_json(
+            store.apply_tool_safety_policy_lifecycle_action(
                 proposal_id=args.proposal_id,
                 action=args.action,
                 reviewer=args.reviewer,

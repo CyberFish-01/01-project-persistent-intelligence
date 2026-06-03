@@ -780,20 +780,42 @@ Implemented result:
 Remaining gaps:
 
 - no tool/safety policy executor exists yet;
-- proposal lifecycle retention is not yet implemented;
+- proposal lifecycle retention is handled by P25;
 - no structured allow/deny rule semantics are enforced from approved proposals;
 - policy proposal prioritization is still simple risk/confidence scoring.
+
+### P25 Tool/Safety Policy Proposal Lifecycle
+
+Goal: let reviewed tool/safety policy proposals age out, be archived, discarded, or quarantined without creating executable policy.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `task_hub.tool_safety_policy_lifecycle_decisions` records proposal lifecycle decisions;
+- `tool-safety-policy-lifecycle` can archive, discard, or quarantine reviewed policy proposals;
+- lifecycle review writes snapshot, audit, trace, update log, lifecycle history, rollback metadata, and replayable event metadata;
+- proposal lifecycle preserves `proposal_mode: "proposal_only"`, `requires_review: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- context packages expose only active pending/approved tool/safety policy proposals;
+- scenario evaluation verifies archived proposal suppression, replay, no executable policy creation, and no Identity Core mutation.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- policy proposal prioritization is still simple risk/confidence scoring;
+- evidence strength and scope specificity are not yet scored systematically.
 
 Recommended next step:
 
 ```text
-P25 Tool/Safety Policy Proposal Lifecycle
+P26 Tool/Safety Proposal Evidence Scoring
 ```
 
 Reason:
 
-- P24 creates reviewed proposal records but does not yet provide retention controls for stale, superseded, or quarantined proposals;
-- lifecycle handling is a foundation step before any future executable policy work;
+- P25 can retain or suppress proposals, but the system still cannot rank which proposal is well-supported, narrowly scoped, or stale;
+- scoring evidence and scope is a foundation step before any future executable policy work;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:
