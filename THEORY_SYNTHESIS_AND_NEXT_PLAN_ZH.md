@@ -882,20 +882,42 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- proposal links 还没有专门的 archive/discard/quarantine lifecycle command；
+- proposal link lifecycle retention 已由 P28 处理；
 - proposal links 还没有连接到 claim graph dependency/evidence links。
+
+### P28 Tool/Safety Proposal Link Lifecycle
+
+目标：让已 review 的 proposal links 可以 age out、archive、discard 或 quarantine，同时不创建 executable policy。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `task_hub.tool_safety_policy_link_lifecycle_decisions` 记录 proposal link lifecycle decisions；
+- `tool-safety-policy-link-lifecycle` 可以 archive、discard 或 quarantine 已 review 的 proposal links；
+- lifecycle review 会写入 snapshot、audit、trace、update log、lifecycle history、rollback metadata 和可 replay 的 event metadata；
+- link lifecycle 保持 `relationship_mode: "review_link_only"`、`requires_review: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- context package 只暴露 active tool/safety policy links；
+- scenario evaluation 检查 archived link suppression、replay、不创建 executable policy，以及不会修改 Identity Core。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- proposal links 还没有连接到 claim graph dependency/evidence links；
+- link lifecycle decisions 还没有表示为 claim graph evidence。
 
 建议下一步：
 
 ```text
-P28 Tool/Safety Proposal Link Lifecycle
+P29 Proposal Link Claim-Graph Evidence Bridge
 ```
 
 理由：
 
-- P27 已能表达关系，但 stale 或误判的 links 也需要像 proposals 一样有可审计 retention path；
-- lifecycle review 应该从 active context 压制 archived/quarantined links，同时保留 evidence；
-- 这能为之后的 claim-graph integration 准备关系层，但仍不创建 executable policy；
+- P27 和 P28 已能表达并 retire proposal relationships，但关系层仍然和 claim graph 分离；
+- claim-graph bridge 应该把 proposal links 作为 evidence/dependency records 追踪，但不 rewrite claims，也不创建 executable policy；
+- 这能为未来 policy review 提供 evidence structure，同时保持 auditability；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

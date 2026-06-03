@@ -325,6 +325,22 @@ def main() -> None:
     )
     tool_safety_link_parser.add_argument("--confidence", type=float, default=0.5)
 
+    tool_safety_link_lifecycle_parser = subparsers.add_parser(
+        "tool-safety-policy-link-lifecycle",
+        help="Apply a reviewed lifecycle action to a tool/safety policy proposal link.",
+    )
+    tool_safety_link_lifecycle_parser.add_argument("link_id")
+    tool_safety_link_lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["archive", "discard", "quarantine"],
+    )
+    tool_safety_link_lifecycle_parser.add_argument(
+        "--reviewer",
+        default="manual_review",
+    )
+    tool_safety_link_lifecycle_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -606,6 +622,15 @@ def main() -> None:
                 reason=args.reason,
                 evidence=args.evidence,
                 confidence=args.confidence,
+            )
+        )
+    elif args.command == "tool-safety-policy-link-lifecycle":
+        print_json(
+            store.apply_tool_safety_policy_link_lifecycle_action(
+                link_id=args.link_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
             )
         )
     elif args.command == "context":

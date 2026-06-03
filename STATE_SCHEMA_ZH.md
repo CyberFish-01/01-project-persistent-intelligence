@@ -43,6 +43,7 @@ task_hub:
   reflection_guidance_decisions: []
   tool_safety_policy_proposals: []
   tool_safety_policy_links: []
+  tool_safety_policy_link_lifecycle_decisions: []
   tool_safety_policy_decisions: []
   tool_safety_policy_lifecycle_decisions: []
   procedural_candidates: []
@@ -848,6 +849,38 @@ task_hub:
         - type: "tool_safety_policy_proposal_link"
           from_proposal_id: "tool_safety_policy_proposal_0002"
           to_proposal_id: "tool_safety_policy_proposal_0001"
+  tool_safety_policy_link_lifecycle_decisions:
+    - decision_id: "tool_safety_policy_link_lifecycle_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      link_id: "tool_safety_policy_link_0001"
+      from_proposal_id: "tool_safety_policy_proposal_0002"
+      to_proposal_id: "tool_safety_policy_proposal_0001"
+      link_type: "supersedes"
+      reviewer: "manual_review"
+      action: "archive"
+      result: "archived"
+      decision_note: "Archive stale relationship evidence after review."
+      link_status_before: "active"
+      snapshot_id: "snapshot_0007"
+      evidence:
+        - "tool_safety_policy_link_0001"
+        - "tool_safety_policy_proposal_0002"
+        - "tool_safety_policy_proposal_0001"
+      confidence: 0.86
+      scope_overlap:
+        score: 0.67
+        shared_terms:
+          - "tool_use"
+          - "preflight"
+      relationship_mode: "review_link_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      rollback:
+        snapshot_id: "snapshot_0007"
+        reversible: true
   tool_safety_policy_decisions:
     - decision_id: "tool_safety_policy_decision_0001"
       timestamp: "ISO-8601 timestamp"
@@ -1085,6 +1118,8 @@ P25 增加 tool/safety policy proposal lifecycle retention。`tool-safety-policy
 P26 增加 tool/safety proposal evidence scoring。每个 proposal 都会获得 `proposal_score`，包含 evidence strength、scope specificity、staleness、priority score、review priority、factors 和 non-execution invariants。Score 只是 review-priority signal：它会用于 context 中 active proposals 的排序，并写入 review/lifecycle decisions，但不会创建 allow/deny rule、executable policy，也不会修改 Identity Core。
 
 P27 增加 tool/safety proposal relationship links。`link-tool-safety-policy-proposals` 可以记录 proposal 之间的 review-only 关系：`supports`、`conflicts_with`、`supersedes`、`overlaps` 和 `depends_on`。Link 会拒绝 self-link，压制重复 active link，要求 proposal id 已存在且必须有 evidence，写入 audit/trace/update metadata，并保持 `relationship_mode: "review_link_only"`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`。Context package 只把 recent active links 作为关系证据暴露。
+
+P28 增加 tool/safety proposal link lifecycle retention。`tool-safety-policy-link-lifecycle` 可以 archive、discard 或 quarantine 已 review 的 proposal links。它会写入 snapshot、audit、trace、update log、lifecycle history 和 `task_hub.tool_safety_policy_link_lifecycle_decisions`，同时保持 `relationship_mode: "review_link_only"` 和 non-executable invariants。Context package 只暴露 active proposal links，所以 archived、discarded 和 quarantined links 会从 active state transfer 中被压制。
 
 ## 14. Identity Update Gate
 
@@ -1378,6 +1413,7 @@ state_transfer_package:
     reflection_guidance_queue: []
     tool_safety_policy_proposals: []
     tool_safety_policy_links: []
+    tool_safety_policy_link_lifecycle_decisions: []
     cautionary_procedural_memory: []
     cautionary_lifecycle_decisions: []
     procedural_memory: []
@@ -1397,6 +1433,7 @@ state_transfer_package:
   reflection_guidance_queue: []
   tool_safety_policy_proposals: []
   tool_safety_policy_links: []
+  tool_safety_policy_link_lifecycle_decisions: []
   cautionary_procedural_memory: []
   cautionary_lifecycle_decisions: []
   procedural_memory: []
@@ -1476,6 +1513,7 @@ state_transfer_package:
 - 每个 cautionary lifecycle decision 都有 memory id、workflow、reviewer、action、result、snapshot metadata，并且 `executable_policy_created: false`；
 - 每个 procedural lifecycle decision 都有 memory id、workflow、reviewer、action、result 和 snapshot metadata；
 - 每个 tool/safety policy link 都引用已存在的 proposal，带有 evidence，保持 `review_link_only`，并且不能创建 executable policy 或修改 Identity Core；
+- 每个 tool/safety policy link lifecycle decision 都引用已存在的 link，保持 `review_link_only`，并且不能创建 executable policy 或修改 Identity Core；
 - identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；
 - P11 不允许直接 patch `identity_core`，approve 只能追加 identity_memory；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

@@ -954,6 +954,13 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         evidence=[review.get("guidance_item_id", "")],
         confidence=0.86,
     )
+    pre_link_lifecycle_package = store.build_context_package()
+    policy_link_lifecycle = store.apply_tool_safety_policy_link_lifecycle_action(
+        link_id=policy_link.get("link_id", ""),
+        action="archive",
+        reviewer="scenario_eval",
+        decision_note="Archive reviewed relationship after link lifecycle test.",
+    )
     pre_lifecycle_package = store.build_context_package()
     policy_lifecycle = store.apply_tool_safety_policy_lifecycle_action(
         proposal_id=policy_proposal.get("proposal_id", ""),
@@ -987,6 +994,10 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         [],
     )
     policy_links = state.get("task_hub", {}).get("tool_safety_policy_links", [])
+    policy_link_lifecycle_decisions = state.get("task_hub", {}).get(
+        "tool_safety_policy_link_lifecycle_decisions",
+        [],
+    )
     reviewed_guidance_item = next(
         (
             item
@@ -1107,7 +1118,7 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         "tool_safety_policy_link_context_exposed": policy_link.get("link_id")
         in {
             item.get("link_id")
-            for item in package.get("tool_safety_policy_links", [])
+            for item in pre_link_lifecycle_package.get("tool_safety_policy_links", [])
             if isinstance(item, dict)
         },
         "tool_safety_policy_link_non_executable": all(
@@ -1120,6 +1131,37 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         "tool_safety_policy_link_identity_locked": all(
             item.get("identity_mutation_allowed") is False
             for item in policy_links
+            if isinstance(item, dict)
+        ),
+        "tool_safety_policy_link_lifecycle_archived": policy_link_lifecycle.get(
+            "status"
+        )
+        == "archived",
+        "tool_safety_policy_link_lifecycle_decision_recorded": bool(
+            policy_link_lifecycle_decisions
+        )
+        and policy_link_lifecycle_decisions[-1].get("decision_id")
+        == policy_link_lifecycle.get(
+            "tool_safety_policy_link_lifecycle_decision_id"
+        ),
+        "tool_safety_policy_link_archived_context_suppressed": policy_link.get(
+            "link_id"
+        )
+        not in {
+            item.get("link_id")
+            for item in package.get("tool_safety_policy_links", [])
+            if isinstance(item, dict)
+        },
+        "tool_safety_policy_link_lifecycle_non_executable": all(
+            item.get("execution_prohibited") is True
+            and item.get("executable_policy") is False
+            and item.get("executable_policy_created") is False
+            for item in policy_link_lifecycle_decisions
+            if isinstance(item, dict)
+        ),
+        "tool_safety_policy_link_lifecycle_identity_locked": all(
+            item.get("identity_mutation_allowed") is False
+            for item in policy_link_lifecycle_decisions
             if isinstance(item, dict)
         ),
         "tool_safety_policy_lifecycle_archived": policy_lifecycle.get("status")
@@ -1232,6 +1274,26 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
                 "tool_safety_policy_link_executable_policy_count": sum(
                     1
                     for item in policy_links
+                    if isinstance(item, dict)
+                    and (
+                        item.get("executable_policy_created") is not False
+                        or item.get("executable_policy") is not False
+                    )
+                ),
+                "tool_safety_policy_link_lifecycle_decision_count": len(
+                    policy_link_lifecycle_decisions
+                ),
+                "tool_safety_policy_link_archived_count": sum(
+                    1
+                    for item in policy_links
+                    if isinstance(item, dict) and item.get("status") == "archived"
+                ),
+                "tool_safety_policy_link_active_context_count": len(
+                    package.get("tool_safety_policy_links", [])
+                ),
+                "tool_safety_policy_link_lifecycle_executable_policy_count": sum(
+                    1
+                    for item in policy_link_lifecycle_decisions
                     if isinstance(item, dict)
                     and (
                         item.get("executable_policy_created") is not False
@@ -2201,6 +2263,27 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "tool_safety_policy_link_executable_policy_count": sum(
             int(item.get("tool_safety_policy_link_executable_policy_count", 0))
+            for item in metrics
+        ),
+        "tool_safety_policy_link_lifecycle_decision_count": sum(
+            int(item.get("tool_safety_policy_link_lifecycle_decision_count", 0))
+            for item in metrics
+        ),
+        "tool_safety_policy_link_archived_count": sum(
+            int(item.get("tool_safety_policy_link_archived_count", 0))
+            for item in metrics
+        ),
+        "tool_safety_policy_link_active_context_count": sum(
+            int(item.get("tool_safety_policy_link_active_context_count", 0))
+            for item in metrics
+        ),
+        "tool_safety_policy_link_lifecycle_executable_policy_count": sum(
+            int(
+                item.get(
+                    "tool_safety_policy_link_lifecycle_executable_policy_count",
+                    0,
+                )
+            )
             for item in metrics
         ),
         "tool_safety_policy_lifecycle_decision_count": sum(

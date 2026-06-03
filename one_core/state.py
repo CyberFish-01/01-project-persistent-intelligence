@@ -58,6 +58,7 @@ CAUTIONARY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 REFLECTION_GUIDANCE_REVIEW_ACTIONS = {"acknowledge", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
+TOOL_SAFETY_POLICY_LINK_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 TOOL_SAFETY_POLICY_LINK_TYPES = {
     "supports",
     "conflicts_with",
@@ -212,6 +213,7 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "reflection_guidance_decisions": [],
         "tool_safety_policy_proposals": [],
         "tool_safety_policy_links": [],
+        "tool_safety_policy_link_lifecycle_decisions": [],
         "tool_safety_policy_decisions": [],
         "tool_safety_policy_lifecycle_decisions": [],
         "failure_reflections": [],
@@ -541,6 +543,7 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "reflection_guidance_decisions",
         "tool_safety_policy_proposals",
         "tool_safety_policy_links",
+        "tool_safety_policy_link_lifecycle_decisions",
         "tool_safety_policy_decisions",
         "tool_safety_policy_lifecycle_decisions",
         "failure_reflections",
@@ -4448,6 +4451,235 @@ class StateStore:
             "link_type": normalized_type,
         }
 
+    def apply_tool_safety_policy_link_lifecycle_action(
+        self,
+        link_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in TOOL_SAFETY_POLICY_LINK_LIFECYCLE_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_tool_safety_policy_link_lifecycle_action",
+                "action": action,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(utc_now(), state.get("working_state", {})),
+        )
+        link = next(
+            (
+                item
+                for item in task_hub.setdefault("tool_safety_policy_links", [])
+                if isinstance(item, dict) and item.get("link_id") == link_id
+            ),
+            None,
+        )
+        if link is None:
+            return {
+                "status": "not_found",
+                "error": "tool_safety_policy_link_not_found",
+                "link_id": link_id,
+            }
+
+        lifecycle = link.get("lifecycle", {})
+        before_status = (
+            lifecycle.get("status") if isinstance(lifecycle, dict) else None
+        ) or link.get("status", "active")
+        if before_status in {"archived", "discarded", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "link_id": link_id,
+                "lifecycle_status": before_status,
+            }
+
+        now = utc_now()
+        target_status = {
+            "archive": "archived",
+            "discard": "discarded",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        decision = build_tool_safety_policy_link_lifecycle_decision(
+            link=link,
+            action=normalized_action,
+            result=target_status,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=None,
+            timestamp=now,
+            before_status=before_status,
+        )
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_tool_safety_policy_link",
+            target_path="task_hub.tool_safety_policy_links",
+            evidence=[link_id] + list(link.get("evidence", [])),
+            metadata={
+                "tool_safety_policy_link_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+                "tool_safety_policy_link_id": link_id,
+                "link_status": before_status,
+                "from_proposal_id": link.get("from_proposal_id"),
+                "to_proposal_id": link.get("to_proposal_id"),
+                "link_type": link.get("link_type"),
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+        )
+        link["status"] = target_status
+        link["review_status"] = target_status
+        link["reviewed_at"] = now
+        link["reviewer"] = reviewer
+        link["decision_note"] = decision_note
+        link["last_lifecycle_decision_id"] = decision["decision_id"]
+        link["relationship_mode"] = "review_link_only"
+        link["requires_review"] = True
+        link["execution_prohibited"] = True
+        link["executable_policy"] = False
+        link["executable_policy_created"] = False
+        link["identity_mutation_allowed"] = False
+        link["lifecycle"] = {
+            **(lifecycle if isinstance(lifecycle, dict) else {}),
+            "status": target_status,
+            "last_reviewed_at": now,
+            "review_status": target_status,
+            "lifecycle_decision_id": decision["decision_id"],
+        }
+        if normalized_action == "quarantine":
+            link["quarantine_reason"] = (
+                decision_note or "tool_safety_policy_link_lifecycle_quarantine"
+            )
+        if normalized_action == "discard":
+            link["discard_reason"] = (
+                decision_note or "tool_safety_policy_link_lifecycle_discard"
+            )
+
+        decision["snapshot_id"] = snapshot["snapshot_id"]
+        decision["rollback"]["snapshot_id"] = snapshot["snapshot_id"]
+        task_hub.setdefault(
+            "tool_safety_policy_link_lifecycle_decisions",
+            [],
+        ).append(decision)
+        link.setdefault("lifecycle_history", []).append(decision)
+        link.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": reviewer,
+                "operation": f"{normalized_action}_tool_safety_policy_link",
+                "evidence": [link_id],
+                "tool_safety_policy_link_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+            }
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.tool_safety_policy_links",
+                "operation": f"{normalized_action}_tool_safety_policy_link",
+                "before": before_status,
+                "after": target_status,
+                "evidence": [link_id] + list(link.get("evidence", [])),
+                "gate": "medium",
+                "confidence": link.get("confidence", 0.5),
+                "tool_safety_policy_link_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_tool_safety_policy_link_lifecycle",
+            target="task_hub.tool_safety_policy_links",
+            outcome=target_status,
+            evidence=[link_id] + list(link.get("evidence", [])),
+            metadata={
+                "tool_safety_policy_link_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+                "snapshot_id": snapshot["snapshot_id"],
+                "tool_safety_policy_link_id": link_id,
+                "from_proposal_id": link.get("from_proposal_id"),
+                "to_proposal_id": link.get("to_proposal_id"),
+                "link_type": link.get("link_type"),
+                "decision_note": decision_note,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="tool_safety_policy_link_lifecycle",
+            nodes=[
+                {
+                    "id": "policy_link",
+                    "type": "PolicyProposalLink",
+                    "link_id": link_id,
+                    "link_type": link.get("link_type"),
+                    "relationship_mode": "review_link_only",
+                },
+                {
+                    "id": "lifecycle_review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[
+                {
+                    "from": "policy_link",
+                    "to": "lifecycle_review",
+                    "type": "feedback",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.tool_safety_policy_links",
+                    "tool_safety_policy_link_id": link_id,
+                    "tool_safety_policy_link_lifecycle_decision_id": decision[
+                        "decision_id"
+                    ],
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_tool_safety_policy_link",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "tool_safety_policy_link_lifecycle_decision": decision,
+                }
+            ],
+            summary=(
+                f"Applied lifecycle action {normalized_action} to tool/safety "
+                f"policy proposal link {link_id}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": target_status,
+            "link_id": link_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "tool_safety_policy_link_lifecycle_decision_id": decision[
+                "decision_id"
+            ],
+        }
+
     def apply_tool_safety_policy_lifecycle_action(
         self,
         proposal_id: str,
@@ -6971,6 +7203,45 @@ def build_tool_safety_policy_link(
                 "to_proposal_id": to_proposal.get("proposal_id"),
             }
         ],
+    }
+
+
+def build_tool_safety_policy_link_lifecycle_decision(
+    link: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: Optional[str],
+    timestamp: str,
+    before_status: str,
+) -> dict:
+    return {
+        "decision_id": new_id("tool_safety_policy_link_lifecycle_decision"),
+        "timestamp": timestamp,
+        "link_id": link.get("link_id"),
+        "from_proposal_id": link.get("from_proposal_id"),
+        "to_proposal_id": link.get("to_proposal_id"),
+        "link_type": link.get("link_type"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "link_status_before": before_status,
+        "snapshot_id": snapshot_id,
+        "evidence": link.get("evidence", []),
+        "confidence": link.get("confidence", 0.5),
+        "scope_overlap": link.get("scope_overlap", {}),
+        "relationship_mode": "review_link_only",
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
     }
 
 

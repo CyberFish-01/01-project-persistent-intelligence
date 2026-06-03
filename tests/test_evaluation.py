@@ -127,6 +127,16 @@ class FoundationEvaluationTests(unittest.TestCase):
         )
         self.assertEqual(metrics["tool_safety_policy_link_executable_policy_count"], 0)
         self.assertGreaterEqual(
+            metrics["tool_safety_policy_link_lifecycle_decision_count"],
+            1,
+        )
+        self.assertGreaterEqual(metrics["tool_safety_policy_link_archived_count"], 1)
+        self.assertEqual(metrics["tool_safety_policy_link_active_context_count"], 0)
+        self.assertEqual(
+            metrics["tool_safety_policy_link_lifecycle_executable_policy_count"],
+            0,
+        )
+        self.assertGreaterEqual(
             metrics["tool_safety_policy_lifecycle_decision_count"],
             1,
         )

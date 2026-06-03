@@ -41,6 +41,7 @@ task_hub:
   reflection_guidance_decisions: []
   tool_safety_policy_proposals: []
   tool_safety_policy_links: []
+  tool_safety_policy_link_lifecycle_decisions: []
   tool_safety_policy_decisions: []
   tool_safety_policy_lifecycle_decisions: []
   procedural_candidates: []
@@ -846,6 +847,38 @@ task_hub:
         - type: "tool_safety_policy_proposal_link"
           from_proposal_id: "tool_safety_policy_proposal_0002"
           to_proposal_id: "tool_safety_policy_proposal_0001"
+  tool_safety_policy_link_lifecycle_decisions:
+    - decision_id: "tool_safety_policy_link_lifecycle_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      link_id: "tool_safety_policy_link_0001"
+      from_proposal_id: "tool_safety_policy_proposal_0002"
+      to_proposal_id: "tool_safety_policy_proposal_0001"
+      link_type: "supersedes"
+      reviewer: "manual_review"
+      action: "archive"
+      result: "archived"
+      decision_note: "Archive stale relationship evidence after review."
+      link_status_before: "active"
+      snapshot_id: "snapshot_0007"
+      evidence:
+        - "tool_safety_policy_link_0001"
+        - "tool_safety_policy_proposal_0002"
+        - "tool_safety_policy_proposal_0001"
+      confidence: 0.86
+      scope_overlap:
+        score: 0.67
+        shared_terms:
+          - "tool_use"
+          - "preflight"
+      relationship_mode: "review_link_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      rollback:
+        snapshot_id: "snapshot_0007"
+        reversible: true
   tool_safety_policy_decisions:
     - decision_id: "tool_safety_policy_decision_0001"
       timestamp: "ISO-8601 timestamp"
@@ -1083,6 +1116,8 @@ P25 adds tool/safety policy proposal lifecycle retention. `tool-safety-policy-li
 P26 adds tool/safety proposal evidence scoring. Each proposal gets a `proposal_score` with evidence strength, scope specificity, staleness, priority score, review priority, factors, and non-execution invariants. Scores are review-priority signals only: they sort active proposals in context and enter review/lifecycle decisions, but they do not create allow/deny rules, executable policy, or Identity Core updates.
 
 P27 adds tool/safety proposal relationship links. `link-tool-safety-policy-proposals` can record review-only relationships between proposals: `supports`, `conflicts_with`, `supersedes`, `overlaps`, and `depends_on`. Links reject self-links, suppress duplicate active links, require existing proposal ids and evidence, write audit/trace/update metadata, and keep `relationship_mode: "review_link_only"`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`. Context packages expose recent active links as relationship evidence only.
+
+P28 adds tool/safety proposal link lifecycle retention. `tool-safety-policy-link-lifecycle` can archive, discard, or quarantine reviewed proposal links. It writes snapshot, audit, trace, update log, lifecycle history, and `task_hub.tool_safety_policy_link_lifecycle_decisions`, while preserving `relationship_mode: "review_link_only"` and non-executable invariants. Context packages expose only active proposal links, so archived, discarded, and quarantined links are suppressed from active state transfer.
 
 ## 14. Identity Update Gate
 
@@ -1376,6 +1411,7 @@ state_transfer_package:
     reflection_guidance_queue: []
     tool_safety_policy_proposals: []
     tool_safety_policy_links: []
+    tool_safety_policy_link_lifecycle_decisions: []
     cautionary_procedural_memory: []
     cautionary_lifecycle_decisions: []
     procedural_memory: []
@@ -1395,6 +1431,7 @@ state_transfer_package:
   reflection_guidance_queue: []
   tool_safety_policy_proposals: []
   tool_safety_policy_links: []
+  tool_safety_policy_link_lifecycle_decisions: []
   cautionary_procedural_memory: []
   cautionary_lifecycle_decisions: []
   procedural_memory: []
@@ -1474,6 +1511,7 @@ A valid 01 state must satisfy:
 - every cautionary lifecycle decision has memory id, workflow, reviewer, action, result, snapshot metadata, and `executable_policy_created: false`,
 - every procedural lifecycle decision has memory id, workflow, reviewer, action, result, and snapshot metadata,
 - every tool/safety policy link references existing proposals, has evidence, remains `review_link_only`, and cannot create executable policy or mutate Identity Core,
+- every tool/safety policy link lifecycle decision references an existing link, remains `review_link_only`, and cannot create executable policy or mutate Identity Core,
 - every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,
 - P11 must not directly patch `identity_core`; approval can only append identity_memory,
 - every session can answer Identity, Context, and Intent anchors.

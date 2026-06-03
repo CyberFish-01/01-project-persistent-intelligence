@@ -848,20 +848,42 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- proposal links do not yet have a dedicated lifecycle command for archive/discard/quarantine;
+- proposal link lifecycle retention is handled by P28;
 - proposal links are not yet connected to claim graph dependency/evidence links.
+
+### P28 Tool/Safety Proposal Link Lifecycle
+
+Goal: let reviewed proposal links age out, be archived, discarded, or quarantined without creating executable policy.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `task_hub.tool_safety_policy_link_lifecycle_decisions` records proposal link lifecycle decisions;
+- `tool-safety-policy-link-lifecycle` can archive, discard, or quarantine reviewed proposal links;
+- lifecycle review writes snapshot, audit, trace, update log, lifecycle history, rollback metadata, and replayable event metadata;
+- link lifecycle preserves `relationship_mode: "review_link_only"`, `requires_review: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- context packages expose only active tool/safety policy links;
+- scenario evaluation verifies archived link suppression, replay, no executable policy creation, and no Identity Core mutation.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- proposal links are not yet connected to claim graph dependency/evidence links;
+- link lifecycle decisions are not yet represented as claim graph evidence.
 
 Recommended next step:
 
 ```text
-P28 Tool/Safety Proposal Link Lifecycle
+P29 Proposal Link Claim-Graph Evidence Bridge
 ```
 
 Reason:
 
-- P27 can express relationships, but stale or mistaken links need the same auditable retention path as proposals;
-- lifecycle review should suppress archived/quarantined links from active context while preserving evidence;
-- this prepares the relationship layer for later claim-graph integration without creating executable policy;
+- P27 and P28 can express and retire proposal relationships, but the relationship layer is still separate from the claim graph;
+- a claim-graph bridge should make proposal links traceable as evidence/dependency records without rewriting claims or creating executable policy;
+- this prepares future policy review to reason over evidence structure while preserving auditability;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:
