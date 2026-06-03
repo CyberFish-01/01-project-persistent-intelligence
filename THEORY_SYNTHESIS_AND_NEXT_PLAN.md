@@ -1077,8 +1077,9 @@ Status: implemented as a first local pass.
 Implemented result:
 
 - `replay-events` now reports `mode: "audit_replay_with_projection"`;
-- event replay builds `target_path_transition_projection_v0.1` from event sequence, operation, target path, after value, and rollback metadata;
-- projection reports rebuildable event count, target-path transition summaries, latest after references, rollback snapshot coverage, and sequence gaps;
+- event replay builds `target_path_transition_projection_v0.2` from event sequence, operation, operation class, target path, target identity, after value, and rollback metadata;
+- projection reports rebuildable event count, target-path transition summaries, operation-class summaries, latest target references, rollback snapshot coverage, and sequence gaps;
+- `projection_validation` reports target-path count consistency against current state while allowing seed/pre-event coverage gaps;
 - `rollback-preview` now reports `mode: "metadata_only_with_projection"`;
 - rollback preview includes affected state paths and projected rollback impact while keeping `would_modify_state: false`;
 - scenario evaluation verifies projection rebuild, identity-memory projection, affected rollback paths, projected rollback impact, and no state mutation.
@@ -1088,7 +1089,7 @@ Remaining gaps:
 - projection is transition-level, not full object-level state reconstruction;
 - automatic rollback is still intentionally absent;
 - event schema still stores references rather than full object payload diffs;
-- no event compaction, retention, or projection validation CLI beyond `replay-events`.
+- no event compaction, retention, or standalone projection validation CLI beyond `replay-events`.
 
 Recommended next step:
 
@@ -1101,6 +1102,50 @@ Reason:
 - P35 gives replay a concrete projection, but the projection should be validated more explicitly against state counts and known target paths;
 - event schema can become more durable by recording operation class and target identity consistently;
 - this keeps the next step local, audit-focused, and safely short of automatic rollback.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+### P36 Replay Projection Coverage / Event Schema Hardening
+
+Goal: make replay projection more durable and auditable without introducing automatic rollback.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- new state events include `operation_class` and `target_identity`;
+- projection mode advances to `target_path_transition_projection_v0.2`;
+- projection records operation-class counts, target identities, target identity counts, and latest target identity by target path;
+- `replay-events` now includes `projection_validation` with checked, matched, consistent, unchecked, and mismatch counts;
+- projection validation treats existing seed or pre-event state as a coverage gap, not a failure, but reports inconsistency when projected references exceed current state count;
+- scenario evaluation verifies identity-memory projection coverage consistency and reports checked/matched/consistent/mismatch metrics.
+
+Remaining gaps:
+
+- projection validation is still report-only;
+- replay still does not reconstruct full object payloads from events;
+- no event compaction or retention workflow exists yet;
+- rollback remains preview-only and non-mutating.
+
+Recommended next step:
+
+```text
+P37 Event Retention / Projection Validation CLI
+```
+
+Reason:
+
+- replay now has enough projection structure to justify a dedicated validation/report command;
+- retention policy should be introduced before the event log grows indefinitely;
+- this keeps the foundation audit-centered and avoids jumping to automatic rollback too early.
 
 Desired acceptance:
 

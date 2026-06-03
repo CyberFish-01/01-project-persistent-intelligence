@@ -1287,7 +1287,9 @@ event:
   update_id: "update_0001"
   actor: "local_generic_adapter"
   operation: "append"
+  operation_class: "append"
   target_path: "memory_stores.episodic_memory"
+  target_identity: "episode_0001"
   before: null
   after: "episode_0001"
   evidence:
@@ -1298,11 +1300,13 @@ event:
   review_events: []
 ```
 
-P35 replay support is still conservative, but stronger than the original P12 audit check:
+P36 replay support is still conservative, but stronger than the original P12 audit check:
 
 - `replay-events` validates that event `update_id` values still reference current `update_log` entries,
-- it rebuilds a deterministic target-path transition projection from event sequence, operation, target path, after value, and rollback metadata,
-- the projection reports rebuildable event count, target-path counts, latest after references, rollback snapshot coverage, and sequence gaps,
+- new events include `operation_class` and `target_identity` so replay can reason about operation kind and the affected state reference without parsing free text,
+- it rebuilds deterministic `target_path_transition_projection_v0.2` from event sequence, operation, operation class, target path, target identity, after value, and rollback metadata,
+- the projection reports rebuildable event count, target-path counts, operation-class counts, latest target references, rollback snapshot coverage, and sequence gaps,
+- `projection_validation` compares projected target identity counts against current state counts as report-only coverage consistency. Existing seed or pre-event state may appear as coverage gap; projection counts must not exceed current state counts,
 - it reports coverage for old state updates but does not require pre-P12 updates to have events,
 - `rollback-preview <snapshot_id>` reports snapshot metadata, affected event ids, affected state paths, and projected rollback impact without mutating state,
 - `dry_run` previews do not write state events.

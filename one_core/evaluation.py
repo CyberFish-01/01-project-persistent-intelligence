@@ -1610,7 +1610,12 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     preview = store.rollback_preview(review["snapshot_id"])
     after_preview = store.load()
     projection = replay.get("projection", {})
+    projection_validation = replay.get("projection_validation", {})
     projected_identity_memory = projection.get("target_paths", {}).get(
+        "memory_stores.identity_memory",
+        {},
+    )
+    projected_identity_validation = projection_validation.get("checked", {}).get(
         "memory_stores.identity_memory",
         {},
     )
@@ -1627,6 +1632,10 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
             "latest_after"
         )
         == review["identity_memory_id"],
+        "replay_projection_validation_consistent_identity_memory": projected_identity_validation.get(
+            "count_consistent"
+        )
+        is True,
         "rollback_preview_non_mutating": preview.get("would_modify_state") is False,
         "rollback_preview_links_event": bool(preview.get("affected_event_ids")),
         "rollback_preview_lists_state_path": "memory_stores.identity_memory"
@@ -1647,6 +1656,21 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 "event_coverage_count": replay["event_coverage_count"],
                 "event_projection_count": projection.get("rebuildable_event_count", 0),
                 "event_projection_gap_count": projection.get("sequence_gap_count", 0),
+                "event_projection_checked_path_count": projection_validation.get(
+                    "checked_target_path_count",
+                    0,
+                ),
+                "event_projection_matched_path_count": projection_validation.get(
+                    "matched_target_path_count",
+                    0,
+                ),
+                "event_projection_consistent_path_count": projection_validation.get(
+                    "consistent_target_path_count",
+                    0,
+                ),
+                "event_projection_mismatch_count": len(
+                    projection_validation.get("count_mismatches", [])
+                ),
                 "rollback_affected_path_count": len(
                     preview.get("affected_state_paths", [])
                 ),
@@ -2640,6 +2664,22 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "event_projection_gap_count": sum(
             int(item.get("event_projection_gap_count", 0)) for item in metrics
+        ),
+        "event_projection_checked_path_count": sum(
+            int(item.get("event_projection_checked_path_count", 0))
+            for item in metrics
+        ),
+        "event_projection_matched_path_count": sum(
+            int(item.get("event_projection_matched_path_count", 0))
+            for item in metrics
+        ),
+        "event_projection_consistent_path_count": sum(
+            int(item.get("event_projection_consistent_path_count", 0))
+            for item in metrics
+        ),
+        "event_projection_mismatch_count": sum(
+            int(item.get("event_projection_mismatch_count", 0))
+            for item in metrics
         ),
         "rollback_preview_count": sum(
             int(item.get("rollback_preview_count", 0)) for item in metrics

@@ -1289,7 +1289,9 @@ event:
   update_id: "update_0001"
   actor: "local_generic_adapter"
   operation: "append"
+  operation_class: "append"
   target_path: "memory_stores.episodic_memory"
+  target_identity: "episode_0001"
   before: null
   after: "episode_0001"
   evidence:
@@ -1300,11 +1302,13 @@ event:
   review_events: []
 ```
 
-P35 replay 支持仍然保持保守，但比最初的 P12 audit check 更强：
+P36 replay 支持仍然保持保守，但比最初的 P12 audit check 更强：
 
 - `replay-events` 检查 event `update_id` 是否仍能引用当前 `update_log`；
-- 它会基于 event sequence、operation、target path、after value 和 rollback metadata 重建 deterministic target-path transition projection；
-- projection 会报告 rebuildable event count、target-path counts、latest after references、rollback snapshot coverage 和 sequence gaps；
+- 新 event 会包含 `operation_class` 和 `target_identity`，让 replay 不需要解析自由文本，也能知道 operation 类型和受影响 state reference；
+- 它会基于 event sequence、operation、operation class、target path、target identity、after value 和 rollback metadata 重建 deterministic `target_path_transition_projection_v0.2`；
+- projection 会报告 rebuildable event count、target-path counts、operation-class counts、latest target references、rollback snapshot coverage 和 sequence gaps；
+- `projection_validation` 会把 projected target identity counts 和当前 state counts 做 report-only coverage consistency 对照。已有 seed 或 pre-event state 可以表现为 coverage gap；projection counts 不能超过 current state counts；
 - 它会报告旧 state update 的 coverage，但不要求 P12 之前的 update 必须有 event；
 - `rollback-preview <snapshot_id>` 会报告 snapshot metadata、affected event ids、affected state paths 和 projected rollback impact，但不修改 state；
 - `dry_run` preview 不写入 state event。

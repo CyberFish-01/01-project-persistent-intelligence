@@ -1068,8 +1068,9 @@ git diff --check
 已实现结果：
 
 - `replay-events` 现在会报告 `mode: "audit_replay_with_projection"`；
-- event replay 会基于 event sequence、operation、target path、after value 和 rollback metadata 构建 `target_path_transition_projection_v0.1`；
-- projection 会报告 rebuildable event count、target-path transition summaries、latest after references、rollback snapshot coverage 和 sequence gaps；
+- event replay 会基于 event sequence、operation、operation class、target path、target identity、after value 和 rollback metadata 构建 `target_path_transition_projection_v0.2`；
+- projection 会报告 rebuildable event count、target-path transition summaries、operation-class summaries、latest target references、rollback snapshot coverage 和 sequence gaps；
+- `projection_validation` 会在允许 seed/pre-event coverage gap 的前提下，报告 target-path count consistency；
 - `rollback-preview` 现在会报告 `mode: "metadata_only_with_projection"`；
 - rollback preview 包含 affected state paths 和 projected rollback impact，同时保持 `would_modify_state: false`；
 - scenario evaluation 会验证 projection rebuild、identity-memory projection、affected rollback paths、projected rollback impact，以及 state 不会被修改。
@@ -1079,7 +1080,7 @@ git diff --check
 - projection 是 transition-level，还不是完整 object-level state reconstruction；
 - automatic rollback 仍然刻意不存在；
 - event schema 仍主要保存 references，而不是完整 object payload diffs；
-- 除了 `replay-events` 之外，还没有 event compaction、retention 或 projection validation CLI。
+- 除了 `replay-events` 之外，还没有 event compaction、retention 或独立 projection validation CLI。
 
 建议下一步：
 
@@ -1092,6 +1093,50 @@ P36 Replay Projection Coverage / Event Schema Hardening
 - P35 让 replay 有了具体 projection，但 projection 还应更明确地和 state counts、known target paths 做验证；
 - event schema 可以通过统一记录 operation class 和 target identity 变得更耐久；
 - 这能保持下一步仍是 local、audit-focused，并且不会越界到 automatic rollback。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+### P36 Replay Projection Coverage / Event Schema Hardening
+
+目标：让 replay projection 更耐久、更可审计，同时不引入 automatic rollback。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- 新 state events 会包含 `operation_class` 和 `target_identity`；
+- projection mode 推进到 `target_path_transition_projection_v0.2`；
+- projection 会按 target path 记录 operation-class counts、target identities、target identity counts 和 latest target identity；
+- `replay-events` 现在包含 `projection_validation`，提供 checked、matched、consistent、unchecked 和 mismatch counts；
+- projection validation 会把已有 seed 或 pre-event state 视为 coverage gap，而不是 failure；但如果 projected references 超过 current state count，会报告 inconsistency；
+- scenario evaluation 会验证 identity-memory projection coverage consistency，并报告 checked/matched/consistent/mismatch metrics。
+
+剩余缺口：
+
+- projection validation 仍是 report-only；
+- replay 仍不能从 events 重建完整 object payload；
+- 还没有 event compaction 或 retention workflow；
+- rollback 仍是 preview-only、non-mutating。
+
+建议下一步：
+
+```text
+P37 Event Retention / Projection Validation CLI
+```
+
+理由：
+
+- replay 现在已有足够 projection 结构，可以支持专门的 validation/report command；
+- event log 无限增长之前，应先引入 retention policy；
+- 这让地基继续保持 audit-centered，同时避免太早跳到 automatic rollback。
 
 期望验收：
 

@@ -932,6 +932,68 @@ def current_memory_counts(state: dict) -> dict:
     }
 
 
+def target_path_current_count(state: dict, target_path: str) -> Optional[int]:
+    parts = str(target_path or "").split(".")
+    if not parts:
+        return None
+    value: object = state
+    for part in parts:
+        if not isinstance(value, dict) or part not in value:
+            return None
+        value = value[part]
+    if isinstance(value, list):
+        return len(value)
+    return None
+
+
+def operation_class_for(operation: object) -> str:
+    normalized = str(operation or "").strip().lower()
+    if not normalized:
+        return "unknown"
+    prefix = normalized.split("_", 1)[0]
+    if normalized == "no_write":
+        return "no_write"
+    if prefix in {
+        "append",
+        "record",
+        "create",
+        "promote",
+        "propose",
+        "verify",
+        "link",
+        "bridge",
+    }:
+        return prefix
+    if prefix in {"approve", "reject", "acknowledge"}:
+        return "review_decision"
+    if prefix in {"archive", "discard", "quarantine"}:
+        return "lifecycle_transition"
+    return "state_transition"
+
+
+def scalar_state_ref(value: object) -> Optional[str]:
+    if isinstance(value, str) and value:
+        return value
+    if isinstance(value, (int, float, bool)):
+        return str(value)
+    return None
+
+
+def target_identity_for(update: dict) -> Optional[str]:
+    return (
+        scalar_state_ref(update.get("after"))
+        or scalar_state_ref(update.get("before"))
+        or next(
+            (
+                str(item)
+                for item in update.get("evidence", [])
+                if isinstance(item, (str, int, float, bool)) and str(item)
+            ),
+            None,
+        )
+    )
+
+
 def last_update_for_trace(state: dict, trace: dict) -> Optional[dict]:
     updates = state_updates_with_ids(state)
     if not updates:
@@ -983,7 +1045,9 @@ def build_state_event(state: dict, trace: dict, update: dict, sequence: int) -> 
         "update_id": update.get("id"),
         "actor": update.get("actor"),
         "operation": update.get("operation"),
+        "operation_class": operation_class_for(update.get("operation")),
         "target_path": update.get("target_path"),
+        "target_identity": target_identity_for(update),
         "before": update.get("before"),
         "after": update.get("after"),
         "evidence": update.get("evidence", []),
@@ -1045,6 +1109,15 @@ def build_event_replay_projection(events: List[dict]) -> dict:
         sequence = event.get("sequence")
         target_path = str(event.get("target_path") or "")
         operation = str(event.get("operation") or "")
+        operation_class = str(
+            event.get("operation_class") or operation_class_for(operation)
+        )
+        target_identity = scalar_state_ref(event.get("target_identity"))
+        if target_identity is None:
+            target_identity = (
+                scalar_state_ref(event.get("after"))
+                or scalar_state_ref(event.get("before"))
+            )
         if not isinstance(sequence, int) or not target_path or not operation:
             unrebuildable_event_ids.append(event_id)
             continue
@@ -1057,8 +1130,11 @@ def build_event_replay_projection(events: List[dict]) -> dict:
             {
                 "event_count": 0,
                 "operation_counts": {},
+                "operation_class_counts": {},
                 "after_ids": [],
+                "target_identities": [],
                 "latest_after": None,
+                "latest_target_identity": None,
                 "latest_event_id": None,
                 "latest_update_id": None,
                 "rollback_snapshot_ids": [],
@@ -1068,11 +1144,18 @@ def build_event_replay_projection(events: List[dict]) -> dict:
         target["operation_counts"][operation] = (
             target["operation_counts"].get(operation, 0) + 1
         )
+        target["operation_class_counts"][operation_class] = (
+            target["operation_class_counts"].get(operation_class, 0) + 1
+        )
         after = event.get("after")
         if after is not None:
             target["latest_after"] = after
             if isinstance(after, str) and after not in target["after_ids"]:
                 target["after_ids"].append(after)
+        if target_identity:
+            target["latest_target_identity"] = target_identity
+            if target_identity not in target["target_identities"]:
+                target["target_identities"].append(target_identity)
         target["latest_event_id"] = event_id
         target["latest_update_id"] = event.get("update_id")
 
@@ -1097,9 +1180,10 @@ def build_event_replay_projection(events: List[dict]) -> dict:
 
     for target in target_paths.values():
         target["after_count"] = len(target["after_ids"])
+        target["target_identity_count"] = len(target["target_identities"])
 
     return {
-        "projection_mode": "target_path_transition_projection_v0.1",
+        "projection_mode": "target_path_transition_projection_v0.2",
         "rebuildable_event_count": len(events) - len(unrebuildable_event_ids),
         "target_paths": target_paths,
         "rollback_snapshots": rollback_snapshots,
@@ -1107,6 +1191,48 @@ def build_event_replay_projection(events: List[dict]) -> dict:
         "unrebuildable_event_ids": unrebuildable_event_ids,
         "full_state_rebuild": False,
         "note": "Projection rebuilds target-path transition references from events; it does not recreate full state objects.",
+    }
+
+
+def validate_event_replay_projection(state: dict, projection: dict) -> dict:
+    checked: dict[str, dict] = {}
+    unchecked: List[str] = []
+    mismatches: List[dict] = []
+    for target_path, projected in projection.get("target_paths", {}).items():
+        current_count = target_path_current_count(state, target_path)
+        if current_count is None:
+            unchecked.append(target_path)
+            continue
+        projected_count = int(projected.get("target_identity_count", 0))
+        coverage_gap_count = current_count - projected_count
+        record = {
+            "current_count": current_count,
+            "projected_target_identity_count": projected_count,
+            "coverage_gap_count": max(coverage_gap_count, 0),
+            "full_count_match": current_count == projected_count,
+            "count_consistent": projected_count <= current_count,
+        }
+        checked[target_path] = record
+        if not record["count_consistent"]:
+            mismatches.append(
+                {
+                    "target_path": target_path,
+                    **record,
+                }
+            )
+    return {
+        "mode": "target_path_count_validation_v0.1",
+        "checked_target_path_count": len(checked),
+        "matched_target_path_count": sum(
+            1 for record in checked.values() if record["full_count_match"]
+        ),
+        "consistent_target_path_count": sum(
+            1 for record in checked.values() if record["count_consistent"]
+        ),
+        "checked": checked,
+        "unchecked_target_paths": sorted(unchecked),
+        "count_mismatches": mismatches,
+        "report_only": True,
     }
 
 
@@ -5590,7 +5716,8 @@ class StateStore:
 
     def replay_events(self) -> dict:
         events = self.list_events()
-        updates = state_updates_with_ids(self.load())
+        state = self.load()
+        updates = state_updates_with_ids(state)
         update_ids = {update["id"] for update in updates}
         event_update_ids = {
             event.get("update_id")
@@ -5599,6 +5726,7 @@ class StateStore:
         }
         missing_event_update_ids = sorted(event_update_ids - update_ids)
         projection = build_event_replay_projection(events)
+        projection_validation = validate_event_replay_projection(state, projection)
         return {
             "status": "passed"
             if not missing_event_update_ids
@@ -5613,6 +5741,7 @@ class StateStore:
             "target_paths": target_path_counts(events),
             "operations": event_operation_counts(events),
             "projection": projection,
+            "projection_validation": projection_validation,
             "missing_event_update_ids": missing_event_update_ids,
             "uncovered_state_update_ids": sorted(
                 update["id"]

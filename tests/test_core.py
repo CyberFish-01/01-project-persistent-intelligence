@@ -2230,13 +2230,15 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(events[0]["workflow"], "record_episode")
             self.assertEqual(events[0]["after"], episode["id"])
             self.assertEqual(events[0]["target_path"], "memory_stores.episodic_memory")
+            self.assertEqual(events[0]["operation_class"], "append")
+            self.assertEqual(events[0]["target_identity"], episode["id"])
             self.assertEqual(replay["status"], "passed")
             self.assertEqual(replay["mode"], "audit_replay_with_projection")
             self.assertEqual(replay["event_count"], 1)
             projection = replay["projection"]
             self.assertEqual(
                 projection["projection_mode"],
-                "target_path_transition_projection_v0.1",
+                "target_path_transition_projection_v0.2",
             )
             self.assertEqual(projection["rebuildable_event_count"], 1)
             self.assertEqual(projection["sequence_gap_count"], 0)
@@ -2244,7 +2246,29 @@ class CoreStateTests(unittest.TestCase):
                 "memory_stores.episodic_memory"
             ]
             self.assertEqual(episodic_projection["after_count"], 1)
+            self.assertEqual(episodic_projection["target_identity_count"], 1)
             self.assertEqual(episodic_projection["latest_after"], episode["id"])
+            self.assertEqual(
+                episodic_projection["latest_target_identity"],
+                episode["id"],
+            )
+            self.assertEqual(
+                episodic_projection["operation_class_counts"]["append"],
+                1,
+            )
+            self.assertEqual(
+                replay["projection_validation"]["checked_target_path_count"],
+                1,
+            )
+            self.assertEqual(
+                replay["projection_validation"]["count_mismatches"],
+                [],
+            )
+            self.assertTrue(
+                replay["projection_validation"]["checked"][
+                    "memory_stores.episodic_memory"
+                ]["count_consistent"]
+            )
 
     def test_dry_run_preview_does_not_write_state_event(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2345,7 +2369,7 @@ class CoreStateTests(unittest.TestCase):
             )
             self.assertEqual(
                 preview["projected_rollback_impact"]["projection_mode"],
-                "target_path_transition_projection_v0.1",
+                "target_path_transition_projection_v0.2",
             )
             self.assertIn(
                 "memory_stores.identity_memory",
@@ -2355,6 +2379,14 @@ class CoreStateTests(unittest.TestCase):
                 preview["projected_rollback_impact"]["would_remove_event_count"],
                 1,
             )
+            replay = store.replay_events()
+            identity_validation = replay["projection_validation"]["checked"][
+                "memory_stores.identity_memory"
+            ]
+            self.assertTrue(identity_validation["count_consistent"])
+            self.assertGreaterEqual(identity_validation["current_count"], 1)
+            self.assertEqual(identity_validation["projected_target_identity_count"], 1)
+            self.assertGreaterEqual(identity_validation["coverage_gap_count"], 0)
             self.assertEqual(after, before)
 
     def test_replay_projection_flags_unrebuildable_event_without_crashing(self):
