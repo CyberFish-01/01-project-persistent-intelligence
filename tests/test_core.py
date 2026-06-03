@@ -3215,6 +3215,94 @@ class CoreStateTests(unittest.TestCase):
                 before_event_ids,
             )
 
+    def test_reconstruction_schema_review_evidence_requests_are_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P48 schema review evidence request episode")
+            store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create retention workflow gap for P48 evidence requests.",
+            )
+            checklist = store.reconstruction_evidence_schema_review_checklist()
+            checklist_id = checklist["checklist_items"][0]["checklist_id"]
+            review = store.review_reconstruction_schema_checklist_item(
+                checklist_id=checklist_id,
+                action="request_more_evidence",
+                reviewer="unit_test",
+                rationale="Need explicit object evidence before schema design.",
+                requested_evidence=[
+                    "object_payload_example",
+                    "object_diff_example",
+                ],
+                approval_scope=["schema_design_discussion_only"],
+            )
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            tracker = store.reconstruction_schema_review_evidence_request_tracker()
+            after = store.load()
+
+            requests = tracker["evidence_requests"]
+            request_labels = {item["requested_evidence"] for item in requests}
+
+            self.assertEqual(
+                tracker["mode"],
+                "reconstruction_schema_review_evidence_request_tracker_v0.1",
+            )
+            self.assertEqual(tracker["tracking_status"], "report_only")
+            self.assertEqual(tracker["request_count"], 2)
+            self.assertEqual(tracker["open_request_count"], 2)
+            self.assertEqual(tracker["satisfied_request_count"], 0)
+            self.assertEqual(tracker["decisions_with_requests_count"], 1)
+            self.assertEqual(
+                request_labels,
+                {"object_payload_example", "object_diff_example"},
+            )
+            for request in requests:
+                self.assertTrue(
+                    request["request_id"].startswith(
+                        "reconstruction_schema_evidence_request_"
+                    )
+                )
+                self.assertEqual(
+                    request["source_decision_id"],
+                    review["decision_id"],
+                )
+                self.assertEqual(request["checklist_id"], checklist_id)
+                self.assertEqual(request["status"], "open")
+                self.assertEqual(request["tracking_status"], "report_only")
+                self.assertFalse(request["satisfied"])
+                self.assertEqual(request["satisfied_by"], [])
+                self.assertTrue(request["review_only"])
+                self.assertTrue(request["requires_review"])
+                self.assertTrue(request["execution_prohibited"])
+                self.assertFalse(request["schema_change_approved"])
+                self.assertFalse(request["schema_change_allowed"])
+                self.assertFalse(request["event_schema_mutation_allowed"])
+                self.assertFalse(request["event_payload_capture_executed"])
+                self.assertFalse(request["reconstruction_executed"])
+                self.assertFalse(request["event_compaction_executed"])
+                self.assertFalse(request["automatic_rollback_executed"])
+                self.assertFalse(request["identity_mutation_allowed"])
+                self.assertFalse(request["events_modified"])
+            self.assertTrue(tracker["report_only"])
+            self.assertFalse(tracker["would_modify_state"])
+            self.assertTrue(tracker["state_unchanged"])
+            self.assertFalse(tracker["reconstruction_executed"])
+            self.assertFalse(tracker["event_payload_capture_executed"])
+            self.assertFalse(tracker["event_schema_mutation_allowed"])
+            self.assertFalse(tracker["event_compaction_executed"])
+            self.assertFalse(tracker["automatic_rollback_executed"])
+            self.assertFalse(tracker["identity_mutation_allowed"])
+            self.assertFalse(tracker["events_modified"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

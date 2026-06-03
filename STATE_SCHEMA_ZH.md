@@ -1788,6 +1788,62 @@ reconstruction_schema_review_coverage_map:
 
 P47 不会批准 schema changes、capture payloads、reconstruct state、compact events、rollback state、mutate identity，也不会修改 event log。它只是在任何 schema mutation 或 reconstruction work 存在之前暴露 governance coverage。
 
+P48 增加 read-only reconstruction schema review evidence request tracker：
+
+```bash
+python3 -m one_core.cli reconstruction-schema-review-evidence-requests
+```
+
+这个 tracker 会从 P46 review decisions 和 P47 coverage 派生 open evidence requests。每条 request 使用稳定派生 id，所以同一份 state 可以反复检查，而不会创建新记录。
+
+```yaml
+reconstruction_schema_review_evidence_request_tracker:
+  mode: "reconstruction_schema_review_evidence_request_tracker_v0.1"
+  tracking_status: "report_only"
+  source_reports:
+    reconstruction_schema_review_coverage_map: "reconstruction_schema_review_coverage_map_v0.1"
+    reconstruction_schema_review_decisions: "task_hub.reconstruction_schema_review_decisions"
+  request_count: 2
+  open_request_count: 2
+  satisfied_request_count: 0
+  decisions_with_requests_count: 1
+  evidence_requests:
+    - request_id: "reconstruction_schema_evidence_request_..."
+      request_mode: "reconstruction_schema_review_evidence_request_v0.1"
+      source_decision_id: "reconstruction_schema_review_decision_..."
+      checklist_id: "schema_review_1_record_episode"
+      workflow: "record_episode"
+      requested_evidence: "object_diff_example"
+      status: "open"
+      tracking_status: "report_only"
+      satisfied: false
+      satisfied_by: []
+      review_only: true
+      requires_review: true
+      execution_prohibited: true
+      schema_change_approved: false
+      schema_change_allowed: false
+      event_schema_mutation_allowed: false
+      event_payload_capture_executed: false
+      reconstruction_executed: false
+      event_compaction_executed: false
+      automatic_rollback_executed: false
+      identity_mutation_allowed: false
+      events_modified: false
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  identity_mutation_allowed: false
+  events_modified: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P48 不会 satisfy evidence requests、approve schema changes、capture payloads、reconstruct state、compact events、rollback state、mutate identity 或 modify events。它只是在 durable request lifecycle 存在之前，让 requested evidence 可审计。
+
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
 ```yaml

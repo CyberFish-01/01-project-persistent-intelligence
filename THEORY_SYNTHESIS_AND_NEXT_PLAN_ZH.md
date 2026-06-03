@@ -1518,7 +1518,7 @@ git diff --check
 - 还没有 event schema migration；
 - 还没有 payload 或 diff capture implementation。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P48 Reconstruction Schema Review Evidence Request Tracker
@@ -1527,8 +1527,47 @@ P48 Reconstruction Schema Review Evidence Request Tracker
 理由：
 
 - P47 可以显示某个 checklist item 请求了更多 evidence，但 evidence request 本身还没有 durable lifecycle；
-- 下一个地基步骤应把 requested evidence 变成 review-only records，支持 open、satisfy、defer、archive 或 quarantine，但不批准 schema changes；
+- 下一个地基步骤应把 requested evidence 变成 open、report-only records，但不批准 schema changes；
 - 这能让 Event-Sourcing Groundwork 在任何 payload capture、reconstruction execution、event compaction、automatic rollback 或 schema migration 之前继续聚焦 governance evidence。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+已实现结果：
+
+- `reconstruction-schema-review-evidence-requests` CLI 会输出 `reconstruction_schema_review_evidence_request_tracker_v0.1`；
+- tracker 会从 P46 decisions 和 P47 coverage 派生 open evidence requests，并且不写 state；
+- 每条 request 都有稳定派生的 `request_id`、source decision id、checklist id、workflow、requested evidence label、target paths、missing capabilities 和 priority context；
+- requests 在未来 durable lifecycle 存在前保持 `status: "open"` 和 `satisfied: false`；
+- tracker 保持 `schema_change_approved: false`、`schema_change_allowed: false`、`event_schema_mutation_allowed: false`、`event_payload_capture_executed: false`、`reconstruction_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`identity_mutation_allowed: false`、`events_modified: false`、`report_only: true` 和 `would_modify_state: false`；
+- scenario evaluation 会验证 tracker visibility、open request count、read-only 行为，以及 schema mutation / payload capture / reconstruction / event modification / identity mutation counts 全部为 0。
+
+剩余缺口：
+
+- evidence requests 仍是 report-only derived records，还不是 durable lifecycle records；
+- 还没有 request satisfaction、deferral、archival 或 quarantine workflow；
+- 还没有 schema approval workflow；
+- 还没有 event schema migration；
+- 还没有 payload 或 diff capture implementation。
+
+建议下一步：
+
+```text
+P49 Reconstruction Schema Evidence Request Lifecycle
+```
+
+理由：
+
+- P48 让 requested evidence 可审计，但项目仍需要 durable、review-only lifecycle，支持 open、satisfy、defer、archive 或 quarantine 这些 requests；
+- satisfy request 必须只记录 evidence references，不能批准 schema changes，也不能执行 payload capture；
+- 这让 governance 继续先于 schema mutation，同时守住 P40 后禁止 reconstruction execution、compaction、rollback 或 platform work 的边界。
 
 期望验收：
 

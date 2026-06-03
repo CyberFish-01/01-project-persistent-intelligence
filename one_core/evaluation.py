@@ -1669,6 +1669,11 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_schema_review_coverage = store.load()
     schema_review_coverage = store.reconstruction_schema_review_coverage_map()
     after_schema_review_coverage = store.load()
+    before_schema_review_evidence_requests = store.load()
+    schema_review_evidence_requests = (
+        store.reconstruction_schema_review_evidence_request_tracker()
+    )
+    after_schema_review_evidence_requests = store.load()
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -2072,6 +2077,64 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
             and item.get("identity_mutation_allowed") is False
             for item in schema_review_coverage.get("workflow_review_coverage", [])
             if isinstance(item, dict)
+        ),
+        "reconstruction_schema_review_evidence_requests_tracked": schema_review_evidence_requests.get(
+            "mode"
+        )
+        == "reconstruction_schema_review_evidence_request_tracker_v0.1",
+        "reconstruction_schema_review_evidence_requests_read_only": schema_review_evidence_requests.get(
+            "would_modify_state"
+        )
+        is False
+        and schema_review_evidence_requests.get("report_only") is True
+        and schema_review_evidence_requests.get("state_unchanged") is True
+        and after_schema_review_evidence_requests
+        == before_schema_review_evidence_requests,
+        "reconstruction_schema_review_evidence_requests_open": schema_review_evidence_requests.get(
+            "request_count",
+            0,
+        )
+        >= 1
+        and schema_review_evidence_requests.get("open_request_count", 0) >= 1,
+        "reconstruction_schema_review_evidence_requests_source_visible": all(
+            request.get("source_decision_id") == schema_review.get("decision_id")
+            and request.get("status") == "open"
+            and request.get("satisfied") is False
+            for request in schema_review_evidence_requests.get(
+                "evidence_requests",
+                [],
+            )
+            if isinstance(request, dict)
+        ),
+        "reconstruction_schema_review_evidence_requests_non_executing": schema_review_evidence_requests.get(
+            "reconstruction_executed"
+        )
+        is False
+        and schema_review_evidence_requests.get("event_payload_capture_executed")
+        is False
+        and schema_review_evidence_requests.get("event_schema_mutation_allowed")
+        is False
+        and schema_review_evidence_requests.get("event_compaction_executed")
+        is False
+        and schema_review_evidence_requests.get("automatic_rollback_executed")
+        is False
+        and schema_review_evidence_requests.get("identity_mutation_allowed") is False
+        and schema_review_evidence_requests.get("events_modified") is False
+        and all(
+            request.get("schema_change_approved") is False
+            and request.get("schema_change_allowed") is False
+            and request.get("event_schema_mutation_allowed") is False
+            and request.get("event_payload_capture_executed") is False
+            and request.get("reconstruction_executed") is False
+            and request.get("event_compaction_executed") is False
+            and request.get("automatic_rollback_executed") is False
+            and request.get("identity_mutation_allowed") is False
+            and request.get("events_modified") is False
+            for request in schema_review_evidence_requests.get(
+                "evidence_requests",
+                [],
+            )
+            if isinstance(request, dict)
         ),
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
@@ -2545,6 +2608,53 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 else 0,
                 "reconstruction_schema_review_coverage_state_mutation_count": 0
                 if after_schema_review_coverage == before_schema_review_coverage
+                else 1,
+                "reconstruction_schema_review_evidence_request_tracker_count": 1
+                if schema_review_evidence_requests.get("mode")
+                == "reconstruction_schema_review_evidence_request_tracker_v0.1"
+                else 0,
+                "reconstruction_schema_review_evidence_request_count": schema_review_evidence_requests.get(
+                    "request_count",
+                    0,
+                ),
+                "reconstruction_schema_review_open_evidence_request_count": schema_review_evidence_requests.get(
+                    "open_request_count",
+                    0,
+                ),
+                "reconstruction_schema_review_satisfied_evidence_request_count": schema_review_evidence_requests.get(
+                    "satisfied_request_count",
+                    0,
+                ),
+                "reconstruction_schema_review_evidence_request_decision_count": schema_review_evidence_requests.get(
+                    "decisions_with_requests_count",
+                    0,
+                ),
+                "reconstruction_schema_review_evidence_request_schema_mutation_count": 1
+                if schema_review_evidence_requests.get(
+                    "event_schema_mutation_allowed"
+                )
+                is True
+                else 0,
+                "reconstruction_schema_review_evidence_request_capture_execution_count": 1
+                if schema_review_evidence_requests.get(
+                    "event_payload_capture_executed"
+                )
+                is True
+                else 0,
+                "reconstruction_schema_review_evidence_request_reconstruction_execution_count": 1
+                if schema_review_evidence_requests.get("reconstruction_executed")
+                is True
+                else 0,
+                "reconstruction_schema_review_evidence_request_identity_mutation_count": 1
+                if schema_review_evidence_requests.get("identity_mutation_allowed")
+                is True
+                else 0,
+                "reconstruction_schema_review_evidence_request_events_modified_count": 1
+                if schema_review_evidence_requests.get("events_modified") is True
+                else 0,
+                "reconstruction_schema_review_evidence_request_state_mutation_count": 0
+                if after_schema_review_evidence_requests
+                == before_schema_review_evidence_requests
                 else 1,
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
@@ -4014,6 +4124,105 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
             int(
                 item.get(
                     "reconstruction_schema_review_coverage_state_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_tracker_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_tracker_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_open_evidence_request_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_open_evidence_request_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_satisfied_evidence_request_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_satisfied_evidence_request_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_decision_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_decision_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_schema_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_schema_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_capture_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_capture_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_reconstruction_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_reconstruction_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_identity_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_identity_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_events_modified_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_events_modified_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_evidence_request_state_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_evidence_request_state_mutation_count",
                     0,
                 )
             )

@@ -427,6 +427,62 @@ class FoundationEvaluationTests(unittest.TestCase):
             metrics["reconstruction_schema_review_coverage_state_mutation_count"],
             0,
         )
+        self.assertEqual(
+            metrics["reconstruction_schema_review_evidence_request_tracker_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_schema_review_evidence_request_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_schema_review_open_evidence_request_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics["reconstruction_schema_review_satisfied_evidence_request_count"],
+            0,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_schema_review_evidence_request_decision_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_review_evidence_request_schema_mutation_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_review_evidence_request_capture_execution_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_review_evidence_request_reconstruction_execution_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_review_evidence_request_identity_mutation_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_review_evidence_request_events_modified_count"
+            ],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "reconstruction_schema_review_evidence_request_state_mutation_count"
+            ],
+            0,
+        )
         self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,

@@ -105,6 +105,11 @@ def new_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:12]}"
 
 
+def stable_id(prefix: str, *parts: object) -> str:
+    normalized = "|".join(str(part or "").strip().lower() for part in parts)
+    return f"{prefix}_{uuid.uuid5(uuid.NAMESPACE_URL, normalized).hex[:12]}"
+
+
 def default_adapter_registry(timestamp: str) -> dict:
     adapters = {}
     for adapter in DEFAULT_REGISTERED_ADAPTERS:
@@ -2819,6 +2824,122 @@ def build_reconstruction_schema_review_coverage_map(
         "report_only": True,
         "would_modify_state": False,
         "note": "P47 maps reconstruction schema review decisions back to checklist workflow coverage; it does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity.",
+    }
+
+
+def build_reconstruction_schema_review_evidence_request_tracker(
+    coverage_map: dict,
+    decisions: List[dict],
+) -> dict:
+    coverage_by_checklist = {
+        str(item.get("checklist_id") or ""): item
+        for item in coverage_map.get("workflow_review_coverage", [])
+        if isinstance(item, dict) and item.get("checklist_id")
+    }
+    requests = []
+    decisions_with_requests = 0
+    for decision in sorted(
+        [item for item in decisions if isinstance(item, dict)],
+        key=lambda item: str(item.get("timestamp") or ""),
+    ):
+        requested = [
+            str(item).strip()
+            for item in decision.get("requested_evidence", [])
+            if str(item).strip()
+        ]
+        if not requested:
+            continue
+        decisions_with_requests += 1
+        checklist_id = str(decision.get("checklist_id") or "")
+        coverage = coverage_by_checklist.get(checklist_id, {})
+        for index, evidence_label in enumerate(requested, start=1):
+            requests.append(
+                {
+                    "request_id": stable_id(
+                        "reconstruction_schema_evidence_request",
+                        decision.get("decision_id"),
+                        evidence_label,
+                    ),
+                    "request_mode": "reconstruction_schema_review_evidence_request_v0.1",
+                    "source_decision_id": decision.get("decision_id"),
+                    "source_decision_result": decision.get("result"),
+                    "checklist_id": checklist_id,
+                    "workflow": decision.get("workflow") or coverage.get("workflow"),
+                    "request_index": index,
+                    "requested_evidence": evidence_label,
+                    "requested_at": decision.get("timestamp"),
+                    "requested_by": decision.get("reviewer"),
+                    "rationale": decision.get("rationale", ""),
+                    "review_coverage_status": coverage.get(
+                        "review_coverage_status",
+                        "evidence_requested",
+                    ),
+                    "recommended_priority": coverage.get("recommended_priority")
+                    or decision.get("checklist_item", {}).get(
+                        "recommended_priority",
+                    ),
+                    "priority_score": coverage.get("priority_score")
+                    or decision.get("checklist_item", {}).get("priority_score", 0.0),
+                    "target_paths": coverage.get("target_paths")
+                    or decision.get("checklist_item", {}).get("target_paths", {}),
+                    "missing_capabilities": coverage.get("missing_capabilities")
+                    or decision.get("checklist_item", {}).get(
+                        "missing_capabilities",
+                        [],
+                    ),
+                    "approval_scope": decision.get("approval_scope", []),
+                    "status": "open",
+                    "tracking_status": "report_only",
+                    "satisfied": False,
+                    "satisfied_by": [],
+                    "review_only": True,
+                    "requires_review": True,
+                    "execution_prohibited": True,
+                    "schema_change_approved": False,
+                    "schema_change_allowed": False,
+                    "event_schema_mutation_allowed": False,
+                    "event_payload_capture_executed": False,
+                    "reconstruction_executed": False,
+                    "event_compaction_executed": False,
+                    "automatic_rollback_executed": False,
+                    "identity_mutation_allowed": False,
+                    "events_modified": False,
+                }
+            )
+
+    workflow_counts: dict[str, int] = {}
+    for request in requests:
+        workflow = str(request.get("workflow") or "unknown")
+        workflow_counts[workflow] = workflow_counts.get(workflow, 0) + 1
+
+    return {
+        "mode": "reconstruction_schema_review_evidence_request_tracker_v0.1",
+        "tracking_status": "report_only",
+        "source_reports": {
+            "reconstruction_schema_review_coverage_map": coverage_map.get("mode"),
+            "reconstruction_schema_review_decisions": "task_hub.reconstruction_schema_review_decisions",
+        },
+        "request_count": len(requests),
+        "open_request_count": len(requests),
+        "satisfied_request_count": 0,
+        "decisions_with_requests_count": decisions_with_requests,
+        "workflow_request_counts": dict(sorted(workflow_counts.items())),
+        "evidence_requests": requests,
+        "recommended_next_actions": [
+            "collect_requested_evidence_without_schema_mutation",
+            "review_evidence_requests_before_schema_approval",
+            "keep_tracker_report_only_until_request_lifecycle_exists",
+        ],
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "identity_mutation_allowed": False,
+        "events_modified": False,
+        "report_only": True,
+        "would_modify_state": False,
+        "note": "P48 derives open evidence requests from reconstruction schema review decisions; it does not satisfy requests, approve schema changes, capture payloads, reconstruct state, compact events, roll back state, modify events, or mutate identity.",
     }
 
 
@@ -8054,6 +8175,21 @@ class StateStore:
         )
         report["state_unchanged"] = before_state == self.load()
         return report
+
+    def reconstruction_schema_review_evidence_request_tracker(self) -> dict:
+        before_state = self.load()
+        coverage_map = self.reconstruction_schema_review_coverage_map()
+        state = self.load()
+        decisions = state.get("task_hub", {}).get(
+            "reconstruction_schema_review_decisions",
+            [],
+        )
+        tracker = build_reconstruction_schema_review_evidence_request_tracker(
+            coverage_map=coverage_map,
+            decisions=decisions if isinstance(decisions, list) else [],
+        )
+        tracker["state_unchanged"] = before_state == self.load()
+        return tracker
 
     def propose_event_payload_capture_policy(
         self,
