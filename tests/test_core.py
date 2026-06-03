@@ -8,7 +8,11 @@ from one_core.cleaner import clean_memory_files
 from one_core.api import OneCoreAPI
 from one_core.dream import DreamEngine
 from one_core.importer import import_text_file, split_memory_text
-from one_core.state import STATE_VERSION, StateStore
+from one_core.state import (
+    STATE_VERSION,
+    StateStore,
+    event_replayability_requirement_summary,
+)
 from one_core.validation import validate_state
 
 
@@ -58,6 +62,33 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(store.list_audit_events(), [])
             self.assertEqual(store.list_traces(), [])
             self.assertEqual(store.list_events(), [])
+
+    def test_force_init_resets_jsonl_logs_to_consistent_baseline(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episode = store.record_episode("force init should reset old logs.")
+            self.assertEqual(len(store.list_events()), 1)
+            self.assertEqual(
+                validate_state(store.load(), events=store.list_events())["status"],
+                "passed",
+            )
+
+            state = store.init(force=True)
+
+            self.assertEqual(state["update_log"][0]["operation"], "init")
+            self.assertEqual(store.list_episodes(), [])
+            self.assertEqual(store.list_dreams(), [])
+            self.assertEqual(store.list_imports(), [])
+            self.assertEqual(store.list_audit_events(), [])
+            self.assertEqual(store.list_traces(), [])
+            self.assertEqual(store.list_events(), [])
+            self.assertEqual(store.list_dream_artifacts(), [])
+            self.assertEqual(
+                validate_state(store.load(), events=store.list_events())["status"],
+                "passed",
+            )
+            self.assertNotIn(episode["id"], json.dumps(store.load(), ensure_ascii=False))
 
     def test_load_migrates_old_state_with_adapter_registry(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2679,6 +2710,88 @@ class CoreStateTests(unittest.TestCase):
                 "no_event_log_entries",
             )
             self.assertEqual(report["status"], "passed")
+
+    def test_event_replayability_assessment_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P41 replayability evidence one")
+            store.record_episode("P41 replayability evidence two")
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.event_replayability_assessment()
+            after = store.load()
+
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(report["mode"], "event_replayability_assessment_v0.1")
+            self.assertEqual(report["assessment"], "not_rebuild_ready")
+            self.assertTrue(report["summary"]["deterministic_replay_ready"])
+            self.assertTrue(report["summary"]["transition_projection_ready"])
+            self.assertFalse(report["summary"]["object_reconstruction_ready"])
+            self.assertFalse(report["summary"]["full_state_reconstruction_ready"])
+            self.assertGreaterEqual(report["summary"]["payload_gap_count"], 1)
+            self.assertGreaterEqual(report["summary"]["diff_gap_count"], 1)
+            self.assertIn(
+                "object_payload",
+                report["summary"]["missing_capabilities"],
+            )
+            self.assertIn("object_diff", report["summary"]["missing_capabilities"])
+            self.assertIn(
+                "review_payload_capture_policy",
+                report["summary"]["recommended_next_actions"],
+            )
+            self.assertTrue(report["report_only"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["reconstruction_executed"])
+            self.assertFalse(report["event_payload_capture_executed"])
+            self.assertFalse(report["event_compaction_executed"])
+            self.assertFalse(report["automatic_rollback_executed"])
+            self.assertFalse(report["event_schema_mutation_allowed"])
+            self.assertTrue(report["target_path_assessments"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
+    def test_event_replayability_requires_snapshot_for_full_state_readiness(self):
+        coverage = {
+            "event_count": 1,
+            "transition_reference_count": 1,
+            "payload_gap_count": 0,
+            "diff_gap_count": 0,
+            "rollback_snapshot_count": 0,
+        }
+        replay = {
+            "status": "passed",
+            "projection": {
+                "sequence_gap_count": 0,
+                "unrebuildable_event_ids": [],
+            },
+            "projection_validation": {
+                "count_mismatches": [],
+                "checked": {
+                    "memory_stores.semantic_memory": {
+                        "coverage_gap_count": 0,
+                    }
+                },
+            },
+        }
+
+        summary = event_replayability_requirement_summary(coverage, replay)
+
+        self.assertTrue(summary["deterministic_replay_ready"])
+        self.assertTrue(summary["transition_projection_ready"])
+        self.assertTrue(summary["object_reconstruction_ready"])
+        self.assertFalse(summary["full_state_reconstruction_ready"])
+        self.assertEqual(summary["snapshot_gap_count"], 1)
+        self.assertIn("rollback_snapshot", summary["missing_capabilities"])
+        self.assertIn(
+            "review_snapshot_link_requirements",
+            summary["recommended_next_actions"],
+        )
 
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:

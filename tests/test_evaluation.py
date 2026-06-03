@@ -210,6 +210,24 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["event_payload_high_risk_count"], 0)
         self.assertEqual(metrics["event_payload_safe_compaction_count"], 0)
         self.assertEqual(metrics["event_payload_state_mutation_count"], 0)
+        self.assertEqual(metrics["event_replayability_assessment_count"], 1)
+        self.assertEqual(metrics["event_replayability_ready_count"], 1)
+        self.assertEqual(
+            metrics["event_replayability_object_reconstruction_ready_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics["event_replayability_full_state_reconstruction_ready_count"],
+            0,
+        )
+        self.assertGreaterEqual(
+            metrics["event_replayability_missing_capability_count"],
+            1,
+        )
+        self.assertGreaterEqual(metrics["event_replayability_payload_gap_count"], 1)
+        self.assertGreaterEqual(metrics["event_replayability_diff_gap_count"], 1)
+        self.assertEqual(metrics["event_replayability_state_mutation_count"], 0)
+        self.assertEqual(metrics["event_replayability_execution_count"], 0)
         self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,

@@ -1502,6 +1502,45 @@ task_hub:
 
 P40 仍然不会 capture payload、创建 executable policy、修改 event schema、compact events、修改已有 event records，或把 destructive compaction 标记为 safe。它是在 P39 coverage visibility 和未来 schema-level payload capture design 之间增加的一层 governance checkpoint。
 
+P41 增加 read-only replayability assessment：
+
+```bash
+python3 -m one_core.cli event-replayability-assessment
+```
+
+这个 report 会把 replay projection validation 和 P39 payload/diff coverage 组合起来，回答一个更窄的 Event-Sourcing Groundwork 问题：当前 events 是否足够支撑未来 state reconstruction。
+
+```yaml
+event_replayability_assessment:
+  mode: "event_replayability_assessment_v0.1"
+  assessment: "not_rebuild_ready"
+  summary:
+    deterministic_replay_ready: true
+    transition_projection_ready: true
+    object_reconstruction_ready: false
+    full_state_reconstruction_ready: false
+    payload_gap_count: 4
+    diff_gap_count: 5
+    snapshot_gap_count: 4
+    missing_capabilities:
+      - "object_payload"
+      - "object_diff"
+      - "rollback_snapshot"
+    recommended_next_actions:
+      - "review_payload_capture_policy"
+      - "review_snapshot_link_requirements"
+  reconstruction_executed: false
+  event_payload_capture_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  event_schema_mutation_allowed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P41 不会 reconstruct state、capture payload、修改 event schema、compact events 或 rollback state。它把过去混在一起的四个问题拆开：deterministic replay readiness、transition projection readiness、object reconstruction readiness 和 full state reconstruction readiness。
+
 这个 projection 还不是完整 object-level state rebuild。它是一个可复现的 audit layer，用于在项目尝试 automatic rollback 之前，检查 event log 能否重建 transition references。
 
 Dream artifact 用于保存一次 Dream run 的完整审查材料：

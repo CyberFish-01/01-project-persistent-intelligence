@@ -1615,6 +1615,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_payload_report = store.load()
     payload_report = store.event_payload_diff_coverage_preview()
     after_payload_report = store.load()
+    before_replayability_assessment = store.load()
+    replayability_assessment = store.event_replayability_assessment()
+    after_replayability_assessment = store.load()
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -1742,6 +1745,49 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
             "safe_for_destructive_compaction"
         )
         is False,
+        "event_replayability_assessment_passed": replayability_assessment.get(
+            "status"
+        )
+        == "passed",
+        "event_replayability_assessment_read_only": replayability_assessment.get(
+            "would_modify_state"
+        )
+        is False
+        and replayability_assessment.get("report_only") is True
+        and replayability_assessment.get("state_unchanged") is True
+        and after_replayability_assessment == before_replayability_assessment,
+        "event_replayability_deterministic_ready": replayability_assessment.get(
+            "summary",
+            {},
+        ).get("deterministic_replay_ready")
+        is True,
+        "event_replayability_object_reconstruction_not_ready": replayability_assessment.get(
+            "summary",
+            {},
+        ).get("object_reconstruction_ready")
+        is False,
+        "event_replayability_full_state_reconstruction_not_ready": replayability_assessment.get(
+            "summary",
+            {},
+        ).get("full_state_reconstruction_ready")
+        is False,
+        "event_replayability_payload_gap_visible": replayability_assessment.get(
+            "summary",
+            {},
+        ).get("payload_gap_count", 0)
+        > 0,
+        "event_replayability_diff_gap_visible": replayability_assessment.get(
+            "summary",
+            {},
+        ).get("diff_gap_count", 0)
+        > 0,
+        "event_replayability_non_executing": replayability_assessment.get(
+            "reconstruction_executed"
+        )
+        is False
+        and replayability_assessment.get("event_payload_capture_executed") is False
+        and replayability_assessment.get("event_compaction_executed") is False
+        and replayability_assessment.get("automatic_rollback_executed") is False,
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
         "event_payload_capture_policy_approved": capture_policy_review.get("status")
@@ -1937,6 +1983,55 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 "event_payload_state_mutation_count": 0
                 if after_payload_report == before_payload_report
                 else 1,
+                "event_replayability_assessment_count": 1
+                if replayability_assessment.get("mode")
+                == "event_replayability_assessment_v0.1"
+                else 0,
+                "event_replayability_ready_count": 1
+                if replayability_assessment.get("summary", {}).get(
+                    "deterministic_replay_ready"
+                )
+                is True
+                else 0,
+                "event_replayability_object_reconstruction_ready_count": 1
+                if replayability_assessment.get("summary", {}).get(
+                    "object_reconstruction_ready"
+                )
+                is True
+                else 0,
+                "event_replayability_full_state_reconstruction_ready_count": 1
+                if replayability_assessment.get("summary", {}).get(
+                    "full_state_reconstruction_ready"
+                )
+                is True
+                else 0,
+                "event_replayability_missing_capability_count": len(
+                    replayability_assessment.get("summary", {}).get(
+                        "missing_capabilities",
+                        [],
+                    )
+                ),
+                "event_replayability_payload_gap_count": replayability_assessment.get(
+                    "summary",
+                    {},
+                ).get("payload_gap_count", 0),
+                "event_replayability_diff_gap_count": replayability_assessment.get(
+                    "summary",
+                    {},
+                ).get("diff_gap_count", 0),
+                "event_replayability_state_mutation_count": 0
+                if after_replayability_assessment == before_replayability_assessment
+                else 1,
+                "event_replayability_execution_count": sum(
+                    1
+                    for key in (
+                        "reconstruction_executed",
+                        "event_payload_capture_executed",
+                        "event_compaction_executed",
+                        "automatic_rollback_executed",
+                    )
+                    if replayability_assessment.get(key) is True
+                ),
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
                 ),
@@ -3062,6 +3157,41 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "event_payload_state_mutation_count": sum(
             int(item.get("event_payload_state_mutation_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_assessment_count": sum(
+            int(item.get("event_replayability_assessment_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_ready_count": sum(
+            int(item.get("event_replayability_ready_count", 0)) for item in metrics
+        ),
+        "event_replayability_object_reconstruction_ready_count": sum(
+            int(item.get("event_replayability_object_reconstruction_ready_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_full_state_reconstruction_ready_count": sum(
+            int(item.get("event_replayability_full_state_reconstruction_ready_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_missing_capability_count": sum(
+            int(item.get("event_replayability_missing_capability_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_payload_gap_count": sum(
+            int(item.get("event_replayability_payload_gap_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_diff_gap_count": sum(
+            int(item.get("event_replayability_diff_gap_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_state_mutation_count": sum(
+            int(item.get("event_replayability_state_mutation_count", 0))
+            for item in metrics
+        ),
+        "event_replayability_execution_count": sum(
+            int(item.get("event_replayability_execution_count", 0))
             for item in metrics
         ),
         "event_payload_capture_policy_proposal_count": sum(

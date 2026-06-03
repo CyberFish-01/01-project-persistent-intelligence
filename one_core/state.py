@@ -1511,6 +1511,198 @@ def build_event_payload_diff_coverage(events: List[dict]) -> dict:
     }
 
 
+def event_replayability_requirement_summary(coverage: dict, replay: dict) -> dict:
+    event_count = int(coverage.get("event_count", 0))
+    transition_gap_count = event_count - int(
+        coverage.get("transition_reference_count", 0)
+    )
+    payload_gap_count = int(coverage.get("payload_gap_count", 0))
+    diff_gap_count = int(coverage.get("diff_gap_count", 0))
+    snapshot_gap_count = event_count - int(coverage.get("rollback_snapshot_count", 0))
+    projection_validation = replay.get("projection_validation", {})
+    count_mismatches = projection_validation.get("count_mismatches", [])
+    coverage_gap_count = sum(
+        int(item.get("coverage_gap_count", 0))
+        for item in projection_validation.get("checked", {}).values()
+        if isinstance(item, dict)
+    )
+    unrebuildable_event_count = len(
+        replay.get("projection", {}).get("unrebuildable_event_ids", [])
+    )
+    sequence_gap_count = int(
+        replay.get("projection", {}).get("sequence_gap_count", 0)
+    )
+
+    deterministic_replay_ready = (
+        replay.get("status") == "passed"
+        and sequence_gap_count == 0
+        and unrebuildable_event_count == 0
+        and not count_mismatches
+    )
+    transition_projection_ready = (
+        deterministic_replay_ready and transition_gap_count == 0 and event_count > 0
+    )
+    object_reconstruction_ready = (
+        transition_projection_ready
+        and payload_gap_count == 0
+        and diff_gap_count == 0
+    )
+    full_state_reconstruction_ready = (
+        object_reconstruction_ready
+        and snapshot_gap_count == 0
+        and coverage_gap_count == 0
+    )
+    missing_capabilities = []
+    if event_count == 0:
+        missing_capabilities.append("event_history")
+    if sequence_gap_count:
+        missing_capabilities.append("contiguous_event_sequence")
+    if unrebuildable_event_count:
+        missing_capabilities.append("rebuildable_event_envelope")
+    if count_mismatches:
+        missing_capabilities.append("projection_count_consistency")
+    if transition_gap_count:
+        missing_capabilities.append("transition_reference")
+    if payload_gap_count:
+        missing_capabilities.append("object_payload")
+    if diff_gap_count:
+        missing_capabilities.append("object_diff")
+    if snapshot_gap_count:
+        missing_capabilities.append("rollback_snapshot")
+    if coverage_gap_count:
+        missing_capabilities.append("seed_or_pre_event_state_coverage")
+
+    recommended_next_actions = []
+    if not deterministic_replay_ready:
+        recommended_next_actions.append("repair_event_log_consistency")
+    if transition_gap_count:
+        recommended_next_actions.append("complete_transition_references")
+    if payload_gap_count or diff_gap_count:
+        recommended_next_actions.append("review_payload_capture_policy")
+    if snapshot_gap_count:
+        recommended_next_actions.append("review_snapshot_link_requirements")
+    if coverage_gap_count:
+        recommended_next_actions.append("document_or_backfill_pre_event_state")
+    if not recommended_next_actions:
+        recommended_next_actions.append("review_reconstruction_strategy")
+
+    return {
+        "event_count": event_count,
+        "deterministic_replay_ready": deterministic_replay_ready,
+        "transition_projection_ready": transition_projection_ready,
+        "object_reconstruction_ready": object_reconstruction_ready,
+        "full_state_reconstruction_ready": full_state_reconstruction_ready,
+        "transition_gap_count": max(transition_gap_count, 0),
+        "payload_gap_count": payload_gap_count,
+        "diff_gap_count": diff_gap_count,
+        "snapshot_gap_count": max(snapshot_gap_count, 0),
+        "coverage_gap_count": coverage_gap_count,
+        "sequence_gap_count": sequence_gap_count,
+        "unrebuildable_event_count": unrebuildable_event_count,
+        "projection_mismatch_count": len(count_mismatches),
+        "missing_capabilities": missing_capabilities,
+        "recommended_next_actions": recommended_next_actions,
+    }
+
+
+def build_event_replayability_assessment(replay: dict, coverage: dict) -> dict:
+    summary = event_replayability_requirement_summary(coverage, replay)
+    target_requirements = event_payload_capture_requirements_from_coverage(coverage)
+    projection_checked = replay.get("projection_validation", {}).get("checked", {})
+    target_path_assessments = []
+    for requirement in target_requirements:
+        target_path = requirement.get("target_path")
+        projection_record = (
+            projection_checked.get(target_path, {})
+            if isinstance(projection_checked, dict)
+            else {}
+        )
+        missing = []
+        if requirement.get("diff_gap_count", 0):
+            missing.append("object_diff")
+        if requirement.get("payload_gap_count", 0):
+            missing.append("object_payload")
+        if requirement.get("snapshot_gap_count", 0):
+            missing.append("rollback_snapshot")
+        if projection_record.get("coverage_gap_count", 0):
+            missing.append("seed_or_pre_event_state_coverage")
+        if projection_record.get("count_consistent") is False:
+            missing.append("projection_count_consistency")
+        if requirement.get("capture_mode") == "reference_only_ok" and not missing:
+            reconstruction_status = "projection_ready"
+        elif "projection_count_consistency" in missing:
+            reconstruction_status = "projection_inconsistent"
+        elif "object_diff" in missing:
+            reconstruction_status = "needs_object_diff"
+        elif "object_payload" in missing:
+            reconstruction_status = "needs_object_payload"
+        elif "rollback_snapshot" in missing:
+            reconstruction_status = "needs_snapshot_link"
+        elif "seed_or_pre_event_state_coverage" in missing:
+            reconstruction_status = "has_seed_or_pre_event_gap"
+        else:
+            reconstruction_status = "projection_ready"
+        target_path_assessments.append(
+            {
+                "target_path": target_path,
+                "event_count": requirement.get("event_count", 0),
+                "capture_mode": requirement.get("capture_mode"),
+                "reconstruction_status": reconstruction_status,
+                "missing_capabilities": missing,
+                "payload_gap_count": requirement.get("payload_gap_count", 0),
+                "diff_gap_count": requirement.get("diff_gap_count", 0),
+                "snapshot_gap_count": requirement.get("snapshot_gap_count", 0),
+                "current_count": projection_record.get("current_count"),
+                "projected_target_identity_count": projection_record.get(
+                    "projected_target_identity_count"
+                ),
+                "coverage_gap_count": projection_record.get("coverage_gap_count", 0),
+                "count_consistent": projection_record.get("count_consistent"),
+                "execution_prohibited": True,
+                "schema_change_allowed": False,
+            }
+        )
+
+    return {
+        "mode": "event_replayability_assessment_v0.1",
+        "status": "passed" if replay.get("status") == "passed" else "failed",
+        "assessment": (
+            "state_reconstruction_ready"
+            if summary["full_state_reconstruction_ready"]
+            else "not_rebuild_ready"
+        ),
+        "replay_status": replay.get("status"),
+        "projection_mode": replay.get("projection", {}).get("projection_mode"),
+        "projection_validation_mode": replay.get("projection_validation", {}).get(
+            "mode"
+        ),
+        "summary": summary,
+        "target_path_assessments": target_path_assessments,
+        "coverage_summary": {
+            "event_count": coverage.get("event_count", 0),
+            "transition_reference_count": coverage.get(
+                "transition_reference_count",
+                0,
+            ),
+            "payload_hint_count": coverage.get("payload_hint_count", 0),
+            "payload_gap_count": coverage.get("payload_gap_count", 0),
+            "diff_ready_count": coverage.get("diff_ready_count", 0),
+            "diff_gap_count": coverage.get("diff_gap_count", 0),
+            "rollback_snapshot_count": coverage.get("rollback_snapshot_count", 0),
+            "high_risk_count": coverage.get("high_risk_count", 0),
+        },
+        "projection_validation": replay.get("projection_validation", {}),
+        "reconstruction_executed": False,
+        "event_payload_capture_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "event_schema_mutation_allowed": False,
+        "report_only": True,
+        "would_modify_state": False,
+        "note": "P41 assesses replayability only; it does not reconstruct state, capture payloads, compact events, mutate schemas, or roll back state.",
+    }
+
+
 def event_payload_capture_requirements_from_coverage(coverage: dict) -> List[dict]:
     requirements = []
     target_paths = coverage.get("target_paths", {})
@@ -2133,13 +2325,20 @@ class StateStore:
 
         write_json(self.state_path, state)
         self.episodes_path.parent.mkdir(parents=True, exist_ok=True)
-        self.episodes_path.touch(exist_ok=True)
-        self.dreams_path.touch(exist_ok=True)
-        self.imports_path.touch(exist_ok=True)
-        self.audit_path.touch(exist_ok=True)
-        self.traces_path.touch(exist_ok=True)
-        self.events_path.touch(exist_ok=True)
-        self.dream_artifacts_path.touch(exist_ok=True)
+        jsonl_paths = [
+            self.episodes_path,
+            self.dreams_path,
+            self.imports_path,
+            self.audit_path,
+            self.traces_path,
+            self.events_path,
+            self.dream_artifacts_path,
+        ]
+        for path in jsonl_paths:
+            if force:
+                path.write_text("", encoding="utf-8")
+            else:
+                path.touch(exist_ok=True)
         return state
 
     def load(self) -> dict:
@@ -6435,6 +6634,17 @@ class StateStore:
             }
         )
         return coverage
+
+    def event_replayability_assessment(self) -> dict:
+        before_state = self.load()
+        replay = self.replay_events()
+        coverage = build_event_payload_diff_coverage(self.list_events())
+        assessment = build_event_replayability_assessment(
+            replay=replay,
+            coverage=coverage,
+        )
+        assessment["state_unchanged"] = before_state == self.load()
+        return assessment
 
     def propose_event_payload_capture_policy(
         self,

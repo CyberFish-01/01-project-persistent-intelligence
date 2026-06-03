@@ -1326,17 +1326,45 @@ Remaining gaps:
 - approved capture guidance is not yet linked to retention review lifecycle decisions;
 - local JSON state writes are still intended for serial local operation; concurrent CLI writes can produce replay or validation mismatches until a file-locking or transactional store layer exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
-P41 Event Payload Capture Policy Lifecycle
+P41 Event Replayability Assessment
 ```
 
 Reason:
 
-- P40 proposals can be approved, rejected, archived, or quarantined during review, but there is not yet a dedicated lifecycle path for revisiting or retiring approved guidance after later coverage reports;
-- before any schema-level payload capture is attempted, approved guidance should have the same durable lifecycle discipline as retention reviews and tool/safety proposals;
-- this keeps the project in local, audit-focused governance and avoids premature executor, automatic rollback, destructive compaction, or event rewrite work.
+- the post-P40 objective shifted from adding governance lifecycle features to proving whether state continuity can be carried by events;
+- P39/P40 expose payload and diff gaps, but the project still needs a direct replayability assessment that says which reconstruction level is ready;
+- this keeps the project in Event-Sourcing Groundwork and avoids premature executor, automatic rollback, destructive compaction, platform integration, or event rewrite work.
+
+Implemented result:
+
+- `event-replayability-assessment` CLI reports `event_replayability_assessment_v0.1`;
+- the report combines replay projection validation with payload/diff coverage;
+- it separates deterministic replay readiness, transition projection readiness, object reconstruction readiness, and full state reconstruction readiness;
+- it reports missing capabilities such as `object_payload`, `object_diff`, `rollback_snapshot`, and seed/pre-event coverage gaps;
+- it keeps `reconstruction_executed: false`, `event_payload_capture_executed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `event_schema_mutation_allowed: false`, `report_only: true`, and `would_modify_state: false`;
+- scenario evaluation verifies that deterministic replay is ready while object/full-state reconstruction remains not ready because payload/diff evidence is incomplete.
+
+Remaining gaps:
+
+- no event schema migration for object payload or object diff capture exists yet;
+- replay still does not rebuild object state from an empty seed;
+- approved capture guidance still lacks a separate lifecycle path;
+- local JSON state writes remain serial-operation oriented until a file lock or transactional store exists.
+
+Recommended next step:
+
+```text
+P42 Reconstruction Evidence Schema Research
+```
+
+Reason:
+
+- P41 can now say what is missing, but the project still needs to design the minimum evidence schema for object payloads, object diffs, transition payloads, and reconstruction metadata;
+- this should remain research/report-only before any event schema mutation or payload capture is implemented;
+- it directly serves Priority A and Priority B without adding chat, platform, or companion surface area.
 
 Desired acceptance:
 

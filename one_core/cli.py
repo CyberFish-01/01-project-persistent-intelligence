@@ -30,7 +30,11 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     init_parser = subparsers.add_parser("init", help="Initialize local 01 state.")
-    init_parser.add_argument("--force", action="store_true", help="Reinitialize state.")
+    init_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Reinitialize state and reset local JSONL logs in the state directory.",
+    )
 
     subparsers.add_parser("status", help="Print continuity anchors and state summary.")
 
@@ -405,6 +409,10 @@ def main() -> None:
         "event-payload-diff-report",
         help="Preview event payload and object-diff coverage without mutating state.",
     )
+    subparsers.add_parser(
+        "event-replayability-assessment",
+        help="Assess whether events can support future state reconstruction without mutating state.",
+    )
     payload_capture_policy_parser = subparsers.add_parser(
         "propose-event-payload-capture-policy",
         help="Create a review-only event payload capture policy proposal.",
@@ -763,6 +771,8 @@ def main() -> None:
         print_json(store.event_projection_report(retention_limit=args.retention_limit))
     elif args.command == "event-payload-diff-report":
         print_json(store.event_payload_diff_coverage_preview())
+    elif args.command == "event-replayability-assessment":
+        print_json(store.event_replayability_assessment())
     elif args.command == "propose-event-payload-capture-policy":
         print_json(
             store.propose_event_payload_capture_policy(

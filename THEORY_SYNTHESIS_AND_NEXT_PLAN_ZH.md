@@ -1317,17 +1317,45 @@ P39 后的资料校准：
 - approved capture guidance 还没有和 retention review lifecycle decisions 建立关系；
 - 本地 JSON state writes 目前仍然只适合串行 local operation；在 file lock 或 transactional store layer 存在之前，并发 CLI 写入可能造成 replay 或 validation mismatch。
 
-建议下一步：
+已实现的下一步：
 
 ```text
-P41 Event Payload Capture Policy Lifecycle
+P41 Event Replayability Assessment
 ```
 
 理由：
 
-- P40 proposals 可以在 review 阶段 approve、reject、archive 或 quarantine，但 approved guidance 后续还没有专门的 lifecycle path 来重新审查或退役；
-- 在任何 schema-level payload capture 之前，approved guidance 应该拥有和 retention reviews、tool/safety proposals 一样的 durable lifecycle discipline；
-- 这能让项目继续停留在 local、audit-focused governance 层，避免过早进入 executor、automatic rollback、destructive compaction 或 event rewrite。
+- P40 之后的目标已经从增加 governance lifecycle features，调整为证明 state continuity 是否能由 events 承载；
+- P39/P40 已经暴露 payload 和 diff gaps，但项目还需要一个直接的 replayability assessment 来说明哪些 reconstruction level 已经 ready；
+- 这能让项目继续停留在 Event-Sourcing Groundwork，避免过早进入 executor、automatic rollback、destructive compaction、platform integration 或 event rewrite。
+
+已实现结果：
+
+- `event-replayability-assessment` CLI 会输出 `event_replayability_assessment_v0.1`；
+- report 会组合 replay projection validation 和 payload/diff coverage；
+- 它会拆开 deterministic replay readiness、transition projection readiness、object reconstruction readiness 和 full state reconstruction readiness；
+- 它会报告缺失能力，例如 `object_payload`、`object_diff`、`rollback_snapshot` 和 seed/pre-event coverage gaps；
+- 它保持 `reconstruction_executed: false`、`event_payload_capture_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`event_schema_mutation_allowed: false`、`report_only: true` 和 `would_modify_state: false`；
+- scenario evaluation 会验证 deterministic replay 已经 ready，但因为 payload/diff evidence 不完整，object/full-state reconstruction 仍然 not ready。
+
+剩余缺口：
+
+- 还没有 object payload 或 object diff capture 的 event schema migration；
+- replay 仍然不能从 empty seed 重建 object state；
+- approved capture guidance 仍然缺少单独的 lifecycle path；
+- 本地 JSON state writes 在 file lock 或 transactional store 出现前，仍然只适合串行操作。
+
+建议下一步：
+
+```text
+P42 Reconstruction Evidence Schema Research
+```
+
+理由：
+
+- P41 现在能说明缺什么，但项目还需要设计 object payload、object diff、transition payload 和 reconstruction metadata 的最小证据 schema；
+- 在任何 event schema mutation 或 payload capture 实现之前，这一步仍应保持 research/report-only；
+- 它直接服务 Priority A 和 Priority B，不增加聊天、平台或 companion 外层能力。
 
 期望验收：
 

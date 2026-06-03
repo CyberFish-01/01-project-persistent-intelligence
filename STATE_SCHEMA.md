@@ -1500,6 +1500,45 @@ Allowed `capture_mode` values are `full_payload_and_diff`, `payload_hint_require
 
 P40 still does not capture payloads, create executable policy, mutate the event schema, compact events, modify existing event records, or mark destructive compaction safe. It is a governance checkpoint between P39 coverage visibility and any future schema-level payload capture design.
 
+P41 adds a read-only replayability assessment:
+
+```bash
+python3 -m one_core.cli event-replayability-assessment
+```
+
+This report combines replay projection validation with P39 payload/diff coverage to answer a narrower Event-Sourcing Groundwork question: are current events enough to support future state reconstruction?
+
+```yaml
+event_replayability_assessment:
+  mode: "event_replayability_assessment_v0.1"
+  assessment: "not_rebuild_ready"
+  summary:
+    deterministic_replay_ready: true
+    transition_projection_ready: true
+    object_reconstruction_ready: false
+    full_state_reconstruction_ready: false
+    payload_gap_count: 4
+    diff_gap_count: 5
+    snapshot_gap_count: 4
+    missing_capabilities:
+      - "object_payload"
+      - "object_diff"
+      - "rollback_snapshot"
+    recommended_next_actions:
+      - "review_payload_capture_policy"
+      - "review_snapshot_link_requirements"
+  reconstruction_executed: false
+  event_payload_capture_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  event_schema_mutation_allowed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P41 does not reconstruct state, capture payloads, mutate the event schema, compact events, or roll back state. It separates four questions that were previously blended together: deterministic replay readiness, transition projection readiness, object reconstruction readiness, and full state reconstruction readiness.
+
 This projection is not a full object-level state rebuild yet. It is a reproducible audit layer for checking that the event log can reconstruct transition references before the project attempts automatic rollback.
 
 Dream artifacts keep the full review material for one Dream run:
