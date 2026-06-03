@@ -984,6 +984,49 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P33 Context Attribution Coverage Review Lifecycle
+
+Goal: let durable attribution coverage review records be acknowledged, archived, or quarantined through an auditable lifecycle path.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `context-attribution-coverage-lifecycle` CLI can acknowledge, archive, or quarantine coverage review records;
+- `StateStore.apply_context_attribution_coverage_lifecycle_action` writes snapshot, audit, trace, update log, lifecycle history, update history, and `context_builder.attribution_coverage_lifecycle_decisions`;
+- context packages expose only active or acknowledged coverage reviews, so archived and quarantined reviews are suppressed from active state transfer;
+- lifecycle decisions preserve `review_only: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- validation rejects executable or identity-mutating coverage review lifecycle records;
+- scenario evaluation verifies lifecycle decision creation, archived-review context suppression, non-execution, and no Identity Core mutation.
+
+Remaining gaps:
+
+- scenario baselines are still metadata-only;
+- replay remains audit-reference validation rather than full state rebuild;
+- no executable policy layer exists or should be introduced yet.
+
+Recommended next step:
+
+```text
+P34 Evaluation Baseline Execution
+```
+
+Reason:
+
+- the project outline still requires real comparison against stateless, retrieval-only, and summary-only baselines;
+- P7-P33 now give enough local foundation to compare continuity behavior without expanding platform scope;
+- baseline execution strengthens the research claim while keeping the work local and non-platform-specific.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P19 Cautionary Procedural Review
 
 Goal: let warning-style failure candidates become active, reviewable caution memory without becoming executable policy.

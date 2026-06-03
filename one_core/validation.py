@@ -1122,7 +1122,15 @@ def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
                 ValidationIssue(path, "Context attribution coverage review must be an object.")
             )
             continue
-        for key in ("review_id", "timestamp", "status", "metrics", "review_signals"):
+        for key in (
+            "review_id",
+            "timestamp",
+            "status",
+            "metrics",
+            "review_signals",
+            "lifecycle",
+            "update_history",
+        ):
             if key not in review:
                 issues.append(
                     ValidationIssue(
@@ -1144,6 +1152,13 @@ def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
                     "Context attribution coverage review signals must be a list.",
                 )
             )
+        if review.get("review_only") is not True:
+            issues.append(
+                ValidationIssue(
+                    path + ".review_only",
+                    "Context attribution coverage review must remain review-only.",
+                )
+            )
         for flag in (
             "execution_prohibited",
             "executable_policy",
@@ -1156,6 +1171,145 @@ def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
                     ValidationIssue(
                         path + f".{flag}",
                         "Context attribution coverage review must remain review-only.",
+                    )
+                )
+        lifecycle = review.get("lifecycle") if isinstance(review.get("lifecycle"), dict) else {}
+        lifecycle_status = lifecycle.get("status")
+        if lifecycle_status not in {"active", "acknowledged", "archived", "quarantined"}:
+            issues.append(
+                ValidationIssue(
+                    path + ".lifecycle.status",
+                    "Context attribution coverage review must have a valid lifecycle status.",
+                )
+            )
+        if not isinstance(review.get("update_history"), list):
+            issues.append(
+                ValidationIssue(
+                    path + ".update_history",
+                    "Context attribution coverage review update history must be a list.",
+                )
+            )
+        if lifecycle_status in {"acknowledged", "archived", "quarantined"}:
+            decision_id = lifecycle.get("lifecycle_decision_id")
+            if not decision_id:
+                issues.append(
+                    ValidationIssue(
+                        path + ".lifecycle.lifecycle_decision_id",
+                        "Context attribution coverage lifecycle must reference a decision.",
+                    )
+                )
+            elif decision_id != review.get("last_lifecycle_decision_id"):
+                issues.append(
+                    ValidationIssue(
+                        path + ".last_lifecycle_decision_id",
+                        "Context attribution coverage last_lifecycle_decision_id must match lifecycle decision.",
+                    )
+                )
+            lifecycle_history = review.get("lifecycle_history")
+            if not isinstance(lifecycle_history, list) or not lifecycle_history:
+                issues.append(
+                    ValidationIssue(
+                        path + ".lifecycle_history",
+                        "Context attribution coverage lifecycle action requires lifecycle history.",
+                    )
+                )
+            elif lifecycle_history[-1].get("decision_id") != review.get(
+                "last_lifecycle_decision_id"
+            ):
+                issues.append(
+                    ValidationIssue(
+                        path + ".lifecycle_history",
+                        "Context attribution coverage lifecycle history must reference latest decision.",
+                    )
+                )
+    coverage_review_ids = {
+        review.get("review_id")
+        for review in coverage_reviews
+        if isinstance(review, dict)
+    }
+    lifecycle_decisions = context_builder.get(
+        "attribution_coverage_lifecycle_decisions"
+    )
+    if not isinstance(lifecycle_decisions, list):
+        issues.append(
+            ValidationIssue(
+                "context_builder.attribution_coverage_lifecycle_decisions",
+                "Context attribution coverage lifecycle decisions must be a list.",
+            )
+        )
+        lifecycle_decisions = []
+    for index, decision in enumerate(lifecycle_decisions):
+        path = f"context_builder.attribution_coverage_lifecycle_decisions[{index}]"
+        if not isinstance(decision, dict):
+            issues.append(
+                ValidationIssue(
+                    path,
+                    "Context attribution coverage lifecycle decision must be an object.",
+                )
+            )
+            continue
+        for key in (
+            "decision_id",
+            "timestamp",
+            "review_id",
+            "reviewer",
+            "action",
+            "result",
+            "snapshot_id",
+            "evidence",
+            "review_only",
+            "execution_prohibited",
+            "executable_policy",
+            "executable_policy_created",
+            "identity_mutation_allowed",
+        ):
+            if key not in decision:
+                issues.append(
+                    ValidationIssue(
+                        path + f".{key}",
+                        "Context attribution coverage lifecycle decision key is missing.",
+                    )
+                )
+        if decision.get("result") not in {"acknowledged", "archived", "quarantined"}:
+            issues.append(
+                ValidationIssue(
+                    path + ".result",
+                    "Context attribution coverage lifecycle decision must have a valid result.",
+                )
+            )
+        if decision.get("action") not in {"acknowledge", "archive", "quarantine"}:
+            issues.append(
+                ValidationIssue(
+                    path + ".action",
+                    "Context attribution coverage lifecycle decision must have a valid action.",
+                )
+            )
+        if decision.get("review_id") not in coverage_review_ids:
+            issues.append(
+                ValidationIssue(
+                    path + ".review_id",
+                    "Context attribution coverage lifecycle decision must reference an existing review.",
+                )
+            )
+        if decision.get("review_only") is not True:
+            issues.append(
+                ValidationIssue(
+                    path + ".review_only",
+                    "Context attribution coverage lifecycle decision must remain review-only.",
+                )
+            )
+        for flag in (
+            "execution_prohibited",
+            "executable_policy",
+            "executable_policy_created",
+            "identity_mutation_allowed",
+        ):
+            expected = False if flag != "execution_prohibited" else True
+            if decision.get(flag) is not expected:
+                issues.append(
+                    ValidationIssue(
+                        path + f".{flag}",
+                        "Context attribution coverage lifecycle decision must remain review-only.",
                     )
                 )
     return issues

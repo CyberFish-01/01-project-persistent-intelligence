@@ -273,6 +273,22 @@ def main() -> None:
     )
     attribution_coverage_parser.add_argument("--note", default="")
 
+    attribution_coverage_lifecycle_parser = subparsers.add_parser(
+        "context-attribution-coverage-lifecycle",
+        help="Apply a reviewed lifecycle action to a Context Builder attribution coverage review.",
+    )
+    attribution_coverage_lifecycle_parser.add_argument("review_id")
+    attribution_coverage_lifecycle_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["acknowledge", "archive", "quarantine"],
+    )
+    attribution_coverage_lifecycle_parser.add_argument(
+        "--reviewer",
+        default="manual_review",
+    )
+    attribution_coverage_lifecycle_parser.add_argument("--decision-note", default="")
+
     tool_safety_proposal_parser = subparsers.add_parser(
         "propose-tool-safety-policy",
         help="Create a non-executable tool/safety policy proposal from reviewed guidance.",
@@ -610,6 +626,15 @@ def main() -> None:
                 window=args.window,
                 minimum_source_record_ratio=args.minimum_source_record_ratio,
                 note=args.note,
+            )
+        )
+    elif args.command == "context-attribution-coverage-lifecycle":
+        print_json(
+            store.apply_context_attribution_coverage_lifecycle_action(
+                review_id=args.review_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
             )
         )
     elif args.command == "propose-tool-safety-policy":

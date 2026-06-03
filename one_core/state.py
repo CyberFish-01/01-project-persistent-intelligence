@@ -56,6 +56,11 @@ PROCEDURAL_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 CAUTIONARY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 CAUTIONARY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 REFLECTION_GUIDANCE_REVIEW_ACTIONS = {"acknowledge", "archive", "quarantine"}
+CONTEXT_ATTRIBUTION_COVERAGE_LIFECYCLE_ACTIONS = {
+    "acknowledge",
+    "archive",
+    "quarantine",
+}
 TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 TOOL_SAFETY_POLICY_LINK_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
@@ -190,6 +195,7 @@ def default_context_builder(timestamp: str) -> dict:
         "policy": default_context_policy(),
         "activation_traces": [],
         "attribution_coverage_reviews": [],
+        "attribution_coverage_lifecycle_decisions": [],
         "last_context_package_id": None,
         "created_at": timestamp,
         "updated_at": timestamp,
@@ -542,6 +548,51 @@ def ensure_context_builder(state: dict, timestamp: str) -> bool:
     reviews = context_builder.get("attribution_coverage_reviews")
     if not isinstance(reviews, list):
         context_builder["attribution_coverage_reviews"] = []
+        changed = True
+        reviews = context_builder["attribution_coverage_reviews"]
+    for review in reviews:
+        if not isinstance(review, dict):
+            continue
+        review_id = str(review.get("review_id") or "context_attribution_coverage_review")
+        created_at = str(review.get("timestamp") or timestamp)
+        if not isinstance(review.get("lifecycle"), dict):
+            review["lifecycle"] = default_lifecycle(
+                status="active",
+                timestamp=created_at,
+                review_status=str(review.get("status") or "pending"),
+            )
+            changed = True
+        if not isinstance(review.get("review_history"), list):
+            review["review_history"] = []
+            changed = True
+        if not isinstance(review.get("lifecycle_history"), list):
+            review["lifecycle_history"] = []
+            changed = True
+        if not isinstance(review.get("update_history"), list):
+            review["update_history"] = [
+                {
+                    "timestamp": created_at,
+                    "actor": str(review.get("reviewer") or "state_store"),
+                    "operation": "review_context_attribution_coverage",
+                    "evidence": review.get("evidence", []) or [review_id],
+                }
+            ]
+            changed = True
+        for key, expected in (
+            ("review_only", True),
+            ("execution_prohibited", True),
+            ("executable_policy", False),
+            ("executable_policy_created", False),
+            ("identity_mutation_allowed", False),
+        ):
+            if review.get(key) is not expected:
+                review[key] = expected
+                changed = True
+    lifecycle_decisions = context_builder.get(
+        "attribution_coverage_lifecycle_decisions"
+    )
+    if not isinstance(lifecycle_decisions, list):
+        context_builder["attribution_coverage_lifecycle_decisions"] = []
         changed = True
     context_builder["updated_at"] = context_builder.get("updated_at") or timestamp
     return changed
@@ -5523,6 +5574,242 @@ class StateStore:
             "note": "P12 only previews rollback from snapshot metadata and event references.",
         }
 
+    def apply_context_attribution_coverage_lifecycle_action(
+        self,
+        review_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in CONTEXT_ATTRIBUTION_COVERAGE_LIFECYCLE_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_context_attribution_coverage_lifecycle_action",
+                "action": action,
+            }
+
+        state = self.load()
+        now = utc_now()
+        context_builder = state.setdefault("context_builder", default_context_builder(now))
+        review = next(
+            (
+                item
+                for item in context_builder.setdefault(
+                    "attribution_coverage_reviews",
+                    [],
+                )
+                if isinstance(item, dict) and item.get("review_id") == review_id
+            ),
+            None,
+        )
+        if review is None:
+            return {
+                "status": "not_found",
+                "error": "context_attribution_coverage_review_not_found",
+                "review_id": review_id,
+            }
+
+        lifecycle = review.get("lifecycle") if isinstance(review.get("lifecycle"), dict) else {}
+        before_status = lifecycle.get("status") or "active"
+        if before_status in {"archived", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "review_id": review_id,
+                "lifecycle_status": before_status,
+            }
+        if before_status == "acknowledged" and normalized_action == "acknowledge":
+            return {
+                "status": "already_reviewed",
+                "review_id": review_id,
+                "lifecycle_status": before_status,
+            }
+
+        target_status = {
+            "acknowledge": "acknowledged",
+            "archive": "archived",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        evidence = [review_id] + [
+            item
+            for item in review.get("evidence", [])
+            if isinstance(item, str) and item
+        ]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_context_attribution_coverage_review",
+            target_path="context_builder.attribution_coverage_reviews",
+            evidence=evidence,
+            metadata={
+                "context_attribution_coverage_lifecycle_decision_id": None,
+                "review_id": review_id,
+                "review_status": review.get("status"),
+                "source_record_ratio": review.get("metrics", {}).get(
+                    "source_record_ratio"
+                )
+                if isinstance(review.get("metrics"), dict)
+                else None,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+        )
+        decision = build_context_attribution_coverage_lifecycle_decision(
+            review=review,
+            action=normalized_action,
+            result=target_status,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+            before_status=before_status,
+        )
+        snapshot["metadata"][
+            "context_attribution_coverage_lifecycle_decision_id"
+        ] = decision["decision_id"]
+
+        review["lifecycle"] = {
+            **lifecycle,
+            "status": target_status,
+            "last_reviewed_at": now,
+            "review_status": target_status,
+            "lifecycle_decision_id": decision["decision_id"],
+        }
+        review["last_lifecycle_decision_id"] = decision["decision_id"]
+        review["reviewed_at"] = now
+        review["reviewer"] = reviewer
+        review["decision_note"] = decision_note
+        review["review_only"] = True
+        review["execution_prohibited"] = True
+        review["executable_policy"] = False
+        review["executable_policy_created"] = False
+        review["identity_mutation_allowed"] = False
+        if normalized_action == "quarantine":
+            review["quarantine_reason"] = (
+                decision_note or "context_attribution_coverage_lifecycle_quarantine"
+            )
+        review.setdefault("lifecycle_history", []).append(decision)
+        review.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": reviewer,
+                "operation": f"{normalized_action}_context_attribution_coverage_review",
+                "evidence": evidence,
+                "context_attribution_coverage_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+            }
+        )
+        context_builder.setdefault(
+            "attribution_coverage_lifecycle_decisions",
+            [],
+        ).append(decision)
+        context_builder["updated_at"] = now
+
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "context_builder.attribution_coverage_reviews",
+                "operation": f"{normalized_action}_context_attribution_coverage_review",
+                "before": before_status,
+                "after": target_status,
+                "evidence": evidence,
+                "gate": "medium",
+                "confidence": review.get("confidence", 0.5),
+                "context_attribution_coverage_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+                "review_only": True,
+                "execution_prohibited": True,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_context_attribution_coverage_review",
+            target="context_builder.attribution_coverage_reviews",
+            outcome=target_status,
+            evidence=evidence,
+            metadata={
+                "context_attribution_coverage_lifecycle_decision_id": decision[
+                    "decision_id"
+                ],
+                "snapshot_id": snapshot["snapshot_id"],
+                "review_id": review_id,
+                "decision_note": decision_note,
+                "review_only": True,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="context_attribution_coverage_lifecycle",
+            nodes=[
+                {
+                    "id": "coverage_review",
+                    "type": "ReviewSignal",
+                    "review_id": review_id,
+                    "coverage_status": review.get("status"),
+                    "review_only": True,
+                },
+                {
+                    "id": "lifecycle_review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[
+                {
+                    "from": "coverage_review",
+                    "to": "lifecycle_review",
+                    "type": "feedback",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "context_builder.attribution_coverage_reviews",
+                    "context_attribution_coverage_review_id": review_id,
+                    "context_attribution_coverage_lifecycle_decision_id": decision[
+                        "decision_id"
+                    ],
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_context_attribution_coverage_review",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "context_attribution_coverage_lifecycle_decision": decision,
+                }
+            ],
+            summary=(
+                f"Applied lifecycle action {normalized_action} to Context "
+                f"Builder attribution coverage review {review_id}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": target_status,
+            "review_id": review_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "context_attribution_coverage_lifecycle_decision_id": decision[
+                "decision_id"
+            ],
+        }
+
     def record_episode(
         self,
         message: str,
@@ -5769,6 +6056,17 @@ class StateStore:
             for link in task_hub.get("tool_safety_policy_links", [])
             if isinstance(link, dict) and link.get("status") == "active"
         ][-12:]
+        active_attribution_coverage_reviews = [
+            review
+            for review in context_builder.get("attribution_coverage_reviews", [])
+            if isinstance(review, dict)
+            and (
+                review.get("lifecycle", {})
+                if isinstance(review.get("lifecycle"), dict)
+                else {}
+            ).get("status", "active")
+            in {"active", "acknowledged"}
+        ][-8:]
         reflection_log = [
             reflection
             for reflection in task_hub.get("reflection_log", [])
@@ -5895,6 +6193,7 @@ class StateStore:
             "continuity_anchors": working_state["context_anchors"],
             "context_policy": policy,
             "relationship_context": relationship_context,
+            "context_attribution_coverage_reviews": active_attribution_coverage_reviews,
             "source_attribution": source_attribution,
             "activation_trace": activation_trace,
             "context_signal_summary": summarize_context_signals(context_signals),
@@ -6843,8 +7142,65 @@ def build_context_attribution_coverage_review(
         "executable_policy": False,
         "executable_policy_created": False,
         "identity_mutation_allowed": False,
+        "lifecycle": {
+            "status": "active",
+            "created_at": timestamp,
+            "last_reviewed_at": None,
+            "review_status": status,
+        },
+        "review_history": [],
+        "lifecycle_history": [],
+        "update_history": [
+            {
+                "timestamp": timestamp,
+                "actor": reviewer,
+                "operation": "review_context_attribution_coverage",
+                "evidence": trace_ids,
+            }
+        ],
         "confidence": 0.85 if traces else 0.5,
         "rollback": {"reversible": True},
+    }
+
+
+def build_context_attribution_coverage_lifecycle_decision(
+    review: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: str,
+    timestamp: str,
+    before_status: str,
+) -> dict:
+    metrics = review.get("metrics") if isinstance(review.get("metrics"), dict) else {}
+    return {
+        "decision_id": new_id("context_attribution_coverage_lifecycle_decision"),
+        "timestamp": timestamp,
+        "review_id": review.get("review_id"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "review_status_before": before_status,
+        "coverage_status": review.get("status"),
+        "snapshot_id": snapshot_id,
+        "evidence": review.get("evidence", []),
+        "trace_ids": review.get("trace_ids", []),
+        "metrics": {
+            "selected_count": metrics.get("selected_count", 0),
+            "signal_selected_count": metrics.get("signal_selected_count", 0),
+            "source_record_ratio": metrics.get("source_record_ratio", 1.0),
+        },
+        "review_only": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
     }
 
 

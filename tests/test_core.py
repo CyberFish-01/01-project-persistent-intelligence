@@ -1786,6 +1786,89 @@ class CoreStateTests(unittest.TestCase):
                 "context_attribution_coverage_review",
             )
 
+    def test_context_attribution_coverage_lifecycle_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episode = store.record_episode(
+                "Context attribution coverage lifecycle should stay review-only."
+            )
+            store.propose_identity_update(
+                "01 can lifecycle-review attribution coverage reports.",
+                evidence=[episode["id"]],
+                proposer="unit_test",
+                rationale="Exercise attribution coverage lifecycle.",
+            )
+            store.build_context_package()
+            created = store.review_context_attribution_coverage(
+                reviewer="unit_test",
+                window=3,
+                minimum_source_record_ratio=0.5,
+                note="Create review for lifecycle test.",
+            )
+            review_id = created["review_id"]
+            before_identity = store.load()["identity_core"]
+
+            acknowledged = store.apply_context_attribution_coverage_lifecycle_action(
+                review_id=review_id,
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Keep as active review signal.",
+            )
+            state = store.load()
+            review = state["context_builder"]["attribution_coverage_reviews"][-1]
+            decision = state["context_builder"][
+                "attribution_coverage_lifecycle_decisions"
+            ][-1]
+            package = store.build_context_package()
+
+            self.assertEqual(acknowledged["status"], "acknowledged")
+            self.assertEqual(review["lifecycle"]["status"], "acknowledged")
+            self.assertEqual(
+                review["last_lifecycle_decision_id"],
+                acknowledged["context_attribution_coverage_lifecycle_decision_id"],
+            )
+            self.assertEqual(decision["result"], "acknowledged")
+            self.assertTrue(decision["review_only"])
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertIn(
+                review_id,
+                {
+                    item["review_id"]
+                    for item in package["context_attribution_coverage_reviews"]
+                },
+            )
+            self.assertEqual(state["identity_core"], before_identity)
+
+            archived = store.apply_context_attribution_coverage_lifecycle_action(
+                review_id=review_id,
+                action="archive",
+                reviewer="unit_test",
+                decision_note="Archive after acknowledgement.",
+            )
+            state = store.load()
+            review = state["context_builder"]["attribution_coverage_reviews"][-1]
+            package = store.build_context_package()
+
+            self.assertEqual(archived["status"], "archived")
+            self.assertEqual(review["lifecycle"]["status"], "archived")
+            self.assertEqual(
+                store.list_traces()[-1]["workflow"],
+                "context_attribution_coverage_lifecycle",
+            )
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertNotIn(
+                review_id,
+                {
+                    item["review_id"]
+                    for item in package["context_attribution_coverage_reviews"]
+                },
+            )
+            self.assertEqual(state["identity_core"], before_identity)
+
     def test_dream_creates_candidate_memory_before_promotion(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

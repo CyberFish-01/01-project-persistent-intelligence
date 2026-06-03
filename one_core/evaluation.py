@@ -1799,6 +1799,31 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
         .get("attribution_coverage_reviews", [])
     )
     coverage_review = coverage_reviews[-1] if coverage_reviews else {}
+    coverage_lifecycle = store.apply_context_attribution_coverage_lifecycle_action(
+        review_id=coverage_review.get("review_id", ""),
+        action="archive",
+        reviewer="scenario_eval",
+        decision_note="Scenario evaluation lifecycle suppression check.",
+    )
+    package_after_lifecycle = store.build_context_package()
+    state_after_lifecycle = store.load()
+    lifecycle_decisions = (
+        state_after_lifecycle.get("context_builder", {})
+        .get("attribution_coverage_lifecycle_decisions", [])
+    )
+    lifecycle_decision = lifecycle_decisions[-1] if lifecycle_decisions else {}
+    archived_review = next(
+        (
+            item
+            for item in state_after_lifecycle.get("context_builder", {}).get(
+                "attribution_coverage_reviews",
+                [],
+            )
+            if isinstance(item, dict)
+            and item.get("review_id") == coverage_review.get("review_id")
+        ),
+        {},
+    )
     checks = {
         "context_package_v03": package.get("context_package_version") == "0.3",
         "policy_v03": package.get("context_policy", {}).get("policy_version") == "0.3",
@@ -1853,6 +1878,30 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
             "identity_mutation_allowed"
         )
         is False,
+        "coverage_review_lifecycle_archived": coverage_lifecycle.get("status")
+        == "archived"
+        and archived_review.get("lifecycle", {}).get("status") == "archived",
+        "coverage_review_lifecycle_decision_recorded": bool(lifecycle_decisions)
+        and lifecycle_decision.get("review_id") == coverage_review.get("review_id"),
+        "coverage_review_archived_context_suppressed": coverage_review.get("review_id")
+        not in {
+            item.get("review_id")
+            for item in package_after_lifecycle.get(
+                "context_attribution_coverage_reviews",
+                [],
+            )
+            if isinstance(item, dict)
+        },
+        "coverage_review_lifecycle_non_executable": lifecycle_decision.get(
+            "execution_prohibited"
+        )
+        is True
+        and lifecycle_decision.get("executable_policy") is False
+        and lifecycle_decision.get("executable_policy_created") is False,
+        "coverage_review_lifecycle_identity_locked": lifecycle_decision.get(
+            "identity_mutation_allowed"
+        )
+        is False,
     }
     return EvaluationCheck(
         name="context_builder_policy_trace",
@@ -1892,6 +1941,27 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
                 ),
                 "context_attribution_coverage_executable_policy_count": int(
                     bool(coverage_review.get("executable_policy_created"))
+                ),
+                "context_attribution_coverage_lifecycle_decision_count": len(
+                    lifecycle_decisions
+                ),
+                "context_attribution_coverage_archived_count": sum(
+                    1
+                    for item in state_after_lifecycle.get("context_builder", {}).get(
+                        "attribution_coverage_reviews",
+                        [],
+                    )
+                    if isinstance(item, dict)
+                    and item.get("lifecycle", {}).get("status") == "archived"
+                ),
+                "context_attribution_coverage_lifecycle_active_context_count": len(
+                    package_after_lifecycle.get(
+                        "context_attribution_coverage_reviews",
+                        [],
+                    )
+                ),
+                "context_attribution_coverage_lifecycle_executable_policy_count": int(
+                    bool(lifecycle_decision.get("executable_policy_created"))
                 ),
             },
         },
@@ -2588,6 +2658,32 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "context_attribution_coverage_executable_policy_count": sum(
             int(item.get("context_attribution_coverage_executable_policy_count", 0))
+            for item in metrics
+        ),
+        "context_attribution_coverage_lifecycle_decision_count": sum(
+            int(item.get("context_attribution_coverage_lifecycle_decision_count", 0))
+            for item in metrics
+        ),
+        "context_attribution_coverage_archived_count": sum(
+            int(item.get("context_attribution_coverage_archived_count", 0))
+            for item in metrics
+        ),
+        "context_attribution_coverage_lifecycle_active_context_count": sum(
+            int(
+                item.get(
+                    "context_attribution_coverage_lifecycle_active_context_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "context_attribution_coverage_lifecycle_executable_policy_count": sum(
+            int(
+                item.get(
+                    "context_attribution_coverage_lifecycle_executable_policy_count",
+                    0,
+                )
+            )
             for item in metrics
         ),
     }

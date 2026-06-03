@@ -134,7 +134,7 @@ class StateValidationTests(unittest.TestCase):
             state = store.init()
             state["context_builder"]["attribution_coverage_reviews"].append(
                 {
-                    "review_id": "context_attribution_coverage_review_bad",
+                    "review_id": "context_attribution_coverage_review_missing",
                     "timestamp": state["created_at"],
                     "status": "passed",
                     "metrics": {},
@@ -163,6 +163,86 @@ class StateValidationTests(unittest.TestCase):
             )
             self.assertIn(
                 "context_builder.attribution_coverage_reviews[0].identity_mutation_allowed",
+                paths,
+            )
+
+    def test_context_builder_validates_attribution_coverage_lifecycle_flags(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["context_builder"]["attribution_coverage_reviews"].append(
+                {
+                    "review_id": "context_attribution_coverage_review_missing",
+                    "timestamp": state["created_at"],
+                    "status": "passed",
+                    "metrics": {},
+                    "review_signals": [],
+                    "lifecycle": {"status": "archived"},
+                    "update_history": [],
+                    "review_only": True,
+                    "execution_prohibited": True,
+                    "executable_policy": False,
+                    "executable_policy_created": False,
+                    "identity_mutation_allowed": False,
+                }
+            )
+            state["context_builder"][
+                "attribution_coverage_lifecycle_decisions"
+            ].append(
+                {
+                    "decision_id": "context_attribution_coverage_lifecycle_decision_bad",
+                    "timestamp": state["created_at"],
+                    "review_id": "context_attribution_coverage_review_bad",
+                    "reviewer": "unit_test",
+                    "action": "execute",
+                    "result": "executed",
+                    "snapshot_id": "snapshot_missing",
+                    "evidence": [],
+                    "review_only": True,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn(
+                "context_builder.attribution_coverage_reviews[0].lifecycle.lifecycle_decision_id",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_reviews[0].lifecycle_history",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_lifecycle_decisions[0].result",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_lifecycle_decisions[0].action",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_lifecycle_decisions[0].review_id",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_lifecycle_decisions[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_lifecycle_decisions[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_lifecycle_decisions[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_lifecycle_decisions[0].identity_mutation_allowed",
                 paths,
             )
 

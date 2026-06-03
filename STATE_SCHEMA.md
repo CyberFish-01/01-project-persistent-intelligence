@@ -1547,6 +1547,22 @@ state_transfer_package:
       executable_policy: false
       executable_policy_created: false
       identity_mutation_allowed: false
+      lifecycle:
+        status: "active | acknowledged | archived | quarantined"
+        review_status: "passed | needs_review | acknowledged | archived | quarantined"
+        lifecycle_decision_id: "context_attribution_coverage_lifecycle_decision_..."
+      lifecycle_history: []
+      update_history: []
+  attribution_coverage_lifecycle_decisions:
+    - decision_id: "context_attribution_coverage_lifecycle_decision_..."
+      review_id: "context_attribution_coverage_review_..."
+      action: "acknowledge | archive | quarantine"
+      result: "acknowledged | archived | quarantined"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
   context_signal_summary:
     identity_gate_evidence_count: 0
     claim_graph_evidence_count: 0
@@ -1588,6 +1604,7 @@ A valid 01 state must satisfy:
 - every tool/safety policy link references existing proposals, has evidence, remains `review_link_only`, and cannot create executable policy or mutate Identity Core,
 - every tool/safety policy link lifecycle decision references an existing link, remains `review_link_only`, and cannot create executable policy or mutate Identity Core,
 - every proposal link claim-graph evidence bridge remains `evidence_bridge_only`, cannot rewrite claims, cannot mutate semantic memory, and cannot create executable policy,
+- every context attribution coverage lifecycle decision references an existing coverage review, remains review-only, and cannot create executable policy or mutate Identity Core,
 - every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,
 - P11 must not directly patch `identity_core`; approval can only append identity_memory,
 - every session can answer Identity, Context, and Intent anchors.

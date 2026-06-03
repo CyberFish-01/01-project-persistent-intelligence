@@ -1549,6 +1549,22 @@ state_transfer_package:
       executable_policy: false
       executable_policy_created: false
       identity_mutation_allowed: false
+      lifecycle:
+        status: "active | acknowledged | archived | quarantined"
+        review_status: "passed | needs_review | acknowledged | archived | quarantined"
+        lifecycle_decision_id: "context_attribution_coverage_lifecycle_decision_..."
+      lifecycle_history: []
+      update_history: []
+  attribution_coverage_lifecycle_decisions:
+    - decision_id: "context_attribution_coverage_lifecycle_decision_..."
+      review_id: "context_attribution_coverage_review_..."
+      action: "acknowledge | archive | quarantine"
+      result: "acknowledged | archived | quarantined"
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
   context_signal_summary:
     identity_gate_evidence_count: 0
     claim_graph_evidence_count: 0
@@ -1590,6 +1606,7 @@ state_transfer_package:
 - 每个 tool/safety policy link 都引用已存在的 proposal，带有 evidence，保持 `review_link_only`，并且不能创建 executable policy 或修改 Identity Core；
 - 每个 tool/safety policy link lifecycle decision 都引用已存在的 link，保持 `review_link_only`，并且不能创建 executable policy 或修改 Identity Core；
 - 每个 proposal link claim-graph evidence bridge 都保持 `evidence_bridge_only`，不能 rewrite claims，不能修改 semantic memory，也不能创建 executable policy；
+- 每个 context attribution coverage lifecycle decision 都引用已存在的 coverage review，保持 review-only，并且不能创建 executable policy 或修改 Identity Core；
 - identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；
 - P11 不允许直接 patch `identity_core`，approve 只能追加 identity_memory；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

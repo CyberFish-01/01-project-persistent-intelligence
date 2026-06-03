@@ -1017,3 +1017,46 @@ python3 -m one_core.cli evaluate-foundation
 python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
+
+### P33 Context Attribution Coverage Review Lifecycle
+
+目标：让 durable attribution coverage review records 可以通过可审计 lifecycle path 被 acknowledge、archive 或 quarantine。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `context-attribution-coverage-lifecycle` CLI 可以 acknowledge、archive 或 quarantine coverage review records；
+- `StateStore.apply_context_attribution_coverage_lifecycle_action` 会写入 snapshot、audit、trace、update log、lifecycle history、update history 和 `context_builder.attribution_coverage_lifecycle_decisions`；
+- context package 只暴露 active 或 acknowledged coverage reviews，所以 archived / quarantined reviews 会从 active state transfer 中被压制；
+- lifecycle decisions 保持 `review_only: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- validation 会拒绝 executable 或 identity-mutating coverage review lifecycle records；
+- scenario evaluation 会验证 lifecycle decision creation、archived-review context suppression、non-execution，以及不会修改 Identity Core。
+
+剩余缺口：
+
+- scenario baselines 仍然只是 metadata-only；
+- replay 仍是 audit-reference validation，还不是完整 state rebuild；
+- 还没有 executable policy layer，当前也不应该引入。
+
+建议下一步：
+
+```text
+P34 Evaluation Baseline Execution
+```
+
+理由：
+
+- 项目大纲仍然要求和 stateless、retrieval-only、summary-only baseline 做真实比较；
+- P7-P33 已经提供足够本地地基，可以在不扩大平台范围的情况下比较 continuity 行为；
+- baseline execution 会增强研究命题，同时保持 local core 和 non-platform-specific 的方向。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```

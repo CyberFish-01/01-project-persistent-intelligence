@@ -195,6 +195,24 @@ class FoundationEvaluationTests(unittest.TestCase):
             metrics["context_attribution_coverage_executable_policy_count"],
             0,
         )
+        self.assertGreaterEqual(
+            metrics["context_attribution_coverage_lifecycle_decision_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["context_attribution_coverage_archived_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics["context_attribution_coverage_lifecycle_active_context_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics[
+                "context_attribution_coverage_lifecycle_executable_policy_count"
+            ],
+            0,
+        )
 
 
 if __name__ == "__main__":
