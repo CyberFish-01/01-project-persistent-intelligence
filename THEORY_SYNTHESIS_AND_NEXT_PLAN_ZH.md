@@ -971,19 +971,41 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- attribution coverage 还没有跨 recent traces 进行 review，所以弱归因 activation patterns 还不能被标记为 cleanup/review 信号。
+- attribution coverage review 已由 P32 处理。
+
+### P32 Context Attribution Coverage Review
+
+目标：review recent Context Builder activation traces 的 attribution coverage，把 weak or missing signal attribution 转成 review-only signals。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `context_builder.attribution_coverage_reviews` 保存 review-only coverage reports；
+- `review-context-attribution-coverage` 会对 recent activation traces 创建 coverage report；
+- coverage metrics 包含 selected count、signal-selected count、attributed count、source record count、attribution ratio、source record ratio 和 signal counts；
+- missing or weak attribution 会成为 `review_signals`，不会成为 executable policy；
+- coverage reviews 保持 `review_only: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- validation 会拒绝 executable 或 identity-mutating coverage reviews；
+- scenario evaluation 会验证 coverage review creation、signal-selected coverage、non-execution，以及不会修改 Identity Core。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- coverage reviews 可以累积，但还没有 acknowledge、archive、quarantine 等 lifecycle review actions。
 
 建议下一步：
 
 ```text
-P32 Context Attribution Coverage Review
+P33 Context Attribution Coverage Review Lifecycle
 ```
 
 理由：
 
-- P31 已让 per-item attribution 可见，但还没有跨 recent traces 汇总 attribution quality；
-- weak or missing source records 应先成为 review signals，而不是被任何未来 policy layer 直接使用；
-- coverage review 可以增强 auditability 和 source monitoring，同时不创建 executable policy；
+- P32 会创建 durable coverage review records，下一步地基应是这些 records 的 lifecycle governance；
+- review signals 应先能被 acknowledge、archive 或 quarantine，再影响未来 planning；
+- lifecycle handling 可以保持 attribution review 可审计，同时不创建 executable policy；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

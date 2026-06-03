@@ -128,6 +128,44 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
 
+    def test_context_builder_validates_attribution_coverage_review_flags(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["context_builder"]["attribution_coverage_reviews"].append(
+                {
+                    "review_id": "context_attribution_coverage_review_bad",
+                    "timestamp": state["created_at"],
+                    "status": "passed",
+                    "metrics": {},
+                    "review_signals": [],
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn(
+                "context_builder.attribution_coverage_reviews[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_reviews[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_reviews[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.attribution_coverage_reviews[0].identity_mutation_allowed",
+                paths,
+            )
+
     def test_adapter_event_index_must_point_to_episode(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

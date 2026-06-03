@@ -319,7 +319,7 @@ It uses temporary state and currently runs:
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
 - `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, and rollback preview does not mutate state.
 - `dream_artifact_package`: verifies that Dream runs produce a complete artifact package with input manifest, provenance, review queue, patch diff, decision log, rollback metadata, and no direct Identity Core or active semantic memory write.
-- `context_builder_policy_trace`: verifies Context Builder v0.3 policy, persistent activation traces, source attribution budget, activation signals from identity gate, claim graph, governance proposal-link evidence, and Dream artifacts, plus signal attribution records and persisted attribution summaries.
+- `context_builder_policy_trace`: verifies Context Builder v0.3 policy, persistent activation traces, source attribution budget, activation signals from identity gate, claim graph, governance proposal-link evidence, and Dream artifacts, plus signal attribution records, persisted attribution summaries, and review-only attribution coverage reports.
 
 The v0.8 runner reports baseline metadata for stateless, retrieval-only, and summary-only baselines, but does not execute those baselines yet. That comparison belongs to a later evaluation expansion.
 
@@ -394,6 +394,10 @@ Current metrics summary includes:
 - context signal count,
 - context governance signal count,
 - context signal attribution count,
+- context attribution coverage review count,
+- context attribution coverage signal selected count,
+- context attribution coverage review signal count,
+- context attribution coverage executable policy count,
 - passed and failed scenario counts.
 
 ## 11. What Would Falsify the Approach?

@@ -1748,6 +1748,44 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(stored_proposal["proposal_id"], proposal["proposal_id"])
             self.assertEqual(stored_proposal["review_status"], "pending")
 
+    def test_context_attribution_coverage_review_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episode = store.record_episode(
+                "Context attribution coverage should be review-only."
+            )
+            store.propose_identity_update(
+                "01 uses attribution coverage as a review signal.",
+                evidence=[episode["id"]],
+                proposer="unit_test",
+                rationale="Exercise attribution coverage review.",
+            )
+            store.build_context_package()
+
+            result = store.review_context_attribution_coverage(
+                reviewer="unit_test",
+                window=3,
+                minimum_source_record_ratio=0.5,
+                note="Unit test coverage review.",
+            )
+            state = store.load()
+            review = state["context_builder"]["attribution_coverage_reviews"][-1]
+
+            self.assertEqual(result["status"], "passed")
+            self.assertEqual(review["review_id"], result["review_id"])
+            self.assertGreaterEqual(review["metrics"]["selected_count"], 1)
+            self.assertGreaterEqual(review["metrics"]["attributed_count"], 1)
+            self.assertTrue(review["review_only"])
+            self.assertTrue(review["execution_prohibited"])
+            self.assertFalse(review["executable_policy"])
+            self.assertFalse(review["executable_policy_created"])
+            self.assertFalse(review["identity_mutation_allowed"])
+            self.assertEqual(
+                store.list_traces()[-1]["workflow"],
+                "context_attribution_coverage_review",
+            )
+
     def test_dream_creates_candidate_memory_before_promotion(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

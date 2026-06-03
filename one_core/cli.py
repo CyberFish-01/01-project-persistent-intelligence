@@ -260,6 +260,19 @@ def main() -> None:
     reflection_guidance_parser.add_argument("--reviewer", default="manual_review")
     reflection_guidance_parser.add_argument("--decision-note", default="")
 
+    attribution_coverage_parser = subparsers.add_parser(
+        "review-context-attribution-coverage",
+        help="Create a review-only coverage report for recent Context Builder attribution traces.",
+    )
+    attribution_coverage_parser.add_argument("--reviewer", default="manual_review")
+    attribution_coverage_parser.add_argument("--window", type=int, default=5)
+    attribution_coverage_parser.add_argument(
+        "--minimum-source-record-ratio",
+        type=float,
+        default=0.8,
+    )
+    attribution_coverage_parser.add_argument("--note", default="")
+
     tool_safety_proposal_parser = subparsers.add_parser(
         "propose-tool-safety-policy",
         help="Create a non-executable tool/safety policy proposal from reviewed guidance.",
@@ -588,6 +601,15 @@ def main() -> None:
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "review-context-attribution-coverage":
+        print_json(
+            store.review_context_attribution_coverage(
+                reviewer=args.reviewer,
+                window=args.window,
+                minimum_source_record_ratio=args.minimum_source_record_ratio,
+                note=args.note,
             )
         )
     elif args.command == "propose-tool-safety-policy":

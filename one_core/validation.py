@@ -1106,6 +1106,58 @@ def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
                             "Selected context signal attribution must be a list.",
                         )
                     )
+    coverage_reviews = context_builder.get("attribution_coverage_reviews")
+    if not isinstance(coverage_reviews, list):
+        issues.append(
+            ValidationIssue(
+                "context_builder.attribution_coverage_reviews",
+                "Context attribution coverage reviews must be a list.",
+            )
+        )
+        coverage_reviews = []
+    for index, review in enumerate(coverage_reviews):
+        path = f"context_builder.attribution_coverage_reviews[{index}]"
+        if not isinstance(review, dict):
+            issues.append(
+                ValidationIssue(path, "Context attribution coverage review must be an object.")
+            )
+            continue
+        for key in ("review_id", "timestamp", "status", "metrics", "review_signals"):
+            if key not in review:
+                issues.append(
+                    ValidationIssue(
+                        path + f".{key}",
+                        "Context attribution coverage review key is missing.",
+                    )
+                )
+        if not isinstance(review.get("metrics", {}), dict):
+            issues.append(
+                ValidationIssue(
+                    path + ".metrics",
+                    "Context attribution coverage review metrics must be an object.",
+                )
+            )
+        if not isinstance(review.get("review_signals", []), list):
+            issues.append(
+                ValidationIssue(
+                    path + ".review_signals",
+                    "Context attribution coverage review signals must be a list.",
+                )
+            )
+        for flag in (
+            "execution_prohibited",
+            "executable_policy",
+            "executable_policy_created",
+            "identity_mutation_allowed",
+        ):
+            expected = False if flag != "execution_prohibited" else True
+            if review.get(flag) is not expected:
+                issues.append(
+                    ValidationIssue(
+                        path + f".{flag}",
+                        "Context attribution coverage review must remain review-only.",
+                    )
+                )
     return issues
 
 

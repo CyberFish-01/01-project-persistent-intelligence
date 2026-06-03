@@ -189,6 +189,7 @@ def default_context_builder(timestamp: str) -> dict:
         "builder_version": "0.3",
         "policy": default_context_policy(),
         "activation_traces": [],
+        "attribution_coverage_reviews": [],
         "last_context_package_id": None,
         "created_at": timestamp,
         "updated_at": timestamp,
@@ -538,6 +539,10 @@ def ensure_context_builder(state: dict, timestamp: str) -> bool:
         if len(traces) > budget:
             context_builder["activation_traces"] = traces[-budget:]
             changed = True
+    reviews = context_builder.get("attribution_coverage_reviews")
+    if not isinstance(reviews, list):
+        context_builder["attribution_coverage_reviews"] = []
+        changed = True
     context_builder["updated_at"] = context_builder.get("updated_at") or timestamp
     return changed
 
@@ -5944,6 +5949,113 @@ class StateStore:
         context_builder["updated_at"] = timestamp
         self.save(state)
 
+    def review_context_attribution_coverage(
+        self,
+        reviewer: str = "manual_review",
+        window: int = 5,
+        minimum_source_record_ratio: float = 0.8,
+        note: str = "",
+    ) -> dict:
+        state = self.load()
+        now = utc_now()
+        context_builder = state.setdefault("context_builder", default_context_builder(now))
+        traces = [
+            trace
+            for trace in context_builder.setdefault("activation_traces", [])
+            if isinstance(trace, dict)
+        ][-max(1, int(window)) :]
+        review = build_context_attribution_coverage_review(
+            traces=traces,
+            reviewer=reviewer,
+            timestamp=now,
+            minimum_source_record_ratio=minimum_source_record_ratio,
+            note=note,
+        )
+        context_builder.setdefault("attribution_coverage_reviews", []).append(review)
+        context_builder["attribution_coverage_reviews"] = context_builder[
+            "attribution_coverage_reviews"
+        ][-20:]
+        context_builder["updated_at"] = now
+        state.setdefault("update_log", []).append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "context_builder.attribution_coverage_reviews",
+                "operation": "review_context_attribution_coverage",
+                "before": None,
+                "after": review["review_id"],
+                "evidence": review["evidence"],
+                "gate": "low",
+                "confidence": review["confidence"],
+                "review_only": True,
+                "execution_prohibited": True,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action="review_context_attribution_coverage",
+            target="context_builder.attribution_coverage_reviews",
+            outcome=review["status"],
+            evidence=review["evidence"],
+            metadata={
+                "review_id": review["review_id"],
+                "window": review["window"],
+                "source_record_ratio": review["metrics"]["source_record_ratio"],
+                "review_only": True,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="context_attribution_coverage_review",
+            nodes=[
+                {
+                    "id": "activation_traces",
+                    "type": "ContextActivationTraceWindow",
+                    "trace_ids": review["trace_ids"],
+                },
+                {
+                    "id": "coverage_review",
+                    "type": "ReviewSignal",
+                    "review_id": review["review_id"],
+                    "status": review["status"],
+                    "review_only": True,
+                },
+            ],
+            edges=[
+                {
+                    "from": "activation_traces",
+                    "to": "coverage_review",
+                    "type": "coverage_review",
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "review_context_attribution_coverage",
+                    "reviewer": reviewer,
+                    "review": review,
+                }
+            ],
+            summary=(
+                "Reviewed Context Builder attribution coverage for recent "
+                "activation traces."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": review["status"],
+            "review_id": review["review_id"],
+            "metrics": review["metrics"],
+            "review_signals": review["review_signals"],
+        }
+
 
 def context_task_terms(working_state: dict) -> List[str]:
     text_parts = [
@@ -6594,6 +6706,146 @@ def summarize_signal_attribution(selected: List[dict]) -> dict:
     for entry in summary.values():
         entry["matched_ids"] = sorted(entry["matched_ids"])
     return summary
+
+
+def build_context_attribution_coverage_review(
+    traces: List[dict],
+    reviewer: str,
+    timestamp: str,
+    minimum_source_record_ratio: float = 0.8,
+    note: str = "",
+) -> dict:
+    selected_count = 0
+    signal_selected_count = 0
+    attributed_count = 0
+    source_record_count = 0
+    weak_items = []
+    missing_items = []
+    trace_ids = []
+    signal_counts: dict[str, int] = {}
+    for trace in traces:
+        if not isinstance(trace, dict):
+            continue
+        trace_id = str(trace.get("trace_id") or "")
+        if trace_id:
+            trace_ids.append(trace_id)
+        for item in trace.get("selected", []):
+            if not isinstance(item, dict):
+                continue
+            selected_count += 1
+            signal_reasons = [
+                reason
+                for reason in item.get("reasons", [])
+                if reason
+                in {
+                    "identity_gate_evidence",
+                    "claim_graph_evidence",
+                    "governance_proposal_link_evidence",
+                    "dream_artifact_input",
+                }
+            ]
+            if not signal_reasons:
+                continue
+            signal_selected_count += 1
+            attributions = [
+                attribution
+                for attribution in item.get("signal_attribution", [])
+                if isinstance(attribution, dict)
+            ]
+            if attributions:
+                attributed_count += 1
+            else:
+                missing_items.append(
+                    {
+                        "trace_id": trace_id,
+                        "memory_id": item.get("memory_id"),
+                        "store_name": item.get("store_name"),
+                        "reason": "missing_signal_attribution",
+                    }
+                )
+                continue
+            item_source_records = 0
+            for attribution in attributions:
+                signal = str(attribution.get("signal") or "unknown")
+                signal_counts[signal] = signal_counts.get(signal, 0) + 1
+                source_records = attribution.get("source_records", [])
+                if not isinstance(source_records, list):
+                    source_records = []
+                item_source_records += len(source_records)
+            source_record_count += item_source_records
+            if item_source_records == 0:
+                weak_items.append(
+                    {
+                        "trace_id": trace_id,
+                        "memory_id": item.get("memory_id"),
+                        "store_name": item.get("store_name"),
+                        "reason": "no_source_records_for_attribution",
+                    }
+                )
+    attribution_ratio = (
+        attributed_count / signal_selected_count
+        if signal_selected_count
+        else 1.0
+    )
+    source_record_ratio = (
+        (attributed_count - len(weak_items)) / attributed_count
+        if attributed_count
+        else 1.0
+    )
+    threshold = bounded_float(minimum_source_record_ratio, default=0.8)
+    status = "passed"
+    review_signals = []
+    if missing_items:
+        status = "needs_review"
+        review_signals.append(
+            {
+                "signal": "missing_signal_attribution",
+                "severity": "medium",
+                "count": len(missing_items),
+                "review_only": True,
+            }
+        )
+    if source_record_ratio < threshold:
+        status = "needs_review"
+        review_signals.append(
+            {
+                "signal": "weak_source_record_coverage",
+                "severity": "medium",
+                "count": len(weak_items),
+                "minimum_source_record_ratio": threshold,
+                "actual_source_record_ratio": round(source_record_ratio, 3),
+                "review_only": True,
+            }
+        )
+    return {
+        "review_id": new_id("context_attribution_coverage_review"),
+        "timestamp": timestamp,
+        "reviewer": reviewer,
+        "status": status,
+        "window": len(traces),
+        "trace_ids": trace_ids,
+        "metrics": {
+            "selected_count": selected_count,
+            "signal_selected_count": signal_selected_count,
+            "attributed_count": attributed_count,
+            "source_record_count": source_record_count,
+            "attribution_ratio": round(attribution_ratio, 3),
+            "source_record_ratio": round(source_record_ratio, 3),
+            "signal_counts": signal_counts,
+        },
+        "weak_items": weak_items,
+        "missing_items": missing_items,
+        "review_signals": review_signals,
+        "note": note,
+        "evidence": trace_ids,
+        "review_only": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "confidence": 0.85 if traces else 0.5,
+        "rollback": {"reversible": True},
+    }
 
 
 def build_source_attribution(

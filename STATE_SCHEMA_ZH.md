@@ -1535,6 +1535,20 @@ state_transfer_package:
     signal_summary: {}
     signal_attribution_summary: {}
     metrics: {}
+  attribution_coverage_reviews:
+    - review_id: "context_attribution_coverage_review_..."
+      status: "passed | needs_review"
+      metrics:
+        selected_count: 0
+        signal_selected_count: 0
+        attributed_count: 0
+        source_record_ratio: 1.0
+      review_signals: []
+      review_only: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
   context_signal_summary:
     identity_gate_evidence_count: 0
     claim_graph_evidence_count: 0

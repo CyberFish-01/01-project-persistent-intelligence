@@ -183,6 +183,18 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertGreaterEqual(metrics["context_signal_count"], 1)
         self.assertGreaterEqual(metrics["context_governance_signal_count"], 1)
         self.assertGreaterEqual(metrics["context_signal_attribution_count"], 1)
+        self.assertGreaterEqual(
+            metrics["context_attribution_coverage_review_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["context_attribution_coverage_signal_selected_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics["context_attribution_coverage_executable_policy_count"],
+            0,
+        )
 
 
 if __name__ == "__main__":

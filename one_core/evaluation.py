@@ -1787,6 +1787,18 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
         "signal_attribution",
         [],
     )
+    coverage_result = store.review_context_attribution_coverage(
+        reviewer="scenario_eval",
+        window=5,
+        minimum_source_record_ratio=0.5,
+        note="Scenario evaluation coverage review.",
+    )
+    state_after_coverage = store.load()
+    coverage_reviews = (
+        state_after_coverage.get("context_builder", {})
+        .get("attribution_coverage_reviews", [])
+    )
+    coverage_review = coverage_reviews[-1] if coverage_reviews else {}
     checks = {
         "context_package_v03": package.get("context_package_version") == "0.3",
         "policy_v03": package.get("context_policy", {}).get("policy_version") == "0.3",
@@ -1825,6 +1837,22 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
             {},
         ).get("governance_proposal_link_evidence_count", 0)
         >= 1,
+        "coverage_review_recorded": bool(coverage_reviews),
+        "coverage_review_signal_selected": coverage_review.get("metrics", {}).get(
+            "signal_selected_count",
+            0,
+        )
+        >= 1,
+        "coverage_review_non_executable": coverage_review.get(
+            "execution_prohibited"
+        )
+        is True
+        and coverage_review.get("executable_policy") is False
+        and coverage_review.get("executable_policy_created") is False,
+        "coverage_review_identity_locked": coverage_review.get(
+            "identity_mutation_allowed"
+        )
+        is False,
     }
     return EvaluationCheck(
         name="context_builder_policy_trace",
@@ -1853,6 +1881,17 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
                     .get("signal_attribution_summary", {})
                     .values()
                     if isinstance(item, dict)
+                ),
+                "context_attribution_coverage_review_count": len(coverage_reviews),
+                "context_attribution_coverage_signal_selected_count": coverage_review.get(
+                    "metrics",
+                    {},
+                ).get("signal_selected_count", 0),
+                "context_attribution_coverage_review_signal_count": len(
+                    coverage_result.get("review_signals", [])
+                ),
+                "context_attribution_coverage_executable_policy_count": int(
+                    bool(coverage_review.get("executable_policy_created"))
                 ),
             },
         },
@@ -2534,6 +2573,22 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "context_signal_attribution_count": sum(
             int(item.get("context_signal_attribution_count", 0)) for item in metrics
+        ),
+        "context_attribution_coverage_review_count": sum(
+            int(item.get("context_attribution_coverage_review_count", 0))
+            for item in metrics
+        ),
+        "context_attribution_coverage_signal_selected_count": sum(
+            int(item.get("context_attribution_coverage_signal_selected_count", 0))
+            for item in metrics
+        ),
+        "context_attribution_coverage_review_signal_count": sum(
+            int(item.get("context_attribution_coverage_review_signal_count", 0))
+            for item in metrics
+        ),
+        "context_attribution_coverage_executable_policy_count": sum(
+            int(item.get("context_attribution_coverage_executable_policy_count", 0))
+            for item in metrics
         ),
     }
 

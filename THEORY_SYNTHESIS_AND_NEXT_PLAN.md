@@ -937,19 +937,41 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- attribution coverage is not yet reviewed over time, so weakly attributed activation patterns cannot be flagged for cleanup.
+- attribution coverage review is handled by P32.
+
+### P32 Context Attribution Coverage Review
+
+Goal: review recent Context Builder activation traces for attribution coverage, turning weak or missing signal attribution into review-only signals.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `context_builder.attribution_coverage_reviews` stores review-only coverage reports;
+- `review-context-attribution-coverage` creates a coverage report over recent activation traces;
+- coverage metrics include selected count, signal-selected count, attributed count, source record count, attribution ratio, source record ratio, and signal counts;
+- missing or weak attribution becomes `review_signals`, not executable policy;
+- coverage reviews preserve `review_only: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- validation rejects executable or identity-mutating coverage reviews;
+- scenario evaluation verifies coverage review creation, signal-selected coverage, non-execution, and no Identity Core mutation.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- coverage reviews can accumulate, but they do not yet have lifecycle review actions such as acknowledge, archive, or quarantine.
 
 Recommended next step:
 
 ```text
-P32 Context Attribution Coverage Review
+P33 Context Attribution Coverage Review Lifecycle
 ```
 
 Reason:
 
-- P31 makes per-item attribution visible, but it does not yet summarize attribution quality across recent traces;
-- weak or missing source records should become review signals before any future policy layer uses them;
-- coverage review strengthens auditability and source monitoring without creating executable policy;
+- P32 creates durable coverage review records, so the next foundation step is lifecycle governance for those records;
+- review signals should be acknowledged, archived, or quarantined before they influence future planning;
+- lifecycle handling keeps attribution review auditable without creating executable policy;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:
