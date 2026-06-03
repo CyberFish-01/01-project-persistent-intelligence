@@ -1481,6 +1481,32 @@ RECONSTRUCTION_CAPABILITY_ORDER = (
     "seed_or_pre_event_state_coverage",
 )
 
+GROWTH_SEMANTICS_INVARIANTS = {
+    "review_only": True,
+    "execution_prohibited": True,
+    "automatic_identity_mutation_allowed": False,
+    "automatic_memory_promotion_allowed": False,
+    "memory_rewrite_executed": False,
+    "recall_mutation_executed": False,
+    "growth_engine_executed": False,
+}
+
+GROWTH_DRIFT_TYPES = (
+    "random_drift",
+    "evidence_backed_evolution",
+    "conflict_driven_revision",
+    "exploration_drift",
+    "identity_threatening_drift",
+)
+
+GROWTH_RECALL_EVENT_TYPES = (
+    "memory_recalled",
+    "memory_reinterpreted",
+    "memory_reinforced",
+    "memory_weakened",
+    "memory_conflicted",
+)
+
 
 def structured_payload(value: object) -> bool:
     return isinstance(value, (dict, list)) and bool(value)
@@ -3013,6 +3039,340 @@ def build_reconstruction_schema_evidence_request_lifecycle_decision(
             "snapshot_id": snapshot_id,
             "reversible": True,
         },
+    }
+
+
+def growth_invariants() -> dict:
+    return dict(GROWTH_SEMANTICS_INVARIANTS)
+
+
+def build_growth_semantics_rfc() -> dict:
+    invariants = growth_invariants()
+    return {
+        "mode": "stateful_memory_rfc_v0.1",
+        "status": "draft_report_only",
+        "rfc_title": "P50 Stateful Memory and Growth Semantics",
+        "core_claim": (
+            "Memory is not static content; a stateful memory is an event interpreted "
+            "through encoding state, recall state, and meaning shift."
+        ),
+        "memory_equation": "memory = event + encoding_state + recall_state + meaning_shift",
+        "memory_types": [
+            {
+                "type": "raw_memory",
+                "purpose": "Preserve source material with minimal interpretation.",
+                "promotion_allowed": False,
+            },
+            {
+                "type": "stateful_memory",
+                "purpose": "Bind remembered content to the state in which it was encoded.",
+                "promotion_allowed": False,
+            },
+            {
+                "type": "identity_relevant_memory",
+                "purpose": "Represent memory that may inform identity review without mutating Identity Core.",
+                "promotion_allowed": False,
+                "requires_high_gate": True,
+            },
+            {
+                "type": "relationship_memory",
+                "purpose": "Represent relationship-scoped memory with explicit privacy boundaries.",
+                "promotion_allowed": False,
+                "implementation_status": "rfc_only",
+            },
+            {
+                "type": "procedural_memory",
+                "purpose": "Represent repeatable behavior or cautionary practice as reviewable memory.",
+                "promotion_allowed": False,
+            },
+        ],
+        "minimum_encoding_state_fields": [
+            "timestamp",
+            "source_event_id",
+            "active_task_id",
+            "active_claim_ids",
+            "identity_anchor_refs",
+            "relationship_scope",
+            "confidence",
+            "salience",
+            "privacy_scope",
+            "state_version",
+        ],
+        "recall_as_event_model": {
+            "principle": (
+                "Recall is not ordinary reading; only meaning-shifting recall should "
+                "become an event candidate."
+            ),
+            "event_types": list(GROWTH_RECALL_EVENT_TYPES),
+            "execution_status": "schema_rfc_only",
+            "writes_recall_events": False,
+            "mutates_memory": False,
+        },
+        "meaning_shift_schema": {
+            "shift_type": [
+                "none",
+                "reinterpreted",
+                "reinforced",
+                "weakened",
+                "conflicted",
+            ],
+            "required_fields": [
+                "source_memory_id",
+                "encoding_state_ref",
+                "recall_state_ref",
+                "previous_meaning_ref",
+                "new_meaning_candidate",
+                "evidence_refs",
+                "review_status",
+            ],
+            "automatic_promotion_allowed": False,
+        },
+        "productive_drift_taxonomy": [
+            {
+                "drift_type": "random_drift",
+                "growth_candidate": False,
+                "reason": "No supporting evidence or state context explains the change.",
+            },
+            {
+                "drift_type": "evidence_backed_evolution",
+                "growth_candidate": True,
+                "reason": "New evidence supports a bounded interpretation change.",
+            },
+            {
+                "drift_type": "conflict_driven_revision",
+                "growth_candidate": True,
+                "reason": "Claim conflict creates a reviewable revision candidate.",
+            },
+            {
+                "drift_type": "exploration_drift",
+                "growth_candidate": True,
+                "reason": "Exploration can be recorded as a candidate but must not promote itself.",
+            },
+            {
+                "drift_type": "identity_threatening_drift",
+                "growth_candidate": False,
+                "reason": "Identity-threatening changes require high-gate review, not growth promotion.",
+            },
+        ],
+        "boundary": {
+            "implements_growth_engine": False,
+            "writes_recall_events": False,
+            "rewrites_memory": False,
+            "updates_identity_core": False,
+            "promotes_growth_candidates": False,
+            "implements_relationship_memory": False,
+            "implements_ui": False,
+            "implements_adapter_integration": False,
+            "implements_reconstruction_reducer": False,
+        },
+        **invariants,
+    }
+
+
+def memory_encoding_state_projection(memory: dict, state: dict) -> dict:
+    return {
+        "timestamp": memory.get("timestamp"),
+        "source_event_id": memory.get("id"),
+        "active_task_id": None,
+        "active_claim_ids": [
+            claim.get("claim_id")
+            for claim in state.get("claim_graph", {}).get("claims", [])
+            if isinstance(claim, dict) and claim.get("claim_id")
+        ][:5],
+        "identity_anchor_refs": list(
+            state.get("working_state", {}).get("context_anchors", {}).keys()
+        ),
+        "relationship_scope": memory.get("source", {}).get("user_id")
+        if isinstance(memory.get("source"), dict)
+        else None,
+        "confidence": memory.get("confidence"),
+        "salience": memory.get("salience"),
+        "privacy_scope": memory.get("sensitivity", "normal"),
+        "state_version": state.get("state_version"),
+    }
+
+
+def classify_growth_drift(sample: dict) -> dict:
+    evidence_refs = [
+        str(item)
+        for item in sample.get("evidence_refs", [])
+        if str(item).strip()
+    ]
+    recall_state = sample.get("recall_state", {})
+    meaning_shift = sample.get("meaning_shift", {})
+    shift_type = str(meaning_shift.get("shift_type") or sample.get("shift_type") or "")
+    has_encoding_state = isinstance(sample.get("encoding_state"), dict) and bool(
+        sample.get("encoding_state")
+    )
+    has_recall_state = isinstance(recall_state, dict) and bool(recall_state)
+    identity_threat = bool(sample.get("identity_threatening"))
+    conflict = bool(sample.get("claim_conflict")) or shift_type == "conflicted"
+    exploration = bool(sample.get("exploration"))
+
+    if identity_threat:
+        drift_type = "identity_threatening_drift"
+        classification = "requires_identity_review"
+        growth_candidate = False
+        missing_context = []
+    elif conflict and evidence_refs:
+        drift_type = "conflict_driven_revision"
+        classification = "growth_candidate"
+        growth_candidate = True
+        missing_context = []
+    elif evidence_refs and shift_type in {
+        "reinterpreted",
+        "reinforced",
+        "weakened",
+    }:
+        drift_type = "evidence_backed_evolution"
+        classification = "growth_candidate"
+        growth_candidate = True
+        missing_context = []
+    elif exploration:
+        drift_type = "exploration_drift"
+        classification = "record_only"
+        growth_candidate = True
+        missing_context = [] if evidence_refs or has_recall_state else ["evidence_refs"]
+    elif shift_type in {"", "none"}:
+        drift_type = "random_drift"
+        classification = "insufficient_context"
+        growth_candidate = False
+        missing_context = ["meaning_shift"]
+    else:
+        drift_type = "random_drift"
+        classification = "mutation_only"
+        growth_candidate = False
+        missing_context = []
+
+    if not has_encoding_state:
+        missing_context.append("encoding_state")
+    if not has_recall_state:
+        missing_context.append("recall_state")
+    if shift_type and shift_type not in {
+        "none",
+        "reinterpreted",
+        "reinforced",
+        "weakened",
+        "conflicted",
+    }:
+        missing_context.append("known_shift_type")
+
+    if missing_context and drift_type not in {
+        "identity_threatening_drift",
+        "random_drift",
+    }:
+        classification = "insufficient_context"
+
+    return {
+        "sample_id": sample.get("sample_id") or stable_id(
+            "growth_sample",
+            sample.get("memory_id"),
+            sample.get("description"),
+            drift_type,
+        ),
+        "memory_id": sample.get("memory_id"),
+        "description": sample.get("description", ""),
+        "drift_type": drift_type,
+        "classification": classification,
+        "growth_candidate": growth_candidate,
+        "meaning_shift_type": shift_type or "none",
+        "evidence_refs": evidence_refs,
+        "missing_context": sorted(set(missing_context)),
+        "review_required": True,
+        "automatic_identity_mutation_allowed": False,
+        "automatic_memory_promotion_allowed": False,
+        "memory_rewrite_executed": False,
+        "recall_mutation_executed": False,
+        "growth_engine_executed": False,
+    }
+
+
+def build_growth_semantics_report(
+    state: dict,
+    events: List[dict],
+    analysis_samples: Optional[List[dict]] = None,
+) -> dict:
+    invariants = growth_invariants()
+    rfc = build_growth_semantics_rfc()
+    samples: List[dict] = []
+    for memory in state.get("memory_stores", {}).get("episodic_memory", [])[-5:]:
+        if not isinstance(memory, dict):
+            continue
+        samples.append(
+            {
+                "sample_id": stable_id("growth_observation", memory.get("id")),
+                "memory_id": memory.get("id"),
+                "description": memory.get("summary", ""),
+                "encoding_state": memory_encoding_state_projection(memory, state),
+                "recall_state": {},
+                "meaning_shift": {"shift_type": "none"},
+                "evidence_refs": [memory.get("id")] if memory.get("id") else [],
+            }
+        )
+    samples.extend(
+        item for item in (analysis_samples or []) if isinstance(item, dict)
+    )
+
+    interpreted = [classify_growth_drift(sample) for sample in samples]
+    growth_candidates = [
+        item
+        for item in interpreted
+        if item.get("classification") == "growth_candidate"
+    ]
+    mutation_only = [
+        item
+        for item in interpreted
+        if item.get("classification") == "mutation_only"
+    ]
+    insufficient_context = [
+        item
+        for item in interpreted
+        if item.get("classification") == "insufficient_context"
+    ]
+    identity_review = [
+        item
+        for item in interpreted
+        if item.get("classification") == "requires_identity_review"
+    ]
+    record_only = [
+        item for item in interpreted if item.get("classification") == "record_only"
+    ]
+    drift_counts: dict[str, int] = {}
+    for item in interpreted:
+        drift_type = str(item.get("drift_type") or "unknown")
+        drift_counts[drift_type] = drift_counts.get(drift_type, 0) + 1
+
+    return {
+        "mode": "growth_semantics_report_v0.1",
+        "status": "passed",
+        "report_status": "report_only",
+        "source_reports": {
+            "stateful_memory_rfc": rfc.get("mode"),
+            "state": "state.json",
+            "events": "events.jsonl",
+        },
+        "memory_model": rfc["memory_equation"],
+        "event_count": len(events),
+        "sample_count": len(samples),
+        "interpreted_change_count": len(interpreted),
+        "drift_type_counts": dict(sorted(drift_counts.items())),
+        "growth_candidate_count": len(growth_candidates),
+        "mutation_only_count": len(mutation_only),
+        "insufficient_context_count": len(insufficient_context),
+        "identity_review_required_count": len(identity_review),
+        "record_only_count": len(record_only),
+        "interpreted_changes": interpreted,
+        "growth_candidates": growth_candidates,
+        "mutation_only_changes": mutation_only,
+        "insufficient_context_changes": insufficient_context,
+        "identity_review_required_changes": identity_review,
+        "record_only_changes": record_only,
+        "recommended_next_actions": [
+            "review_growth_candidates_without_promotion",
+            "define_meaning_shift_evidence_requirements",
+            "keep_recall_event_writes_disabled_until_schema_review",
+        ],
+        **invariants,
     }
 
 
@@ -8263,6 +8623,27 @@ class StateStore:
         )
         tracker["state_unchanged"] = before_state == self.load()
         return tracker
+
+    def growth_semantics_rfc(self) -> dict:
+        before_state = self.load()
+        report = build_growth_semantics_rfc()
+        report["state_unchanged"] = before_state == self.load()
+        report["would_modify_state"] = False
+        return report
+
+    def growth_semantics_report(
+        self,
+        analysis_samples: Optional[List[dict]] = None,
+    ) -> dict:
+        before_state = self.load()
+        report = build_growth_semantics_report(
+            state=before_state,
+            events=self.list_events(),
+            analysis_samples=analysis_samples,
+        )
+        report["state_unchanged"] = before_state == self.load()
+        report["would_modify_state"] = False
+        return report
 
     def apply_reconstruction_schema_evidence_request_lifecycle_action(
         self,

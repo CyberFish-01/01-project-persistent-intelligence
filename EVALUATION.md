@@ -320,6 +320,7 @@ It uses temporary state and currently runs:
 - `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, event replay builds a target-path transition projection with operation class, target identity, and report-only coverage validation, `event-report` exposes read-only projection coverage and retention suggestions, event payload/diff coverage and replayability assessment expose why deterministic replay is ready while object/full-state reconstruction is not, event payload/diff coverage produces a review-only payload capture policy proposal and decision without schema mutation, payload capture, compaction, or event rewrite, event retention review lifecycle records planning decisions without compaction or event rewrite, reconstruction schema review coverage maps checklist decisions back to reviewed and unreviewed workflow gaps without execution, reconstruction schema review evidence requests are tracked as open report-only requests, reconstruction schema evidence request lifecycle decisions can satisfy requests by evidence reference without approving schema or executing capture/reconstruction, and rollback preview reports affected state paths and projected impact without mutating state.
 - `dream_artifact_package`: verifies that Dream runs produce a complete artifact package with input manifest, provenance, review queue, patch diff, decision log, rollback metadata, and no direct Identity Core or active semantic memory write.
 - `context_builder_policy_trace`: verifies Context Builder v0.3 policy, persistent activation traces, source attribution budget, activation signals from identity gate, claim graph, governance proposal-link evidence, and Dream artifacts, plus signal attribution records, persisted attribution summaries, review-only attribution coverage reports, coverage lifecycle retention, archived-review context suppression, and no executable policy creation.
+- `growth_semantics`: verifies P50 `growth-semantics-rfc` and `growth-semantics-report`, including same-memory/different-recall-state meaning shift, claim-conflict evidence-backed evolution, random drift rejection, exploration drift recorded without promotion, identity-threatening drift routed to review, and no recall mutation, memory rewrite, automatic growth, or Identity Core mutation.
 
 The v0.9 runner executes deterministic local rule baselines for stateless, retrieval-only, and summary-only systems. These baselines do not call a model; they provide a reproducible comparison layer for task resumption, stale memory control, identity attack resistance, conflict repair auditability, and selective forgetting.
 
@@ -443,6 +444,20 @@ Current metrics summary includes:
 - reconstruction schema evidence request lifecycle compaction count,
 - reconstruction schema evidence request lifecycle events modified count,
 - reconstruction schema evidence request lifecycle replay after count,
+- growth semantics report count,
+- growth semantics RFC count,
+- growth semantics interpreted change count,
+- growth semantics growth candidate count,
+- growth semantics mutation only count,
+- growth semantics record only count,
+- growth semantics identity review count,
+- growth semantics insufficient context count,
+- growth semantics automatic identity mutation count,
+- growth semantics automatic memory promotion count,
+- growth semantics memory rewrite count,
+- growth semantics recall mutation count,
+- growth semantics growth engine execution count,
+- growth semantics state mutation count,
 - event payload capture policy proposal count,
 - event payload capture policy decision count,
 - event payload capture policy approved count,

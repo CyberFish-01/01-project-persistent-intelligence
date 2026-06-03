@@ -1605,17 +1605,19 @@ Remaining gaps:
 - no event schema migration exists;
 - no payload or diff capture implementation exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
-P50 Reconstruction Evidence Reference Coverage Report
+P50 Stateful Memory and Growth Semantics
 ```
 
 Reason:
 
-- P49 can record that an evidence request was satisfied by references, but the project still needs a report-only check that those references cover the requested object payload, object diff, snapshot, or reconstruction metadata need;
-- this should remain analytical and should not approve schema changes or execute capture;
-- it continues Event-Sourcing Groundwork by improving evidence quality before any event schema mutation or reconstruction work.
+- P41-P49 established evidence and reconstruction governance, but the project also needs semantics for which state changes are worth remembering;
+- memory should be treated as event + encoding state + recall state + meaning shift, not static content;
+- recall should not be treated as ordinary retrieval when it changes meaning;
+- drift needs taxonomy so the harness can distinguish random mutation from reviewable growth;
+- growth must remain a review-only candidate, not an automatic identity or memory update.
 
 Desired acceptance:
 
@@ -1626,6 +1628,39 @@ python3 -m one_core.cli evaluate-foundation
 python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
+
+Implemented result:
+
+- `growth-semantics-rfc` CLI returns `stateful_memory_rfc_v0.1`;
+- `growth-semantics-report` CLI returns `growth_semantics_report_v0.1`;
+- the RFC defines raw memory, stateful memory, identity-relevant memory, relationship memory, and procedural memory at the schema/RFC level;
+- the RFC defines recall event candidates: `memory_recalled`, `memory_reinterpreted`, `memory_reinforced`, `memory_weakened`, and `memory_conflicted`;
+- the report classifies changes as `random_drift`, `evidence_backed_evolution`, `conflict_driven_revision`, `exploration_drift`, or `identity_threatening_drift`;
+- validation rejects growth semantics artifacts that violate review-only invariants;
+- scenario evaluation adds `growth_semantics` with deterministic samples for same-memory/different-recall-state meaning shift, claim-conflict evolution, random drift rejection, exploration drift without promotion, and identity-threatening drift review;
+- P50 preserves `review_only: true`, `execution_prohibited: true`, `automatic_identity_mutation_allowed: false`, `automatic_memory_promotion_allowed: false`, `memory_rewrite_executed: false`, `recall_mutation_executed: false`, and `growth_engine_executed: false`.
+
+Remaining gaps:
+
+- P50 does not write recall events;
+- P50 does not implement recall lifecycle;
+- P50 does not rewrite memory;
+- P50 does not promote growth candidates;
+- P50 does not implement relationship memory;
+- P50 does not execute reconstruction reducers;
+- growth candidate review remains a future governance layer.
+
+Potential next step:
+
+```text
+P51 Growth Candidate Review Design
+```
+
+Reason:
+
+- P50 can classify growth candidates, but it deliberately does not make them durable or reviewable over time;
+- the next step should decide whether growth candidates belong in Task Hub, Claim Graph, Memory Layer, or a separate governance surface;
+- it should remain review-only and should not mutate Identity Core automatically.
 
 ### P19 Cautionary Procedural Review
 

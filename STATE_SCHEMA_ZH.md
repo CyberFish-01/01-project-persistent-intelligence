@@ -1890,6 +1890,63 @@ reconstruction_schema_evidence_request_lifecycle_decision:
 
 P49 可以把 request 标记为 satisfied、deferred、archived 或 quarantined，但只用于治理。`satisfied` 只表示 evidence references 已被记录；它不会 approve schema changes、capture payloads、reconstruct state、compact events、rollback state、mutate identity 或 modify existing events。
 
+P50 增加 review-only stateful memory and growth semantics reports：
+
+```bash
+python3 -m one_core.cli growth-semantics-rfc
+python3 -m one_core.cli growth-semantics-report
+```
+
+RFC 定义 memory 不是静态 content，而是 `event + encoding_state + recall_state + meaning_shift`。Report 会把当前 memories/events 和 deterministic evaluation samples 解释为 growth candidates、mutation-only changes、insufficient-context changes、record-only exploration drift 或 identity-review-required changes。
+
+```yaml
+stateful_memory_rfc:
+  mode: "stateful_memory_rfc_v0.1"
+  memory_equation: "memory = event + encoding_state + recall_state + meaning_shift"
+  recall_as_event_model:
+    event_types:
+      - memory_recalled
+      - memory_reinterpreted
+      - memory_reinforced
+      - memory_weakened
+      - memory_conflicted
+    writes_recall_events: false
+    mutates_memory: false
+  productive_drift_taxonomy:
+    - random_drift
+    - evidence_backed_evolution
+    - conflict_driven_revision
+    - exploration_drift
+    - identity_threatening_drift
+  review_only: true
+  execution_prohibited: true
+  automatic_identity_mutation_allowed: false
+  automatic_memory_promotion_allowed: false
+  memory_rewrite_executed: false
+  recall_mutation_executed: false
+  growth_engine_executed: false
+
+growth_semantics_report:
+  mode: "growth_semantics_report_v0.1"
+  report_status: "report_only"
+  growth_candidates: []
+  mutation_only_changes: []
+  insufficient_context_changes: []
+  identity_review_required_changes: []
+  record_only_changes: []
+  review_only: true
+  execution_prohibited: true
+  automatic_identity_mutation_allowed: false
+  automatic_memory_promotion_allowed: false
+  memory_rewrite_executed: false
+  recall_mutation_executed: false
+  growth_engine_executed: false
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P50 不会 write recall events、rewrite memory、promote growth candidates、mutate Identity Core、实现 relationship memory、做 UI/adapter work 或执行 reconstruction reducers。Growth 只是一种 review-only interpretation candidate。
+
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
 ```yaml

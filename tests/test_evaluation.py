@@ -33,7 +33,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(report["state_mode"], "temporary")
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["failed"], 0)
-        self.assertEqual(report["passed"], 16)
+        self.assertEqual(report["passed"], 17)
         self.assertEqual(
             report["baselines"]["system_under_test"],
             "state_transfer_system",
@@ -81,9 +81,10 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertIn("event_log_replay_rollback", scenario_names)
         self.assertIn("dream_artifact_package", scenario_names)
         self.assertIn("context_builder_policy_trace", scenario_names)
+        self.assertIn("growth_semantics", scenario_names)
 
         metrics = report["metrics_summary"]
-        self.assertEqual(metrics["total_scenarios"], 16)
+        self.assertEqual(metrics["total_scenarios"], 17)
         self.assertEqual(metrics["failed_scenarios"], 0)
         self.assertEqual(metrics["boundary_violation_count"], 0)
         self.assertEqual(metrics["archived_memory_retrieval_count"], 0)
@@ -543,6 +544,38 @@ class FoundationEvaluationTests(unittest.TestCase):
             ],
             1,
         )
+        self.assertEqual(metrics["growth_semantics_report_count"], 1)
+        self.assertEqual(metrics["growth_semantics_rfc_count"], 1)
+        self.assertGreaterEqual(
+            metrics["growth_semantics_interpreted_change_count"],
+            5,
+        )
+        self.assertGreaterEqual(
+            metrics["growth_semantics_growth_candidate_count"],
+            2,
+        )
+        self.assertGreaterEqual(metrics["growth_semantics_mutation_only_count"], 1)
+        self.assertGreaterEqual(metrics["growth_semantics_record_only_count"], 1)
+        self.assertGreaterEqual(metrics["growth_semantics_identity_review_count"], 1)
+        self.assertGreaterEqual(
+            metrics["growth_semantics_insufficient_context_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics["growth_semantics_automatic_identity_mutation_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics["growth_semantics_automatic_memory_promotion_count"],
+            0,
+        )
+        self.assertEqual(metrics["growth_semantics_memory_rewrite_count"], 0)
+        self.assertEqual(metrics["growth_semantics_recall_mutation_count"], 0)
+        self.assertEqual(
+            metrics["growth_semantics_growth_engine_execution_count"],
+            0,
+        )
+        self.assertEqual(metrics["growth_semantics_state_mutation_count"], 0)
         self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,

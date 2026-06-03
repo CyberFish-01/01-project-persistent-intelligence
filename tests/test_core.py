@@ -13,7 +13,7 @@ from one_core.state import (
     StateStore,
     event_replayability_requirement_summary,
 )
-from one_core.validation import validate_state
+from one_core.validation import validate_growth_semantics_artifact, validate_state
 
 
 class CoreStateTests(unittest.TestCase):
@@ -3401,6 +3401,194 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(
                 validate_state(store.load(), events=store.list_events())["status"],
                 "passed",
+            )
+
+    def test_growth_semantics_rfc_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.growth_semantics_rfc()
+            after = store.load()
+
+            self.assertEqual(report["mode"], "stateful_memory_rfc_v0.1")
+            self.assertEqual(
+                report["memory_equation"],
+                "memory = event + encoding_state + recall_state + meaning_shift",
+            )
+            self.assertIn(
+                "memory_reinterpreted",
+                report["recall_as_event_model"]["event_types"],
+            )
+            drift_types = {
+                item["drift_type"]
+                for item in report["productive_drift_taxonomy"]
+            }
+            self.assertEqual(
+                drift_types,
+                {
+                    "random_drift",
+                    "evidence_backed_evolution",
+                    "conflict_driven_revision",
+                    "exploration_drift",
+                    "identity_threatening_drift",
+                },
+            )
+            self.assertTrue(report["review_only"])
+            self.assertTrue(report["execution_prohibited"])
+            self.assertFalse(report["automatic_identity_mutation_allowed"])
+            self.assertFalse(report["automatic_memory_promotion_allowed"])
+            self.assertFalse(report["memory_rewrite_executed"])
+            self.assertFalse(report["recall_mutation_executed"])
+            self.assertFalse(report["growth_engine_executed"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertEqual(
+                validate_growth_semantics_artifact(report)["status"],
+                "passed",
+            )
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
+    def test_growth_semantics_report_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            memory = store.record_episode("P50 stateful memory encoding episode")
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+            encoding_state = {
+                "timestamp": memory["timestamp"],
+                "source_event_id": memory["id"],
+                "active_task_id": "task_p50",
+                "active_claim_ids": ["claim_support"],
+                "identity_anchor_refs": list(
+                    state["working_state"]["context_anchors"].keys()
+                ),
+                "relationship_scope": "local_user",
+                "confidence": 0.8,
+                "salience": 0.7,
+                "privacy_scope": "normal",
+                "state_version": STATE_VERSION,
+            }
+
+            samples = [
+                {
+                    "sample_id": "same_memory_recall_task",
+                    "memory_id": memory["id"],
+                    "description": "Same memory recalled during task planning.",
+                    "encoding_state": encoding_state,
+                    "recall_state": {
+                        "timestamp": "2026-06-04T00:00:00+00:00",
+                        "active_task_id": "task_resume",
+                        "retrieval_reason": "resume_task",
+                    },
+                    "meaning_shift": {"shift_type": "reinforced"},
+                    "evidence_refs": [memory["id"], "task:resume"],
+                },
+                {
+                    "sample_id": "same_memory_recall_conflict",
+                    "memory_id": memory["id"],
+                    "description": "Same memory recalled during claim conflict.",
+                    "encoding_state": encoding_state,
+                    "recall_state": {
+                        "timestamp": "2026-06-04T00:01:00+00:00",
+                        "active_claim_ids": ["claim_conflict"],
+                        "retrieval_reason": "resolve_conflict",
+                    },
+                    "meaning_shift": {"shift_type": "conflicted"},
+                    "claim_conflict": True,
+                    "evidence_refs": [memory["id"], "claim:conflict"],
+                },
+                {
+                    "sample_id": "random_drift_without_evidence",
+                    "memory_id": memory["id"],
+                    "description": "Unsupported identity tone drift.",
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "unsupported_change"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "evidence_refs": [],
+                },
+                {
+                    "sample_id": "exploration_drift_record_only",
+                    "memory_id": memory["id"],
+                    "description": "Exploratory framing of a memory.",
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "exploration"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "exploration": True,
+                    "evidence_refs": [],
+                },
+                {
+                    "sample_id": "identity_threatening_drift_review",
+                    "memory_id": memory["id"],
+                    "description": "Threatens Identity Core continuity.",
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "identity_overwrite"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "identity_threatening": True,
+                    "evidence_refs": [memory["id"]],
+                },
+            ]
+
+            report = store.growth_semantics_report(analysis_samples=samples)
+            after = store.load()
+            classifications = {
+                item["sample_id"]: item
+                for item in report["interpreted_changes"]
+            }
+
+            self.assertEqual(report["mode"], "growth_semantics_report_v0.1")
+            self.assertEqual(report["report_status"], "report_only")
+            self.assertGreaterEqual(report["interpreted_change_count"], 5)
+            self.assertEqual(
+                classifications["same_memory_recall_task"]["drift_type"],
+                "evidence_backed_evolution",
+            )
+            self.assertEqual(
+                classifications["same_memory_recall_conflict"]["drift_type"],
+                "conflict_driven_revision",
+            )
+            self.assertEqual(
+                classifications["random_drift_without_evidence"]["classification"],
+                "mutation_only",
+            )
+            self.assertEqual(
+                classifications["exploration_drift_record_only"]["classification"],
+                "record_only",
+            )
+            self.assertEqual(
+                classifications["identity_threatening_drift_review"][
+                    "classification"
+                ],
+                "requires_identity_review",
+            )
+            self.assertGreaterEqual(report["growth_candidate_count"], 2)
+            self.assertGreaterEqual(report["mutation_only_count"], 1)
+            self.assertGreaterEqual(report["record_only_count"], 1)
+            self.assertGreaterEqual(report["identity_review_required_count"], 1)
+            self.assertTrue(report["review_only"])
+            self.assertTrue(report["execution_prohibited"])
+            self.assertFalse(report["automatic_identity_mutation_allowed"])
+            self.assertFalse(report["automatic_memory_promotion_allowed"])
+            self.assertFalse(report["memory_rewrite_executed"])
+            self.assertFalse(report["recall_mutation_executed"])
+            self.assertFalse(report["growth_engine_executed"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertEqual(
+                validate_growth_semantics_artifact(report)["status"],
+                "passed",
+            )
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
             )
 
     def test_event_retention_review_lifecycle_is_review_only(self):

@@ -1596,17 +1596,19 @@ git diff --check
 - 还没有 event schema migration；
 - 还没有 payload 或 diff capture implementation。
 
-建议下一步：
+已实现的下一步：
 
 ```text
-P50 Reconstruction Evidence Reference Coverage Report
+P50 Stateful Memory and Growth Semantics
 ```
 
 理由：
 
-- P49 可以记录某个 evidence request 被 references satisfy，但项目仍需要一个 report-only check，判断这些 references 是否覆盖 requested object payload、object diff、snapshot 或 reconstruction metadata need；
-- 这一步仍应保持 analytical，不批准 schema changes，也不执行 capture；
-- 它会继续在任何 event schema mutation 或 reconstruction work 之前提升 evidence quality。
+- P41-P49 已经建立 evidence 与 reconstruction governance，但项目还需要说明什么状态变化值得被记住；
+- memory 不应被视为静态 content，而应被视为 event + encoding state + recall state + meaning shift；
+- 当 recall 改变 meaning 时，它不能被当作普通 retrieval；
+- drift 需要 taxonomy，harness 才能区分 random mutation 和 reviewable growth；
+- growth 必须保持 review-only candidate，而不是 automatic identity 或 memory update。
 
 期望验收：
 
@@ -1617,6 +1619,39 @@ python3 -m one_core.cli evaluate-foundation
 python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
+
+已实现结果：
+
+- `growth-semantics-rfc` CLI 返回 `stateful_memory_rfc_v0.1`；
+- `growth-semantics-report` CLI 返回 `growth_semantics_report_v0.1`；
+- RFC 在 schema/RFC 层定义 raw memory、stateful memory、identity-relevant memory、relationship memory 和 procedural memory；
+- RFC 定义 recall event candidates：`memory_recalled`、`memory_reinterpreted`、`memory_reinforced`、`memory_weakened` 和 `memory_conflicted`；
+- report 会把变化分类为 `random_drift`、`evidence_backed_evolution`、`conflict_driven_revision`、`exploration_drift` 或 `identity_threatening_drift`；
+- validation 会拒绝违反 review-only invariants 的 growth semantics artifacts；
+- scenario evaluation 增加 `growth_semantics`，用 deterministic samples 检查 same-memory/different-recall-state meaning shift、claim-conflict evolution、random drift rejection、exploration drift without promotion，以及 identity-threatening drift review；
+- P50 保持 `review_only: true`、`execution_prohibited: true`、`automatic_identity_mutation_allowed: false`、`automatic_memory_promotion_allowed: false`、`memory_rewrite_executed: false`、`recall_mutation_executed: false` 和 `growth_engine_executed: false`。
+
+剩余缺口：
+
+- P50 不会 write recall events；
+- P50 不会实现 recall lifecycle；
+- P50 不会 rewrite memory；
+- P50 不会 promote growth candidates；
+- P50 不会实现 relationship memory；
+- P50 不会执行 reconstruction reducers；
+- growth candidate review 仍是后续 governance layer。
+
+可能的下一步：
+
+```text
+P51 Growth Candidate Review Design
+```
+
+理由：
+
+- P50 可以分类 growth candidates，但刻意不让它们 durable 或可长期 review；
+- 下一步应决定 growth candidates 属于 Task Hub、Claim Graph、Memory Layer，还是独立 governance surface；
+- 它仍应保持 review-only，不应自动 mutate Identity Core。
 
 ### P33 Context Attribution Coverage Review Lifecycle
 

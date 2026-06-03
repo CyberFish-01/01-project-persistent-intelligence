@@ -322,6 +322,7 @@ python3 -m one_core.cli evaluate-scenarios
 - `event_log_replay_rollback`：检查真实 state transition 会进入 append-only event log，dry-run preview 不写入，replay check 通过，event replay 会构建带 operation class、target identity 和 report-only coverage validation 的 target-path transition projection，`event-report` 会暴露只读 projection coverage 和 retention suggestions，event payload/diff coverage 和 replayability assessment 会说明为什么 deterministic replay 已经可用但 object/full-state reconstruction 还不可用，event payload/diff coverage 会生成 review-only payload capture policy proposal 和 decision，但不会修改 schema、capture payload、compact events 或 rewrite events，event retention review lifecycle 会记录 planning decisions 但不执行 compaction 或 event rewrite，reconstruction schema review coverage 会把 checklist decisions 映射回 reviewed / unreviewed workflow gaps 且不执行任何变更，reconstruction schema review evidence requests 会以 open、report-only request 被跟踪，reconstruction schema evidence request lifecycle decisions 可以通过 evidence reference satisfy requests 但不批准 schema 或执行 capture/reconstruction，rollback preview 会报告 affected state paths 和 projected impact，并且不修改 state。
 - `dream_artifact_package`：检查 Dream run 会生成完整 artifact package，包含 input manifest、provenance、review queue、patch diff、decision log、rollback metadata，并且不直接写 Identity Core 或 active semantic memory。
 - `context_builder_policy_trace`：检查 Context Builder v0.3 policy、持久 activation trace、source attribution budget、来自 identity gate、claim graph、governance proposal-link evidence 和 Dream artifact 的 activation signals，以及 signal attribution records、持久 attribution summaries、review-only attribution coverage reports、coverage lifecycle retention、archived review context suppression，并确认不会创建 executable policy。
+- `growth_semantics`：检查 P50 `growth-semantics-rfc` 和 `growth-semantics-report`，包括 same-memory/different-recall-state meaning shift、claim-conflict evidence-backed evolution、random drift rejection、exploration drift recorded without promotion、identity-threatening drift routed to review，并确认不会执行 recall mutation、memory rewrite、automatic growth 或 Identity Core mutation。
 
 v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、retrieval-only、summary-only systems。它们不调用模型，而是为 task resumption、stale memory control、identity attack resistance、conflict repair auditability 和 selective forgetting 提供可复现的对照层。
 
@@ -445,6 +446,20 @@ v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、re
 - reconstruction schema evidence request lifecycle compaction count；
 - reconstruction schema evidence request lifecycle events modified count；
 - reconstruction schema evidence request lifecycle replay after count；
+- growth semantics report count；
+- growth semantics RFC count；
+- growth semantics interpreted change count；
+- growth semantics growth candidate count；
+- growth semantics mutation only count；
+- growth semantics record only count；
+- growth semantics identity review count；
+- growth semantics insufficient context count；
+- growth semantics automatic identity mutation count；
+- growth semantics automatic memory promotion count；
+- growth semantics memory rewrite count；
+- growth semantics recall mutation count；
+- growth semantics growth engine execution count；
+- growth semantics state mutation count；
 - event payload capture policy proposal count；
 - event payload capture policy decision count；
 - event payload capture policy approved count；

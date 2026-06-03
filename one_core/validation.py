@@ -56,6 +56,16 @@ MEMORY_STORES_REQUIRING_METADATA = [
     "archived_memory",
 ]
 
+GROWTH_SEMANTICS_REQUIRED_INVARIANTS = {
+    "review_only": True,
+    "execution_prohibited": True,
+    "automatic_identity_mutation_allowed": False,
+    "automatic_memory_promotion_allowed": False,
+    "memory_rewrite_executed": False,
+    "recall_mutation_executed": False,
+    "growth_engine_executed": False,
+}
+
 
 @dataclass(frozen=True)
 class ValidationIssue:
@@ -89,6 +99,81 @@ def validate_state(
         issues.extend(validate_event_log(state, events))
     if dream_artifacts is not None:
         issues.extend(validate_dream_artifacts(dream_artifacts))
+    return {
+        "status": "passed" if not issues else "failed",
+        "issues": [issue_to_dict(issue) for issue in issues],
+        "issue_count": len(issues),
+    }
+
+
+def validate_growth_semantics_artifact(artifact: dict[str, Any]) -> dict:
+    issues: list[ValidationIssue] = []
+    path = "growth_semantics_artifact"
+    if artifact.get("mode") not in {
+        "stateful_memory_rfc_v0.1",
+        "growth_semantics_report_v0.1",
+    }:
+        issues.append(
+            ValidationIssue(
+                path + ".mode",
+                "Growth semantics artifact mode is invalid.",
+            )
+        )
+    for key, expected in GROWTH_SEMANTICS_REQUIRED_INVARIANTS.items():
+        if artifact.get(key) is not expected:
+            issues.append(
+                ValidationIssue(
+                    path + f".{key}",
+                    "Growth semantics artifact must preserve review-only invariants.",
+                )
+            )
+    if artifact.get("mode") == "growth_semantics_report_v0.1":
+        for bucket_key in (
+            "growth_candidates",
+            "mutation_only_changes",
+            "insufficient_context_changes",
+            "identity_review_required_changes",
+            "record_only_changes",
+        ):
+            if not isinstance(artifact.get(bucket_key), list):
+                issues.append(
+                    ValidationIssue(
+                        path + f".{bucket_key}",
+                        "Growth semantics report buckets must be lists.",
+                    )
+                )
+        for index, item in enumerate(artifact.get("interpreted_changes", [])):
+            if not isinstance(item, dict):
+                issues.append(
+                    ValidationIssue(
+                        path + f".interpreted_changes[{index}]",
+                        "Growth semantics interpreted change must be an object.",
+                    )
+                )
+                continue
+            for key, expected in (
+                ("automatic_identity_mutation_allowed", False),
+                ("automatic_memory_promotion_allowed", False),
+                ("memory_rewrite_executed", False),
+                ("recall_mutation_executed", False),
+                ("growth_engine_executed", False),
+            ):
+                if item.get(key) is not expected:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".interpreted_changes[{index}].{key}",
+                            "Growth semantics interpreted changes must not execute mutations.",
+                        )
+                    )
+            if item.get("classification") == "growth_candidate" and item.get(
+                "review_required"
+            ) is not True:
+                issues.append(
+                    ValidationIssue(
+                        path + f".interpreted_changes[{index}].review_required",
+                        "Growth candidates must require review.",
+                    )
+                )
     return {
         "status": "passed" if not issues else "failed",
         "issues": [issue_to_dict(issue) for issue in issues],
