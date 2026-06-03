@@ -1300,12 +1300,16 @@ event:
   review_events: []
 ```
 
-P12 replay 支持刻意保持保守：
+P35 replay 支持仍然保持保守，但比最初的 P12 audit check 更强：
 
 - `replay-events` 检查 event `update_id` 是否仍能引用当前 `update_log`；
+- 它会基于 event sequence、operation、target path、after value 和 rollback metadata 重建 deterministic target-path transition projection；
+- projection 会报告 rebuildable event count、target-path counts、latest after references、rollback snapshot coverage 和 sequence gaps；
 - 它会报告旧 state update 的 coverage，但不要求 P12 之前的 update 必须有 event；
-- `rollback-preview <snapshot_id>` 只报告 snapshot 与 affected event metadata，不修改 state；
+- `rollback-preview <snapshot_id>` 会报告 snapshot metadata、affected event ids、affected state paths 和 projected rollback impact，但不修改 state；
 - `dry_run` preview 不写入 state event。
+
+这个 projection 还不是完整 object-level state rebuild。它是一个可复现的 audit layer，用于在项目尝试 automatic rollback 之前，检查 event log 能否重建 transition references。
 
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 

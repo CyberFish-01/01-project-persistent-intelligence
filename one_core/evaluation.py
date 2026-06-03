@@ -1609,14 +1609,30 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     replay = store.replay_events()
     preview = store.rollback_preview(review["snapshot_id"])
     after_preview = store.load()
+    projection = replay.get("projection", {})
+    projected_identity_memory = projection.get("target_paths", {}).get(
+        "memory_stores.identity_memory",
+        {},
+    )
+    projected_impact = preview.get("projected_rollback_impact", {})
     checks = {
         "dry_run_status_preview": status_code == 200 and response.get("status") == "preview",
         "dry_run_no_event": after_dry_run_events == before_dry_run_events,
         "events_written": len(store.list_events()) >= 5,
         "replay_passed": replay["status"] == "passed",
         "event_coverage_nonzero": replay["event_coverage_count"] > 0,
+        "replay_projection_built": projection.get("rebuildable_event_count", 0)
+        == len(store.list_events()),
+        "replay_projection_has_identity_memory": projected_identity_memory.get(
+            "latest_after"
+        )
+        == review["identity_memory_id"],
         "rollback_preview_non_mutating": preview.get("would_modify_state") is False,
         "rollback_preview_links_event": bool(preview.get("affected_event_ids")),
+        "rollback_preview_lists_state_path": "memory_stores.identity_memory"
+        in preview.get("affected_state_paths", []),
+        "rollback_projection_lists_impact": "memory_stores.identity_memory"
+        in projected_impact.get("target_paths", []),
         "state_unchanged_after_preview": after_preview == before_preview,
     }
     return EvaluationCheck(
@@ -1629,6 +1645,15 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 "event_log_replay_score": ratio(checks.values()),
                 "event_count": len(store.list_events()),
                 "event_coverage_count": replay["event_coverage_count"],
+                "event_projection_count": projection.get("rebuildable_event_count", 0),
+                "event_projection_gap_count": projection.get("sequence_gap_count", 0),
+                "rollback_affected_path_count": len(
+                    preview.get("affected_state_paths", [])
+                ),
+                "rollback_projected_impact_count": projected_impact.get(
+                    "would_remove_event_count",
+                    0,
+                ),
                 "rollback_preview_count": 1 if preview.get("status") == "preview" else 0,
                 "rollback_mutation_count": 0 if after_preview == before_preview else 1,
             },
@@ -2610,8 +2635,21 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         "event_coverage_count": sum(
             int(item.get("event_coverage_count", 0)) for item in metrics
         ),
+        "event_projection_count": sum(
+            int(item.get("event_projection_count", 0)) for item in metrics
+        ),
+        "event_projection_gap_count": sum(
+            int(item.get("event_projection_gap_count", 0)) for item in metrics
+        ),
         "rollback_preview_count": sum(
             int(item.get("rollback_preview_count", 0)) for item in metrics
+        ),
+        "rollback_affected_path_count": sum(
+            int(item.get("rollback_affected_path_count", 0)) for item in metrics
+        ),
+        "rollback_projected_impact_count": sum(
+            int(item.get("rollback_projected_impact_count", 0))
+            for item in metrics
         ),
         "rollback_mutation_count": sum(
             int(item.get("rollback_mutation_count", 0)) for item in metrics

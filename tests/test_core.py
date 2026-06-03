@@ -2231,7 +2231,20 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(events[0]["after"], episode["id"])
             self.assertEqual(events[0]["target_path"], "memory_stores.episodic_memory")
             self.assertEqual(replay["status"], "passed")
+            self.assertEqual(replay["mode"], "audit_replay_with_projection")
             self.assertEqual(replay["event_count"], 1)
+            projection = replay["projection"]
+            self.assertEqual(
+                projection["projection_mode"],
+                "target_path_transition_projection_v0.1",
+            )
+            self.assertEqual(projection["rebuildable_event_count"], 1)
+            self.assertEqual(projection["sequence_gap_count"], 0)
+            episodic_projection = projection["target_paths"][
+                "memory_stores.episodic_memory"
+            ]
+            self.assertEqual(episodic_projection["after_count"], 1)
+            self.assertEqual(episodic_projection["latest_after"], episode["id"])
 
     def test_dry_run_preview_does_not_write_state_event(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -2326,7 +2339,49 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(preview["snapshot_id"], result["snapshot_id"])
             self.assertFalse(preview["would_modify_state"])
             self.assertTrue(preview["affected_event_ids"])
+            self.assertIn(
+                "memory_stores.identity_memory",
+                preview["affected_state_paths"],
+            )
+            self.assertEqual(
+                preview["projected_rollback_impact"]["projection_mode"],
+                "target_path_transition_projection_v0.1",
+            )
+            self.assertIn(
+                "memory_stores.identity_memory",
+                preview["projected_rollback_impact"]["target_paths"],
+            )
+            self.assertGreaterEqual(
+                preview["projected_rollback_impact"]["would_remove_event_count"],
+                1,
+            )
             self.assertEqual(after, before)
+
+    def test_replay_projection_flags_unrebuildable_event_without_crashing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            episode = store.record_episode("bad sequence replay should be audited.")
+            event = store.list_events()[0]
+            event["sequence"] = "bad-sequence"
+            store.events_path.write_text(
+                json.dumps(event, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            replay = store.replay_events()
+
+            self.assertEqual(replay["status"], "failed")
+            self.assertEqual(
+                replay["projection"]["unrebuildable_event_ids"],
+                [event["event_id"]],
+            )
+            self.assertEqual(replay["event_count"], 1)
+            self.assertEqual(
+                replay["projection"]["target_paths"],
+                {},
+            )
+            self.assertEqual(episode["id"], event["after"])
 
     def test_identity_update_gate_blocks_non_claims_violation(self):
         with tempfile.TemporaryDirectory() as tmp:

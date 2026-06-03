@@ -1298,12 +1298,16 @@ event:
   review_events: []
 ```
 
-P12 replay support is intentionally conservative:
+P35 replay support is still conservative, but stronger than the original P12 audit check:
 
 - `replay-events` validates that event `update_id` values still reference current `update_log` entries,
+- it rebuilds a deterministic target-path transition projection from event sequence, operation, target path, after value, and rollback metadata,
+- the projection reports rebuildable event count, target-path counts, latest after references, rollback snapshot coverage, and sequence gaps,
 - it reports coverage for old state updates but does not require pre-P12 updates to have events,
-- `rollback-preview <snapshot_id>` reports snapshot and affected event metadata without mutating state,
+- `rollback-preview <snapshot_id>` reports snapshot metadata, affected event ids, affected state paths, and projected rollback impact without mutating state,
 - `dry_run` previews do not write state events.
+
+This projection is not a full object-level state rebuild yet. It is a reproducible audit layer for checking that the event log can reconstruct transition references before the project attempts automatic rollback.
 
 Dream artifacts keep the full review material for one Dream run:
 

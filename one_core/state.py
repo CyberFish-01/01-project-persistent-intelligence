@@ -1020,6 +1020,96 @@ def target_path_counts(events: List[dict]) -> dict:
     return counts
 
 
+def event_operation_counts(events: List[dict]) -> dict:
+    counts: dict[str, int] = {}
+    for event in events:
+        operation = str(event.get("operation") or "unknown")
+        counts[operation] = counts.get(operation, 0) + 1
+    return counts
+
+
+def event_sequence_sort_key(event: dict) -> int:
+    sequence = event.get("sequence")
+    return sequence if isinstance(sequence, int) else 0
+
+
+def build_event_replay_projection(events: List[dict]) -> dict:
+    target_paths: dict[str, dict] = {}
+    rollback_snapshots: dict[str, dict] = {}
+    unrebuildable_event_ids: List[str] = []
+    last_sequence = 0
+    sequence_gap_count = 0
+
+    for event in sorted(events, key=event_sequence_sort_key):
+        event_id = str(event.get("event_id") or "unknown_event")
+        sequence = event.get("sequence")
+        target_path = str(event.get("target_path") or "")
+        operation = str(event.get("operation") or "")
+        if not isinstance(sequence, int) or not target_path or not operation:
+            unrebuildable_event_ids.append(event_id)
+            continue
+        if sequence != last_sequence + 1:
+            sequence_gap_count += 1
+        last_sequence = sequence
+
+        target = target_paths.setdefault(
+            target_path,
+            {
+                "event_count": 0,
+                "operation_counts": {},
+                "after_ids": [],
+                "latest_after": None,
+                "latest_event_id": None,
+                "latest_update_id": None,
+                "rollback_snapshot_ids": [],
+            },
+        )
+        target["event_count"] += 1
+        target["operation_counts"][operation] = (
+            target["operation_counts"].get(operation, 0) + 1
+        )
+        after = event.get("after")
+        if after is not None:
+            target["latest_after"] = after
+            if isinstance(after, str) and after not in target["after_ids"]:
+                target["after_ids"].append(after)
+        target["latest_event_id"] = event_id
+        target["latest_update_id"] = event.get("update_id")
+
+        snapshot_id = event.get("rollback", {}).get("snapshot_id")
+        if snapshot_id:
+            snapshot_key = str(snapshot_id)
+            if snapshot_key not in target["rollback_snapshot_ids"]:
+                target["rollback_snapshot_ids"].append(snapshot_key)
+            rollback = rollback_snapshots.setdefault(
+                snapshot_key,
+                {
+                    "event_ids": [],
+                    "update_ids": [],
+                    "target_paths": [],
+                },
+            )
+            rollback["event_ids"].append(event_id)
+            if event.get("update_id"):
+                rollback["update_ids"].append(str(event["update_id"]))
+            if target_path not in rollback["target_paths"]:
+                rollback["target_paths"].append(target_path)
+
+    for target in target_paths.values():
+        target["after_count"] = len(target["after_ids"])
+
+    return {
+        "projection_mode": "target_path_transition_projection_v0.1",
+        "rebuildable_event_count": len(events) - len(unrebuildable_event_ids),
+        "target_paths": target_paths,
+        "rollback_snapshots": rollback_snapshots,
+        "sequence_gap_count": sequence_gap_count,
+        "unrebuildable_event_ids": unrebuildable_event_ids,
+        "full_state_rebuild": False,
+        "note": "Projection rebuilds target-path transition references from events; it does not recreate full state objects.",
+    }
+
+
 def inferred_memory_provenance(store_name: str, memory: dict) -> List[dict]:
     if store_name == "imported_memory":
         return [
@@ -5508,14 +5598,21 @@ class StateStore:
             if event.get("update_id")
         }
         missing_event_update_ids = sorted(event_update_ids - update_ids)
+        projection = build_event_replay_projection(events)
         return {
-            "status": "passed" if not missing_event_update_ids else "failed",
-            "mode": "audit_replay",
+            "status": "passed"
+            if not missing_event_update_ids
+            and not projection["unrebuildable_event_ids"]
+            and projection["sequence_gap_count"] == 0
+            else "failed",
+            "mode": "audit_replay_with_projection",
             "event_count": len(events),
             "state_update_count": len(updates),
             "event_coverage_count": len(event_update_ids & update_ids),
             "workflows": workflow_counts(events),
             "target_paths": target_path_counts(events),
+            "operations": event_operation_counts(events),
+            "projection": projection,
             "missing_event_update_ids": missing_event_update_ids,
             "uncovered_state_update_ids": sorted(
                 update["id"]
@@ -5523,7 +5620,7 @@ class StateStore:
                 if update["id"] not in event_update_ids
                 and should_update_have_event(update)
             ),
-            "coverage_note": "P12 replay validates event references; pre-P12 state updates may be uncovered.",
+            "coverage_note": "P35 replay validates event references and rebuilds a target-path transition projection; pre-P12 state updates may be uncovered.",
             "last_event_id": events[-1]["event_id"] if events else None,
         }
 
@@ -5559,9 +5656,20 @@ class StateStore:
             for event in events
             if event.get("update_id") in event_update_ids
         ]
+        affected_state_paths = sorted(
+            {
+                str(update.get("target_path"))
+                for update in target_updates
+                if update.get("target_path")
+            }
+        )
+        replay_projection = build_event_replay_projection(events)
+        projected_rollback = (
+            replay_projection.get("rollback_snapshots", {}).get(snapshot_id, {})
+        )
         return {
             "status": "preview",
-            "mode": "metadata_only",
+            "mode": "metadata_only_with_projection",
             "snapshot_id": snapshot_id,
             "operation": snapshot.get("operation"),
             "target_path": snapshot.get("target_path"),
@@ -5570,8 +5678,28 @@ class StateStore:
             "current_memory_counts": current_memory_counts(state),
             "affected_update_ids": sorted(event_update_ids),
             "affected_event_ids": [event.get("event_id") for event in affected_events],
+            "affected_state_paths": affected_state_paths,
+            "projected_rollback_impact": {
+                "projection_mode": replay_projection["projection_mode"],
+                "target_paths": projected_rollback.get(
+                    "target_paths",
+                    affected_state_paths,
+                ),
+                "event_ids": projected_rollback.get(
+                    "event_ids",
+                    [event.get("event_id") for event in affected_events],
+                ),
+                "update_ids": projected_rollback.get(
+                    "update_ids",
+                    sorted(event_update_ids),
+                ),
+                "would_remove_event_count": len(
+                    projected_rollback.get("event_ids", affected_events)
+                ),
+                "full_state_rebuild": False,
+            },
             "would_modify_state": False,
-            "note": "P12 only previews rollback from snapshot metadata and event references.",
+            "note": "P35 previews rollback from snapshot metadata, event references, and replay projection only; automatic rollback is not implemented.",
         }
 
     def apply_context_attribution_coverage_lifecycle_action(

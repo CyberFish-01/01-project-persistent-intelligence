@@ -44,8 +44,8 @@ Gaps:
 
 - scenario evaluation now has deterministic local rule baselines, but not separate baseline agents;
 - quantitative metrics are still local and rule-derived;
-- replay is still audit-reference validation rather than full state rebuild;
-- rollback preview is still metadata-only;
+- replay now builds a target-path transition projection, but not a full object-level state rebuild;
+- rollback preview reports affected paths and projected impact, but remains non-mutating;
 - long-gap continuity still needs broader endurance-style tests.
 
 ### 2.2 Context Builder Is Still Shallow
@@ -542,13 +542,13 @@ Implemented result:
 
 - completed runtime traces with state mutations now write state transition events;
 - dry-run preview does not write state events;
-- replay validates event `update_id` references and reports coverage;
-- rollback preview links snapshot metadata to affected events without mutating state;
+- replay validates event `update_id` references, reports coverage, and builds a target-path transition projection;
+- rollback preview links snapshot metadata to affected events, affected state paths, and projected impact without mutating state;
 - scenario evaluation adds `event_log_replay_rollback`.
 
 Remaining gaps:
 
-- replay does not reconstruct full state from an empty seed yet;
+- replay projection does not reconstruct full object-level state from an empty seed yet;
 - pre-P12 updates may be uncovered and are reported as coverage gaps;
 - rollback is still preview-only;
 - event schema is deterministic but still coarse;
@@ -1001,7 +1001,7 @@ Implemented result:
 Remaining gaps:
 
 - scenario baselines now run deterministic local rule comparisons, but not separate baseline agents;
-- replay remains audit-reference validation rather than full state rebuild;
+- replay now has a target-path transition projection, but not a full object-level state rebuild;
 - no executable policy layer exists or should be introduced yet.
 
 Recommended next step:
@@ -1043,8 +1043,8 @@ Implemented result:
 Remaining gaps:
 
 - baseline execution is deterministic and rule-based; it does not yet run separate baseline agents;
-- replay still validates audit references rather than rebuilding state from the event log;
-- rollback remains metadata-only preview.
+- replay now has a target-path transition projection, but not a full object-level state rebuild;
+- rollback preview now reports affected paths and projected impact, but remains non-mutating.
 
 Recommended next step:
 
@@ -1057,6 +1057,50 @@ Reason:
 - P34 makes evaluation more experimental, but replay is still the weakest engineering proof;
 - stronger replay/rebuild would support baseline comparison, auditability, and long-run durability;
 - rollback preview should explain affected state paths more concretely while remaining non-mutating.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+### P35 Event Replay Rebuild / Stronger Rollback Preview
+
+Goal: strengthen replay beyond audit-reference validation while keeping rollback preview non-mutating.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `replay-events` now reports `mode: "audit_replay_with_projection"`;
+- event replay builds `target_path_transition_projection_v0.1` from event sequence, operation, target path, after value, and rollback metadata;
+- projection reports rebuildable event count, target-path transition summaries, latest after references, rollback snapshot coverage, and sequence gaps;
+- `rollback-preview` now reports `mode: "metadata_only_with_projection"`;
+- rollback preview includes affected state paths and projected rollback impact while keeping `would_modify_state: false`;
+- scenario evaluation verifies projection rebuild, identity-memory projection, affected rollback paths, projected rollback impact, and no state mutation.
+
+Remaining gaps:
+
+- projection is transition-level, not full object-level state reconstruction;
+- automatic rollback is still intentionally absent;
+- event schema still stores references rather than full object payload diffs;
+- no event compaction, retention, or projection validation CLI beyond `replay-events`.
+
+Recommended next step:
+
+```text
+P36 Replay Projection Coverage / Event Schema Hardening
+```
+
+Reason:
+
+- P35 gives replay a concrete projection, but the projection should be validated more explicitly against state counts and known target paths;
+- event schema can become more durable by recording operation class and target identity consistently;
+- this keeps the next step local, audit-focused, and safely short of automatic rollback.
 
 Desired acceptance:
 

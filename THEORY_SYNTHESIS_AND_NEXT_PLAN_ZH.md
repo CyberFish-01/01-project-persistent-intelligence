@@ -44,8 +44,8 @@
 
 - scenario evaluation 已有 deterministic local rule baselines，但还没有独立 baseline agents；
 - quantitative metrics 仍是本地规则派生；
-- replay 仍是 audit-reference validation，还不是完整 state rebuild；
-- rollback preview 仍是 metadata-only；
+- replay 已经能构建 target-path transition projection，但还不是完整 object-level state rebuild；
+- rollback preview 会报告 affected paths 和 projected impact，但仍然不修改 state；
 - long-gap continuity 仍需要更广的 endurance-style tests。
 
 ### 2.2 Context Builder 还太浅
@@ -522,13 +522,13 @@ git diff --check
 
 - 带 state mutation 的 completed runtime trace 现在会写入 state transition event；
 - dry-run preview 不写入 state event；
-- replay 会检查 event `update_id` 是否仍能引用 update_log，并报告 coverage；
-- rollback preview 会把 snapshot metadata 与 affected events 连接起来，但不修改 state；
+- replay 会检查 event `update_id` 是否仍能引用 update_log、报告 coverage，并构建 target-path transition projection；
+- rollback preview 会把 snapshot metadata 与 affected events、affected state paths 和 projected impact 连接起来，但不修改 state；
 - scenario evaluation 增加 `event_log_replay_rollback`。
 
 剩余缺口：
 
-- replay 还不能从空 seed 完整重建 state；
+- replay projection 还不能从空 seed 完整重建 object-level state；
 - P12 之前的 update 可能没有 event，只作为 coverage gap 报告；
 - rollback 仍是 preview-only；
 - event schema 是确定性的，但仍然比较粗；
@@ -1034,8 +1034,8 @@ git diff --check
 剩余缺口：
 
 - baseline execution 仍是 deterministic rule-based，还没有运行独立 baseline agents；
-- replay 仍在验证 audit references，还不是从 event log rebuild state；
-- rollback 仍是 metadata-only preview。
+- replay 现在已有 target-path transition projection，但还不是完整 object-level state rebuild；
+- rollback preview 现在会报告 affected paths 和 projected impact，但仍然不修改 state。
 
 建议下一步：
 
@@ -1048,6 +1048,50 @@ P35 Event Replay Rebuild / Stronger Rollback Preview
 - P34 让 evaluation 更像实验，但 replay 仍是最弱的工程证明；
 - 更强的 replay/rebuild 会支撑 baseline comparison、auditability 和 long-run durability；
 - rollback preview 应更具体解释 affected state paths，同时仍然保持 non-mutating。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+### P35 Event Replay Rebuild / Stronger Rollback Preview
+
+目标：把 replay 从 audit-reference validation 推进一步，同时保持 rollback preview 不修改 state。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `replay-events` 现在会报告 `mode: "audit_replay_with_projection"`；
+- event replay 会基于 event sequence、operation、target path、after value 和 rollback metadata 构建 `target_path_transition_projection_v0.1`；
+- projection 会报告 rebuildable event count、target-path transition summaries、latest after references、rollback snapshot coverage 和 sequence gaps；
+- `rollback-preview` 现在会报告 `mode: "metadata_only_with_projection"`；
+- rollback preview 包含 affected state paths 和 projected rollback impact，同时保持 `would_modify_state: false`；
+- scenario evaluation 会验证 projection rebuild、identity-memory projection、affected rollback paths、projected rollback impact，以及 state 不会被修改。
+
+剩余缺口：
+
+- projection 是 transition-level，还不是完整 object-level state reconstruction；
+- automatic rollback 仍然刻意不存在；
+- event schema 仍主要保存 references，而不是完整 object payload diffs；
+- 除了 `replay-events` 之外，还没有 event compaction、retention 或 projection validation CLI。
+
+建议下一步：
+
+```text
+P36 Replay Projection Coverage / Event Schema Hardening
+```
+
+理由：
+
+- P35 让 replay 有了具体 projection，但 projection 还应更明确地和 state counts、known target paths 做验证；
+- event schema 可以通过统一记录 operation class 和 target identity 变得更耐久；
+- 这能保持下一步仍是 local、audit-focused，并且不会越界到 automatic rollback。
 
 期望验收：
 
@@ -1077,7 +1121,7 @@ git diff --check
 剩余缺口：
 
 - scenario baselines 已经运行 deterministic local rule comparisons，但还没有独立 baseline agents；
-- replay 仍是 audit-reference validation，还不是完整 state rebuild；
+- replay 现在已有 target-path transition projection，但还不是完整 object-level state rebuild；
 - 还没有 executable policy layer，当前也不应该引入。
 
 建议下一步：
