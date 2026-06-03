@@ -66,6 +66,12 @@ EVENT_RETENTION_LIFECYCLE_ACTIONS = {
     "archive",
     "quarantine",
 }
+EVENT_PAYLOAD_CAPTURE_POLICY_REVIEW_ACTIONS = {
+    "approve",
+    "reject",
+    "archive",
+    "quarantine",
+}
 TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 TOOL_SAFETY_POLICY_LINK_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
@@ -233,6 +239,8 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "tool_safety_policy_lifecycle_decisions": [],
         "event_retention_reviews": [],
         "event_retention_lifecycle_decisions": [],
+        "event_payload_capture_policy_proposals": [],
+        "event_payload_capture_policy_decisions": [],
         "failure_reflections": [],
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
@@ -629,6 +637,8 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "tool_safety_policy_lifecycle_decisions",
         "event_retention_reviews",
         "event_retention_lifecycle_decisions",
+        "event_payload_capture_policy_proposals",
+        "event_payload_capture_policy_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -765,6 +775,8 @@ def task_action_evidence(trace: dict) -> List[str]:
             "reflection_verification_id",
             "event_retention_review_id",
             "event_retention_lifecycle_decision_id",
+            "event_payload_capture_policy_proposal_id",
+            "event_payload_capture_policy_decision_id",
         ):
             value = event.get(key)
             if value:
@@ -1001,9 +1013,19 @@ def target_identity_for(update: dict) -> Optional[str]:
             "quarantine_event_retention_review",
         }
     )
+    event_payload_capture_policy_review = (
+        target_path == "task_hub.event_payload_capture_policy_proposals"
+        and operation in {
+            "approve_event_payload_capture_policy",
+            "reject_event_payload_capture_policy",
+            "archive_event_payload_capture_policy",
+            "quarantine_event_payload_capture_policy",
+        }
+    )
     if (
         operation_class_for(update.get("operation")) == "lifecycle_transition"
         or event_retention_lifecycle
+        or event_payload_capture_policy_review
     ):
         evidence_identity = next(
             (
@@ -1486,6 +1508,217 @@ def build_event_payload_diff_coverage(events: List[dict]) -> dict:
         else "review_retention_policy",
         "report_only": True,
         "would_modify_state": False,
+    }
+
+
+def event_payload_capture_requirements_from_coverage(coverage: dict) -> List[dict]:
+    requirements = []
+    target_paths = coverage.get("target_paths", {})
+    if not isinstance(target_paths, dict):
+        return requirements
+    if not target_paths and int(coverage.get("event_count", 0)) == 0:
+        return [
+            {
+                "target_path": "events.jsonl",
+                "event_count": 0,
+                "capture_mode": "reference_only_ok",
+                "reason": "no_event_log_entries",
+                "requires_full_payload": False,
+                "requires_object_diff": False,
+                "requires_snapshot_link": False,
+                "allows_reference_only": True,
+                "payload_gap_count": 0,
+                "diff_gap_count": 0,
+                "snapshot_gap_count": 0,
+                "execution_prohibited": True,
+                "schema_change_allowed": False,
+            }
+        ]
+    for target_path, summary in sorted(target_paths.items()):
+        if not isinstance(summary, dict):
+            continue
+        event_count = int(summary.get("event_count", 0))
+        payload_gap_count = event_count - int(summary.get("payload_hint_count", 0))
+        diff_gap_count = event_count - int(summary.get("diff_ready_count", 0))
+        snapshot_gap_count = event_count - int(summary.get("rollback_snapshot_count", 0))
+        if diff_gap_count > 0:
+            capture_mode = "full_payload_and_diff"
+            reason = "object_diff_missing"
+        elif payload_gap_count > 0:
+            capture_mode = "payload_hint_required"
+            reason = "object_payload_missing"
+        elif snapshot_gap_count > 0:
+            capture_mode = "snapshot_link_required"
+            reason = "rollback_snapshot_missing"
+        else:
+            capture_mode = "reference_only_ok"
+            reason = "coverage_sufficient_for_current_reference_projection"
+        requirements.append(
+            {
+                "target_path": target_path,
+                "event_count": event_count,
+                "capture_mode": capture_mode,
+                "reason": reason,
+                "requires_full_payload": capture_mode == "full_payload_and_diff",
+                "requires_object_diff": capture_mode == "full_payload_and_diff",
+                "requires_snapshot_link": snapshot_gap_count > 0,
+                "allows_reference_only": capture_mode == "reference_only_ok",
+                "payload_gap_count": payload_gap_count,
+                "diff_gap_count": diff_gap_count,
+                "snapshot_gap_count": snapshot_gap_count,
+                "execution_prohibited": True,
+                "schema_change_allowed": False,
+            }
+        )
+    return requirements
+
+
+def build_event_payload_capture_policy_proposal(
+    coverage: dict,
+    proposer: str,
+    timestamp: str,
+    rationale: str = "",
+) -> dict:
+    requirements = event_payload_capture_requirements_from_coverage(coverage)
+    diff_gap_count = int(coverage.get("diff_gap_count", 0))
+    payload_gap_count = int(coverage.get("payload_gap_count", 0))
+    status = "needs_review" if diff_gap_count or payload_gap_count else "ready_for_review"
+    evidence = [
+        item
+        for item in (
+            coverage.get("events", [{}])[0].get("event_id")
+            if coverage.get("events")
+            else None,
+            coverage.get("events", [{}])[-1].get("event_id")
+            if coverage.get("events")
+            else None,
+        )
+        if item
+    ]
+    return {
+        "proposal_id": new_id("event_payload_capture_policy_proposal"),
+        "timestamp": timestamp,
+        "proposer": proposer,
+        "status": "active",
+        "review_status": status,
+        "proposal_mode": "proposal_only",
+        "policy_mode": "event_payload_capture_policy_v0.1",
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "event_compaction_executed": False,
+        "events_modified": False,
+        "safe_for_destructive_compaction": False,
+        "rationale": rationale,
+        "coverage_summary": {
+            "mode": coverage.get("mode"),
+            "event_count": coverage.get("event_count", 0),
+            "transition_reference_count": coverage.get(
+                "transition_reference_count",
+                0,
+            ),
+            "payload_hint_count": coverage.get("payload_hint_count", 0),
+            "payload_gap_count": payload_gap_count,
+            "diff_ready_count": coverage.get("diff_ready_count", 0),
+            "diff_gap_count": diff_gap_count,
+            "high_risk_count": coverage.get("high_risk_count", 0),
+            "full_object_rebuild_ready": coverage.get(
+                "full_object_rebuild_ready",
+                False,
+            ),
+            "safe_for_destructive_compaction": coverage.get(
+                "safe_for_destructive_compaction",
+                False,
+            ),
+        },
+        "target_path_requirements": requirements,
+        "required_provenance_fields": [
+            "event_id",
+            "sequence",
+            "workflow",
+            "operation",
+            "target_path",
+            "target_identity",
+            "evidence",
+            "actor",
+            "timestamp",
+        ],
+        "recommended_next_action": "review_capture_policy_before_schema_change",
+        "evidence": evidence,
+        "review_history": [],
+        "lifecycle": {
+            "status": "active",
+            "created_at": timestamp,
+            "last_reviewed_at": None,
+            "review_status": status,
+        },
+        "update_history": [
+            {
+                "timestamp": timestamp,
+                "actor": proposer,
+                "operation": "propose_event_payload_capture_policy",
+                "evidence": evidence,
+            }
+        ],
+        "provenance": [
+            {
+                "type": "event_payload_diff_coverage_report",
+                "coverage_mode": coverage.get("mode"),
+                "event_count": coverage.get("event_count", 0),
+            }
+        ],
+        "confidence": 0.7 if requirements else 0.5,
+        "rollback": {"reversible": True},
+    }
+
+
+def build_event_payload_capture_policy_decision(
+    proposal: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: str,
+    timestamp: str,
+    before_status: str,
+) -> dict:
+    return {
+        "decision_id": new_id("event_payload_capture_policy_decision"),
+        "timestamp": timestamp,
+        "proposal_id": proposal.get("proposal_id"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "review_status_before": before_status,
+        "snapshot_id": snapshot_id,
+        "proposal_mode": "proposal_only",
+        "policy_mode": proposal.get("policy_mode", "event_payload_capture_policy_v0.1"),
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "event_compaction_executed": False,
+        "events_modified": False,
+        "safe_for_destructive_compaction": False,
+        "target_path_requirement_count": len(
+            proposal.get("target_path_requirements", [])
+            if isinstance(proposal.get("target_path_requirements"), list)
+            else []
+        ),
+        "evidence": [proposal.get("proposal_id")]
+        + list(proposal.get("evidence", [])),
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
     }
 
 
@@ -6203,6 +6436,386 @@ class StateStore:
         )
         return coverage
 
+    def propose_event_payload_capture_policy(
+        self,
+        proposer: str = "manual_review",
+        rationale: str = "",
+    ) -> dict:
+        state = self.load()
+        now = utc_now()
+        before_event_ids = [event.get("event_id") for event in self.list_events()]
+        coverage = self.event_payload_diff_coverage_preview()
+        after_coverage_event_ids = [event.get("event_id") for event in self.list_events()]
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(now, state.get("working_state", {})),
+        )
+        proposal = build_event_payload_capture_policy_proposal(
+            coverage=coverage,
+            proposer=proposer,
+            timestamp=now,
+            rationale=rationale,
+        )
+        proposal["events_unchanged_by_report"] = (
+            before_event_ids == after_coverage_event_ids
+        )
+        task_hub.setdefault("event_payload_capture_policy_proposals", []).append(
+            proposal
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": proposer,
+                "target_path": "task_hub.event_payload_capture_policy_proposals",
+                "operation": "propose_event_payload_capture_policy",
+                "before": None,
+                "after": proposal["proposal_id"],
+                "evidence": proposal["evidence"],
+                "gate": "medium",
+                "confidence": proposal["confidence"],
+                "event_payload_capture_policy_proposal_id": proposal[
+                    "proposal_id"
+                ],
+                "proposal_mode": "proposal_only",
+                "requires_review": True,
+                "execution_prohibited": True,
+                "executable_policy": False,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "event_compaction_executed": False,
+                "events_modified": False,
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=proposer,
+            action="propose_event_payload_capture_policy",
+            target="task_hub.event_payload_capture_policy_proposals",
+            outcome=proposal["review_status"],
+            evidence=proposal["evidence"],
+            metadata={
+                "proposal_id": proposal["proposal_id"],
+                "target_path_requirement_count": len(
+                    proposal["target_path_requirements"]
+                ),
+                "diff_gap_count": proposal["coverage_summary"].get("diff_gap_count"),
+                "payload_gap_count": proposal["coverage_summary"].get(
+                    "payload_gap_count"
+                ),
+                "proposal_mode": "proposal_only",
+                "execution_prohibited": True,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "event_compaction_executed": False,
+                "events_modified": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="event_payload_capture_policy_proposal",
+            nodes=[
+                {
+                    "id": "payload_diff_coverage",
+                    "type": "EventPayloadDiffCoverage",
+                    "event_count": coverage.get("event_count", 0),
+                    "diff_gap_count": coverage.get("diff_gap_count", 0),
+                },
+                {
+                    "id": "capture_policy_proposal",
+                    "type": "PolicyProposal",
+                    "proposal_id": proposal["proposal_id"],
+                    "proposal_mode": "proposal_only",
+                    "executable_policy": False,
+                },
+            ],
+            edges=[
+                {
+                    "from": "payload_diff_coverage",
+                    "to": "capture_policy_proposal",
+                    "type": "proposal",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": "propose",
+                    "target": "task_hub.event_payload_capture_policy_proposals",
+                    "event_payload_capture_policy_proposal_id": proposal[
+                        "proposal_id"
+                    ],
+                    "event_payload_capture_executed": False,
+                    "event_compaction_executed": False,
+                    "events_modified": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "propose_event_payload_capture_policy",
+                    "proposer": proposer,
+                    "proposal": proposal,
+                }
+            ],
+            summary="Proposed review-only event payload capture policy from payload/diff coverage.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        after_save_event_ids = [event.get("event_id") for event in self.list_events()]
+        return {
+            "status": proposal["review_status"],
+            "proposal_id": proposal["proposal_id"],
+            "target_path_requirement_count": len(proposal["target_path_requirements"]),
+            "coverage_summary": proposal["coverage_summary"],
+            "event_schema_mutation_allowed": False,
+            "event_payload_capture_executed": False,
+            "event_compaction_executed": False,
+            "events_modified": before_event_ids
+            != after_save_event_ids[: len(before_event_ids)],
+        }
+
+    def review_event_payload_capture_policy(
+        self,
+        proposal_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in EVENT_PAYLOAD_CAPTURE_POLICY_REVIEW_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_event_payload_capture_policy_review_action",
+                "action": action,
+            }
+
+        before_event_ids = [event.get("event_id") for event in self.list_events()]
+        state = self.load()
+        now = utc_now()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(now, state.get("working_state", {})),
+        )
+        proposal = next(
+            (
+                item
+                for item in task_hub.setdefault(
+                    "event_payload_capture_policy_proposals",
+                    [],
+                )
+                if isinstance(item, dict) and item.get("proposal_id") == proposal_id
+            ),
+            None,
+        )
+        if proposal is None:
+            return {
+                "status": "not_found",
+                "error": "event_payload_capture_policy_proposal_not_found",
+                "proposal_id": proposal_id,
+            }
+
+        before_status = proposal.get("review_status", "pending")
+        if before_status in {"approved", "rejected", "archived", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "proposal_id": proposal_id,
+                "review_status": before_status,
+            }
+
+        target_status = {
+            "approve": "approved",
+            "reject": "rejected",
+            "archive": "archived",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        evidence = [proposal_id] + [
+            item
+            for item in proposal.get("evidence", [])
+            if isinstance(item, str) and item
+        ]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_event_payload_capture_policy",
+            target_path="task_hub.event_payload_capture_policy_proposals",
+            evidence=evidence,
+            metadata={
+                "proposal_id": proposal_id,
+                "review_action": normalized_action,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "event_compaction_executed": False,
+                "events_modified": False,
+            },
+        )
+        decision = build_event_payload_capture_policy_decision(
+            proposal=proposal,
+            action=normalized_action,
+            result=target_status,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+            before_status=before_status,
+        )
+        proposal["review_status"] = target_status
+        proposal["reviewed_at"] = now
+        proposal["reviewer"] = reviewer
+        proposal["decision_note"] = decision_note
+        proposal["last_review_decision_id"] = decision["decision_id"]
+        proposal["proposal_mode"] = "proposal_only"
+        proposal["requires_review"] = True
+        proposal["execution_prohibited"] = True
+        proposal["executable_policy"] = False
+        proposal["executable_policy_created"] = False
+        proposal["identity_mutation_allowed"] = False
+        proposal["event_schema_mutation_allowed"] = False
+        proposal["event_payload_capture_executed"] = False
+        proposal["event_compaction_executed"] = False
+        proposal["events_modified"] = False
+        proposal["lifecycle"] = {
+            **(
+                proposal.get("lifecycle", {})
+                if isinstance(proposal.get("lifecycle"), dict)
+                else {}
+            ),
+            "status": "active",
+            "last_reviewed_at": now,
+            "review_status": target_status,
+            "review_decision_id": decision["decision_id"],
+        }
+        if target_status in {"archived", "quarantined"}:
+            proposal["lifecycle"]["status"] = target_status
+            proposal["status"] = target_status
+        proposal.setdefault("review_history", []).append(decision)
+        proposal.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": reviewer,
+                "operation": f"{normalized_action}_event_payload_capture_policy",
+                "event_payload_capture_policy_decision_id": decision[
+                    "decision_id"
+                ],
+                "evidence": evidence,
+            }
+        )
+        task_hub.setdefault("event_payload_capture_policy_decisions", []).append(
+            decision
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.event_payload_capture_policy_proposals",
+                "operation": f"{normalized_action}_event_payload_capture_policy",
+                "before": before_status,
+                "after": target_status,
+                "evidence": evidence,
+                "gate": "medium",
+                "confidence": proposal.get("confidence", 0.5),
+                "event_payload_capture_policy_decision_id": decision["decision_id"],
+                "proposal_mode": "proposal_only",
+                "requires_review": True,
+                "execution_prohibited": True,
+                "executable_policy": False,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "event_compaction_executed": False,
+                "events_modified": False,
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_event_payload_capture_policy",
+            target="task_hub.event_payload_capture_policy_proposals",
+            outcome=target_status,
+            evidence=evidence,
+            metadata={
+                "event_payload_capture_policy_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "proposal_id": proposal_id,
+                "decision_note": decision_note,
+                "proposal_mode": "proposal_only",
+                "execution_prohibited": True,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "event_compaction_executed": False,
+                "events_modified": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="event_payload_capture_policy_review",
+            nodes=[
+                {
+                    "id": "capture_policy_proposal",
+                    "type": "PolicyProposal",
+                    "proposal_id": proposal_id,
+                    "proposal_mode": "proposal_only",
+                },
+                {
+                    "id": "review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[
+                {
+                    "from": "capture_policy_proposal",
+                    "to": "review",
+                    "type": "feedback",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.event_payload_capture_policy_proposals",
+                    "event_payload_capture_policy_proposal_id": proposal_id,
+                    "event_payload_capture_policy_decision_id": decision[
+                        "decision_id"
+                    ],
+                    "event_payload_capture_executed": False,
+                    "event_compaction_executed": False,
+                    "events_modified": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_event_payload_capture_policy",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "event_payload_capture_policy_decision": decision,
+                }
+            ],
+            summary=(
+                f"Reviewed event payload capture policy proposal {proposal_id} "
+                f"with action {normalized_action}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        after_event_ids = [event.get("event_id") for event in self.list_events()]
+        return {
+            "status": target_status,
+            "proposal_id": proposal_id,
+            "snapshot_id": snapshot["snapshot_id"],
+            "event_payload_capture_policy_decision_id": decision["decision_id"],
+            "event_schema_mutation_allowed": False,
+            "event_payload_capture_executed": False,
+            "event_compaction_executed": False,
+            "events_modified": before_event_ids != after_event_ids[: len(before_event_ids)],
+        }
+
     def review_event_retention(
         self,
         reviewer: str = "manual_review",
@@ -7136,6 +7749,22 @@ class StateStore:
             ).get("status", "active")
             in {"active", "acknowledged"}
         ][-8:]
+        active_event_payload_capture_policy_proposals = [
+            proposal
+            for proposal in task_hub.get(
+                "event_payload_capture_policy_proposals",
+                [],
+            )
+            if isinstance(proposal, dict)
+            and proposal.get("review_status")
+            in {"needs_review", "ready_for_review", "approved"}
+            and (
+                proposal.get("lifecycle", {})
+                if isinstance(proposal.get("lifecycle"), dict)
+                else {}
+            ).get("status", proposal.get("status", "active"))
+            == "active"
+        ][-8:]
         reflection_log = [
             reflection
             for reflection in task_hub.get("reflection_log", [])
@@ -7221,6 +7850,7 @@ class StateStore:
                 "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
                 "tool_safety_policy_links": active_tool_safety_policy_links,
                 "event_retention_reviews": active_event_retention_reviews,
+                "event_payload_capture_policy_proposals": active_event_payload_capture_policy_proposals,
                 "cautionary_procedural_memory": active_cautionary_memory,
                 "procedural_memory": active_procedural_memory,
             },
@@ -7238,6 +7868,7 @@ class StateStore:
             "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
             "tool_safety_policy_links": active_tool_safety_policy_links,
             "event_retention_reviews": active_event_retention_reviews,
+            "event_payload_capture_policy_proposals": active_event_payload_capture_policy_proposals,
             "cautionary_procedural_memory": active_cautionary_memory,
             "procedural_memory": active_procedural_memory,
             "identity_update_gate": {

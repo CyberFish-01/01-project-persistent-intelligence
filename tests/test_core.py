@@ -9,6 +9,7 @@ from one_core.api import OneCoreAPI
 from one_core.dream import DreamEngine
 from one_core.importer import import_text_file, split_memory_text
 from one_core.state import STATE_VERSION, StateStore
+from one_core.validation import validate_state
 
 
 class CoreStateTests(unittest.TestCase):
@@ -2549,6 +2550,135 @@ class CoreStateTests(unittest.TestCase):
                 "transition_reference",
                 report["events"][0]["missing_capabilities"],
             )
+
+    def test_event_payload_capture_policy_proposal_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P40 payload capture policy evidence one")
+            store.record_episode("P40 payload capture policy evidence two")
+            before_identity = store.load()["identity_core"]
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            proposed = store.propose_event_payload_capture_policy(
+                proposer="unit_test",
+                rationale="Define capture policy before event schema changes.",
+            )
+            state = store.load()
+            proposal = state["task_hub"]["event_payload_capture_policy_proposals"][-1]
+            package = store.build_context_package()
+            after_proposal_event_ids = [event["event_id"] for event in store.list_events()]
+
+            self.assertEqual(proposed["status"], "needs_review")
+            self.assertEqual(proposal["proposal_id"], proposed["proposal_id"])
+            self.assertEqual(proposal["proposal_mode"], "proposal_only")
+            self.assertEqual(proposal["policy_mode"], "event_payload_capture_policy_v0.1")
+            self.assertTrue(proposal["requires_review"])
+            self.assertTrue(proposal["execution_prohibited"])
+            self.assertFalse(proposal["executable_policy"])
+            self.assertFalse(proposal["executable_policy_created"])
+            self.assertFalse(proposal["identity_mutation_allowed"])
+            self.assertFalse(proposal["event_schema_mutation_allowed"])
+            self.assertFalse(proposal["event_payload_capture_executed"])
+            self.assertFalse(proposal["event_compaction_executed"])
+            self.assertFalse(proposal["events_modified"])
+            self.assertFalse(proposal["safe_for_destructive_compaction"])
+            self.assertGreaterEqual(
+                proposal["coverage_summary"]["diff_gap_count"],
+                1,
+            )
+            self.assertEqual(
+                proposal["target_path_requirements"][0]["capture_mode"],
+                "full_payload_and_diff",
+            )
+            self.assertFalse(
+                proposal["target_path_requirements"][0]["schema_change_allowed"]
+            )
+            self.assertIn(
+                proposed["proposal_id"],
+                {
+                    item["proposal_id"]
+                    for item in package["event_payload_capture_policy_proposals"]
+                },
+            )
+            self.assertEqual(after_proposal_event_ids[: len(before_event_ids)], before_event_ids)
+            self.assertEqual(state["identity_core"], before_identity)
+
+            reviewed = store.review_event_payload_capture_policy(
+                proposal_id=proposed["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Approve as review-only capture guidance.",
+            )
+            state = store.load()
+            proposal = state["task_hub"]["event_payload_capture_policy_proposals"][-1]
+            decision = state["task_hub"]["event_payload_capture_policy_decisions"][-1]
+            replay_report = store.replay_events()
+            proposal_projection = replay_report["projection_validation"]["checked"][
+                "task_hub.event_payload_capture_policy_proposals"
+            ]
+            review_events = [
+                event
+                for event in store.list_events()
+                if event.get("workflow") == "event_payload_capture_policy_review"
+            ]
+            after_review_event_ids = [event["event_id"] for event in store.list_events()]
+
+            self.assertEqual(reviewed["status"], "approved")
+            self.assertEqual(proposal["review_status"], "approved")
+            self.assertEqual(decision["result"], "approved")
+            self.assertEqual(
+                proposal["last_review_decision_id"],
+                reviewed["event_payload_capture_policy_decision_id"],
+            )
+            self.assertTrue(decision["requires_review"])
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertFalse(decision["event_schema_mutation_allowed"])
+            self.assertFalse(decision["event_payload_capture_executed"])
+            self.assertFalse(decision["event_compaction_executed"])
+            self.assertFalse(decision["events_modified"])
+            self.assertFalse(decision["safe_for_destructive_compaction"])
+            self.assertEqual(replay_report["status"], "passed")
+            self.assertEqual(replay_report["projection_validation"]["count_mismatches"], [])
+            self.assertEqual(proposal_projection["projected_target_identity_count"], 1)
+            self.assertEqual(
+                review_events[-1]["target_identity"],
+                proposed["proposal_id"],
+            )
+            self.assertNotEqual(review_events[-1]["target_identity"], "approved")
+            self.assertEqual(after_review_event_ids[: len(before_event_ids)], before_event_ids)
+            self.assertEqual(state["identity_core"], before_identity)
+
+    def test_event_payload_capture_policy_empty_log_remains_valid(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+
+            proposed = store.propose_event_payload_capture_policy(
+                proposer="unit_test",
+                rationale="Empty event logs should still produce valid guidance.",
+            )
+            state = store.load()
+            proposal = state["task_hub"]["event_payload_capture_policy_proposals"][-1]
+            report = validate_state(state, store.list_episodes())
+
+            self.assertEqual(proposed["status"], "ready_for_review")
+            self.assertEqual(
+                proposal["target_path_requirements"][0]["target_path"],
+                "events.jsonl",
+            )
+            self.assertEqual(
+                proposal["target_path_requirements"][0]["capture_mode"],
+                "reference_only_ok",
+            )
+            self.assertEqual(
+                proposal["target_path_requirements"][0]["reason"],
+                "no_event_log_entries",
+            )
+            self.assertEqual(report["status"], "passed")
 
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:

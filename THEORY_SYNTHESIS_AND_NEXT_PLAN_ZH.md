@@ -1291,6 +1291,54 @@ P39 后的资料校准：
 
 对 P40 的含义：先按 target path 定义 review-only payload capture policy，明确 reference-only event、object payload hint、object diff、snapshot link 和 PROV-style provenance fields 的要求，再考虑任何 schema-level payload capture 或 compaction 机制。
 
+### P40 Event Payload Capture Policy Proposal
+
+目标：把 P39 暴露出的 payload/diff coverage gaps 转成 durable、review-only、按 target path 组织的 capture policy proposal，在任何 event schema mutation 或 payload capture 机制出现之前先建立治理层。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `propose-event-payload-capture-policy` CLI 会基于当前 payload/diff coverage report 创建 `task_hub.event_payload_capture_policy_proposals`；
+- `review-event-payload-capture-policy` CLI 会把 approve、reject、archive 或 quarantine decisions 记录到 `task_hub.event_payload_capture_policy_decisions`；
+- 每个 proposal 会记录 target-path requirements，`capture_mode` 可以是 `full_payload_and_diff`、`payload_hint_required`、`snapshot_link_required` 或 `reference_only_ok`；
+- proposals 和 decisions 明确保持 `proposal_mode: "proposal_only"`、`requires_review: true`、`execution_prohibited: true`、`executable_policy: false` 和 `executable_policy_created: false`；
+- proposals 和 decisions 同时锁死 `event_schema_mutation_allowed`、`event_payload_capture_executed`、`event_compaction_executed`、`events_modified` 和 `safe_for_destructive_compaction`；
+- active 和 approved capture policy proposals 会进入 context package，让后续工程循环能看到已审查的 target-path guidance；
+- validation 会拒绝 executable、schema-mutating、payload-capturing、compaction-executing、event-modifying 或 destructive-compaction-safe records；
+- scenario evaluation 会检查 proposal 创建、approval、context exposure、replay consistency，以及 schema mutation / execution / compaction / event modification count 全部为 0；
+- 空 event log 也会生成合法的 `reference_only_ok` guidance record，而不是生成一条无法通过 validation 的 proposal。
+
+剩余缺口：
+
+- event log 仍然只存 transition references，不存 full object payloads；
+- 还没有用于 payload capture 的 event schema migration；
+- 还没有 executable policy layer，并且在 review lifecycle 更稳之前不应该引入；
+- approved capture guidance 还没有和 retention review lifecycle decisions 建立关系；
+- 本地 JSON state writes 目前仍然只适合串行 local operation；在 file lock 或 transactional store layer 存在之前，并发 CLI 写入可能造成 replay 或 validation mismatch。
+
+建议下一步：
+
+```text
+P41 Event Payload Capture Policy Lifecycle
+```
+
+理由：
+
+- P40 proposals 可以在 review 阶段 approve、reject、archive 或 quarantine，但 approved guidance 后续还没有专门的 lifecycle path 来重新审查或退役；
+- 在任何 schema-level payload capture 之前，approved guidance 应该拥有和 retention reviews、tool/safety proposals 一样的 durable lifecycle discipline；
+- 这能让项目继续停留在 local、audit-focused governance 层，避免过早进入 executor、automatic rollback、destructive compaction 或 event rewrite。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P33 Context Attribution Coverage Review Lifecycle
 
 目标：让 durable attribution coverage review records 可以通过可审计 lifecycle path 被 acknowledge、archive 或 quarantine。

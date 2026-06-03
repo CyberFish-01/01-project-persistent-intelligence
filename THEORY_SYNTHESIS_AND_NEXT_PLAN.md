@@ -1300,6 +1300,54 @@ Research calibration after P39:
 
 Implication for P40: define a review-only payload capture policy by target path, with explicit requirements for reference-only events, object payload hints, object diffs, snapshot links, and PROV-style provenance fields before any schema-level payload capture or compaction mechanism is attempted.
 
+### P40 Event Payload Capture Policy Proposal
+
+Goal: turn P39 payload/diff coverage gaps into a durable, review-only target-path capture policy proposal before any event schema mutation or payload capture mechanism exists.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `propose-event-payload-capture-policy` CLI creates `task_hub.event_payload_capture_policy_proposals` from the current payload/diff coverage report;
+- `review-event-payload-capture-policy` CLI records approve, reject, archive, or quarantine decisions in `task_hub.event_payload_capture_policy_decisions`;
+- each proposal records target-path requirements with `capture_mode` values: `full_payload_and_diff`, `payload_hint_required`, `snapshot_link_required`, or `reference_only_ok`;
+- proposals and decisions explicitly preserve `proposal_mode: "proposal_only"`, `requires_review: true`, `execution_prohibited: true`, `executable_policy: false`, and `executable_policy_created: false`;
+- proposals and decisions also lock out `event_schema_mutation_allowed`, `event_payload_capture_executed`, `event_compaction_executed`, `events_modified`, and `safe_for_destructive_compaction`;
+- active and approved capture policy proposals enter the context package so later engineering loops can see the reviewed target-path guidance;
+- validation rejects executable, schema-mutating, payload-capturing, compaction-executing, event-modifying, or destructive-compaction-safe records;
+- scenario evaluation verifies proposal creation, approval, context exposure, replay consistency, and zero schema mutation / execution / compaction / event modification counts;
+- empty event logs still produce a valid `reference_only_ok` guidance record instead of an invalid proposal.
+
+Remaining gaps:
+
+- the event log still stores transition references, not full object payloads;
+- no event schema migration for payload capture exists yet;
+- no executable policy layer exists and should not be introduced before the review lifecycle is firmer;
+- approved capture guidance is not yet linked to retention review lifecycle decisions;
+- local JSON state writes are still intended for serial local operation; concurrent CLI writes can produce replay or validation mismatches until a file-locking or transactional store layer exists.
+
+Recommended next step:
+
+```text
+P41 Event Payload Capture Policy Lifecycle
+```
+
+Reason:
+
+- P40 proposals can be approved, rejected, archived, or quarantined during review, but there is not yet a dedicated lifecycle path for revisiting or retiring approved guidance after later coverage reports;
+- before any schema-level payload capture is attempted, approved guidance should have the same durable lifecycle discipline as retention reviews and tool/safety proposals;
+- this keeps the project in local, audit-focused governance and avoids premature executor, automatic rollback, destructive compaction, or event rewrite work.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P19 Cautionary Procedural Review
 
 Goal: let warning-style failure candidates become active, reviewable caution memory without becoming executable policy.

@@ -319,7 +319,7 @@ python3 -m one_core.cli evaluate-scenarios
 - `reflection_log_verification`：检查 `record-reflection`、`verify-reflection`、reflection log 持久化、verification history、context 暴露、来自 verified reflections 的 policy-adjacent advisory guidance、durable guidance queue review、非执行 tool/safety policy proposal review、proposal evidence/scope/staleness scoring、review-only proposal relationship links、proposal-link claim-graph evidence bridging、proposal link lifecycle retention、proposal lifecycle retention、archived proposal/link context suppression、replay、不创建 executable policy，以及不会修改 Identity Core。
 - `procedural_lifecycle_retention`：检查 `procedural-lifecycle`、procedural lifecycle decision metadata、replay，以及 archived procedural memory 不再进入 context。
 - `identity_update_gate_review`：检查 identity update 必须通过 high gate；单证据会被 quarantine，三证据可批准为 identity_memory，但不会改写 Identity Core。
-- `event_log_replay_rollback`：检查真实 state transition 会进入 append-only event log，dry-run preview 不写入，replay check 通过，event replay 会构建带 operation class、target identity 和 report-only coverage validation 的 target-path transition projection，`event-report` 会暴露只读 projection coverage 和 retention suggestions，event retention review lifecycle 会记录 planning decisions 但不执行 compaction 或 event rewrite，rollback preview 会报告 affected state paths 和 projected impact，并且不修改 state。
+- `event_log_replay_rollback`：检查真实 state transition 会进入 append-only event log，dry-run preview 不写入，replay check 通过，event replay 会构建带 operation class、target identity 和 report-only coverage validation 的 target-path transition projection，`event-report` 会暴露只读 projection coverage 和 retention suggestions，event payload/diff coverage 会生成 review-only payload capture policy proposal 和 decision，但不会修改 schema、capture payload、compact events 或 rewrite events，event retention review lifecycle 会记录 planning decisions 但不执行 compaction 或 event rewrite，rollback preview 会报告 affected state paths 和 projected impact，并且不修改 state。
 - `dream_artifact_package`：检查 Dream run 会生成完整 artifact package，包含 input manifest、provenance、review queue、patch diff、decision log、rollback metadata，并且不直接写 Identity Core 或 active semantic memory。
 - `context_builder_policy_trace`：检查 Context Builder v0.3 policy、持久 activation trace、source attribution budget、来自 identity gate、claim graph、governance proposal-link evidence 和 Dream artifact 的 activation signals，以及 signal attribution records、持久 attribution summaries、review-only attribution coverage reports、coverage lifecycle retention、archived review context suppression，并确认不会创建 executable policy。
 
@@ -351,6 +351,7 @@ v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、re
 - event report coverage gap count；
 - event report retention excess count；
 - event payload report count；
+- event payload report event count；
 - event payload transition reference count；
 - event payload hint count；
 - event payload gap count；
@@ -359,6 +360,15 @@ v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、re
 - event payload high risk count；
 - event payload safe compaction count；
 - event payload state mutation count；
+- event payload capture policy proposal count；
+- event payload capture policy decision count；
+- event payload capture policy approved count；
+- event payload capture policy context count；
+- event payload capture policy schema mutation count；
+- event payload capture policy execution count；
+- event payload capture policy compaction count；
+- event payload capture policy events modified count；
+- event payload capture policy replay after count；
 - event retention review count；
 - event retention lifecycle decision count；
 - event retention archived count；

@@ -405,6 +405,24 @@ def main() -> None:
         "event-payload-diff-report",
         help="Preview event payload and object-diff coverage without mutating state.",
     )
+    payload_capture_policy_parser = subparsers.add_parser(
+        "propose-event-payload-capture-policy",
+        help="Create a review-only event payload capture policy proposal.",
+    )
+    payload_capture_policy_parser.add_argument("--proposer", default="manual_review")
+    payload_capture_policy_parser.add_argument("--rationale", default="")
+    payload_capture_policy_review_parser = subparsers.add_parser(
+        "review-event-payload-capture-policy",
+        help="Review a non-executable event payload capture policy proposal.",
+    )
+    payload_capture_policy_review_parser.add_argument("proposal_id")
+    payload_capture_policy_review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["approve", "reject", "archive", "quarantine"],
+    )
+    payload_capture_policy_review_parser.add_argument("--reviewer", default="manual_review")
+    payload_capture_policy_review_parser.add_argument("--decision-note", default="")
     event_retention_review_parser = subparsers.add_parser(
         "review-event-retention",
         help="Record a review-only event retention planning record.",
@@ -745,6 +763,22 @@ def main() -> None:
         print_json(store.event_projection_report(retention_limit=args.retention_limit))
     elif args.command == "event-payload-diff-report":
         print_json(store.event_payload_diff_coverage_preview())
+    elif args.command == "propose-event-payload-capture-policy":
+        print_json(
+            store.propose_event_payload_capture_policy(
+                proposer=args.proposer,
+                rationale=args.rationale,
+            )
+        )
+    elif args.command == "review-event-payload-capture-policy":
+        print_json(
+            store.review_event_payload_capture_policy(
+                proposal_id=args.proposal_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
     elif args.command == "review-event-retention":
         print_json(
             store.review_event_retention(

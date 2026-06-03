@@ -201,7 +201,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["event_payload_report_count"], 1)
         self.assertGreaterEqual(
             metrics["event_payload_transition_reference_count"],
-            metrics["event_count"] - 2,
+            metrics["event_payload_report_event_count"],
         )
         self.assertGreaterEqual(metrics["event_payload_hint_count"], 1)
         self.assertGreaterEqual(metrics["event_payload_gap_count"], 1)
@@ -210,6 +210,33 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["event_payload_high_risk_count"], 0)
         self.assertEqual(metrics["event_payload_safe_compaction_count"], 0)
         self.assertEqual(metrics["event_payload_state_mutation_count"], 0)
+        self.assertGreaterEqual(
+            metrics["event_payload_capture_policy_proposal_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["event_payload_capture_policy_decision_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["event_payload_capture_policy_approved_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["event_payload_capture_policy_context_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics["event_payload_capture_policy_schema_mutation_count"],
+            0,
+        )
+        self.assertEqual(metrics["event_payload_capture_policy_execution_count"], 0)
+        self.assertEqual(metrics["event_payload_capture_policy_compaction_count"], 0)
+        self.assertEqual(
+            metrics["event_payload_capture_policy_events_modified_count"],
+            0,
+        )
+        self.assertEqual(metrics["event_payload_capture_policy_replay_after_count"], 1)
         self.assertGreaterEqual(metrics["event_retention_review_count"], 1)
         self.assertGreaterEqual(
             metrics["event_retention_lifecycle_decision_count"],

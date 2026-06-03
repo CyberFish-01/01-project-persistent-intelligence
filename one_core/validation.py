@@ -1337,6 +1337,8 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "tool_safety_policy_lifecycle_decisions",
         "event_retention_reviews",
         "event_retention_lifecycle_decisions",
+        "event_payload_capture_policy_proposals",
+        "event_payload_capture_policy_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -1799,6 +1801,185 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                 issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy lifecycle decision must not allow Identity Core mutation."))
             if "proposal_score" in decision:
                 issues.extend(validate_tool_safety_policy_score(path + ".proposal_score", decision.get("proposal_score")))
+    event_payload_capture_policy_proposals = task_hub.get(
+        "event_payload_capture_policy_proposals",
+        [],
+    )
+    event_payload_capture_policy_proposal_ids = {
+        item.get("proposal_id")
+        for item in event_payload_capture_policy_proposals
+        if isinstance(item, dict) and item.get("proposal_id")
+    }
+    if isinstance(event_payload_capture_policy_proposals, list):
+        for index, proposal in enumerate(event_payload_capture_policy_proposals):
+            path = f"task_hub.event_payload_capture_policy_proposals[{index}]"
+            if not isinstance(proposal, dict):
+                issues.append(
+                    ValidationIssue(
+                        path,
+                        "Event payload capture policy proposal must be an object.",
+                    )
+                )
+                continue
+            for key in (
+                "proposal_id",
+                "timestamp",
+                "proposer",
+                "status",
+                "review_status",
+                "proposal_mode",
+                "policy_mode",
+                "requires_review",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+                "event_schema_mutation_allowed",
+                "event_payload_capture_executed",
+                "event_compaction_executed",
+                "events_modified",
+                "safe_for_destructive_compaction",
+                "coverage_summary",
+                "target_path_requirements",
+                "required_provenance_fields",
+                "evidence",
+                "review_history",
+                "lifecycle",
+                "update_history",
+                "provenance",
+            ):
+                if key not in proposal:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Event payload capture policy proposal key is missing.",
+                        )
+                    )
+            if proposal.get("proposal_mode") != "proposal_only":
+                issues.append(ValidationIssue(path + ".proposal_mode", "Event payload capture policy proposal must remain proposal_only."))
+            if proposal.get("policy_mode") != "event_payload_capture_policy_v0.1":
+                issues.append(ValidationIssue(path + ".policy_mode", "Event payload capture policy mode is invalid."))
+            if proposal.get("requires_review") is not True:
+                issues.append(ValidationIssue(path + ".requires_review", "Event payload capture policy proposal must require review."))
+            if proposal.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Event payload capture policy proposal must prohibit execution."))
+            if proposal.get("executable_policy") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy", "Event payload capture policy proposal must not be executable policy."))
+            if proposal.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Event payload capture policy proposal must not create executable policy."))
+            if proposal.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Event payload capture policy proposal must not allow Identity Core mutation."))
+            if proposal.get("event_schema_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".event_schema_mutation_allowed", "Event payload capture policy proposal must not allow event schema mutation."))
+            if proposal.get("event_payload_capture_executed") is not False:
+                issues.append(ValidationIssue(path + ".event_payload_capture_executed", "Event payload capture policy proposal must not execute payload capture."))
+            if proposal.get("event_compaction_executed") is not False:
+                issues.append(ValidationIssue(path + ".event_compaction_executed", "Event payload capture policy proposal must not execute compaction."))
+            if proposal.get("events_modified") is not False:
+                issues.append(ValidationIssue(path + ".events_modified", "Event payload capture policy proposal must not modify events."))
+            if proposal.get("safe_for_destructive_compaction") is not False:
+                issues.append(ValidationIssue(path + ".safe_for_destructive_compaction", "Event payload capture policy proposal must not mark destructive compaction safe."))
+            if proposal.get("review_status") not in {"needs_review", "ready_for_review", "approved", "rejected", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".review_status", "Event payload capture policy proposal review status is invalid."))
+            if proposal.get("status") not in {"active", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".status", "Event payload capture policy proposal status is invalid."))
+            requirements = proposal.get("target_path_requirements")
+            if not isinstance(requirements, list) or not requirements:
+                issues.append(ValidationIssue(path + ".target_path_requirements", "Event payload capture policy proposal requires target path requirements."))
+            elif all(isinstance(item, dict) for item in requirements):
+                for requirement_index, requirement in enumerate(requirements):
+                    req_path = path + f".target_path_requirements[{requirement_index}]"
+                    if requirement.get("capture_mode") not in {"full_payload_and_diff", "payload_hint_required", "snapshot_link_required", "reference_only_ok"}:
+                        issues.append(ValidationIssue(req_path + ".capture_mode", "Event payload capture requirement mode is invalid."))
+                    if requirement.get("execution_prohibited") is not True:
+                        issues.append(ValidationIssue(req_path + ".execution_prohibited", "Event payload capture requirement must prohibit execution."))
+                    if requirement.get("schema_change_allowed") is not False:
+                        issues.append(ValidationIssue(req_path + ".schema_change_allowed", "Event payload capture requirement must not allow schema changes."))
+            else:
+                issues.append(ValidationIssue(path + ".target_path_requirements", "Event payload capture policy requirements must be objects."))
+            if proposal.get("review_status") in {"approved", "rejected", "archived", "quarantined"}:
+                history = proposal.get("review_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(ValidationIssue(path + ".review_history", "Reviewed event payload capture policy proposal requires review history."))
+                elif history[-1].get("decision_id") != proposal.get("last_review_decision_id"):
+                    issues.append(ValidationIssue(path + ".last_review_decision_id", "Event payload capture policy last review decision id must match history."))
+
+    event_payload_capture_policy_decisions = task_hub.get(
+        "event_payload_capture_policy_decisions",
+        [],
+    )
+    if isinstance(event_payload_capture_policy_decisions, list):
+        for index, decision in enumerate(event_payload_capture_policy_decisions):
+            path = f"task_hub.event_payload_capture_policy_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(
+                    ValidationIssue(
+                        path,
+                        "Event payload capture policy decision must be an object.",
+                    )
+                )
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "proposal_id",
+                "reviewer",
+                "action",
+                "result",
+                "snapshot_id",
+                "proposal_mode",
+                "policy_mode",
+                "requires_review",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+                "event_schema_mutation_allowed",
+                "event_payload_capture_executed",
+                "event_compaction_executed",
+                "events_modified",
+                "safe_for_destructive_compaction",
+                "evidence",
+                "rollback",
+            ):
+                if key not in decision:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Event payload capture policy decision key is missing.",
+                        )
+                    )
+            if decision.get("proposal_id") not in event_payload_capture_policy_proposal_ids:
+                issues.append(ValidationIssue(path + ".proposal_id", "Event payload capture policy decision must reference an existing proposal."))
+            if decision.get("action") not in {"approve", "reject", "archive", "quarantine"}:
+                issues.append(ValidationIssue(path + ".action", "Event payload capture policy review action is invalid."))
+            if decision.get("result") not in {"approved", "rejected", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".result", "Event payload capture policy decision result is invalid."))
+            if decision.get("proposal_mode") != "proposal_only":
+                issues.append(ValidationIssue(path + ".proposal_mode", "Event payload capture policy decision must remain proposal_only."))
+            if decision.get("policy_mode") != "event_payload_capture_policy_v0.1":
+                issues.append(ValidationIssue(path + ".policy_mode", "Event payload capture policy decision mode is invalid."))
+            if decision.get("requires_review") is not True:
+                issues.append(ValidationIssue(path + ".requires_review", "Event payload capture policy decision must require review."))
+            if decision.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Event payload capture policy decision must prohibit execution."))
+            if decision.get("executable_policy") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy", "Event payload capture policy decision must not be executable policy."))
+            if decision.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Event payload capture policy decision must not create executable policy."))
+            if decision.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Event payload capture policy decision must not allow Identity Core mutation."))
+            if decision.get("event_schema_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".event_schema_mutation_allowed", "Event payload capture policy decision must not allow event schema mutation."))
+            if decision.get("event_payload_capture_executed") is not False:
+                issues.append(ValidationIssue(path + ".event_payload_capture_executed", "Event payload capture policy decision must not execute payload capture."))
+            if decision.get("event_compaction_executed") is not False:
+                issues.append(ValidationIssue(path + ".event_compaction_executed", "Event payload capture policy decision must not execute compaction."))
+            if decision.get("events_modified") is not False:
+                issues.append(ValidationIssue(path + ".events_modified", "Event payload capture policy decision must not modify events."))
+            if decision.get("safe_for_destructive_compaction") is not False:
+                issues.append(ValidationIssue(path + ".safe_for_destructive_compaction", "Event payload capture policy decision must not mark destructive compaction safe."))
+
     raw_event_retention_reviews = task_hub.get("event_retention_reviews", [])
     event_retention_reviews = (
         raw_event_retention_reviews

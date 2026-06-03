@@ -1615,6 +1615,43 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_payload_report = store.load()
     payload_report = store.event_payload_diff_coverage_preview()
     after_payload_report = store.load()
+    before_capture_policy_event_ids = [
+        event.get("event_id") for event in store.list_events()
+    ]
+    capture_policy = store.propose_event_payload_capture_policy(
+        proposer="scenario_eval",
+        rationale="Define review-only payload capture requirements before schema changes.",
+    )
+    capture_policy_review = store.review_event_payload_capture_policy(
+        proposal_id=capture_policy.get("proposal_id", ""),
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Approve as non-executable capture policy guidance.",
+    )
+    after_capture_policy_event_ids = [
+        event.get("event_id") for event in store.list_events()
+    ]
+    capture_policy_state = store.load()
+    capture_policy_proposals = capture_policy_state.get("task_hub", {}).get(
+        "event_payload_capture_policy_proposals",
+        [],
+    )
+    capture_policy_decisions = capture_policy_state.get("task_hub", {}).get(
+        "event_payload_capture_policy_decisions",
+        [],
+    )
+    capture_policy_context = store.build_context_package()
+    replay_after_capture_policy = store.replay_events()
+    capture_policy_projection_validation = replay_after_capture_policy.get(
+        "projection_validation",
+        {},
+    )
+    projected_capture_policy_validation = (
+        capture_policy_projection_validation.get("checked", {}).get(
+            "task_hub.event_payload_capture_policy_proposals",
+            {},
+        )
+    )
     before_retention_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -1705,6 +1742,88 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
             "safe_for_destructive_compaction"
         )
         is False,
+        "event_payload_capture_policy_proposed": capture_policy.get("status")
+        == "needs_review",
+        "event_payload_capture_policy_approved": capture_policy_review.get("status")
+        == "approved",
+        "event_payload_capture_policy_decision_recorded": bool(
+            capture_policy_decisions
+        )
+        and capture_policy_decisions[-1].get("decision_id")
+        == capture_policy_review.get("event_payload_capture_policy_decision_id"),
+        "event_payload_capture_policy_non_executable": all(
+            item.get("proposal_mode") == "proposal_only"
+            and item.get("requires_review") is True
+            and item.get("execution_prohibited") is True
+            and item.get("executable_policy") is False
+            and item.get("executable_policy_created") is False
+            and item.get("identity_mutation_allowed") is False
+            for item in capture_policy_proposals + capture_policy_decisions
+            if isinstance(item, dict)
+        ),
+        "event_payload_capture_policy_no_schema_mutation": all(
+            item.get("event_schema_mutation_allowed") is False
+            for item in capture_policy_proposals + capture_policy_decisions
+            if isinstance(item, dict)
+        ),
+        "event_payload_capture_policy_no_payload_capture": all(
+            item.get("event_payload_capture_executed") is False
+            for item in capture_policy_proposals + capture_policy_decisions
+            if isinstance(item, dict)
+        )
+        and capture_policy.get("event_payload_capture_executed") is False
+        and capture_policy_review.get("event_payload_capture_executed") is False,
+        "event_payload_capture_policy_no_compaction": all(
+            item.get("event_compaction_executed") is False
+            for item in capture_policy_proposals + capture_policy_decisions
+            if isinstance(item, dict)
+        )
+        and capture_policy.get("event_compaction_executed") is False
+        and capture_policy_review.get("event_compaction_executed") is False,
+        "event_payload_capture_policy_events_preserved": after_capture_policy_event_ids[
+            : len(before_capture_policy_event_ids)
+        ]
+        == before_capture_policy_event_ids
+        and capture_policy.get("events_modified") is False
+        and capture_policy_review.get("events_modified") is False
+        and all(
+            item.get("events_modified") is False
+            for item in capture_policy_proposals + capture_policy_decisions
+            if isinstance(item, dict)
+        ),
+        "event_payload_capture_policy_destructive_compaction_blocked": all(
+            item.get("safe_for_destructive_compaction") is False
+            for item in capture_policy_proposals + capture_policy_decisions
+            if isinstance(item, dict)
+        ),
+        "event_payload_capture_policy_context_exposed": capture_policy.get(
+            "proposal_id"
+        )
+        in {
+            item.get("proposal_id")
+            for item in capture_policy_context.get(
+                "event_payload_capture_policy_proposals",
+                [],
+            )
+            if isinstance(item, dict)
+        },
+        "event_payload_capture_policy_replay_still_passed": replay_after_capture_policy.get(
+            "status"
+        )
+        == "passed",
+        "event_payload_capture_policy_projection_consistent": projected_capture_policy_validation.get(
+            "count_consistent"
+        )
+        is True
+        and not any(
+            mismatch.get("target_path")
+            == "task_hub.event_payload_capture_policy_proposals"
+            for mismatch in capture_policy_projection_validation.get(
+                "count_mismatches",
+                [],
+            )
+            if isinstance(mismatch, dict)
+        ),
         "event_retention_review_created": retention_review.get("status")
         == "needs_review",
         "event_retention_lifecycle_archived": retention_lifecycle.get("status")
@@ -1790,6 +1909,10 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 "event_payload_report_count": 1
                 if payload_report.get("status") == "passed"
                 else 0,
+                "event_payload_report_event_count": payload_report.get(
+                    "event_count",
+                    0,
+                ),
                 "event_payload_transition_reference_count": payload_report.get(
                     "transition_reference_count",
                     0,
@@ -1814,6 +1937,60 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 "event_payload_state_mutation_count": 0
                 if after_payload_report == before_payload_report
                 else 1,
+                "event_payload_capture_policy_proposal_count": len(
+                    capture_policy_proposals
+                ),
+                "event_payload_capture_policy_decision_count": len(
+                    capture_policy_decisions
+                ),
+                "event_payload_capture_policy_approved_count": sum(
+                    1
+                    for item in capture_policy_proposals
+                    if isinstance(item, dict)
+                    and item.get("review_status") == "approved"
+                ),
+                "event_payload_capture_policy_context_count": len(
+                    capture_policy_context.get(
+                        "event_payload_capture_policy_proposals",
+                        [],
+                    )
+                ),
+                "event_payload_capture_policy_schema_mutation_count": sum(
+                    1
+                    for item in capture_policy_proposals + capture_policy_decisions
+                    if isinstance(item, dict)
+                    and item.get("event_schema_mutation_allowed") is True
+                ),
+                "event_payload_capture_policy_execution_count": sum(
+                    1
+                    for item in capture_policy_proposals + capture_policy_decisions
+                    if isinstance(item, dict)
+                    and (
+                        item.get("event_payload_capture_executed") is True
+                        or item.get("executable_policy") is not False
+                        or item.get("executable_policy_created") is not False
+                    )
+                ),
+                "event_payload_capture_policy_compaction_count": sum(
+                    1
+                    for item in capture_policy_proposals + capture_policy_decisions
+                    if isinstance(item, dict)
+                    and item.get("event_compaction_executed") is True
+                ),
+                "event_payload_capture_policy_events_modified_count": sum(
+                    1
+                    for item in capture_policy_proposals + capture_policy_decisions
+                    if isinstance(item, dict) and item.get("events_modified") is True
+                )
+                + int(
+                    after_capture_policy_event_ids[
+                        : len(before_capture_policy_event_ids)
+                    ]
+                    != before_capture_policy_event_ids
+                ),
+                "event_payload_capture_policy_replay_after_count": 1
+                if replay_after_capture_policy.get("status") == "passed"
+                else 0,
                 "event_retention_review_count": len(retention_reviews),
                 "event_retention_lifecycle_decision_count": len(
                     retention_lifecycle_decisions
@@ -2857,6 +3034,9 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         "event_payload_report_count": sum(
             int(item.get("event_payload_report_count", 0)) for item in metrics
         ),
+        "event_payload_report_event_count": sum(
+            int(item.get("event_payload_report_event_count", 0)) for item in metrics
+        ),
         "event_payload_transition_reference_count": sum(
             int(item.get("event_payload_transition_reference_count", 0))
             for item in metrics
@@ -2882,6 +3062,42 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "event_payload_state_mutation_count": sum(
             int(item.get("event_payload_state_mutation_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_proposal_count": sum(
+            int(item.get("event_payload_capture_policy_proposal_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_decision_count": sum(
+            int(item.get("event_payload_capture_policy_decision_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_approved_count": sum(
+            int(item.get("event_payload_capture_policy_approved_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_context_count": sum(
+            int(item.get("event_payload_capture_policy_context_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_schema_mutation_count": sum(
+            int(item.get("event_payload_capture_policy_schema_mutation_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_execution_count": sum(
+            int(item.get("event_payload_capture_policy_execution_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_compaction_count": sum(
+            int(item.get("event_payload_capture_policy_compaction_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_events_modified_count": sum(
+            int(item.get("event_payload_capture_policy_events_modified_count", 0))
+            for item in metrics
+        ),
+        "event_payload_capture_policy_replay_after_count": sum(
+            int(item.get("event_payload_capture_policy_replay_after_count", 0))
             for item in metrics
         ),
         "event_retention_review_count": sum(

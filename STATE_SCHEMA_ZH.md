@@ -47,6 +47,10 @@ task_hub:
   tool_safety_policy_link_lifecycle_decisions: []
   tool_safety_policy_decisions: []
   tool_safety_policy_lifecycle_decisions: []
+  event_retention_reviews: []
+  event_retention_lifecycle_decisions: []
+  event_payload_capture_policy_proposals: []
+  event_payload_capture_policy_decisions: []
   procedural_candidates: []
 identity_update_gate:
   proposals: []
@@ -1411,6 +1415,92 @@ event_payload_diff_coverage:
 每条 event 的记录会包含 `payload_status`，例如 `reference_only`、`payload_hint_only`、`diff_ready` 或 `missing_transition_reference`，并列出缺失能力，例如 `object_payload`、`object_diff` 或 `rollback_snapshot`。
 
 P39 不会增加 event compaction、delete、summarize、rewrite、automatic rollback 或 object-level replay。它只是把缺口明确化：当前大多数 events 已经 transition-reference complete，但还不是 object-diff complete。
+
+P40 增加 review-only event payload capture policy proposal：
+
+```bash
+python3 -m one_core.cli propose-event-payload-capture-policy --proposer manual_review --rationale "Define capture policy before schema changes."
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action approve
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action reject
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action archive
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action quarantine
+```
+
+`propose-event-payload-capture-policy` 会读取 P39 payload/diff coverage report，并把 target-path requirements 记录到 `task_hub.event_payload_capture_policy_proposals`。Review decisions 会记录到 `task_hub.event_payload_capture_policy_decisions`。Active 和 approved proposals 可以进入 context package，让后续工程循环知道哪些 state paths 需要 full payload、object diff、snapshot link 或 reference-only treatment。
+
+```yaml
+task_hub:
+  event_payload_capture_policy_proposals:
+    - proposal_id: "event_payload_capture_policy_proposal_0001"
+      timestamp: "ISO-8601 timestamp"
+      proposer: "manual_review"
+      status: "active"
+      review_status: "needs_review"
+      proposal_mode: "proposal_only"
+      policy_mode: "event_payload_capture_policy_v0.1"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_schema_mutation_allowed: false
+      event_payload_capture_executed: false
+      event_compaction_executed: false
+      events_modified: false
+      safe_for_destructive_compaction: false
+      coverage_summary:
+        mode: "event_payload_diff_coverage_v0.1"
+        event_count: 5
+        payload_gap_count: 4
+        diff_gap_count: 5
+        safe_for_destructive_compaction: false
+      target_path_requirements:
+        - target_path: "memory_stores.episodic_memory"
+          event_count: 3
+          capture_mode: "full_payload_and_diff"
+          reason: "object_diff_missing"
+          requires_full_payload: true
+          requires_object_diff: true
+          requires_snapshot_link: true
+          allows_reference_only: false
+          execution_prohibited: true
+          schema_change_allowed: false
+      required_provenance_fields:
+        - "event_id"
+        - "sequence"
+        - "workflow"
+        - "operation"
+        - "target_path"
+        - "target_identity"
+        - "evidence"
+        - "actor"
+        - "timestamp"
+      recommended_next_action: "review_capture_policy_before_schema_change"
+      lifecycle:
+        status: "active"
+  event_payload_capture_policy_decisions:
+    - decision_id: "event_payload_capture_policy_decision_0001"
+      proposal_id: "event_payload_capture_policy_proposal_0001"
+      action: "approve"
+      result: "approved"
+      proposal_mode: "proposal_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_schema_mutation_allowed: false
+      event_payload_capture_executed: false
+      event_compaction_executed: false
+      events_modified: false
+      safe_for_destructive_compaction: false
+      rollback:
+        reversible: true
+```
+
+允许的 `capture_mode` 是 `full_payload_and_diff`、`payload_hint_required`、`snapshot_link_required` 和 `reference_only_ok`。
+
+P40 仍然不会 capture payload、创建 executable policy、修改 event schema、compact events、修改已有 event records，或把 destructive compaction 标记为 safe。它是在 P39 coverage visibility 和未来 schema-level payload capture design 之间增加的一层 governance checkpoint。
 
 这个 projection 还不是完整 object-level state rebuild。它是一个可复现的 audit layer，用于在项目尝试 automatic rollback 之前，检查 event log 能否重建 transition references。
 

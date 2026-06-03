@@ -339,6 +339,148 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
 
+    def test_task_hub_validates_event_payload_capture_policy_flags(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["task_hub"]["event_payload_capture_policy_proposals"].append(
+                {
+                    "proposal_id": "event_payload_capture_policy_proposal_bad",
+                    "timestamp": state["created_at"],
+                    "proposer": "unit_test",
+                    "status": "active",
+                    "review_status": "approved",
+                    "proposal_mode": "executor",
+                    "policy_mode": "event_payload_capture_policy_v0.1",
+                    "requires_review": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "event_schema_mutation_allowed": True,
+                    "event_payload_capture_executed": True,
+                    "event_compaction_executed": True,
+                    "events_modified": True,
+                    "safe_for_destructive_compaction": True,
+                    "coverage_summary": {},
+                    "target_path_requirements": [
+                        {
+                            "target_path": "events.jsonl",
+                            "capture_mode": "execute_now",
+                            "execution_prohibited": False,
+                            "schema_change_allowed": True,
+                        }
+                    ],
+                    "required_provenance_fields": [],
+                    "evidence": [],
+                    "review_history": [],
+                    "lifecycle": {"status": "active"},
+                    "update_history": [],
+                    "provenance": [],
+                }
+            )
+            state["task_hub"]["event_payload_capture_policy_decisions"].append(
+                {
+                    "decision_id": "event_payload_capture_policy_decision_bad",
+                    "timestamp": state["created_at"],
+                    "proposal_id": "missing_proposal",
+                    "reviewer": "unit_test",
+                    "action": "execute",
+                    "result": "captured",
+                    "snapshot_id": "snapshot_missing",
+                    "proposal_mode": "executor",
+                    "policy_mode": "event_payload_capture_policy_v0.1",
+                    "requires_review": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "event_schema_mutation_allowed": True,
+                    "event_payload_capture_executed": True,
+                    "event_compaction_executed": True,
+                    "events_modified": True,
+                    "safe_for_destructive_compaction": True,
+                    "evidence": [],
+                    "rollback": {},
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].proposal_mode",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].requires_review",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].event_schema_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].event_payload_capture_executed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].event_compaction_executed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].events_modified",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].safe_for_destructive_compaction",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].target_path_requirements[0].capture_mode",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].target_path_requirements[0].schema_change_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_proposals[0].review_history",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_decisions[0].proposal_id",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_decisions[0].action",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_decisions[0].result",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_decisions[0].event_schema_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_decisions[0].event_payload_capture_executed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.event_payload_capture_policy_decisions[0].safe_for_destructive_compaction",
+                paths,
+            )
+
     def test_adapter_event_index_must_point_to_episode(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

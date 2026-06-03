@@ -45,6 +45,10 @@ task_hub:
   tool_safety_policy_link_lifecycle_decisions: []
   tool_safety_policy_decisions: []
   tool_safety_policy_lifecycle_decisions: []
+  event_retention_reviews: []
+  event_retention_lifecycle_decisions: []
+  event_payload_capture_policy_proposals: []
+  event_payload_capture_policy_decisions: []
   procedural_candidates: []
 identity_update_gate:
   proposals: []
@@ -1409,6 +1413,92 @@ event_payload_diff_coverage:
 Per-event records include `payload_status` values such as `reference_only`, `payload_hint_only`, `diff_ready`, or `missing_transition_reference`, plus missing capabilities like `object_payload`, `object_diff`, or `rollback_snapshot`.
 
 P39 does not add event compaction, deletion, summarization, rewriting, automatic rollback, or object-level replay. It makes the gap explicit: most current events are transition-reference complete, but not yet object-diff complete.
+
+P40 adds a review-only event payload capture policy proposal:
+
+```bash
+python3 -m one_core.cli propose-event-payload-capture-policy --proposer manual_review --rationale "Define capture policy before schema changes."
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action approve
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action reject
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action archive
+python3 -m one_core.cli review-event-payload-capture-policy <proposal_id> --action quarantine
+```
+
+`propose-event-payload-capture-policy` reads the P39 payload/diff coverage report and records target-path requirements in `task_hub.event_payload_capture_policy_proposals`. Review decisions are recorded in `task_hub.event_payload_capture_policy_decisions`. Active and approved proposals may enter the context package so future engineering loops can see which state paths need full payloads, object diffs, snapshot links, or reference-only treatment.
+
+```yaml
+task_hub:
+  event_payload_capture_policy_proposals:
+    - proposal_id: "event_payload_capture_policy_proposal_0001"
+      timestamp: "ISO-8601 timestamp"
+      proposer: "manual_review"
+      status: "active"
+      review_status: "needs_review"
+      proposal_mode: "proposal_only"
+      policy_mode: "event_payload_capture_policy_v0.1"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_schema_mutation_allowed: false
+      event_payload_capture_executed: false
+      event_compaction_executed: false
+      events_modified: false
+      safe_for_destructive_compaction: false
+      coverage_summary:
+        mode: "event_payload_diff_coverage_v0.1"
+        event_count: 5
+        payload_gap_count: 4
+        diff_gap_count: 5
+        safe_for_destructive_compaction: false
+      target_path_requirements:
+        - target_path: "memory_stores.episodic_memory"
+          event_count: 3
+          capture_mode: "full_payload_and_diff"
+          reason: "object_diff_missing"
+          requires_full_payload: true
+          requires_object_diff: true
+          requires_snapshot_link: true
+          allows_reference_only: false
+          execution_prohibited: true
+          schema_change_allowed: false
+      required_provenance_fields:
+        - "event_id"
+        - "sequence"
+        - "workflow"
+        - "operation"
+        - "target_path"
+        - "target_identity"
+        - "evidence"
+        - "actor"
+        - "timestamp"
+      recommended_next_action: "review_capture_policy_before_schema_change"
+      lifecycle:
+        status: "active"
+  event_payload_capture_policy_decisions:
+    - decision_id: "event_payload_capture_policy_decision_0001"
+      proposal_id: "event_payload_capture_policy_proposal_0001"
+      action: "approve"
+      result: "approved"
+      proposal_mode: "proposal_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      event_schema_mutation_allowed: false
+      event_payload_capture_executed: false
+      event_compaction_executed: false
+      events_modified: false
+      safe_for_destructive_compaction: false
+      rollback:
+        reversible: true
+```
+
+Allowed `capture_mode` values are `full_payload_and_diff`, `payload_hint_required`, `snapshot_link_required`, and `reference_only_ok`.
+
+P40 still does not capture payloads, create executable policy, mutate the event schema, compact events, modify existing event records, or mark destructive compaction safe. It is a governance checkpoint between P39 coverage visibility and any future schema-level payload capture design.
 
 This projection is not a full object-level state rebuild yet. It is a reproducible audit layer for checking that the event log can reconstruct transition references before the project attempts automatic rollback.
 
