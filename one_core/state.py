@@ -2707,6 +2707,121 @@ def build_reconstruction_schema_review_decision(
     }
 
 
+def build_reconstruction_schema_review_coverage_map(
+    checklist: dict,
+    decisions: List[dict],
+) -> dict:
+    decisions_by_checklist: dict[str, List[dict]] = {}
+    for decision in decisions:
+        if not isinstance(decision, dict):
+            continue
+        checklist_id = str(decision.get("checklist_id") or "")
+        if not checklist_id:
+            continue
+        decisions_by_checklist.setdefault(checklist_id, []).append(decision)
+
+    workflow_records = []
+    for item in checklist.get("checklist_items", []):
+        if not isinstance(item, dict):
+            continue
+        checklist_id = str(item.get("checklist_id") or "")
+        item_decisions = sorted(
+            decisions_by_checklist.get(checklist_id, []),
+            key=lambda decision: str(decision.get("timestamp") or ""),
+        )
+        latest = item_decisions[-1] if item_decisions else {}
+        latest_result = latest.get("result") if latest else None
+        if latest_result == "more_evidence_requested":
+            review_coverage_status = "evidence_requested"
+        elif latest_result == "approved_for_schema_design":
+            review_coverage_status = "reviewed_for_schema_design"
+        elif latest_result == "rejected_as_low_value":
+            review_coverage_status = "rejected"
+        elif latest_result == "deferred":
+            review_coverage_status = "deferred"
+        elif latest_result == "quarantined":
+            review_coverage_status = "quarantined"
+        else:
+            review_coverage_status = "unreviewed"
+
+        workflow_records.append(
+            {
+                "checklist_id": checklist_id,
+                "workflow": item.get("workflow"),
+                "recommended_order": item.get("recommended_order"),
+                "recommended_priority": item.get("recommended_priority"),
+                "priority_score": item.get("priority_score", 0.0),
+                "coverage_status": item.get("coverage_status"),
+                "target_paths": item.get("target_paths", {}),
+                "missing_capabilities": item.get("missing_capabilities", []),
+                "decision_count": len(item_decisions),
+                "latest_decision_id": latest.get("decision_id") if latest else None,
+                "latest_action": latest.get("action") if latest else None,
+                "latest_result": latest_result,
+                "latest_reviewed_at": latest.get("timestamp") if latest else None,
+                "requested_evidence": latest.get("requested_evidence", [])
+                if latest
+                else [],
+                "approval_scope": latest.get("approval_scope", []) if latest else [],
+                "review_coverage_status": review_coverage_status,
+                "reviewed": bool(item_decisions),
+                "review_only": True,
+                "execution_prohibited": True,
+                "schema_change_approved": False,
+                "schema_change_allowed": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "identity_mutation_allowed": False,
+            }
+        )
+
+    total = len(workflow_records)
+    reviewed = sum(1 for item in workflow_records if item.get("reviewed"))
+    status_counts: dict[str, int] = {}
+    for item in workflow_records:
+        status = str(item.get("review_coverage_status") or "unknown")
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+    return {
+        "mode": "reconstruction_schema_review_coverage_map_v0.1",
+        "status": checklist.get("status", "blocked_by_replayability"),
+        "coverage_status": "report_only",
+        "source_reports": {
+            "reconstruction_evidence_schema_review_checklist": checklist.get("mode"),
+            "reconstruction_schema_review_decisions": "task_hub.reconstruction_schema_review_decisions",
+        },
+        "event_count": checklist.get("event_count", 0),
+        "workflow_count": checklist.get("workflow_count", 0),
+        "workflow_gap_count": checklist.get("workflow_gap_count", 0),
+        "checklist_item_count": total,
+        "reviewed_checklist_item_count": reviewed,
+        "unreviewed_checklist_item_count": max(total - reviewed, 0),
+        "review_decision_count": sum(
+            len(values) for values in decisions_by_checklist.values()
+        ),
+        "review_status_counts": dict(sorted(status_counts.items())),
+        "workflow_review_coverage": workflow_records,
+        "review_coverage_ratio": round(reviewed / total, 2) if total else 0.0,
+        "recommended_next_actions": [
+            "review_unreviewed_schema_checklist_items",
+            "request_missing_evidence_before_schema_approval",
+            "keep_report_only_until_schema_approval",
+        ],
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "identity_mutation_allowed": False,
+        "report_only": True,
+        "would_modify_state": False,
+        "note": "P47 maps reconstruction schema review decisions back to checklist workflow coverage; it does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity.",
+    }
+
+
 def event_payload_capture_requirements_from_coverage(coverage: dict) -> List[dict]:
     requirements = []
     target_paths = coverage.get("target_paths", {})
@@ -7924,6 +8039,21 @@ class StateStore:
                 or before_event_ids != after_event_ids[: len(before_event_ids)]
             ),
         }
+
+    def reconstruction_schema_review_coverage_map(self) -> dict:
+        before_state = self.load()
+        checklist = self.reconstruction_evidence_schema_review_checklist()
+        state = self.load()
+        decisions = state.get("task_hub", {}).get(
+            "reconstruction_schema_review_decisions",
+            [],
+        )
+        report = build_reconstruction_schema_review_coverage_map(
+            checklist=checklist,
+            decisions=decisions if isinstance(decisions, list) else [],
+        )
+        report["state_unchanged"] = before_state == self.load()
+        return report
 
     def propose_event_payload_capture_policy(
         self,

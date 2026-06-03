@@ -1666,6 +1666,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
             {},
         )
     )
+    before_schema_review_coverage = store.load()
+    schema_review_coverage = store.reconstruction_schema_review_coverage_map()
+    after_schema_review_coverage = store.load()
     before_capture_policy_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -2026,6 +2029,49 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 [],
             )
             if isinstance(mismatch, dict)
+        ),
+        "reconstruction_schema_review_coverage_mapped": schema_review_coverage.get(
+            "mode"
+        )
+        == "reconstruction_schema_review_coverage_map_v0.1",
+        "reconstruction_schema_review_coverage_read_only": schema_review_coverage.get(
+            "would_modify_state"
+        )
+        is False
+        and schema_review_coverage.get("report_only") is True
+        and schema_review_coverage.get("state_unchanged") is True
+        and after_schema_review_coverage == before_schema_review_coverage,
+        "reconstruction_schema_review_coverage_decision_visible": schema_review_coverage.get(
+            "reviewed_checklist_item_count",
+            0,
+        )
+        >= 1
+        and schema_review_coverage.get("review_decision_count", 0) >= 1,
+        "reconstruction_schema_review_coverage_unreviewed_visible": schema_review_coverage.get(
+            "unreviewed_checklist_item_count",
+            0,
+        )
+        >= 1,
+        "reconstruction_schema_review_coverage_non_executing": schema_review_coverage.get(
+            "reconstruction_executed"
+        )
+        is False
+        and schema_review_coverage.get("event_payload_capture_executed") is False
+        and schema_review_coverage.get("event_schema_mutation_allowed") is False
+        and schema_review_coverage.get("event_compaction_executed") is False
+        and schema_review_coverage.get("automatic_rollback_executed") is False
+        and schema_review_coverage.get("identity_mutation_allowed") is False
+        and all(
+            item.get("schema_change_approved") is False
+            and item.get("schema_change_allowed") is False
+            and item.get("event_schema_mutation_allowed") is False
+            and item.get("event_payload_capture_executed") is False
+            and item.get("reconstruction_executed") is False
+            and item.get("event_compaction_executed") is False
+            and item.get("automatic_rollback_executed") is False
+            and item.get("identity_mutation_allowed") is False
+            for item in schema_review_coverage.get("workflow_review_coverage", [])
+            if isinstance(item, dict)
         ),
         "event_payload_capture_policy_proposed": capture_policy.get("status")
         == "needs_review",
@@ -2465,6 +2511,41 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                 "reconstruction_schema_review_replay_after_count": 1
                 if replay_after_schema_review.get("status") == "passed"
                 else 0,
+                "reconstruction_schema_review_coverage_map_count": 1
+                if schema_review_coverage.get("mode")
+                == "reconstruction_schema_review_coverage_map_v0.1"
+                else 0,
+                "reconstruction_schema_review_coverage_reviewed_count": schema_review_coverage.get(
+                    "reviewed_checklist_item_count",
+                    0,
+                ),
+                "reconstruction_schema_review_coverage_unreviewed_count": schema_review_coverage.get(
+                    "unreviewed_checklist_item_count",
+                    0,
+                ),
+                "reconstruction_schema_review_coverage_ratio": schema_review_coverage.get(
+                    "review_coverage_ratio",
+                    0.0,
+                ),
+                "reconstruction_schema_review_coverage_evidence_requested_count": schema_review_coverage.get(
+                    "review_status_counts",
+                    {},
+                ).get("evidence_requested", 0),
+                "reconstruction_schema_review_coverage_schema_mutation_count": 1
+                if schema_review_coverage.get("event_schema_mutation_allowed") is True
+                else 0,
+                "reconstruction_schema_review_coverage_capture_execution_count": 1
+                if schema_review_coverage.get("event_payload_capture_executed") is True
+                else 0,
+                "reconstruction_schema_review_coverage_reconstruction_execution_count": 1
+                if schema_review_coverage.get("reconstruction_executed") is True
+                else 0,
+                "reconstruction_schema_review_coverage_identity_mutation_count": 1
+                if schema_review_coverage.get("identity_mutation_allowed") is True
+                else 0,
+                "reconstruction_schema_review_coverage_state_mutation_count": 0
+                if after_schema_review_coverage == before_schema_review_coverage
+                else 1,
                 "event_payload_capture_policy_proposal_count": len(
                     capture_policy_proposals
                 ),
@@ -3863,6 +3944,79 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "reconstruction_schema_review_replay_after_count": sum(
             int(item.get("reconstruction_schema_review_replay_after_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_map_count": sum(
+            int(item.get("reconstruction_schema_review_coverage_map_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_reviewed_count": sum(
+            int(item.get("reconstruction_schema_review_coverage_reviewed_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_unreviewed_count": sum(
+            int(item.get("reconstruction_schema_review_coverage_unreviewed_count", 0))
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_max_ratio": max(
+            [
+                float(item.get("reconstruction_schema_review_coverage_ratio", 0.0))
+                for item in metrics
+            ]
+            or [0.0]
+        ),
+        "reconstruction_schema_review_coverage_evidence_requested_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_coverage_evidence_requested_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_schema_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_coverage_schema_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_capture_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_coverage_capture_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_reconstruction_execution_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_coverage_reconstruction_execution_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_identity_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_coverage_identity_mutation_count",
+                    0,
+                )
+            )
+            for item in metrics
+        ),
+        "reconstruction_schema_review_coverage_state_mutation_count": sum(
+            int(
+                item.get(
+                    "reconstruction_schema_review_coverage_state_mutation_count",
+                    0,
+                )
+            )
             for item in metrics
         ),
         "event_payload_capture_policy_proposal_count": sum(

@@ -1480,7 +1480,7 @@ P46 Reconstruction Schema Checklist Review Record
 - 还没有 event schema migration；
 - 还没有 payload 或 diff capture implementation。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P47 Reconstruction Schema Review Coverage Map
@@ -1491,6 +1491,44 @@ P47 Reconstruction Schema Review Coverage Map
 - P46 记录了 individual decisions，但项目仍然需要一个 report-only map，显示哪些 prioritized workflow gaps 已有 review decisions，哪些仍未 review；
 - 这一步应该暴露 reviewed、deferred、rejected 和 evidence-requested checklist items，但不批准 schema changes；
 - 它让 Event-Sourcing Groundwork 在任何 schema mutation 或 payload capture 之前先聚焦 governance coverage。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+已实现结果：
+
+- `reconstruction-schema-review-coverage-map` CLI 会输出 `reconstruction_schema_review_coverage_map_v0.1`；
+- report 会把 P46 的 `task_hub.reconstruction_schema_review_decisions` 映射回 P45 checklist workflow items；
+- coverage records 会暴露 reviewed、unreviewed、evidence-requested、deferred、rejected、quarantined 和 reviewed-for-schema-design 状态；
+- report 会保留 checklist priority、target paths、missing capabilities、latest decision metadata、requested evidence 和 approval scope；
+- report 保持 `schema_change_approved: false`、`schema_change_allowed: false`、`event_schema_mutation_allowed: false`、`event_payload_capture_executed: false`、`reconstruction_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`identity_mutation_allowed: false`、`report_only: true` 和 `would_modify_state: false`；
+- scenario evaluation 会验证 review coverage visibility、unreviewed gap visibility、read-only 行为，以及 schema mutation / payload capture / reconstruction / identity mutation counts 全部为 0。
+
+剩余缺口：
+
+- requested evidence 已经可见，但还没有 dedicated evidence request lifecycle；
+- 还没有 schema approval workflow；
+- 还没有 event schema migration；
+- 还没有 payload 或 diff capture implementation。
+
+建议下一步：
+
+```text
+P48 Reconstruction Schema Review Evidence Request Tracker
+```
+
+理由：
+
+- P47 可以显示某个 checklist item 请求了更多 evidence，但 evidence request 本身还没有 durable lifecycle；
+- 下一个地基步骤应把 requested evidence 变成 review-only records，支持 open、satisfy、defer、archive 或 quarantine，但不批准 schema changes；
+- 这能让 Event-Sourcing Groundwork 在任何 payload capture、reconstruction execution、event compaction、automatic rollback 或 schema migration 之前继续聚焦 governance evidence。
 
 期望验收：
 

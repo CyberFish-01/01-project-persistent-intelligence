@@ -1489,7 +1489,7 @@ Remaining gaps:
 - no event schema migration exists;
 - no payload or diff capture implementation exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
 P47 Reconstruction Schema Review Coverage Map
@@ -1500,6 +1500,44 @@ Reason:
 - P46 records individual decisions, but the project still needs a report-only map showing which prioritized workflow gaps have review decisions and which remain unreviewed;
 - this should expose reviewed, deferred, rejected, and evidence-requested checklist items without approving schema changes;
 - it keeps Event-Sourcing Groundwork focused on governance coverage before any schema mutation or payload capture.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+Implemented result:
+
+- `reconstruction-schema-review-coverage-map` CLI reports `reconstruction_schema_review_coverage_map_v0.1`;
+- the report maps P46 `task_hub.reconstruction_schema_review_decisions` back to P45 checklist workflow items;
+- coverage records expose reviewed, unreviewed, evidence-requested, deferred, rejected, quarantined, and reviewed-for-schema-design statuses;
+- the report preserves checklist priority, target paths, missing capabilities, latest decision metadata, requested evidence, and approval scope;
+- the report keeps `schema_change_approved: false`, `schema_change_allowed: false`, `event_schema_mutation_allowed: false`, `event_payload_capture_executed: false`, `reconstruction_executed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `identity_mutation_allowed: false`, `report_only: true`, and `would_modify_state: false`;
+- scenario evaluation verifies review coverage visibility, unreviewed gap visibility, read-only behavior, and zero schema mutation / payload capture / reconstruction / identity mutation counts.
+
+Remaining gaps:
+
+- requested evidence is visible but not yet tracked as a dedicated evidence request lifecycle;
+- no schema approval workflow exists;
+- no event schema migration exists;
+- no payload or diff capture implementation exists.
+
+Recommended next step:
+
+```text
+P48 Reconstruction Schema Review Evidence Request Tracker
+```
+
+Reason:
+
+- P47 can show that a checklist item requested more evidence, but the evidence request itself has no durable lifecycle yet;
+- the next foundation step should track requested evidence as review-only records that can be opened, satisfied, deferred, archived, or quarantined without approving schema changes;
+- this keeps Event-Sourcing Groundwork focused on governance evidence before any payload capture, reconstruction execution, event compaction, automatic rollback, or schema migration.
 
 Desired acceptance:
 

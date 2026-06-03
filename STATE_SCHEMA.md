@@ -1732,6 +1732,60 @@ reconstruction_schema_review_decision:
 
 P46 records human review intent and evidence requests only. It still does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity.
 
+P47 adds a read-only reconstruction schema review coverage map:
+
+```bash
+python3 -m one_core.cli reconstruction-schema-review-coverage-map
+```
+
+This report maps P46 decisions back to P45 checklist items so the project can see which workflow gaps have been reviewed and which remain unreviewed.
+
+```yaml
+reconstruction_schema_review_coverage_map:
+  mode: "reconstruction_schema_review_coverage_map_v0.1"
+  coverage_status: "report_only"
+  source_reports:
+    reconstruction_evidence_schema_review_checklist: "reconstruction_evidence_schema_review_checklist_v0.1"
+    reconstruction_schema_review_decisions: "task_hub.reconstruction_schema_review_decisions"
+  checklist_item_count: 2
+  reviewed_checklist_item_count: 1
+  unreviewed_checklist_item_count: 1
+  review_decision_count: 1
+  review_status_counts:
+    evidence_requested: 1
+    unreviewed: 1
+  workflow_review_coverage:
+    - checklist_id: "schema_review_1_record_episode"
+      workflow: "record_episode"
+      decision_count: 1
+      latest_result: "more_evidence_requested"
+      requested_evidence:
+        - "object_diff_example"
+      review_coverage_status: "evidence_requested"
+      reviewed: true
+      review_only: true
+      execution_prohibited: true
+      schema_change_approved: false
+      schema_change_allowed: false
+      event_schema_mutation_allowed: false
+      event_payload_capture_executed: false
+      reconstruction_executed: false
+      event_compaction_executed: false
+      automatic_rollback_executed: false
+      identity_mutation_allowed: false
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  identity_mutation_allowed: false
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+P47 does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, mutate identity, or modify the event log. It only exposes governance coverage before any schema mutation or reconstruction work exists.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml

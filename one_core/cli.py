@@ -462,6 +462,10 @@ def main() -> None:
         default=[],
         help="Schema design scope approved for later review; may be repeated.",
     )
+    subparsers.add_parser(
+        "reconstruction-schema-review-coverage-map",
+        help="Map reconstruction schema checklist review decisions to workflow coverage without mutating state.",
+    )
     payload_capture_policy_parser = subparsers.add_parser(
         "propose-event-payload-capture-policy",
         help="Create a review-only event payload capture policy proposal.",
@@ -841,6 +845,8 @@ def main() -> None:
                 approval_scope=args.approval_scope,
             )
         )
+    elif args.command == "reconstruction-schema-review-coverage-map":
+        print_json(store.reconstruction_schema_review_coverage_map())
     elif args.command == "propose-event-payload-capture-policy":
         print_json(
             store.propose_event_payload_capture_policy(

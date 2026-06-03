@@ -3144,6 +3144,77 @@ class CoreStateTests(unittest.TestCase):
                 1,
             )
 
+    def test_reconstruction_schema_review_coverage_map_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P47 schema review coverage map episode")
+            store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create retention workflow gap for P47 coverage.",
+            )
+            checklist = store.reconstruction_evidence_schema_review_checklist()
+            checklist_id = checklist["checklist_items"][0]["checklist_id"]
+            review = store.review_reconstruction_schema_checklist_item(
+                checklist_id=checklist_id,
+                action="request_more_evidence",
+                reviewer="unit_test",
+                rationale="Need explicit object diff evidence before schema design.",
+                requested_evidence=["object_diff_example"],
+                approval_scope=["schema_design_discussion_only"],
+            )
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.reconstruction_schema_review_coverage_map()
+            after = store.load()
+
+            coverage = {
+                item["checklist_id"]: item
+                for item in report["workflow_review_coverage"]
+            }
+            reviewed = coverage[checklist_id]
+
+            self.assertEqual(
+                report["mode"],
+                "reconstruction_schema_review_coverage_map_v0.1",
+            )
+            self.assertEqual(report["coverage_status"], "report_only")
+            self.assertEqual(report["reviewed_checklist_item_count"], 1)
+            self.assertGreaterEqual(report["unreviewed_checklist_item_count"], 1)
+            self.assertEqual(report["review_decision_count"], 1)
+            self.assertEqual(
+                report["review_status_counts"]["evidence_requested"],
+                1,
+            )
+            self.assertEqual(reviewed["latest_decision_id"], review["decision_id"])
+            self.assertEqual(reviewed["latest_result"], "more_evidence_requested")
+            self.assertEqual(reviewed["review_coverage_status"], "evidence_requested")
+            self.assertTrue(reviewed["reviewed"])
+            self.assertFalse(reviewed["schema_change_approved"])
+            self.assertFalse(reviewed["schema_change_allowed"])
+            self.assertFalse(reviewed["event_schema_mutation_allowed"])
+            self.assertFalse(reviewed["event_payload_capture_executed"])
+            self.assertFalse(reviewed["reconstruction_executed"])
+            self.assertFalse(reviewed["event_compaction_executed"])
+            self.assertFalse(reviewed["automatic_rollback_executed"])
+            self.assertFalse(reviewed["identity_mutation_allowed"])
+            self.assertTrue(report["report_only"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["reconstruction_executed"])
+            self.assertFalse(report["event_payload_capture_executed"])
+            self.assertFalse(report["event_schema_mutation_allowed"])
+            self.assertFalse(report["event_compaction_executed"])
+            self.assertFalse(report["automatic_rollback_executed"])
+            self.assertFalse(report["identity_mutation_allowed"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))
