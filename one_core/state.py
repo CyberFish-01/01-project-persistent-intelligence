@@ -55,6 +55,13 @@ PROCEDURAL_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 PROCEDURAL_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 CAUTIONARY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 CAUTIONARY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
+REFLECTION_GUIDANCE_REVIEW_ACTIONS = {"acknowledge", "archive", "quarantine"}
+REFLECTION_VERIFICATION_RESULTS = {
+    "verified",
+    "not_observed",
+    "regressed",
+    "superseded",
+}
 
 
 def utc_now() -> str:
@@ -191,6 +198,9 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         ],
         "recurring_duties": [],
         "action_trace": [],
+        "reflection_log": [],
+        "reflection_guidance_queue": [],
+        "reflection_guidance_decisions": [],
         "failure_reflections": [],
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
@@ -513,6 +523,9 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "blocked_tasks",
         "recurring_duties",
         "action_trace",
+        "reflection_log",
+        "reflection_guidance_queue",
+        "reflection_guidance_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -621,6 +634,8 @@ def task_action_evidence(trace: dict) -> List[str]:
             "cautionary_memory_id",
             "cautionary_decision_id",
             "cautionary_lifecycle_decision_id",
+            "reflection_id",
+            "reflection_verification_id",
         ):
             value = event.get(key)
             if value:
@@ -934,7 +949,7 @@ def read_json(path: Path) -> dict:
 
 def write_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    tmp_path = path.with_name(f"{path.name}.{uuid.uuid4().hex}.tmp")
     with tmp_path.open("w", encoding="utf-8") as handle:
         json.dump(data, handle, ensure_ascii=False, indent=2)
         handle.write("\n")
@@ -3379,6 +3394,20 @@ class StateStore:
         }
         task_hub.setdefault("failure_reflections", []).append(reflection)
         task_hub.setdefault("cautionary_procedural_candidates", []).append(caution)
+        reflection_log_entry = build_reflection_log_entry(
+            timestamp=now,
+            reflection_type="failure",
+            workflow=normalized_workflow,
+            observation=normalized_summary,
+            lesson=normalized_lesson,
+            expected_behavior=next_action,
+            actor=reviewer,
+            source_ids=[reflection["reflection_id"]] + reflection["evidence"],
+            evidence=[reflection["reflection_id"]] + reflection["evidence"],
+            risk=caution["risk"],
+            confidence=caution["confidence"],
+        )
+        task_hub.setdefault("reflection_log", []).append(reflection_log_entry)
         state["update_log"].append(
             {
                 "id": new_id("update"),
@@ -3391,6 +3420,7 @@ class StateStore:
                 "evidence": reflection["evidence"],
                 "gate": "medium",
                 "confidence": caution["confidence"],
+                "reflection_log_id": reflection_log_entry["reflection_id"],
                 "rollback": {"reversible": True},
             }
         )
@@ -3403,6 +3433,7 @@ class StateStore:
             metadata={
                 "reflection_id": reflection["reflection_id"],
                 "cautionary_candidate_id": caution["candidate_id"],
+                "reflection_log_id": reflection_log_entry["reflection_id"],
                 "workflow": normalized_workflow,
             },
             state=state,
@@ -3422,6 +3453,11 @@ class StateStore:
                     "reflection_id": reflection["reflection_id"],
                 },
                 {
+                    "id": "reflection_log",
+                    "type": "Memory",
+                    "reflection_id": reflection_log_entry["reflection_id"],
+                },
+                {
                     "id": "caution",
                     "type": "Memory",
                     "candidate_id": caution["candidate_id"],
@@ -3429,6 +3465,7 @@ class StateStore:
             ],
             edges=[
                 {"from": "failed_action", "to": "reflection", "type": "reflection"},
+                {"from": "reflection", "to": "reflection_log", "type": "memory_write"},
                 {"from": "reflection", "to": "caution", "type": "proposal"},
             ],
             memory_events=[
@@ -3437,6 +3474,7 @@ class StateStore:
                     "target": "task_hub.failure_reflections",
                     "memory_id": reflection["reflection_id"],
                     "candidate_id": caution["candidate_id"],
+                    "reflection_id": reflection_log_entry["reflection_id"],
                 }
             ],
             review_events=[
@@ -3455,8 +3493,412 @@ class StateStore:
         return {
             "status": "recorded",
             "reflection_id": reflection["reflection_id"],
+            "reflection_log_id": reflection_log_entry["reflection_id"],
             "cautionary_candidate_id": caution["candidate_id"],
             "source_action_id": source_action_id,
+        }
+
+    def record_reflection_log(
+        self,
+        reflection_type: str,
+        workflow: str,
+        observation: str,
+        lesson: str,
+        expected_behavior: str,
+        actor: str = "manual_review",
+        source_ids: Optional[List[str]] = None,
+        evidence: Optional[List[str]] = None,
+        risk: str = "medium",
+        confidence: float = 0.5,
+    ) -> dict:
+        normalized_workflow = str(workflow or "").strip()
+        normalized_observation = str(observation or "").strip()
+        normalized_lesson = str(lesson or "").strip()
+        if not normalized_workflow:
+            return {"status": "rejected", "error": "missing_workflow"}
+        if not normalized_observation or not normalized_lesson:
+            return {"status": "rejected", "error": "missing_reflection"}
+
+        state = self.load()
+        now = utc_now()
+        task_hub = state.setdefault("task_hub", default_task_hub(now, state.get("working_state", {})))
+        entry = build_reflection_log_entry(
+            timestamp=now,
+            reflection_type=reflection_type,
+            workflow=normalized_workflow,
+            observation=normalized_observation,
+            lesson=normalized_lesson,
+            expected_behavior=expected_behavior,
+            actor=actor,
+            source_ids=source_ids or [],
+            evidence=evidence or source_ids or [],
+            risk=risk,
+            confidence=confidence,
+        )
+        task_hub.setdefault("reflection_log", []).append(entry)
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": actor,
+                "target_path": "task_hub.reflection_log",
+                "operation": "record_reflection_log",
+                "before": None,
+                "after": entry["reflection_id"],
+                "evidence": entry["evidence"],
+                "gate": "medium",
+                "confidence": entry["confidence"],
+                "reflection_log_id": entry["reflection_id"],
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=actor,
+            action="record_reflection_log",
+            target="task_hub.reflection_log",
+            outcome="recorded",
+            evidence=entry["evidence"],
+            metadata={
+                "reflection_log_id": entry["reflection_id"],
+                "workflow": normalized_workflow,
+                "reflection_type": entry["reflection_type"],
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="reflection_log",
+            nodes=[
+                {
+                    "id": "observation",
+                    "type": "Review",
+                    "summary": normalized_observation,
+                },
+                {
+                    "id": "reflection_log",
+                    "type": "Memory",
+                    "reflection_id": entry["reflection_id"],
+                },
+            ],
+            edges=[{"from": "observation", "to": "reflection_log", "type": "memory_write"}],
+            memory_events=[
+                {
+                    "operation": "record",
+                    "target": "task_hub.reflection_log",
+                    "reflection_id": entry["reflection_id"],
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "record_reflection_log",
+                    "actor": actor,
+                    "expected_behavior": expected_behavior,
+                }
+            ],
+            summary=f"Recorded reflection log entry {entry['reflection_id']}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": "recorded",
+            "reflection_log_id": entry["reflection_id"],
+        }
+
+    def verify_reflection(
+        self,
+        reflection_id: str,
+        result: str,
+        verifier: str = "manual_review",
+        evidence: Optional[List[str]] = None,
+        note: str = "",
+    ) -> dict:
+        normalized_result = str(result or "").strip().lower()
+        if normalized_result not in REFLECTION_VERIFICATION_RESULTS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_reflection_verification_result",
+                "result": result,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault("task_hub", default_task_hub(utc_now(), state.get("working_state", {})))
+        entry = next(
+            (
+                item
+                for item in task_hub.setdefault("reflection_log", [])
+                if isinstance(item, dict) and item.get("reflection_id") == reflection_id
+            ),
+            None,
+        )
+        if entry is None:
+            return {
+                "status": "not_found",
+                "error": "reflection_not_found",
+                "reflection_id": reflection_id,
+            }
+
+        now = utc_now()
+        verification = {
+            "verification_id": new_id("reflection_verification"),
+            "timestamp": now,
+            "reflection_id": reflection_id,
+            "verifier": verifier,
+            "result": normalized_result,
+            "note": note,
+            "evidence": evidence or [],
+        }
+        before_status = entry.get("status", "open")
+        status_by_result = {
+            "verified": "verified",
+            "not_observed": "open",
+            "regressed": "needs_revision",
+            "superseded": "superseded",
+        }
+        entry["status"] = status_by_result[normalized_result]
+        entry["verification_status"] = normalized_result
+        entry["last_verified_at"] = now
+        entry["last_verification_id"] = verification["verification_id"]
+        entry.setdefault("verification_history", []).append(verification)
+        entry.setdefault("update_history", []).append(
+            {
+                "timestamp": now,
+                "actor": verifier,
+                "operation": "verify_reflection",
+                "reflection_verification_id": verification["verification_id"],
+                "evidence": evidence or [],
+            }
+        )
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": verifier,
+                "target_path": "task_hub.reflection_log",
+                "operation": "verify_reflection",
+                "before": before_status,
+                "after": entry["status"],
+                "evidence": [reflection_id] + list(evidence or []),
+                "gate": "medium",
+                "confidence": entry.get("confidence", 0.5),
+                "reflection_verification_id": verification["verification_id"],
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=verifier,
+            action="verify_reflection",
+            target="task_hub.reflection_log",
+            outcome=entry["status"],
+            evidence=[reflection_id] + list(evidence or []),
+            metadata={
+                "reflection_id": reflection_id,
+                "reflection_verification_id": verification["verification_id"],
+                "result": normalized_result,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="reflection_verification",
+            nodes=[
+                {
+                    "id": "reflection_log",
+                    "type": "Memory",
+                    "reflection_id": reflection_id,
+                },
+                {
+                    "id": "verification",
+                    "type": "Review",
+                    "result": normalized_result,
+                },
+            ],
+            edges=[{"from": "reflection_log", "to": "verification", "type": "feedback"}],
+            review_events=[
+                {
+                    "operation": "verify_reflection",
+                    "verifier": verifier,
+                    "verification": verification,
+                }
+            ],
+            summary=f"Verified reflection {reflection_id} as {normalized_result}.",
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": entry["status"],
+            "reflection_id": reflection_id,
+            "reflection_verification_id": verification["verification_id"],
+        }
+
+    def review_reflection_guidance(
+        self,
+        guidance_item_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in REFLECTION_GUIDANCE_REVIEW_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_reflection_guidance_review_action",
+                "action": action,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(utc_now(), state.get("working_state", {})),
+        )
+        item = next(
+            (
+                entry
+                for entry in task_hub.setdefault("reflection_guidance_queue", [])
+                if isinstance(entry, dict)
+                and entry.get("guidance_item_id") == guidance_item_id
+            ),
+            None,
+        )
+        if item is None:
+            return {
+                "status": "not_found",
+                "error": "reflection_guidance_item_not_found",
+                "guidance_item_id": guidance_item_id,
+            }
+
+        before_status = item.get("review_status", "pending")
+        if before_status in {"acknowledged", "archived", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "guidance_item_id": guidance_item_id,
+                "review_status": before_status,
+            }
+
+        now = utc_now()
+        target_status = {
+            "acknowledge": "acknowledged",
+            "archive": "archived",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_reflection_guidance",
+            target_path="task_hub.reflection_guidance_queue",
+            evidence=[guidance_item_id] + list(item.get("evidence", [])),
+            metadata={
+                "guidance_item_id": guidance_item_id,
+                "reflection_id": item.get("reflection_id"),
+                "workflow": item.get("workflow"),
+                "review_action": normalized_action,
+                "executable_policy_created": False,
+            },
+        )
+        decision = build_reflection_guidance_decision(
+            item=item,
+            action=normalized_action,
+            result=target_status,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+        )
+        item["review_status"] = target_status
+        item["reviewed_at"] = now
+        item["reviewer"] = reviewer
+        item["decision_note"] = decision_note
+        item["last_review_decision_id"] = decision["decision_id"]
+        item["execution_prohibited"] = True
+        item["executable_policy_created"] = False
+        item["identity_mutation_allowed"] = False
+        item.setdefault("review_history", []).append(decision)
+        task_hub.setdefault("reflection_guidance_decisions", []).append(decision)
+
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.reflection_guidance_queue",
+                "operation": f"{normalized_action}_reflection_guidance",
+                "before": before_status,
+                "after": target_status,
+                "evidence": [guidance_item_id] + list(item.get("evidence", [])),
+                "gate": "medium",
+                "confidence": item.get("signal_inputs", {}).get("confidence", 0.5),
+                "reflection_guidance_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_reflection_guidance",
+            target="task_hub.reflection_guidance_queue",
+            outcome=target_status,
+            evidence=[guidance_item_id] + list(item.get("evidence", [])),
+            metadata={
+                "reflection_guidance_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "guidance_item_id": guidance_item_id,
+                "reflection_id": item.get("reflection_id"),
+                "workflow": item.get("workflow"),
+                "decision_note": decision_note,
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="reflection_guidance_review",
+            nodes=[
+                {
+                    "id": "reflection_guidance",
+                    "type": "ReviewQueueItem",
+                    "guidance_item_id": guidance_item_id,
+                    "reflection_id": item.get("reflection_id"),
+                    "workflow": item.get("workflow"),
+                },
+                {
+                    "id": "review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[{"from": "reflection_guidance", "to": "review", "type": "feedback"}],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.reflection_guidance_queue",
+                    "reflection_guidance_item_id": guidance_item_id,
+                    "reflection_guidance_decision_id": decision["decision_id"],
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_reflection_guidance",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "reflection_guidance_decision": decision,
+                }
+            ],
+            summary=(
+                f"Reviewed reflection guidance {guidance_item_id} "
+                f"with action {normalized_action}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": target_status,
+            "guidance_item_id": guidance_item_id,
+            "reflection_guidance_decision_id": decision["decision_id"],
+            "snapshot_id": snapshot["snapshot_id"],
         }
 
     def apply_memory_lifecycle_action(
@@ -4106,6 +4548,12 @@ class StateStore:
             and warning.get("status") == "active"
             and warning.get("lifecycle", {}).get("status") == "active"
         ]
+        reflection_log = [
+            reflection
+            for reflection in task_hub.get("reflection_log", [])
+            if isinstance(reflection, dict)
+        ]
+        active_reflection_log = reflection_log[-8:]
         task_terms = context_task_terms(working_state)
         relationship_context = build_relationship_context(state)
         episodic, episodic_trace = activate_context_memories(
@@ -4148,6 +4596,16 @@ class StateStore:
         package_id = new_id("context_package")
         activation_trace["trace_id"] = new_id("context_activation")
         activation_trace["context_package_id"] = package_id
+        reflection_policy_guidance = build_reflection_policy_guidance(
+            active_reflection_log,
+            package_id=package_id,
+            timestamp=now,
+        )
+        reflection_guidance_queue = sync_reflection_guidance_queue(
+            task_hub=task_hub,
+            guidance=reflection_policy_guidance,
+            timestamp=now,
+        )
         source_attribution = build_source_attribution(
             relevant_memories,
             budget=int(policy.get("budgets", {}).get("source_attribution", 12)),
@@ -4169,6 +4627,9 @@ class StateStore:
                     "cautionary_procedural_candidates",
                     [],
                 ),
+                "reflection_log": active_reflection_log,
+                "reflection_policy_guidance": reflection_policy_guidance,
+                "reflection_guidance_queue": reflection_guidance_queue,
                 "cautionary_procedural_memory": active_cautionary_memory,
                 "procedural_memory": active_procedural_memory,
             },
@@ -4180,6 +4641,9 @@ class StateStore:
                 "cautionary_procedural_candidates",
                 [],
             ),
+            "reflection_log": active_reflection_log,
+            "reflection_policy_guidance": reflection_policy_guidance,
+            "reflection_guidance_queue": reflection_guidance_queue,
             "cautionary_procedural_memory": active_cautionary_memory,
             "procedural_memory": active_procedural_memory,
             "identity_update_gate": {
@@ -4679,6 +5143,182 @@ def build_source_attribution(
     return attributions
 
 
+def build_reflection_policy_guidance(
+    reflection_log: List[dict],
+    package_id: str,
+    timestamp: str,
+    limit: int = 5,
+) -> dict:
+    verified_reflections = [
+        reflection
+        for reflection in reflection_log
+        if isinstance(reflection, dict)
+        and reflection.get("status") == "verified"
+        and reflection.get("verification_status") == "verified"
+    ][-limit:]
+    recommendations = []
+    for reflection in verified_reflections:
+        risk = str(reflection.get("risk", "medium")).strip().lower() or "medium"
+        confidence = round(memory_confidence(reflection), 2)
+        if risk == "high" or confidence >= 0.8:
+            review_priority = "high"
+        elif risk == "low" and confidence < 0.65:
+            review_priority = "low"
+        else:
+            review_priority = "medium"
+        recommendations.append(
+            {
+                "recommendation_id": new_id("reflection_guidance"),
+                "reflection_id": reflection.get("reflection_id"),
+                "workflow": reflection.get("workflow"),
+                "review_priority": review_priority,
+                "recommended_review_mode": "cautionary_review_only",
+                "review_focus": (
+                    f"Use verified reflection from workflow {reflection.get('workflow')} "
+                    "as cautionary review context."
+                ),
+                "recommendation_note": (
+                    f"{reflection.get('lesson', '')} -> "
+                    f"{reflection.get('expected_behavior', '')}"
+                ).strip(),
+                "signal_inputs": {
+                    "risk": risk,
+                    "confidence": confidence,
+                    "lesson": reflection.get("lesson", ""),
+                    "expected_behavior": reflection.get("expected_behavior", ""),
+                },
+                "source_ids": reflection.get("source_ids", []),
+                "evidence": reflection.get("evidence", []),
+                "verification_history_count": len(
+                    reflection.get("verification_history", [])
+                ),
+                "execution_prohibited": True,
+            }
+        )
+    return {
+        "guidance_id": new_id("reflection_policy"),
+        "context_package_id": package_id,
+        "generated_at": timestamp,
+        "guidance_version": "0.1",
+        "mode": "advisory_only",
+        "execution_prohibited": True,
+        "identity_mutation_allowed": False,
+        "influence_fields": {
+            "review_priority": ["risk", "confidence"],
+            "review_focus": ["workflow", "lesson", "expected_behavior"],
+            "provenance": ["source_ids", "evidence", "actor", "verifier"],
+            "gate": ["status", "verification_status", "verification_history"],
+        },
+        "verified_reflections": [
+            {
+                "reflection_id": reflection.get("reflection_id"),
+                "workflow": reflection.get("workflow"),
+                "lesson": reflection.get("lesson"),
+                "expected_behavior": reflection.get("expected_behavior"),
+                "risk": reflection.get("risk", "medium"),
+                "confidence": round(memory_confidence(reflection), 2),
+                "status": reflection.get("status"),
+                "verification_status": reflection.get("verification_status"),
+                "last_verified_at": reflection.get("last_verified_at"),
+                "source_ids": reflection.get("source_ids", []),
+                "evidence": reflection.get("evidence", []),
+                "verification_history_count": len(
+                    reflection.get("verification_history", [])
+                ),
+            }
+            for reflection in verified_reflections
+        ],
+        "review_recommendations": recommendations,
+        "summary": {
+            "verified_reflection_count": len(verified_reflections),
+            "recommendation_count": len(recommendations),
+            "high_priority_count": sum(
+                1 for item in recommendations if item["review_priority"] == "high"
+            ),
+            "medium_priority_count": sum(
+                1 for item in recommendations if item["review_priority"] == "medium"
+            ),
+            "low_priority_count": sum(
+                1 for item in recommendations if item["review_priority"] == "low"
+            ),
+        },
+    }
+
+
+def sync_reflection_guidance_queue(
+    task_hub: dict,
+    guidance: dict,
+    timestamp: str,
+) -> List[dict]:
+    queue = task_hub.setdefault("reflection_guidance_queue", [])
+    existing = {
+        str(item.get("reflection_id")): item
+        for item in queue
+        if isinstance(item, dict) and item.get("reflection_id")
+    }
+    for recommendation in guidance.get("review_recommendations", []):
+        if not isinstance(recommendation, dict):
+            continue
+        reflection_id = str(recommendation.get("reflection_id") or "")
+        if not reflection_id or reflection_id in existing:
+            continue
+        item = build_reflection_guidance_queue_item(
+            recommendation=recommendation,
+            guidance=guidance,
+            timestamp=timestamp,
+        )
+        queue.append(item)
+        existing[reflection_id] = item
+    return [
+        item
+        for item in queue[-20:]
+        if isinstance(item, dict)
+        and item.get("review_status") in {"pending", "acknowledged"}
+    ]
+
+
+def build_reflection_guidance_queue_item(
+    recommendation: dict,
+    guidance: dict,
+    timestamp: str,
+) -> dict:
+    return {
+        "guidance_item_id": new_id("reflection_guidance_item"),
+        "timestamp": timestamp,
+        "guidance_id": guidance.get("guidance_id"),
+        "context_package_id": guidance.get("context_package_id"),
+        "reflection_id": recommendation.get("reflection_id"),
+        "workflow": recommendation.get("workflow"),
+        "review_priority": recommendation.get("review_priority", "medium"),
+        "recommended_review_mode": recommendation.get(
+            "recommended_review_mode",
+            "cautionary_review_only",
+        ),
+        "review_focus": recommendation.get("review_focus", ""),
+        "recommendation_note": recommendation.get("recommendation_note", ""),
+        "signal_inputs": recommendation.get("signal_inputs", {}),
+        "source_ids": recommendation.get("source_ids", []),
+        "evidence": recommendation.get("evidence", []),
+        "verification_history_count": recommendation.get(
+            "verification_history_count",
+            0,
+        ),
+        "review_status": "pending",
+        "execution_prohibited": True,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "review_history": [],
+        "provenance": [
+            {
+                "type": "reflection_policy_guidance",
+                "guidance_id": guidance.get("guidance_id"),
+                "context_package_id": guidance.get("context_package_id"),
+                "reflection_id": recommendation.get("reflection_id"),
+            }
+        ],
+    }
+
+
 def visible_episodic_memories(state: dict, episodes: List[dict]) -> List[dict]:
     current_user_id = str(
         state.get("working_state", {})
@@ -5142,6 +5782,95 @@ def build_cautionary_procedural_memory(
                 "cautionary_decision_id": decision["decision_id"],
             }
         ],
+    }
+
+
+def build_reflection_log_entry(
+    timestamp: str,
+    reflection_type: str,
+    workflow: str,
+    observation: str,
+    lesson: str,
+    expected_behavior: str,
+    actor: str,
+    source_ids: List[str],
+    evidence: List[str],
+    risk: str,
+    confidence: float,
+) -> dict:
+    normalized_reflection_type = str(reflection_type or "general").strip().lower()
+    normalized_workflow = str(workflow or "").strip()
+    normalized_observation = str(observation or "").strip()
+    normalized_lesson = str(lesson or "").strip()
+    normalized_expected_behavior = str(expected_behavior or "").strip()
+    normalized_actor = str(actor or "manual_review").strip() or "manual_review"
+    normalized_source_ids = [str(item) for item in source_ids if str(item).strip()]
+    normalized_evidence = [str(item) for item in evidence if str(item).strip()]
+    return {
+        "reflection_id": new_id("reflection"),
+        "timestamp": timestamp,
+        "reflection_type": normalized_reflection_type,
+        "workflow": normalized_workflow,
+        "observation": normalized_observation,
+        "lesson": normalized_lesson,
+        "expected_behavior": normalized_expected_behavior,
+        "actor": normalized_actor,
+        "source_ids": normalized_source_ids,
+        "evidence": normalized_evidence,
+        "risk": str(risk or "medium").strip() or "medium",
+        "confidence": confidence,
+        "status": "open",
+        "verification_status": "pending",
+        "verification_history": [],
+        "provenance": [
+            {
+                "type": "reflection_log",
+                "workflow": normalized_workflow,
+                "actor": normalized_actor,
+                "source_ids": normalized_source_ids,
+            }
+        ],
+        "update_history": [
+            {
+                "timestamp": timestamp,
+                "actor": normalized_actor,
+                "operation": "record_reflection_log",
+                "evidence": normalized_evidence,
+            }
+        ],
+    }
+
+
+def build_reflection_guidance_decision(
+    item: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: str,
+    timestamp: str,
+) -> dict:
+    return {
+        "decision_id": new_id("reflection_guidance_decision"),
+        "timestamp": timestamp,
+        "guidance_item_id": item.get("guidance_item_id"),
+        "reflection_id": item.get("reflection_id"),
+        "workflow": item.get("workflow"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "review_priority": item.get("review_priority", "medium"),
+        "snapshot_id": snapshot_id,
+        "evidence": item.get("evidence", []),
+        "source_ids": item.get("source_ids", []),
+        "execution_prohibited": True,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
     }
 
 

@@ -222,6 +222,48 @@ class StateValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))
             state = store.init()
+            state["task_hub"]["reflection_log"].append(
+                {
+                    "reflection_id": "reflection_bad",
+                    "timestamp": state["created_at"],
+                    "reflection_type": "general",
+                    "workflow": "tool_use",
+                    "observation": "Observed something.",
+                }
+            )
+            state["task_hub"]["reflection_guidance_queue"].append(
+                {
+                    "guidance_item_id": "reflection_guidance_bad",
+                    "reflection_id": "reflection_bad",
+                    "workflow": "tool_use",
+                    "review_priority": "high",
+                    "recommended_review_mode": "cautionary_review_only",
+                    "evidence": ["action_bad"],
+                    "review_status": "acknowledged",
+                    "execution_prohibited": False,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "last_review_decision_id": "reflection_guidance_decision_missing",
+                    "review_history": [],
+                    "provenance": [],
+                }
+            )
+            state["task_hub"]["reflection_guidance_decisions"].append(
+                {
+                    "decision_id": "reflection_guidance_decision_bad",
+                    "timestamp": state["created_at"],
+                    "guidance_item_id": "reflection_guidance_bad",
+                    "reflection_id": "reflection_bad",
+                    "workflow": "tool_use",
+                    "reviewer": "unit_test",
+                    "action": "acknowledge",
+                    "result": "approved",
+                    "snapshot_id": "snapshot_bad",
+                    "execution_prohibited": False,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                }
+            )
             state["task_hub"]["failure_reflections"].append(
                 {
                     "reflection_id": "failure_reflection_bad",
@@ -279,6 +321,41 @@ class StateValidationTests(unittest.TestCase):
             paths = {issue["path"] for issue in report["issues"]}
             self.assertIn("task_hub.failure_reflections[0].lesson", paths)
             self.assertIn("task_hub.failure_reflections[0].evidence", paths)
+            self.assertIn("task_hub.reflection_log[0].lesson", paths)
+            self.assertIn("task_hub.reflection_log[0].expected_behavior", paths)
+            self.assertIn("task_hub.reflection_log[0].verification_history", paths)
+            self.assertIn(
+                "task_hub.reflection_guidance_queue[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.reflection_guidance_queue[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.reflection_guidance_queue[0].identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.reflection_guidance_queue[0].review_history",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.reflection_guidance_decisions[0].result",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.reflection_guidance_decisions[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.reflection_guidance_decisions[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.reflection_guidance_decisions[0].identity_mutation_allowed",
+                paths,
+            )
             self.assertIn(
                 "task_hub.cautionary_procedural_candidates[0].avoid",
                 paths,

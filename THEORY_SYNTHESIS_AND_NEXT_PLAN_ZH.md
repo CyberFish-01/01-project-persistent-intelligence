@@ -343,6 +343,7 @@
 | TMS / AGM | Conflict system | 建 claim graph、reason dependency、minimal-change patch |
 | Sleep consolidation / CLS | Dream Engine | 增加 input manifest、candidate store review、slow identity gates |
 | Narrative Identity / SMS | Identity + Task Hub | identity story 必须由 state transitions 支撑 |
+| Metacognition / Source monitoring | Reflection log + verification | 区分 confidence、source 和后续验证 |
 | ReAct / Reflexion | Task Hub + procedural memory | 保存 action trace、failure reflection、workflow candidates |
 | Continual Learning | Evaluation | 测 stability-plasticity、stale memory、catastrophic overwrite analog |
 | Global Workspace | Context Builder | state activation explainability |
@@ -738,17 +739,68 @@ P17 Failure Reflection
 剩余缺口：
 
 - cautionary warnings 还没有和 tool policy / safety policy 联动；
-- failure reflections 和 warnings 还没有进入通用 reflection log；
-- 还没有 workflow policy executor。
+- 还没有 workflow policy executor；
+- reflection log 已经存在，但 reflection verification 还需要更广的场景覆盖，以及和后续 policy 工作的交叉链接。
 
 建议下一步：
 
 ```text
-P21 Reflection Log
+P22 Reflection-Policy Linkage
 ```
 
 理由：
 
-- P17-P20 已经能记录失败 lesson、把它提升为 active warning，并退休过时 warning；
-- 下一块缺失地基是通用 reflection log，用来连接 observation、lesson、review 和后续验证；
-- 这回应 Cognitive OS 的自成长要求：reflection 不应该只是漂亮记录，而要能证明它是否改变了后续行为。
+- P21 现在已经能记录并验证通用 reflection log；
+- 下一块缺失地基是把 reflection 证据接到 policy 邻接的安全保障上，但仍然不做自动执行；
+- 这回应 Cognitive OS 的自成长要求：reflection 要保持可审计，同时和 policy 执行保持分离。
+
+### P22 Reflection-Policy Linkage
+
+目标：把已经验证的 reflection evidence 接到 policy 邻接的安全保障上，但不把 reflection 变成自动执行。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `build_context_package()` 现在暴露 `reflection_policy_guidance`；
+- `reflection_policy_guidance` 只消费 verified `task_hub.reflection_log` entries；
+- guidance 会记录 advisory-only review recommendations、可影响字段、evidence、verification history count 和 priority；
+- guidance 明确记录 `execution_prohibited: true` 和 `identity_mutation_allowed: false`；
+- scenario evaluation 把 `reflection_log_verification` 扩展到 `tool_use` 和 `claim_graph_review`；
+- reflection evidence 可以指导 cautionary review focus，但不会修改 Identity Core，也不会执行 workflow policy。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- dedicated reflection guidance review queue 由 P23 处理；
+
+### P23 Reflection Guidance Review Queue
+
+目标：让 reflection-policy guidance 成为 durable、可审查对象，但仍然不创建 executable policy。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `task_hub.reflection_guidance_queue` 会记录从 verified reflection policy guidance 推导出的 durable guidance items；
+- `task_hub.reflection_guidance_decisions` 会记录 review decisions；
+- `review-reflection-guidance` 可以 acknowledge、archive 或 quarantine guidance item；
+- review 会写入 snapshot、audit、trace、update log、review history 和可 replay 的 event metadata；
+- reviewed guidance 保持 `execution_prohibited: true`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- scenario evaluation 会验证 durable queue 创建、review decision 记录、replay、不创建 executable policy，以及不修改 Identity Core。
+
+剩余缺口：
+
+- guidance queue 还没有连接到 dedicated tool/safety policy proposal layer；
+- 还没有 tool/safety policy executor；
+- guidance prioritization 目前仍然只是简单 risk/confidence scoring。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```

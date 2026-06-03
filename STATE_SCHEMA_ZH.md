@@ -38,6 +38,9 @@ task_hub:
   blocked_tasks: []
   recurring_duties: []
   action_trace: []
+  reflection_log: []
+  reflection_guidance_queue: []
+  reflection_guidance_decisions: []
   procedural_candidates: []
 identity_update_gate:
   proposals: []
@@ -674,6 +677,80 @@ task_hub:
       errors: []
       evidence:
         - "episode_0001"
+  reflection_log:
+    - reflection_id: "reflection_0001"
+      timestamp: "ISO-8601 timestamp"
+      reflection_type: "general"
+      workflow: "tool_use"
+      observation: "观察到一个可复用的 workflow 模式。"
+      lesson: "记录 reflection 以便后续检查行为是否真的改变。"
+      expected_behavior: "在后续审查时验证这条 reflection log。"
+      actor: "manual_review"
+      source_ids:
+        - "action_0002"
+      evidence:
+        - "action_0002"
+      risk: "medium"
+      confidence: 0.5
+      status: "verified"
+      verification_status: "verified"
+      last_verified_at: "ISO-8601 timestamp"
+      last_verification_id: "reflection_verification_0001"
+      verification_history:
+        - verification_id: "reflection_verification_0001"
+          timestamp: "ISO-8601 timestamp"
+          reflection_id: "reflection_0001"
+          verifier: "manual_review"
+          result: "verified"
+          note: "在后续审查中确认。"
+          evidence:
+            - "action_0002"
+      provenance:
+        - type: "reflection_log"
+          workflow: "tool_use"
+          actor: "manual_review"
+          source_ids:
+            - "action_0002"
+      update_history:
+        - timestamp: "ISO-8601 timestamp"
+          actor: "manual_review"
+          operation: "record_reflection_log"
+          evidence:
+            - "action_0002"
+  reflection_guidance_queue:
+    - guidance_item_id: "reflection_guidance_item_0001"
+      timestamp: "ISO-8601 timestamp"
+      guidance_id: "reflection_policy_0001"
+      context_package_id: "context_package_0001"
+      reflection_id: "reflection_0001"
+      workflow: "tool_use"
+      review_priority: "medium"
+      recommended_review_mode: "cautionary_review_only"
+      review_focus: "Use verified reflection as cautionary review context."
+      recommendation_note: "Record reflections -> Verify later behavior."
+      evidence:
+        - "action_0002"
+      review_status: "pending|acknowledged|archived|quarantined"
+      execution_prohibited: true
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      review_history: []
+      provenance:
+        - type: "reflection_policy_guidance"
+          reflection_id: "reflection_0001"
+  reflection_guidance_decisions:
+    - decision_id: "reflection_guidance_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      guidance_item_id: "reflection_guidance_item_0001"
+      reflection_id: "reflection_0001"
+      workflow: "tool_use"
+      reviewer: "manual_review"
+      action: "acknowledge"
+      result: "acknowledged"
+      snapshot_id: "snapshot_0004"
+      execution_prohibited: true
+      executable_policy_created: false
+      identity_mutation_allowed: false
   failure_reflections:
     - reflection_id: "failure_reflection_0001"
       timestamp: "ISO-8601 timestamp"
@@ -834,6 +911,10 @@ P18 增加 procedural lifecycle retention。`procedural-lifecycle` 可以对已 
 P19 增加 cautionary procedural review。`review-cautionary-procedural-candidate` 可以 approve、reject、archive 或 quarantine warning candidates。批准后会创建 active `task_hub.cautionary_procedural_memory`，未来 context 会把它作为 active warning 暴露。它明确记录 `executable_policy: false`，写入 snapshot、audit、trace、update log、review decision 和 rollback metadata，并且仍然不会执行 workflow policy。
 
 P20 增加 cautionary warning lifecycle retention。`cautionary-warning-lifecycle` 可以 archive、discard 或 quarantine active `task_hub.cautionary_procedural_memory`。它会写入 snapshot、audit、trace、update log、lifecycle history、`task_hub.cautionary_lifecycle_decisions`，并保持 `executable_policy: false`。context package 只暴露 active cautionary warnings。
+
+P21 增加 reflection log。`record-reflection` 可以记录通用 reflection 条目，`verify-reflection` 可以把 reflection 标记为 verified、not_observed、regressed 或 superseded。Reflection log 会保留 observation、lesson、expected_behavior、source_ids、evidence、verification history 和 update history，并暴露最近条目到 context。它仍然不会执行 workflow，也不会修改 Identity Core。
+
+P22 增加 reflection-policy guidance。`build_context_package()` 会从 verified reflection log entries 推导 advisory-only `reflection_policy_guidance`。P23 增加 durable `task_hub.reflection_guidance_queue` 和 `task_hub.reflection_guidance_decisions`；`review-reflection-guidance` 可以 acknowledge、archive 或 quarantine guidance item，并写入 snapshot、audit、trace、update log 和可 replay 的 event metadata。Reflection guidance 仍然不可执行，也不能修改 Identity Core。
 
 ## 14. Identity Update Gate
 
@@ -1117,6 +1198,14 @@ state_transfer_package:
     failure_reflections: []
     procedural_candidates: []
     cautionary_procedural_candidates: []
+    reflection_log: []
+    reflection_policy_guidance:
+      mode: "advisory_only"
+      execution_prohibited: true
+      identity_mutation_allowed: false
+      verified_reflections: []
+      review_recommendations: []
+    reflection_guidance_queue: []
     cautionary_procedural_memory: []
     cautionary_lifecycle_decisions: []
     procedural_memory: []
@@ -1126,6 +1215,14 @@ state_transfer_package:
   failure_reflections: []
   procedural_candidates: []
   cautionary_procedural_candidates: []
+  reflection_log: []
+  reflection_policy_guidance:
+    mode: "advisory_only"
+    execution_prohibited: true
+    identity_mutation_allowed: false
+    verified_reflections: []
+    review_recommendations: []
+  reflection_guidance_queue: []
   cautionary_procedural_memory: []
   cautionary_lifecycle_decisions: []
   procedural_memory: []

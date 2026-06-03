@@ -2,7 +2,7 @@
 
 Chinese version: [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md)
 
-This document synthesizes the current 01 Core foundation after P0-P6, the Cognitive OS reference direction, and external theory that is useful for the next engineering loop.
+This document synthesizes the current 01 Core foundation, the Cognitive OS reference direction, and external theory that is useful for the next engineering loop.
 
 Its purpose is not to turn 01 Project into a philosophy or consciousness claim.
 
@@ -284,6 +284,26 @@ Implications for 01:
 - memory is not an isolated store;
 - state transfer package should show how current goals connect to past state.
 
+#### Metacognition and Source Monitoring
+
+Sources:
+
+- [Metacognition and Confidence: A Review and Synthesis](https://pubmed.ncbi.nlm.nih.gov/37722748/)
+- [Source monitoring](https://pubmed.ncbi.nlm.nih.gov/8346328/)
+- [Source monitoring 15 years later: what have we learned from fMRI about the neural mechanisms of source memory?](https://pubmed.ncbi.nlm.nih.gov/19586165/)
+
+Useful points:
+
+- metacognition separates first-order task content from second-order confidence and error monitoring;
+- source monitoring distinguishes whether a memory came from perception, imagination, inference, or another source;
+- confidence, evidence, and origin are not the same thing.
+
+Implications for 01:
+
+- reflection log should carry source_ids, evidence, and confidence separately;
+- verification should be a second-order pass, not just a restatement of the original lesson;
+- policy-adjacent safeguards should consult reflection evidence, but not automatically execute workflow policy.
+
 ### 3.6 Consciousness-Related Theories As Functional Analogies Only
 
 #### Global Neuronal Workspace
@@ -343,6 +363,7 @@ Implications for 01:
 | TMS / AGM | Conflict system | Claim graph, reason dependencies, minimal-change patch |
 | Sleep consolidation / CLS | Dream Engine | Input manifest, candidate review, slow identity gates |
 | Narrative Identity / SMS | Identity + Task Hub | Identity story grounded in state transitions |
+| Metacognition / Source monitoring | Reflection log + verification | Track confidence, source, and later verification separately |
 | ReAct / Reflexion | Task Hub + procedural memory | Action trace, failure reflection, workflow candidates |
 | Continual Learning | Evaluation | Stability-plasticity, stale memory, overwrite analogs |
 | Global Workspace | Context Builder | Explainable state activation |
@@ -699,6 +720,57 @@ Remaining gaps:
 - procedural memory is not yet deeply linked to tool policy / safety policy;
 - no workflow policy executor yet;
 
+### P22 Reflection-Policy Linkage
+
+Goal: connect verified reflection evidence to policy-adjacent safeguards without turning reflection into automatic execution.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `build_context_package()` now exposes `reflection_policy_guidance`;
+- `reflection_policy_guidance` consumes only verified `task_hub.reflection_log` entries;
+- guidance records advisory-only review recommendations, allowed influence fields, evidence, verification history count, and priority;
+- guidance explicitly records `execution_prohibited: true` and `identity_mutation_allowed: false`;
+- scenario evaluation expands `reflection_log_verification` across `tool_use` and `claim_graph_review`;
+- reflection evidence can guide cautionary review focus without mutating Identity Core or executing workflow policy.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- dedicated reflection guidance review queue is handled by P23;
+
+### P23 Reflection Guidance Review Queue
+
+Goal: make reflection-policy guidance durable and reviewable without creating executable policy.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `task_hub.reflection_guidance_queue` records durable guidance items derived from verified reflection policy guidance;
+- `task_hub.reflection_guidance_decisions` records review decisions;
+- `review-reflection-guidance` can acknowledge, archive, or quarantine a guidance item;
+- review writes snapshot, audit, trace, update log, review history, and replayable event metadata;
+- reviewed guidance preserves `execution_prohibited: true`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- scenario evaluation verifies durable queue creation, review decision recording, replay, no executable policy creation, and no Identity Core mutation.
+
+Remaining gaps:
+
+- guidance queue is not yet linked to a dedicated tool/safety policy proposal layer;
+- no tool/safety policy executor exists yet;
+- guidance prioritization is still simple risk/confidence scoring.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
 ### P19 Cautionary Procedural Review
 
 Goal: let warning-style failure candidates become active, reviewable caution memory without becoming executable policy.
@@ -738,17 +810,17 @@ Implemented result:
 Remaining gaps:
 
 - cautionary warnings are not yet linked to tool policy / safety policy;
-- failure reflections and warnings do not yet enter a general reflection log;
-- no workflow policy executor yet.
+- no workflow policy executor yet;
+- reflection log is now in place, but reflection verification needs broader scenario coverage and cross-linking to future policy work.
 
 Recommended next step:
 
 ```text
-P21 Reflection Log
+P22 Reflection-Policy Linkage
 ```
 
 Reason:
 
-- P17-P20 can record failure lessons, promote them into active warnings, and retire obsolete warnings;
-- the next missing foundation is a general reflection log that links observations, lessons, reviews, and later verification;
-- this supports the Cognitive OS self-growth requirement: a reflection should prove whether it changed later behavior, not just create a polished note.
+- P21 now records and verifies a general reflection log entry;
+- the next missing foundation is to connect reflection evidence to policy-adjacent safeguards without turning it into automatic execution;
+- this supports the Cognitive OS self-growth requirement by keeping reflection auditable while still separate from policy execution.

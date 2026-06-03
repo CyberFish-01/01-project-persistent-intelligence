@@ -314,6 +314,7 @@ It uses temporary state and currently runs:
 - `failure_reflection`: verifies `record-failure-reflection`, failure reflection persistence, cautionary procedural candidate creation, context exposure, and no Identity Core mutation.
 - `cautionary_procedural_review`: verifies `review-cautionary-procedural-candidate`, active warning creation, review decision metadata, context exposure, replay, `executable_policy: false`, and no Identity Core mutation.
 - `cautionary_warning_lifecycle`: verifies `cautionary-warning-lifecycle`, cautionary lifecycle decision metadata, replay, `executable_policy: false`, no Identity Core mutation, and suppression of archived warnings from context.
+- `reflection_log_verification`: verifies `record-reflection`, `verify-reflection`, reflection log persistence, verification history, context exposure, policy-adjacent advisory guidance from verified reflections, durable guidance queue review, replay, no executable policy creation, and no Identity Core mutation.
 - `procedural_lifecycle_retention`: verifies `procedural-lifecycle`, procedural lifecycle decision metadata, replay, and suppression of archived procedural memory from context.
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
 - `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, and rollback preview does not mutate state.
@@ -360,6 +361,10 @@ Current metrics summary includes:
 - procedural lifecycle decision count,
 - procedural archived count,
 - procedural active context count,
+- reflection log score,
+- reflection log count,
+- reflection verified count,
+- reflection identity mutation count,
 - context builder score,
 - context activation trace count,
 - context source attribution count,

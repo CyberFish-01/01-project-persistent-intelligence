@@ -370,6 +370,8 @@ P19 adds cautionary procedural review. `review-cautionary-procedural-candidate` 
 
 P20 adds reviewed retention for cautionary warnings. `cautionary-warning-lifecycle` can archive, discard, or quarantine active `task_hub.cautionary_procedural_memory`. Archived or quarantined warnings are retained for audit but suppressed from active context. This remains warning lifecycle governance, not workflow execution.
 
+P21 adds reflection log verification. `record-reflection` records a general reflection entry with observation, lesson, expected behavior, source IDs, evidence, and update history. `verify-reflection` can later mark the entry as verified, not observed, regressed, or superseded and append verification history. Reflection log is auditable evidence about whether a reflection changed later behavior, but it still does not execute workflow policy or mutate Identity Core.
+
 Dream artifacts also include a deterministic rubric:
 
 ```yaml

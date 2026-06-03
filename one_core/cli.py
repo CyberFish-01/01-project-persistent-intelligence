@@ -218,6 +218,48 @@ def main() -> None:
     failure_reflection_parser.add_argument("--action-id", default=None)
     failure_reflection_parser.add_argument("--next-action", default="")
 
+    reflection_log_parser = subparsers.add_parser(
+        "record-reflection",
+        help="Record a reflection log entry without requiring a failure reflection.",
+    )
+    reflection_log_parser.add_argument("--reflection-type", required=True)
+    reflection_log_parser.add_argument("--workflow", required=True)
+    reflection_log_parser.add_argument("--observation", required=True)
+    reflection_log_parser.add_argument("--lesson", required=True)
+    reflection_log_parser.add_argument("--expected-behavior", required=True)
+    reflection_log_parser.add_argument("--actor", default="manual_review")
+    reflection_log_parser.add_argument("--source-id", action="append", default=[])
+    reflection_log_parser.add_argument("--evidence", action="append", default=[])
+    reflection_log_parser.add_argument("--risk", default="medium")
+    reflection_log_parser.add_argument("--confidence", type=float, default=0.5)
+
+    verify_reflection_parser = subparsers.add_parser(
+        "verify-reflection",
+        help="Verify a reflection log entry and record the outcome.",
+    )
+    verify_reflection_parser.add_argument("reflection_id")
+    verify_reflection_parser.add_argument(
+        "--result",
+        required=True,
+        choices=["verified", "not_observed", "regressed", "superseded"],
+    )
+    verify_reflection_parser.add_argument("--verifier", default="manual_review")
+    verify_reflection_parser.add_argument("--evidence", action="append", default=[])
+    verify_reflection_parser.add_argument("--note", default="")
+
+    reflection_guidance_parser = subparsers.add_parser(
+        "review-reflection-guidance",
+        help="Review a reflection guidance queue item without creating executable policy.",
+    )
+    reflection_guidance_parser.add_argument("guidance_item_id")
+    reflection_guidance_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["acknowledge", "archive", "quarantine"],
+    )
+    reflection_guidance_parser.add_argument("--reviewer", default="manual_review")
+    reflection_guidance_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -423,6 +465,40 @@ def main() -> None:
                 reviewer=args.reviewer,
                 action_id=args.action_id,
                 next_action=args.next_action,
+            )
+        )
+    elif args.command == "record-reflection":
+        print_json(
+            store.record_reflection_log(
+                reflection_type=args.reflection_type,
+                workflow=args.workflow,
+                observation=args.observation,
+                lesson=args.lesson,
+                expected_behavior=args.expected_behavior,
+                actor=args.actor,
+                source_ids=args.source_id,
+                evidence=args.evidence,
+                risk=args.risk,
+                confidence=args.confidence,
+            )
+        )
+    elif args.command == "verify-reflection":
+        print_json(
+            store.verify_reflection(
+                reflection_id=args.reflection_id,
+                result=args.result,
+                verifier=args.verifier,
+                evidence=args.evidence,
+                note=args.note,
+            )
+        )
+    elif args.command == "review-reflection-guidance":
+        print_json(
+            store.review_reflection_guidance(
+                guidance_item_id=args.guidance_item_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
             )
         )
     elif args.command == "context":

@@ -67,6 +67,7 @@ def run_scenario_evaluation() -> dict:
             check_cautionary_warning_lifecycle(
                 root / "cautionary_warning_lifecycle"
             ),
+            check_reflection_log_verification(root / "reflection_log_verification"),
             check_procedural_lifecycle_retention(
                 root / "procedural_lifecycle_retention"
             ),
@@ -838,6 +839,219 @@ def check_cautionary_warning_lifecycle(state_dir: Path) -> EvaluationCheck:
     )
 
 
+def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    before_identity = store.init()["identity_core"]
+    state = store.load()
+    store.record_trace(
+        workflow="tool_use",
+        nodes=[
+            {
+                "id": "observed_workflow",
+                "type": "Action",
+                "summary": "Workflow observation for reflection logging.",
+            }
+        ],
+        summary="Observed a workflow worth logging as a reflection.",
+        state=state,
+        status="completed",
+    )
+    store.save(state)
+    action = state["task_hub"]["action_trace"][-1]
+    recorded = store.record_reflection_log(
+        reflection_type="general",
+        workflow="tool_use",
+        observation="Workflow observation for reflection logging.",
+        lesson="Keep a reusable reflection record that can later be verified.",
+        expected_behavior="Record and later verify the reflection log entry.",
+        actor="scenario_eval",
+        source_ids=[action["action_id"]],
+        evidence=[action["action_id"]],
+    )
+    verified = store.verify_reflection(
+        recorded.get("reflection_log_id", ""),
+        result="verified",
+        verifier="scenario_eval",
+        evidence=[action["action_id"]],
+        note="Reflection log entry was later verified.",
+    )
+    state = store.load()
+    store.record_trace(
+        workflow="claim_graph_review",
+        nodes=[
+            {
+                "id": "observed_review",
+                "type": "Action",
+                "summary": "Workflow observation for policy-adjacent reflection guidance.",
+            }
+        ],
+        summary="Observed a review workflow worth capturing as a second reflection.",
+        state=state,
+        status="completed",
+    )
+    store.save(state)
+    second_action = state["task_hub"]["action_trace"][-1]
+    second_recorded = store.record_reflection_log(
+        reflection_type="policy_review",
+        workflow="claim_graph_review",
+        observation="Observed a review workflow that should stay advisory-only.",
+        lesson="Use verified reflection evidence to guide cautionary review.",
+        expected_behavior="Recommend review focus without mutating Identity Core.",
+        actor="scenario_eval",
+        source_ids=[second_action["action_id"]],
+        evidence=[second_action["action_id"]],
+        risk="high",
+        confidence=0.92,
+    )
+    second_verified = store.verify_reflection(
+        second_recorded.get("reflection_log_id", ""),
+        result="verified",
+        verifier="scenario_eval",
+        evidence=[second_action["action_id"]],
+        note="Policy-adjacent reflection guidance should stay advisory-only.",
+    )
+    state = store.load()
+    package = store.build_context_package()
+    queue_before_review = package.get("reflection_guidance_queue", [])
+    review = store.review_reflection_guidance(
+        queue_before_review[0].get("guidance_item_id", "")
+        if queue_before_review
+        else "",
+        action="acknowledge",
+        reviewer="scenario_eval",
+        decision_note="Keep reflection guidance advisory-only.",
+    )
+    state = store.load()
+    package = store.build_context_package()
+    reflections = state.get("task_hub", {}).get("reflection_log", [])
+    guidance_queue = state.get("task_hub", {}).get("reflection_guidance_queue", [])
+    guidance_decisions = state.get("task_hub", {}).get(
+        "reflection_guidance_decisions",
+        [],
+    )
+    reviewed_guidance_item = next(
+        (
+            item
+            for item in guidance_queue
+            if isinstance(item, dict)
+            and item.get("guidance_item_id") == review.get("guidance_item_id")
+        ),
+        {},
+    )
+    first_reflection = next(
+        (
+            item
+            for item in reflections
+            if isinstance(item, dict)
+            and item.get("reflection_id") == recorded.get("reflection_log_id")
+        ),
+        {},
+    )
+    second_reflection = next(
+        (
+            item
+            for item in reflections
+            if isinstance(item, dict)
+            and item.get("reflection_id") == second_recorded.get("reflection_log_id")
+        ),
+        {},
+    )
+    guidance = package.get("reflection_policy_guidance", {})
+    reflection_ids_in_context = {
+        item.get("reflection_id")
+        for item in package.get("reflection_log", [])
+        if isinstance(item, dict)
+    }
+    checks = {
+        "reflection_recorded": first_reflection.get("reflection_id")
+        == recorded.get("reflection_log_id"),
+        "reflection_verified": first_reflection.get("status") == "verified",
+        "verification_history_recorded": bool(
+            first_reflection.get("verification_history")
+        ),
+        "last_verification_recorded": first_reflection.get("last_verification_id")
+        == verified.get("reflection_verification_id"),
+        "second_reflection_verified": second_reflection.get("status") == "verified",
+        "context_exposes_reflection": recorded.get("reflection_log_id")
+        in reflection_ids_in_context,
+        "context_exposes_second_reflection": second_recorded.get("reflection_log_id")
+        in reflection_ids_in_context,
+        "policy_guidance_generated": bool(
+            guidance.get("review_recommendations", [])
+        ),
+        "policy_guidance_verified_only": all(
+            item.get("status") == "verified"
+            for item in guidance.get("verified_reflections", [])
+        ),
+        "policy_guidance_non_executable": guidance.get("execution_prohibited") is True,
+        "policy_guidance_advisory_only": guidance.get("mode") == "advisory_only",
+        "policy_guidance_identity_locked": guidance.get("identity_mutation_allowed")
+        is False,
+        "guidance_queue_created": bool(guidance_queue),
+        "guidance_queue_context_exposed": bool(
+            package.get("reflection_guidance_queue", [])
+        ),
+        "guidance_review_acknowledged": review.get("status") == "acknowledged",
+        "guidance_review_decision_recorded": bool(guidance_decisions)
+        and guidance_decisions[-1].get("decision_id")
+        == review.get("reflection_guidance_decision_id"),
+        "guidance_review_non_executable": reviewed_guidance_item.get(
+            "executable_policy_created"
+        )
+        is False
+        and reviewed_guidance_item.get("execution_prohibited") is True,
+        "guidance_review_identity_locked": reviewed_guidance_item.get(
+            "identity_mutation_allowed"
+        )
+        is False,
+        "identity_not_mutated": state["identity_core"] == before_identity,
+        "event_replay_passed": store.replay_events()["status"] == "passed",
+    }
+    return EvaluationCheck(
+        name="reflection_log_verification",
+        passed=all(checks.values()),
+        details={
+            "scenario": "Reflection Log Verification",
+            "reflection_log_id": recorded.get("reflection_log_id"),
+            "reflection_verification_id": verified.get("reflection_verification_id"),
+            "second_reflection_log_id": second_recorded.get("reflection_log_id"),
+            "second_reflection_verification_id": second_verified.get(
+                "reflection_verification_id"
+            ),
+            "checks": checks,
+            "metrics": {
+                "reflection_log_score": ratio(checks.values()),
+                "reflection_log_count": len(reflections),
+                "reflection_verified_count": sum(
+                    1
+                    for item in reflections
+                    if isinstance(item, dict) and item.get("status") == "verified"
+                ),
+                "reflection_policy_guidance_count": len(
+                    guidance.get("review_recommendations", [])
+                ),
+                "reflection_policy_guidance_verified_count": len(
+                    guidance.get("verified_reflections", [])
+                ),
+                "reflection_policy_guidance_high_priority_count": guidance.get(
+                    "summary", {}
+                ).get("high_priority_count", 0),
+                "reflection_guidance_queue_count": len(guidance_queue),
+                "reflection_guidance_review_decision_count": len(guidance_decisions),
+                "reflection_guidance_executable_policy_count": sum(
+                    1
+                    for item in guidance_queue
+                    if isinstance(item, dict)
+                    and item.get("executable_policy_created") is not False
+                ),
+                "reflection_identity_mutation_count": 0
+                if state["identity_core"] == before_identity
+                else 1,
+            },
+        },
+    )
+
+
 def check_procedural_lifecycle_retention(state_dir: Path) -> EvaluationCheck:
     store = StateStore(state_dir)
     before_identity = store.init()["identity_core"]
@@ -1531,6 +1745,11 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         for item in metrics
         if "cautionary_lifecycle_score" in item
     ]
+    reflection_log_scores = [
+        item["reflection_log_score"]
+        for item in metrics
+        if "reflection_log_score" in item
+    ]
     return {
         "total_scenarios": len(scenarios),
         "passed_scenarios": sum(1 for scenario in scenarios if scenario.passed),
@@ -1603,6 +1822,12 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
             2,
         )
         if cautionary_lifecycle_scores
+        else None,
+        "reflection_log_score": round(
+            sum(reflection_log_scores) / len(reflection_log_scores),
+            2,
+        )
+        if reflection_log_scores
         else None,
         "boundary_violation_count": sum(
             int(item.get("boundary_violation_count", 0)) for item in metrics
@@ -1681,6 +1906,38 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "cautionary_lifecycle_identity_mutation_count": sum(
             int(item.get("cautionary_lifecycle_identity_mutation_count", 0))
+            for item in metrics
+        ),
+        "reflection_log_count": sum(
+            int(item.get("reflection_log_count", 0)) for item in metrics
+        ),
+        "reflection_verified_count": sum(
+            int(item.get("reflection_verified_count", 0)) for item in metrics
+        ),
+        "reflection_policy_guidance_count": sum(
+            int(item.get("reflection_policy_guidance_count", 0)) for item in metrics
+        ),
+        "reflection_policy_guidance_verified_count": sum(
+            int(item.get("reflection_policy_guidance_verified_count", 0))
+            for item in metrics
+        ),
+        "reflection_policy_guidance_high_priority_count": sum(
+            int(item.get("reflection_policy_guidance_high_priority_count", 0))
+            for item in metrics
+        ),
+        "reflection_guidance_queue_count": sum(
+            int(item.get("reflection_guidance_queue_count", 0)) for item in metrics
+        ),
+        "reflection_guidance_review_decision_count": sum(
+            int(item.get("reflection_guidance_review_decision_count", 0))
+            for item in metrics
+        ),
+        "reflection_guidance_executable_policy_count": sum(
+            int(item.get("reflection_guidance_executable_policy_count", 0))
+            for item in metrics
+        ),
+        "reflection_identity_mutation_count": sum(
+            int(item.get("reflection_identity_mutation_count", 0))
             for item in metrics
         ),
         "approved_identity_updates": sum(

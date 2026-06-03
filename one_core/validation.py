@@ -944,6 +944,9 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "blocked_tasks",
         "recurring_duties",
         "action_trace",
+        "reflection_log",
+        "reflection_guidance_queue",
+        "reflection_guidance_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -1024,6 +1027,114 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
             for key in ("reflection_id", "timestamp", "workflow", "summary", "lesson", "status", "evidence", "provenance"):
                 if key not in reflection:
                     issues.append(ValidationIssue(path + f".{key}", "Failure reflection key is missing."))
+    reflection_log = task_hub.get("reflection_log", [])
+    if isinstance(reflection_log, list):
+        for index, reflection in enumerate(reflection_log):
+            path = f"task_hub.reflection_log[{index}]"
+            if not isinstance(reflection, dict):
+                issues.append(ValidationIssue(path, "Reflection log entry must be an object."))
+                continue
+            for key in (
+                "reflection_id",
+                "timestamp",
+                "reflection_type",
+                "workflow",
+                "observation",
+                "lesson",
+                "expected_behavior",
+                "actor",
+                "source_ids",
+                "evidence",
+                "status",
+                "verification_status",
+                "verification_history",
+                "provenance",
+                "update_history",
+            ):
+                if key not in reflection:
+                    issues.append(ValidationIssue(path + f".{key}", "Reflection log key is missing."))
+            if not isinstance(reflection.get("source_ids"), list):
+                issues.append(ValidationIssue(path + ".source_ids", "Reflection log source_ids must be a list."))
+            if not isinstance(reflection.get("evidence"), list) or not reflection.get("evidence"):
+                issues.append(ValidationIssue(path + ".evidence", "Reflection log requires non-empty evidence."))
+            if reflection.get("status") not in {"open", "verified", "needs_revision", "superseded"}:
+                issues.append(ValidationIssue(path + ".status", "Reflection log must have a valid status."))
+            if reflection.get("verification_status") not in {"pending", "verified", "not_observed", "regressed", "superseded"}:
+                issues.append(ValidationIssue(path + ".verification_status", "Reflection log must have a valid verification status."))
+            if reflection.get("verification_status") != "pending":
+                history = reflection.get("verification_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(ValidationIssue(path + ".verification_history", "Verified reflection log entry requires verification history."))
+                if not reflection.get("last_verification_id"):
+                    issues.append(ValidationIssue(path + ".last_verification_id", "Verified reflection log entry requires last_verification_id."))
+    reflection_guidance_queue = task_hub.get("reflection_guidance_queue", [])
+    if isinstance(reflection_guidance_queue, list):
+        for index, item in enumerate(reflection_guidance_queue):
+            path = f"task_hub.reflection_guidance_queue[{index}]"
+            if not isinstance(item, dict):
+                issues.append(ValidationIssue(path, "Reflection guidance queue item must be an object."))
+                continue
+            for key in (
+                "guidance_item_id",
+                "reflection_id",
+                "workflow",
+                "review_priority",
+                "recommended_review_mode",
+                "evidence",
+                "review_status",
+                "execution_prohibited",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+                "review_history",
+                "provenance",
+            ):
+                if key not in item:
+                    issues.append(ValidationIssue(path + f".{key}", "Reflection guidance queue key is missing."))
+            if item.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Reflection guidance must prohibit execution."))
+            if item.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Reflection guidance must not create executable policy."))
+            if item.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Reflection guidance must not allow Identity Core mutation."))
+            if item.get("review_status") not in {"pending", "acknowledged", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".review_status", "Reflection guidance must have a valid review status."))
+            if item.get("review_status") in {"acknowledged", "archived", "quarantined"}:
+                history = item.get("review_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(ValidationIssue(path + ".review_history", "Reviewed reflection guidance requires review history."))
+                elif history[-1].get("decision_id") != item.get("last_review_decision_id"):
+                    issues.append(ValidationIssue(path + ".last_review_decision_id", "Reflection guidance last_review_decision_id must match latest decision."))
+    reflection_guidance_decisions = task_hub.get("reflection_guidance_decisions", [])
+    if isinstance(reflection_guidance_decisions, list):
+        for index, decision in enumerate(reflection_guidance_decisions):
+            path = f"task_hub.reflection_guidance_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Reflection guidance decision must be an object."))
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "guidance_item_id",
+                "reflection_id",
+                "workflow",
+                "reviewer",
+                "action",
+                "result",
+                "snapshot_id",
+                "execution_prohibited",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+            ):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Reflection guidance decision key is missing."))
+            if decision.get("result") not in {"acknowledged", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".result", "Reflection guidance decision must have a valid result."))
+            if decision.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Reflection guidance decision must prohibit execution."))
+            if decision.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Reflection guidance decision must not create executable policy."))
+            if decision.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Reflection guidance decision must not allow Identity Core mutation."))
     cautions = task_hub.get("cautionary_procedural_candidates", [])
     if isinstance(cautions, list):
         for index, caution in enumerate(cautions):

@@ -725,6 +725,200 @@ class CoreStateTests(unittest.TestCase):
             self.assertEqual(package["cautionary_procedural_memory"], [])
             self.assertEqual(package["task_hub"]["cautionary_procedural_memory"], [])
 
+    def test_reflection_log_round_trip_records_and_verifies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            state = store.load()
+            store.record_trace(
+                workflow="tool_use",
+                nodes=[
+                    {
+                        "id": "observed_tool",
+                        "type": "Action",
+                        "summary": "Observed a reusable workflow pattern.",
+                    }
+                ],
+                summary="Observed a reusable workflow pattern.",
+                state=state,
+                status="completed",
+            )
+            store.save(state)
+            action = state["task_hub"]["action_trace"][-1]
+
+            result = store.record_reflection_log(
+                reflection_type="general",
+                workflow="tool_use",
+                observation="Observed a reusable workflow pattern.",
+                lesson="Record reflections so later behavior can be checked.",
+                expected_behavior="Verify the reflection log entry after later use.",
+                actor="unit_test",
+                source_ids=[action["action_id"]],
+                evidence=[action["action_id"]],
+            )
+            verified = store.verify_reflection(
+                result["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=[action["action_id"]],
+                note="Verified after later review.",
+            )
+            state = store.load()
+            reflection = state["task_hub"]["reflection_log"][-1]
+            package = store.build_context_package()
+
+            self.assertEqual(result["status"], "recorded")
+            self.assertTrue(result["reflection_log_id"].startswith("reflection_"))
+            self.assertEqual(verified["status"], "verified")
+            self.assertEqual(reflection["status"], "verified")
+            self.assertEqual(
+                reflection["last_verification_id"],
+                verified["reflection_verification_id"],
+            )
+            self.assertTrue(reflection["verification_history"])
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(store.list_traces()[-1]["workflow"], "reflection_verification")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertIn(
+                result["reflection_log_id"],
+                {item["reflection_id"] for item in package["reflection_log"]},
+            )
+            guidance = package["reflection_policy_guidance"]
+            self.assertEqual(guidance["mode"], "advisory_only")
+            self.assertTrue(guidance["execution_prohibited"])
+            self.assertFalse(guidance["identity_mutation_allowed"])
+            self.assertEqual(guidance["summary"]["verified_reflection_count"], 1)
+            self.assertEqual(guidance["summary"]["recommendation_count"], 1)
+            self.assertIn(
+                result["reflection_log_id"],
+                {
+                    item["reflection_id"]
+                    for item in guidance["verified_reflections"]
+                },
+            )
+            recommendation = guidance["review_recommendations"][0]
+            self.assertEqual(recommendation["reflection_id"], result["reflection_log_id"])
+            self.assertEqual(
+                recommendation["recommended_review_mode"],
+                "cautionary_review_only",
+            )
+            self.assertTrue(recommendation["execution_prohibited"])
+            self.assertIn("risk", guidance["influence_fields"]["review_priority"])
+
+    def test_reflection_policy_guidance_ignores_unverified_reflections(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            verified_result = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="claim_graph_review",
+                observation="Verified reflection should guide review.",
+                lesson="Verified evidence can inform cautionary review.",
+                expected_behavior="Surface advisory guidance only.",
+                actor="unit_test",
+                source_ids=["action_verified"],
+                evidence=["action_verified"],
+                risk="high",
+                confidence=0.9,
+            )
+            open_result = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="claim_graph_review",
+                observation="Open reflection should not guide review yet.",
+                lesson="Unverified reflection must stay out of policy guidance.",
+                expected_behavior="Wait for verification.",
+                actor="unit_test",
+                source_ids=["action_open"],
+                evidence=["action_open"],
+                risk="high",
+                confidence=0.9,
+            )
+            store.verify_reflection(
+                verified_result["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=["action_verified"],
+            )
+
+            package = store.build_context_package()
+            guidance = package["reflection_policy_guidance"]
+            guidance_ids = {
+                item["reflection_id"] for item in guidance["verified_reflections"]
+            }
+            recommendation_ids = {
+                item["reflection_id"] for item in guidance["review_recommendations"]
+            }
+
+            self.assertIn(verified_result["reflection_log_id"], guidance_ids)
+            self.assertNotIn(open_result["reflection_log_id"], guidance_ids)
+            self.assertIn(verified_result["reflection_log_id"], recommendation_ids)
+            self.assertNotIn(open_result["reflection_log_id"], recommendation_ids)
+            self.assertEqual(guidance["summary"]["verified_reflection_count"], 1)
+
+    def test_reflection_guidance_queue_can_be_reviewed_without_policy_execution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            recorded = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="claim_graph_review",
+                observation="Verified reflection should enter a durable review queue.",
+                lesson="Review guidance should be auditable before any policy work.",
+                expected_behavior="Acknowledge guidance without execution.",
+                actor="unit_test",
+                source_ids=["action_guidance"],
+                evidence=["action_guidance"],
+                risk="high",
+                confidence=0.91,
+            )
+            store.verify_reflection(
+                recorded["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=["action_guidance"],
+            )
+            package = store.build_context_package()
+            guidance_item = package["reflection_guidance_queue"][0]
+
+            result = store.review_reflection_guidance(
+                guidance_item["guidance_item_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Track this as advisory review input only.",
+            )
+            state = store.load()
+            reviewed_item = state["task_hub"]["reflection_guidance_queue"][-1]
+            decision = state["task_hub"]["reflection_guidance_decisions"][-1]
+            package = store.build_context_package()
+
+            self.assertEqual(result["status"], "acknowledged")
+            self.assertTrue(result["snapshot_id"].startswith("snapshot_"))
+            self.assertEqual(reviewed_item["review_status"], "acknowledged")
+            self.assertEqual(
+                reviewed_item["last_review_decision_id"],
+                result["reflection_guidance_decision_id"],
+            )
+            self.assertEqual(
+                decision["decision_id"],
+                result["reflection_guidance_decision_id"],
+            )
+            self.assertTrue(reviewed_item["execution_prohibited"])
+            self.assertFalse(reviewed_item["executable_policy_created"])
+            self.assertFalse(reviewed_item["identity_mutation_allowed"])
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(store.list_traces()[-1]["workflow"], "reflection_guidance_review")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertIn(
+                guidance_item["guidance_item_id"],
+                {
+                    item["guidance_item_id"]
+                    for item in package["reflection_guidance_queue"]
+                },
+            )
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

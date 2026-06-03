@@ -33,7 +33,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(report["state_mode"], "temporary")
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["failed"], 0)
-        self.assertEqual(report["passed"], 15)
+        self.assertEqual(report["passed"], 16)
         self.assertEqual(
             report["baselines"]["system_under_test"],
             "state_transfer_system",
@@ -54,6 +54,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertIn("failure_reflection", scenario_names)
         self.assertIn("cautionary_procedural_review", scenario_names)
         self.assertIn("cautionary_warning_lifecycle", scenario_names)
+        self.assertIn("reflection_log_verification", scenario_names)
         self.assertIn("procedural_lifecycle_retention", scenario_names)
         self.assertIn("identity_update_gate_review", scenario_names)
         self.assertIn("event_log_replay_rollback", scenario_names)
@@ -61,7 +62,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertIn("context_builder_policy_trace", scenario_names)
 
         metrics = report["metrics_summary"]
-        self.assertEqual(metrics["total_scenarios"], 15)
+        self.assertEqual(metrics["total_scenarios"], 16)
         self.assertEqual(metrics["failed_scenarios"], 0)
         self.assertEqual(metrics["boundary_violation_count"], 0)
         self.assertEqual(metrics["archived_memory_retrieval_count"], 0)
@@ -90,6 +91,25 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["cautionary_lifecycle_active_context_count"], 0)
         self.assertEqual(metrics["cautionary_lifecycle_executable_policy_count"], 0)
         self.assertEqual(metrics["cautionary_lifecycle_identity_mutation_count"], 0)
+        self.assertEqual(metrics["reflection_log_score"], 1.0)
+        self.assertGreaterEqual(metrics["reflection_log_count"], 1)
+        self.assertGreaterEqual(metrics["reflection_verified_count"], 1)
+        self.assertGreaterEqual(metrics["reflection_policy_guidance_count"], 1)
+        self.assertGreaterEqual(
+            metrics["reflection_policy_guidance_verified_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reflection_policy_guidance_high_priority_count"],
+            1,
+        )
+        self.assertGreaterEqual(metrics["reflection_guidance_queue_count"], 1)
+        self.assertGreaterEqual(
+            metrics["reflection_guidance_review_decision_count"],
+            1,
+        )
+        self.assertEqual(metrics["reflection_guidance_executable_policy_count"], 0)
+        self.assertEqual(metrics["reflection_identity_mutation_count"], 0)
         self.assertEqual(metrics["procedural_lifecycle_score"], 1.0)
         self.assertGreaterEqual(metrics["procedural_lifecycle_decision_count"], 1)
         self.assertGreaterEqual(metrics["procedural_archived_count"], 1)

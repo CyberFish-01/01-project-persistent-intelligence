@@ -368,6 +368,8 @@ P19 增加 cautionary procedural review。`review-cautionary-procedural-candidat
 
 P20 增加 cautionary warnings 的已审查 retention。`cautionary-warning-lifecycle` 可以 archive、discard 或 quarantine active `task_hub.cautionary_procedural_memory`。Archived 或 quarantined warnings 会保留审计轨迹，但会从 active context 中被压制。这仍然是 warning lifecycle governance，不是 workflow execution。
 
+P21 增加 reflection log verification。`record-reflection` 会记录一个通用 reflection 条目，包含 observation、lesson、expected behavior、source IDs、evidence 和 update history。`verify-reflection` 之后可以把该条目标记为 verified、not_observed、regressed 或 superseded，并追加 verification history。Reflection log 是关于“某个 reflection 是否真的改变了后续行为”的可审计证据，但它仍然不会执行 workflow policy，也不会修改 Identity Core。
+
 Dream artifact 也包含确定性的 rubric：
 
 ```yaml

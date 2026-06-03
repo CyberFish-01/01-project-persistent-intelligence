@@ -36,6 +36,9 @@ task_hub:
   blocked_tasks: []
   recurring_duties: []
   action_trace: []
+  reflection_log: []
+  reflection_guidance_queue: []
+  reflection_guidance_decisions: []
   procedural_candidates: []
 identity_update_gate:
   proposals: []
@@ -672,6 +675,80 @@ task_hub:
       errors: []
       evidence:
         - "episode_0001"
+  reflection_log:
+    - reflection_id: "reflection_0001"
+      timestamp: "ISO-8601 timestamp"
+      reflection_type: "general"
+      workflow: "tool_use"
+      observation: "Observed a reusable workflow pattern."
+      lesson: "Record reflections so later behavior can be checked."
+      expected_behavior: "Verify the reflection log entry after later use."
+      actor: "manual_review"
+      source_ids:
+        - "action_0002"
+      evidence:
+        - "action_0002"
+      risk: "medium"
+      confidence: 0.5
+      status: "verified"
+      verification_status: "verified"
+      last_verified_at: "ISO-8601 timestamp"
+      last_verification_id: "reflection_verification_0001"
+      verification_history:
+        - verification_id: "reflection_verification_0001"
+          timestamp: "ISO-8601 timestamp"
+          reflection_id: "reflection_0001"
+          verifier: "manual_review"
+          result: "verified"
+          note: "Verified after later review."
+          evidence:
+            - "action_0002"
+      provenance:
+        - type: "reflection_log"
+          workflow: "tool_use"
+          actor: "manual_review"
+          source_ids:
+            - "action_0002"
+      update_history:
+        - timestamp: "ISO-8601 timestamp"
+          actor: "manual_review"
+          operation: "record_reflection_log"
+          evidence:
+            - "action_0002"
+  reflection_guidance_queue:
+    - guidance_item_id: "reflection_guidance_item_0001"
+      timestamp: "ISO-8601 timestamp"
+      guidance_id: "reflection_policy_0001"
+      context_package_id: "context_package_0001"
+      reflection_id: "reflection_0001"
+      workflow: "tool_use"
+      review_priority: "medium"
+      recommended_review_mode: "cautionary_review_only"
+      review_focus: "Use verified reflection as cautionary review context."
+      recommendation_note: "Record reflections -> Verify later behavior."
+      evidence:
+        - "action_0002"
+      review_status: "pending|acknowledged|archived|quarantined"
+      execution_prohibited: true
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      review_history: []
+      provenance:
+        - type: "reflection_policy_guidance"
+          reflection_id: "reflection_0001"
+  reflection_guidance_decisions:
+    - decision_id: "reflection_guidance_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      guidance_item_id: "reflection_guidance_item_0001"
+      reflection_id: "reflection_0001"
+      workflow: "tool_use"
+      reviewer: "manual_review"
+      action: "acknowledge"
+      result: "acknowledged"
+      snapshot_id: "snapshot_0004"
+      execution_prohibited: true
+      executable_policy_created: false
+      identity_mutation_allowed: false
   failure_reflections:
     - reflection_id: "failure_reflection_0001"
       timestamp: "ISO-8601 timestamp"
@@ -832,6 +909,10 @@ P18 adds procedural lifecycle retention. `procedural-lifecycle` can archive, dis
 P19 adds cautionary procedural review. `review-cautionary-procedural-candidate` can approve, reject, archive, or quarantine warning candidates. Approval creates active `task_hub.cautionary_procedural_memory`, which enters future context as an active warning. It explicitly records `executable_policy: false`, writes snapshot, audit, trace, update log, review decision, rollback metadata, and still does not execute workflow policy.
 
 P20 adds cautionary warning lifecycle retention. `cautionary-warning-lifecycle` can archive, discard, or quarantine active `task_hub.cautionary_procedural_memory`. It writes snapshot, audit, trace, update log, lifecycle history, `task_hub.cautionary_lifecycle_decisions`, and preserves `executable_policy: false`. Context packages only expose active cautionary warnings.
+
+P21 adds reflection log. `record-reflection` can record a general reflection entry, and `verify-reflection` can mark it as verified, not observed, regressed, or superseded. Reflection log preserves observation, lesson, expected behavior, source IDs, evidence, verification history, and update history, and exposes recent entries to context. It still does not execute workflows or mutate Identity Core.
+
+P22 adds reflection-policy guidance. `build_context_package()` derives advisory-only `reflection_policy_guidance` from verified reflection log entries. P23 adds durable `task_hub.reflection_guidance_queue` and `task_hub.reflection_guidance_decisions`; `review-reflection-guidance` can acknowledge, archive, or quarantine guidance items, writing snapshot, audit, trace, update log, and replayable event metadata. Reflection guidance remains non-executable and cannot mutate Identity Core.
 
 ## 14. Identity Update Gate
 
@@ -1115,6 +1196,14 @@ state_transfer_package:
     failure_reflections: []
     procedural_candidates: []
     cautionary_procedural_candidates: []
+    reflection_log: []
+    reflection_policy_guidance:
+      mode: "advisory_only"
+      execution_prohibited: true
+      identity_mutation_allowed: false
+      verified_reflections: []
+      review_recommendations: []
+    reflection_guidance_queue: []
     cautionary_procedural_memory: []
     cautionary_lifecycle_decisions: []
     procedural_memory: []
@@ -1124,6 +1213,14 @@ state_transfer_package:
   failure_reflections: []
   procedural_candidates: []
   cautionary_procedural_candidates: []
+  reflection_log: []
+  reflection_policy_guidance:
+    mode: "advisory_only"
+    execution_prohibited: true
+    identity_mutation_allowed: false
+    verified_reflections: []
+    review_recommendations: []
+  reflection_guidance_queue: []
   cautionary_procedural_memory: []
   cautionary_lifecycle_decisions: []
   procedural_memory: []

@@ -316,6 +316,7 @@ python3 -m one_core.cli evaluate-scenarios
 - `failure_reflection`：检查 `record-failure-reflection`、failure reflection 持久化、cautionary procedural candidate 生成、context 暴露，以及不会修改 Identity Core。
 - `cautionary_procedural_review`：检查 `review-cautionary-procedural-candidate`、active warning 创建、review decision metadata、context 暴露、replay、`executable_policy: false`，以及不会修改 Identity Core。
 - `cautionary_warning_lifecycle`：检查 `cautionary-warning-lifecycle`、cautionary lifecycle decision metadata、replay、`executable_policy: false`、不会修改 Identity Core，以及 archived warning 不再进入 context。
+- `reflection_log_verification`：检查 `record-reflection`、`verify-reflection`、reflection log 持久化、verification history、context 暴露、来自 verified reflections 的 policy-adjacent advisory guidance、durable guidance queue review、replay、不创建 executable policy，以及不会修改 Identity Core。
 - `procedural_lifecycle_retention`：检查 `procedural-lifecycle`、procedural lifecycle decision metadata、replay，以及 archived procedural memory 不再进入 context。
 - `identity_update_gate_review`：检查 identity update 必须通过 high gate；单证据会被 quarantine，三证据可批准为 identity_memory，但不会改写 Identity Core。
 - `event_log_replay_rollback`：检查真实 state transition 会进入 append-only event log，dry-run preview 不写入，replay check 通过，rollback preview 不修改 state。
@@ -362,6 +363,10 @@ v0.8 runner 会报告 stateless、retrieval-only、summary-only baseline metadat
 - procedural lifecycle decision count；
 - procedural archived count；
 - procedural active context count；
+- reflection log score；
+- reflection log count；
+- reflection verified count；
+- reflection identity mutation count；
 - context builder score；
 - context activation trace count；
 - context source attribution count；
