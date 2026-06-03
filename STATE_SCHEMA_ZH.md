@@ -779,6 +779,24 @@ task_hub:
         - "reflection_guidance_item_0001"
         - "reflection_0001"
         - "action_0002"
+      proposal_score:
+        score_id: "tool_safety_policy_score_0001"
+        timestamp: "ISO-8601 timestamp"
+        mode: "review_priority_only"
+        evidence_strength: 0.89
+        scope_specificity: 0.71
+        staleness: 0.0
+        priority_score: 0.77
+        recommended_review_priority: "high"
+        evidence_count: 3
+        unique_evidence:
+          - "reflection_guidance_item_0001"
+          - "reflection_0001"
+          - "action_0002"
+        factors: []
+        execution_prohibited: true
+        executable_policy_created: false
+        identity_mutation_allowed: false
       source_ids:
         - "action_0002"
       review_history: []
@@ -814,6 +832,12 @@ task_hub:
       executable_policy: false
       executable_policy_created: false
       identity_mutation_allowed: false
+      proposal_score:
+        mode: "review_priority_only"
+        priority_score: 0.77
+        execution_prohibited: true
+        executable_policy_created: false
+        identity_mutation_allowed: false
       rollback:
         snapshot_id: "snapshot_0005"
         reversible: true
@@ -841,6 +865,13 @@ task_hub:
       executable_policy: false
       executable_policy_created: false
       identity_mutation_allowed: false
+      proposal_score:
+        mode: "review_priority_only"
+        priority_score: 0.61
+        staleness: 0.75
+        execution_prohibited: true
+        executable_policy_created: false
+        identity_mutation_allowed: false
       rollback:
         snapshot_id: "snapshot_0006"
         reversible: true
@@ -1012,6 +1043,8 @@ P22 增加 reflection-policy guidance。`build_context_package()` 会从 verifie
 P24 增加 tool/safety policy proposal layer。`propose-tool-safety-policy` 只能从已经 review 的 reflection guidance 创建非执行 policy proposal；`review-tool-safety-policy-proposal` 可以 approve、reject、archive 或 quarantine proposal。Proposal 和 decision 会写入 snapshot、audit、trace、update metadata 和可 replay 的 event reference。它们明确保持 `proposal_mode: "proposal_only"`、`requires_review: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`。P24 不创建 policy executor，也不会修改 Identity Core。
 
 P25 增加 tool/safety policy proposal lifecycle retention。`tool-safety-policy-lifecycle` 可以 archive、discard 或 quarantine 已 review 的 policy proposal。它会写入 snapshot、audit、trace、update log、lifecycle history 和 `task_hub.tool_safety_policy_lifecycle_decisions`，同时保持 proposal-only 和 non-executable invariants。context package 只暴露 active pending/approved proposals，所以 archived、discarded 和 quarantined proposals 会从 active state transfer 中被压制。
+
+P26 增加 tool/safety proposal evidence scoring。每个 proposal 都会获得 `proposal_score`，包含 evidence strength、scope specificity、staleness、priority score、review priority、factors 和 non-execution invariants。Score 只是 review-priority signal：它会用于 context 中 active proposals 的排序，并写入 review/lifecycle decisions，但不会创建 allow/deny rule、executable policy，也不会修改 Identity Core。
 
 ## 14. Identity Update Gate
 

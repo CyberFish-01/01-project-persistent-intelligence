@@ -978,9 +978,20 @@ class CoreStateTests(unittest.TestCase):
             self.assertFalse(proposal["executable_policy"])
             self.assertFalse(proposal["executable_policy_created"])
             self.assertFalse(proposal["identity_mutation_allowed"])
+            self.assertEqual(proposal["proposal_score"]["mode"], "review_priority_only")
+            self.assertGreater(proposal["proposal_score"]["evidence_strength"], 0)
+            self.assertGreater(proposal["proposal_score"]["scope_specificity"], 0)
+            self.assertGreater(proposal["proposal_score"]["priority_score"], 0)
+            self.assertTrue(proposal["proposal_score"]["execution_prohibited"])
+            self.assertFalse(proposal["proposal_score"]["executable_policy_created"])
+            self.assertFalse(proposal["proposal_score"]["identity_mutation_allowed"])
             self.assertEqual(
                 proposal["last_review_decision_id"],
                 reviewed["tool_safety_policy_decision_id"],
+            )
+            self.assertEqual(
+                decision["proposal_score"]["priority_score"],
+                proposal["proposal_score"]["priority_score"],
             )
             self.assertTrue(decision["execution_prohibited"])
             self.assertFalse(decision["executable_policy"])
@@ -1064,7 +1075,13 @@ class CoreStateTests(unittest.TestCase):
             self.assertFalse(proposal["executable_policy"])
             self.assertFalse(proposal["executable_policy_created"])
             self.assertFalse(proposal["identity_mutation_allowed"])
+            self.assertEqual(proposal["proposal_score"]["mode"], "review_priority_only")
+            self.assertGreaterEqual(proposal["proposal_score"]["staleness"], 0.75)
             self.assertEqual(decision["result"], "archived")
+            self.assertEqual(
+                decision["proposal_score"]["priority_score"],
+                proposal["proposal_score"]["priority_score"],
+            )
             self.assertTrue(decision["execution_prohibited"])
             self.assertFalse(decision["executable_policy"])
             self.assertFalse(decision["executable_policy_created"])
@@ -1079,6 +1096,66 @@ class CoreStateTests(unittest.TestCase):
                     for item in package["tool_safety_policy_proposals"]
                 },
             )
+
+    def test_tool_safety_policy_score_orders_context(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            recorded = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="tool_use",
+                observation="Different proposal scopes need priority scoring.",
+                lesson="Narrow, well-evidenced tool safety proposals should rank higher.",
+                expected_behavior="Context exposes higher priority proposals first.",
+                actor="unit_test",
+                source_ids=["action_policy_score", "action_policy_extra"],
+                evidence=["action_policy_score", "action_policy_extra"],
+                risk="high",
+                confidence=0.93,
+            )
+            store.verify_reflection(
+                recorded["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=["action_policy_score", "action_policy_extra"],
+            )
+            guidance_item = store.build_context_package()["reflection_guidance_queue"][0]
+            store.review_reflection_guidance(
+                guidance_item["guidance_item_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Use as proposal scoring evidence.",
+            )
+            broad = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="global",
+                proposed_rule="Be safe.",
+                proposer="unit_test",
+                rationale="Broad low-specificity proposal.",
+                risk="medium",
+                confidence=0.3,
+            )
+            narrow = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="tool_use.preflight.input_readiness",
+                proposed_rule="Require explicit input readiness before executing a local tool.",
+                proposer="unit_test",
+                rationale="Narrow high-specificity proposal.",
+                risk="high",
+                confidence=0.9,
+            )
+
+            package = store.build_context_package()
+            proposals = package["tool_safety_policy_proposals"]
+            by_id = {proposal["proposal_id"]: proposal for proposal in proposals}
+
+            self.assertIn(broad["proposal_id"], by_id)
+            self.assertIn(narrow["proposal_id"], by_id)
+            self.assertGreater(
+                by_id[narrow["proposal_id"]]["proposal_score"]["priority_score"],
+                by_id[broad["proposal_id"]]["proposal_score"]["priority_score"],
+            )
+            self.assertEqual(proposals[0]["proposal_id"], narrow["proposal_id"])
 
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:

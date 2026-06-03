@@ -777,6 +777,24 @@ task_hub:
         - "reflection_guidance_item_0001"
         - "reflection_0001"
         - "action_0002"
+      proposal_score:
+        score_id: "tool_safety_policy_score_0001"
+        timestamp: "ISO-8601 timestamp"
+        mode: "review_priority_only"
+        evidence_strength: 0.89
+        scope_specificity: 0.71
+        staleness: 0.0
+        priority_score: 0.77
+        recommended_review_priority: "high"
+        evidence_count: 3
+        unique_evidence:
+          - "reflection_guidance_item_0001"
+          - "reflection_0001"
+          - "action_0002"
+        factors: []
+        execution_prohibited: true
+        executable_policy_created: false
+        identity_mutation_allowed: false
       source_ids:
         - "action_0002"
       review_history: []
@@ -812,6 +830,12 @@ task_hub:
       executable_policy: false
       executable_policy_created: false
       identity_mutation_allowed: false
+      proposal_score:
+        mode: "review_priority_only"
+        priority_score: 0.77
+        execution_prohibited: true
+        executable_policy_created: false
+        identity_mutation_allowed: false
       rollback:
         snapshot_id: "snapshot_0005"
         reversible: true
@@ -839,6 +863,13 @@ task_hub:
       executable_policy: false
       executable_policy_created: false
       identity_mutation_allowed: false
+      proposal_score:
+        mode: "review_priority_only"
+        priority_score: 0.61
+        staleness: 0.75
+        execution_prohibited: true
+        executable_policy_created: false
+        identity_mutation_allowed: false
       rollback:
         snapshot_id: "snapshot_0006"
         reversible: true
@@ -1010,6 +1041,8 @@ P22 adds reflection-policy guidance. `build_context_package()` derives advisory-
 P24 adds a tool/safety policy proposal layer. `propose-tool-safety-policy` can create a non-executable policy proposal only from reviewed reflection guidance, and `review-tool-safety-policy-proposal` can approve, reject, archive, or quarantine that proposal. Proposal and decision records write snapshot/audit/trace/update metadata and replayable event references. They explicitly preserve `proposal_mode: "proposal_only"`, `requires_review: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`. P24 does not create a policy executor and does not mutate Identity Core.
 
 P25 adds tool/safety policy proposal lifecycle retention. `tool-safety-policy-lifecycle` can archive, discard, or quarantine reviewed policy proposals. It writes snapshot, audit, trace, update log, lifecycle history, and `task_hub.tool_safety_policy_lifecycle_decisions`, while preserving proposal-only and non-executable invariants. Context packages expose only active pending/approved proposals, so archived, discarded, and quarantined proposals are suppressed from active state transfer.
+
+P26 adds tool/safety proposal evidence scoring. Each proposal gets a `proposal_score` with evidence strength, scope specificity, staleness, priority score, review priority, factors, and non-execution invariants. Scores are review-priority signals only: they sort active proposals in context and enter review/lifecycle decisions, but they do not create allow/deny rules, executable policy, or Identity Core updates.
 
 ## 14. Identity Update Gate
 

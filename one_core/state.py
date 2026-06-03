@@ -565,6 +565,12 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         if "update_history" not in proposal:
             proposal["update_history"] = []
             changed = True
+        if not isinstance(proposal.get("proposal_score"), dict):
+            proposal["proposal_score"] = score_tool_safety_policy_proposal(
+                proposal,
+                timestamp=timestamp,
+            )
+            changed = True
 
     existing_source_keys = {
         str(task.get("source_key"))
@@ -3983,6 +3989,10 @@ class StateStore:
             confidence=confidence,
             timestamp=now,
         )
+        proposal["proposal_score"] = score_tool_safety_policy_proposal(
+            proposal,
+            timestamp=now,
+        )
         task_hub.setdefault("tool_safety_policy_proposals", []).append(proposal)
         state["update_log"].append(
             {
@@ -4150,6 +4160,11 @@ class StateStore:
         proposal["executable_policy_created"] = False
         proposal["executable_policy"] = False
         proposal["identity_mutation_allowed"] = False
+        proposal["proposal_score"] = score_tool_safety_policy_proposal(
+            proposal,
+            timestamp=now,
+        )
+        decision["proposal_score"] = proposal["proposal_score"]
         proposal.setdefault("review_history", []).append(decision)
         task_hub.setdefault("tool_safety_policy_decisions", []).append(decision)
 
@@ -4347,9 +4362,14 @@ class StateStore:
             proposal["discard_reason"] = (
                 decision_note or "tool_safety_policy_lifecycle_discard"
             )
+        proposal["proposal_score"] = score_tool_safety_policy_proposal(
+            proposal,
+            timestamp=now,
+        )
 
         decision["snapshot_id"] = snapshot["snapshot_id"]
         decision["rollback"]["snapshot_id"] = snapshot["snapshot_id"]
+        decision["proposal_score"] = proposal["proposal_score"]
         task_hub.setdefault("tool_safety_policy_lifecycle_decisions", []).append(
             decision
         )
@@ -5104,18 +5124,27 @@ class StateStore:
             and warning.get("status") == "active"
             and warning.get("lifecycle", {}).get("status") == "active"
         ]
-        active_tool_safety_policy_proposals = [
-            proposal
-            for proposal in task_hub.get("tool_safety_policy_proposals", [])
-            if isinstance(proposal, dict)
-            and proposal.get("review_status") in {"pending", "approved"}
-            and (
-                proposal.get("lifecycle", {})
-                if isinstance(proposal.get("lifecycle"), dict)
-                else {}
-            ).get("status", proposal.get("status", "active"))
-            == "active"
-        ][-8:]
+        active_tool_safety_policy_proposals = sorted(
+            [
+                proposal
+                for proposal in task_hub.get("tool_safety_policy_proposals", [])
+                if isinstance(proposal, dict)
+                and proposal.get("review_status") in {"pending", "approved"}
+                and (
+                    proposal.get("lifecycle", {})
+                    if isinstance(proposal.get("lifecycle"), dict)
+                    else {}
+                ).get("status", proposal.get("status", "active"))
+                == "active"
+            ],
+            key=lambda proposal: proposal.get("proposal_score", {}).get(
+                "priority_score",
+                0.0,
+            )
+            if isinstance(proposal.get("proposal_score"), dict)
+            else 0.0,
+            reverse=True,
+        )[:8]
         reflection_log = [
             reflection
             for reflection in task_hub.get("reflection_log", [])
@@ -6545,6 +6574,133 @@ def build_tool_safety_policy_decision(
             "reversible": True,
         },
     }
+
+
+def score_tool_safety_policy_proposal(
+    proposal: dict,
+    timestamp: Optional[str] = None,
+) -> dict:
+    evidence = [
+        str(item)
+        for item in proposal.get("evidence", [])
+        if str(item or "").strip()
+    ]
+    unique_evidence = list(dict.fromkeys(evidence))
+    evidence_count = len(unique_evidence)
+    confidence = bounded_float(proposal.get("confidence", 0.5), default=0.5)
+    evidence_strength = min(1.0, 0.25 + evidence_count * 0.12 + confidence * 0.35)
+    if proposal.get("source_guidance_item_id"):
+        evidence_strength += 0.08
+    if proposal.get("source_reflection_id"):
+        evidence_strength += 0.08
+    evidence_strength = round(min(evidence_strength, 1.0), 2)
+
+    scope = str(proposal.get("policy_scope") or "").strip()
+    rule = str(proposal.get("proposed_rule") or "").strip()
+    scope_parts = [part for part in re.split(r"[.:/]", scope) if part]
+    broad_terms = {"global", "all", "any", "*", "everything", "system"}
+    broad_scope = any(part.lower() in broad_terms for part in scope_parts) or (
+        len(scope_parts) <= 1
+    )
+    scope_specificity = 0.35 + min(len(scope_parts), 4) * 0.12
+    if rule and 12 <= len(rule) <= 180:
+        scope_specificity += 0.12
+    if broad_scope:
+        scope_specificity -= 0.18
+    scope_specificity = round(max(0.0, min(scope_specificity, 1.0)), 2)
+
+    created_at = str(proposal.get("timestamp") or "")
+    current_time = timestamp or utc_now()
+    age_days = iso_age_days(created_at, current_time)
+    if age_days is None:
+        staleness = 0.0
+    else:
+        staleness = min(1.0, max(age_days, 0) / 30.0)
+    lifecycle_status = (
+        proposal.get("lifecycle", {}).get("status")
+        if isinstance(proposal.get("lifecycle"), dict)
+        else proposal.get("status", "active")
+    )
+    if lifecycle_status in {"archived", "discarded", "quarantined"}:
+        staleness = max(staleness, 0.75)
+    staleness = round(staleness, 2)
+
+    risk = str(proposal.get("risk") or "medium").strip().lower()
+    risk_weight = {
+        "critical": 0.18,
+        "high": 0.14,
+        "medium": 0.08,
+        "low": 0.03,
+    }.get(risk, 0.06)
+    priority_score = (
+        evidence_strength * 0.42
+        + scope_specificity * 0.26
+        + confidence * 0.18
+        + risk_weight
+        - staleness * 0.22
+    )
+    priority_score = round(max(0.0, min(priority_score, 1.0)), 2)
+    recommended_review_priority = "low"
+    if priority_score >= 0.74 or risk in {"critical", "high"}:
+        recommended_review_priority = "high"
+    elif priority_score >= 0.5 or risk == "medium":
+        recommended_review_priority = "medium"
+
+    return {
+        "score_id": new_id("tool_safety_policy_score"),
+        "timestamp": current_time,
+        "mode": "review_priority_only",
+        "evidence_strength": evidence_strength,
+        "scope_specificity": scope_specificity,
+        "staleness": staleness,
+        "priority_score": priority_score,
+        "recommended_review_priority": recommended_review_priority,
+        "evidence_count": evidence_count,
+        "unique_evidence": unique_evidence[:12],
+        "factors": [
+            {
+                "name": "evidence_strength",
+                "value": evidence_strength,
+                "evidence_count": evidence_count,
+            },
+            {
+                "name": "scope_specificity",
+                "value": scope_specificity,
+                "policy_scope": scope,
+            },
+            {
+                "name": "staleness",
+                "value": staleness,
+                "age_days": age_days,
+            },
+            {"name": "risk_weight", "value": risk_weight, "risk": risk},
+        ],
+        "execution_prohibited": True,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+    }
+
+
+def bounded_float(value: object, default: float = 0.0) -> float:
+    try:
+        return max(0.0, min(float(value), 1.0))
+    except (TypeError, ValueError):
+        return default
+
+
+def iso_age_days(start: str, end: str) -> Optional[float]:
+    if not start:
+        return None
+    try:
+        start_dt = datetime.fromisoformat(start.replace("Z", "+00:00"))
+        end_dt = datetime.fromisoformat(end.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if start_dt.tzinfo is None:
+        start_dt = start_dt.replace(tzinfo=timezone.utc)
+    if end_dt.tzinfo is None:
+        end_dt = end_dt.replace(tzinfo=timezone.utc)
+    return round((end_dt - start_dt).total_seconds() / 86400, 2)
 
 
 def build_tool_safety_policy_lifecycle_decision(

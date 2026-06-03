@@ -127,6 +127,45 @@ def validate_identity_core(state: dict[str, Any]) -> list[ValidationIssue]:
     return issues
 
 
+def validate_tool_safety_policy_score(path: str, score: Any) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    if not isinstance(score, dict):
+        return [ValidationIssue(path, "Tool/safety policy proposal_score must be an object.")]
+    for key in (
+        "score_id",
+        "timestamp",
+        "mode",
+        "evidence_strength",
+        "scope_specificity",
+        "staleness",
+        "priority_score",
+        "recommended_review_priority",
+        "factors",
+        "execution_prohibited",
+        "executable_policy_created",
+        "identity_mutation_allowed",
+    ):
+        if key not in score:
+            issues.append(ValidationIssue(path + f".{key}", "Tool/safety policy score key is missing."))
+    if score.get("mode") != "review_priority_only":
+        issues.append(ValidationIssue(path + ".mode", "Tool/safety policy score must remain review_priority_only."))
+    if score.get("recommended_review_priority") not in {"low", "medium", "high"}:
+        issues.append(ValidationIssue(path + ".recommended_review_priority", "Tool/safety policy score must have a valid review priority."))
+    for key in ("evidence_strength", "scope_specificity", "staleness", "priority_score"):
+        value = score.get(key)
+        if not isinstance(value, (int, float)) or not 0.0 <= float(value) <= 1.0:
+            issues.append(ValidationIssue(path + f".{key}", "Tool/safety policy score value must be between 0 and 1."))
+    if score.get("execution_prohibited") is not True:
+        issues.append(ValidationIssue(path + ".execution_prohibited", "Tool/safety policy score must prohibit execution."))
+    if score.get("executable_policy_created") is not False:
+        issues.append(ValidationIssue(path + ".executable_policy_created", "Tool/safety policy score must not create executable policy."))
+    if score.get("identity_mutation_allowed") is not False:
+        issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy score must not allow Identity Core mutation."))
+    if not isinstance(score.get("factors"), list) or not score.get("factors"):
+        issues.append(ValidationIssue(path + ".factors", "Tool/safety policy score requires factors."))
+    return issues
+
+
 def validate_working_state(state: dict[str, Any]) -> list[ValidationIssue]:
     working_state = state.get("working_state")
     if not isinstance(working_state, dict):
@@ -1164,10 +1203,12 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                 "review_history",
                 "lifecycle",
                 "update_history",
+                "proposal_score",
                 "provenance",
             ):
                 if key not in proposal:
                     issues.append(ValidationIssue(path + f".{key}", "Tool/safety policy proposal key is missing."))
+            issues.extend(validate_tool_safety_policy_score(path + ".proposal_score", proposal.get("proposal_score")))
             if proposal.get("status") not in {"active", "archived", "discarded", "quarantined"}:
                 issues.append(ValidationIssue(path + ".status", "Tool/safety policy proposal must have a valid lifecycle status."))
             if proposal.get("proposal_mode") != "proposal_only":
@@ -1240,6 +1281,8 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                 issues.append(ValidationIssue(path + ".executable_policy_created", "Tool/safety policy decision must not create executable policy."))
             if decision.get("identity_mutation_allowed") is not False:
                 issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy decision must not allow Identity Core mutation."))
+            if "proposal_score" in decision:
+                issues.extend(validate_tool_safety_policy_score(path + ".proposal_score", decision.get("proposal_score")))
     policy_lifecycle_decisions = task_hub.get("tool_safety_policy_lifecycle_decisions", [])
     if isinstance(policy_lifecycle_decisions, list):
         for index, decision in enumerate(policy_lifecycle_decisions):
@@ -1279,6 +1322,8 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                 issues.append(ValidationIssue(path + ".executable_policy_created", "Tool/safety policy lifecycle decision must not create executable policy."))
             if decision.get("identity_mutation_allowed") is not False:
                 issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy lifecycle decision must not allow Identity Core mutation."))
+            if "proposal_score" in decision:
+                issues.extend(validate_tool_safety_policy_score(path + ".proposal_score", decision.get("proposal_score")))
     cautions = task_hub.get("cautionary_procedural_candidates", [])
     if isinstance(cautions, list):
         for index, caution in enumerate(cautions):

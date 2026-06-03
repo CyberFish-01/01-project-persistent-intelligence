@@ -837,19 +837,41 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- policy proposal prioritization 目前仍然只是简单 risk/confidence scoring；
-- evidence strength 和 scope specificity 还没有系统评分。
+- policy proposal prioritization 已由 P26 scoring 处理，但 proposal conflicts 和 supersession links 还没有建模；
+- evidence strength 和 scope specificity 已做本地评分，但还没有连接到 claim graph dependency links。
+
+### P26 Tool/Safety Proposal Evidence Scoring
+
+目标：按 evidence strength、scope specificity、staleness 和 risk 给 reviewed tool/safety policy proposals 排序，但不创建 executable policy。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `proposal_score` 会附加到 tool/safety policy proposals；
+- score 字段包含 evidence strength、scope specificity、staleness、priority score、recommended review priority、unique evidence 和 factors；
+- scores 会复制到 review 和 lifecycle decisions；
+- context packages 会按 `priority_score` 排序 active pending/approved proposals；
+- scoring 会记录 `mode: "review_priority_only"`、`execution_prohibited: true`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- scenario evaluation 会验证 score 创建、bounded priority、score factors、context ranking、replay、不创建 executable policy，以及不修改 Identity Core。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- proposal conflict 和 supersession links 还没有建模；
+- evidence scoring 还没有连接到 claim graph dependency links。
 
 建议下一步：
 
 ```text
-P26 Tool/Safety Proposal Evidence Scoring
+P27 Tool/Safety Proposal Conflict Links
 ```
 
 理由：
 
-- P25 已能保留或压制 proposals，但系统还不能判断哪些 proposal 证据更强、scope 更窄、是否已经 stale；
-- evidence 和 scope scoring 是任何未来 executable policy work 之前的地基；
+- P26 已经能给 proposals 排序，但系统还不能判断两个 proposal 是否冲突、重叠或互相 supersede；
+- conflict/supersession links 是任何未来 executable policy work 之前的地基；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

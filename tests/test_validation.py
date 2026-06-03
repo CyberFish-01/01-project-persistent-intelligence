@@ -286,6 +286,20 @@ class StateValidationTests(unittest.TestCase):
                     "review_history": [],
                     "lifecycle": {},
                     "update_history": [],
+                    "proposal_score": {
+                        "score_id": "score_bad",
+                        "timestamp": state["created_at"],
+                        "mode": "executable_policy",
+                        "evidence_strength": 2.0,
+                        "scope_specificity": -1.0,
+                        "staleness": 0.0,
+                        "priority_score": 1.2,
+                        "recommended_review_priority": "urgent",
+                        "factors": [],
+                        "execution_prohibited": False,
+                        "executable_policy_created": True,
+                        "identity_mutation_allowed": True,
+                    },
                     "provenance": [],
                 }
             )
@@ -304,6 +318,20 @@ class StateValidationTests(unittest.TestCase):
                     "executable_policy": True,
                     "executable_policy_created": True,
                     "identity_mutation_allowed": True,
+                    "proposal_score": {
+                        "score_id": "score_decision_bad",
+                        "timestamp": state["created_at"],
+                        "mode": "executable_policy",
+                        "evidence_strength": 0.5,
+                        "scope_specificity": 0.5,
+                        "staleness": 0.0,
+                        "priority_score": 0.5,
+                        "recommended_review_priority": "high",
+                        "factors": [{"name": "bad", "value": 0.5}],
+                        "execution_prohibited": False,
+                        "executable_policy_created": True,
+                        "identity_mutation_allowed": True,
+                    },
                 }
             )
             state["task_hub"]["tool_safety_policy_lifecycle_decisions"].append(
@@ -322,6 +350,20 @@ class StateValidationTests(unittest.TestCase):
                     "executable_policy": True,
                     "executable_policy_created": True,
                     "identity_mutation_allowed": True,
+                    "proposal_score": {
+                        "score_id": "score_lifecycle_bad",
+                        "timestamp": state["created_at"],
+                        "mode": "executable_policy",
+                        "evidence_strength": 0.5,
+                        "scope_specificity": 0.5,
+                        "staleness": 0.0,
+                        "priority_score": 0.5,
+                        "recommended_review_priority": "high",
+                        "factors": [{"name": "bad", "value": 0.5}],
+                        "execution_prohibited": False,
+                        "executable_policy_created": True,
+                        "identity_mutation_allowed": True,
+                    },
                 }
             )
             state["task_hub"]["failure_reflections"].append(
@@ -449,6 +491,42 @@ class StateValidationTests(unittest.TestCase):
                 paths,
             )
             self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.mode",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.evidence_strength",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.scope_specificity",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.priority_score",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.recommended_review_priority",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_score.factors",
+                paths,
+            )
+            self.assertIn(
                 "task_hub.tool_safety_policy_decisions[0].result",
                 paths,
             )
@@ -470,6 +548,22 @@ class StateValidationTests(unittest.TestCase):
             )
             self.assertIn(
                 "task_hub.tool_safety_policy_decisions[0].identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].proposal_score.mode",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].proposal_score.execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].proposal_score.executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].proposal_score.identity_mutation_allowed",
                 paths,
             )
             self.assertIn(
@@ -498,6 +592,22 @@ class StateValidationTests(unittest.TestCase):
             )
             self.assertIn(
                 "task_hub.tool_safety_policy_lifecycle_decisions[0].identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_lifecycle_decisions[0].proposal_score.mode",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_lifecycle_decisions[0].proposal_score.execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_lifecycle_decisions[0].proposal_score.executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_lifecycle_decisions[0].proposal_score.identity_mutation_allowed",
                 paths,
             )
             self.assertIn(

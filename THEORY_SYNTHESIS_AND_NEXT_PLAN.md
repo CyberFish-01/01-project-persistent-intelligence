@@ -803,19 +803,41 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- policy proposal prioritization is still simple risk/confidence scoring;
-- evidence strength and scope specificity are not yet scored systematically.
+- policy proposal prioritization is handled by P26 scoring, but proposal conflicts and supersession links are not yet modeled;
+- evidence strength and scope specificity are scored locally, but not yet connected to claim graph dependency links.
+
+### P26 Tool/Safety Proposal Evidence Scoring
+
+Goal: rank reviewed tool/safety policy proposals by evidence strength, scope specificity, staleness, and risk without creating executable policy.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `proposal_score` is attached to tool/safety policy proposals;
+- score fields include evidence strength, scope specificity, staleness, priority score, recommended review priority, unique evidence, and factors;
+- scores are copied into review and lifecycle decisions;
+- context packages sort active pending/approved proposals by `priority_score`;
+- scoring records `mode: "review_priority_only"`, `execution_prohibited: true`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- scenario evaluation verifies score creation, bounded priority, score factors, context ranking, replay, no executable policy creation, and no Identity Core mutation.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- proposal conflict and supersession links are not modeled;
+- evidence scoring is not yet connected to claim graph dependency links.
 
 Recommended next step:
 
 ```text
-P26 Tool/Safety Proposal Evidence Scoring
+P27 Tool/Safety Proposal Conflict Links
 ```
 
 Reason:
 
-- P25 can retain or suppress proposals, but the system still cannot rank which proposal is well-supported, narrowly scoped, or stale;
-- scoring evidence and scope is a foundation step before any future executable policy work;
+- P26 can rank proposals, but the system still cannot say whether two proposals conflict, overlap, or supersede one another;
+- conflict/supersession links are a foundation step before any future executable policy work;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:
