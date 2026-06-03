@@ -341,6 +341,14 @@ def main() -> None:
     )
     tool_safety_link_lifecycle_parser.add_argument("--decision-note", default="")
 
+    proposal_link_bridge_parser = subparsers.add_parser(
+        "bridge-proposal-link-claim-evidence",
+        help="Bridge a proposal link into claim graph evidence without mutating claims.",
+    )
+    proposal_link_bridge_parser.add_argument("link_id")
+    proposal_link_bridge_parser.add_argument("--reviewer", default="manual_review")
+    proposal_link_bridge_parser.add_argument("--rationale", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -631,6 +639,14 @@ def main() -> None:
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "bridge-proposal-link-claim-evidence":
+        print_json(
+            store.bridge_tool_safety_policy_link_to_claim_graph(
+                link_id=args.link_id,
+                reviewer=args.reviewer,
+                rationale=args.rationale,
             )
         )
     elif args.command == "context":

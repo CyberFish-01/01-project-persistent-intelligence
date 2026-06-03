@@ -161,6 +161,30 @@ class StateValidationTests(unittest.TestCase):
                     "type": "invalid_link_type",
                 }
             )
+            state["claim_graph"]["proposal_link_evidence"].append(
+                {
+                    "evidence_id": "proposal_link_evidence_bad",
+                    "timestamp": state["created_at"],
+                    "source_link_id": "tool_safety_policy_link_bad",
+                    "from_proposal_id": "proposal_a",
+                    "to_proposal_id": "proposal_b",
+                    "link_type": "execute",
+                    "status": "active",
+                    "reviewer": "unit_test",
+                    "evidence": [],
+                    "relationship_mode": "executable_policy",
+                    "claim_graph_mode": "claim_rewrite",
+                    "requires_review": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "claim_mutation_allowed": True,
+                    "semantic_memory_mutation_allowed": True,
+                    "provenance": [],
+                    "rollback": {},
+                }
+            )
 
             report = validate_state(state, store.list_episodes())
             self.assertEqual(report["status"], "failed")
@@ -170,6 +194,44 @@ class StateValidationTests(unittest.TestCase):
             self.assertIn("claim_graph.links[0].link_id", paths)
             self.assertIn("claim_graph.links[0].type", paths)
             self.assertIn("claim_graph.links[0]", paths)
+            self.assertIn("claim_graph.proposal_link_evidence[0].link_type", paths)
+            self.assertIn("claim_graph.proposal_link_evidence[0].evidence", paths)
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].relationship_mode",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].claim_graph_mode",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].requires_review",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].claim_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "claim_graph.proposal_link_evidence[0].semantic_memory_mutation_allowed",
+                paths,
+            )
 
     def test_task_hub_requires_action_and_procedural_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:

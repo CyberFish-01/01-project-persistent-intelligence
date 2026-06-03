@@ -131,6 +131,7 @@ def default_claim_graph() -> dict:
         "graph_version": "0.2",
         "claims": [],
         "links": [],
+        "proposal_link_evidence": [],
         "review_decisions": [],
         "policy": {
             "revision_mode": "minimal_change_preview",
@@ -427,11 +428,17 @@ def ensure_claim_graph(state: dict, timestamp: str) -> bool:
     if not isinstance(claim_graph.get("links"), list):
         claim_graph["links"] = []
         changed = True
+    if not isinstance(claim_graph.get("proposal_link_evidence"), list):
+        claim_graph["proposal_link_evidence"] = []
+        changed = True
     default_graph = default_claim_graph()
-    for key in ("graph_version", "policy", "review_decisions"):
+    for key in ("graph_version", "policy", "proposal_link_evidence", "review_decisions"):
         if key not in claim_graph:
             claim_graph[key] = default_graph[key]
             changed = True
+    if not isinstance(claim_graph.get("proposal_link_evidence"), list):
+        claim_graph["proposal_link_evidence"] = []
+        changed = True
     if not isinstance(claim_graph.get("review_decisions"), list):
         claim_graph["review_decisions"] = []
         changed = True
@@ -4680,6 +4687,175 @@ class StateStore:
             ],
         }
 
+    def bridge_tool_safety_policy_link_to_claim_graph(
+        self,
+        link_id: str,
+        reviewer: str = "manual_review",
+        rationale: str = "",
+    ) -> dict:
+        state = self.load()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(utc_now(), state.get("working_state", {})),
+        )
+        claim_graph = state.setdefault("claim_graph", default_claim_graph())
+        claim_graph.setdefault("proposal_link_evidence", [])
+        claim_graph.setdefault("links", [])
+        link = next(
+            (
+                item
+                for item in task_hub.setdefault("tool_safety_policy_links", [])
+                if isinstance(item, dict) and item.get("link_id") == link_id
+            ),
+            None,
+        )
+        if link is None:
+            return {
+                "status": "not_found",
+                "error": "tool_safety_policy_link_not_found",
+                "link_id": link_id,
+            }
+
+        existing = next(
+            (
+                item
+                for item in claim_graph.setdefault("proposal_link_evidence", [])
+                if isinstance(item, dict)
+                and item.get("source_link_id") == link_id
+                and item.get("status") == "active"
+            ),
+            None,
+        )
+        if existing is not None:
+            return {
+                "status": "duplicate",
+                "evidence_id": existing.get("evidence_id"),
+                "link_id": link_id,
+            }
+
+        now = utc_now()
+        evidence_record = build_proposal_link_claim_graph_evidence(
+            link=link,
+            reviewer=reviewer,
+            rationale=rationale,
+            timestamp=now,
+        )
+        claim_link = build_proposal_link_claim_graph_link(
+            evidence_record=evidence_record,
+            link=link,
+            timestamp=now,
+        )
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation="bridge_tool_safety_policy_link_to_claim_graph",
+            target_path="claim_graph.proposal_link_evidence",
+            evidence=evidence_record["evidence"],
+            metadata={
+                "proposal_link_evidence_id": evidence_record["evidence_id"],
+                "tool_safety_policy_link_id": link_id,
+                "claim_graph_link_id": claim_link["link_id"],
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+        )
+        evidence_record["snapshot_id"] = snapshot["snapshot_id"]
+        evidence_record["rollback"]["snapshot_id"] = snapshot["snapshot_id"]
+        claim_graph.setdefault("proposal_link_evidence", []).append(evidence_record)
+        add_claim_link(claim_graph, claim_link)
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "claim_graph.proposal_link_evidence",
+                "operation": "bridge_tool_safety_policy_link_to_claim_graph",
+                "before": None,
+                "after": evidence_record["evidence_id"],
+                "evidence": evidence_record["evidence"],
+                "gate": "medium",
+                "confidence": evidence_record["confidence"],
+                "proposal_link_evidence_id": evidence_record["evidence_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action="bridge_tool_safety_policy_link_to_claim_graph",
+            target="claim_graph.proposal_link_evidence",
+            outcome="bridged",
+            evidence=evidence_record["evidence"],
+            metadata={
+                "proposal_link_evidence_id": evidence_record["evidence_id"],
+                "tool_safety_policy_link_id": link_id,
+                "claim_graph_link_id": claim_link["link_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="proposal_link_claim_graph_bridge",
+            nodes=[
+                {
+                    "id": "proposal_link",
+                    "type": "PolicyProposalLink",
+                    "link_id": link_id,
+                    "link_type": link.get("link_type"),
+                    "relationship_mode": "review_link_only",
+                },
+                {
+                    "id": "claim_graph_evidence",
+                    "type": "ClaimGraphEvidence",
+                    "evidence_id": evidence_record["evidence_id"],
+                    "claim_graph_mode": "evidence_bridge_only",
+                },
+            ],
+            edges=[
+                {
+                    "from": "proposal_link",
+                    "to": "claim_graph_evidence",
+                    "type": "evidence_bridge",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": "bridge",
+                    "target": "claim_graph.proposal_link_evidence",
+                    "proposal_link_evidence_id": evidence_record["evidence_id"],
+                    "tool_safety_policy_link_id": link_id,
+                    "claim_graph_link_id": claim_link["link_id"],
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "bridge_tool_safety_policy_link_to_claim_graph",
+                    "reviewer": reviewer,
+                    "rationale": rationale,
+                    "proposal_link_evidence": evidence_record,
+                }
+            ],
+            summary=(
+                f"Bridged tool/safety policy proposal link {link_id} into "
+                "claim graph evidence."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": "bridged",
+            "evidence_id": evidence_record["evidence_id"],
+            "link_id": link_id,
+            "claim_graph_link_id": claim_link["link_id"],
+            "snapshot_id": snapshot["snapshot_id"],
+        }
+
     def apply_tool_safety_policy_lifecycle_action(
         self,
         proposal_id: str,
@@ -5960,6 +6136,11 @@ def build_context_signal_index(state: dict, dream_artifacts: List[dict]) -> dict
         if not isinstance(decision, dict):
             continue
         claim_evidence.update(str(item) for item in decision.get("patch_preview", {}).get("affected_evidence", []) if item)
+    for evidence_record in state.get("claim_graph", {}).get("proposal_link_evidence", []):
+        if not isinstance(evidence_record, dict):
+            continue
+        claim_evidence.add(str(evidence_record.get("evidence_id")))
+        claim_evidence.update(str(item) for item in evidence_record.get("evidence", []) if item)
 
     dream_inputs = set()
     dream_proposals = set()
@@ -7242,6 +7423,87 @@ def build_tool_safety_policy_link_lifecycle_decision(
             "snapshot_id": snapshot_id,
             "reversible": True,
         },
+    }
+
+
+def build_proposal_link_claim_graph_evidence(
+    link: dict,
+    reviewer: str,
+    rationale: str,
+    timestamp: str,
+) -> dict:
+    evidence = list(
+        dict.fromkeys(
+            str(item).strip()
+            for item in [
+                link.get("link_id"),
+                link.get("from_proposal_id"),
+                link.get("to_proposal_id"),
+                *link.get("evidence", []),
+            ]
+            if str(item or "").strip()
+        )
+    )
+    return {
+        "evidence_id": new_id("proposal_link_evidence"),
+        "timestamp": timestamp,
+        "source_link_id": link.get("link_id"),
+        "from_proposal_id": link.get("from_proposal_id"),
+        "to_proposal_id": link.get("to_proposal_id"),
+        "link_type": link.get("link_type"),
+        "status": "active",
+        "reviewer": reviewer,
+        "rationale": rationale,
+        "evidence": evidence,
+        "confidence": bounded_float(link.get("confidence", 0.5), default=0.5),
+        "scope_overlap": link.get("scope_overlap", {}),
+        "relationship_mode": "review_link_only",
+        "claim_graph_mode": "evidence_bridge_only",
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "claim_mutation_allowed": False,
+        "semantic_memory_mutation_allowed": False,
+        "snapshot_id": None,
+        "rollback": {
+            "snapshot_id": None,
+            "reversible": True,
+        },
+        "provenance": [
+            {
+                "type": "tool_safety_policy_link_claim_graph_bridge",
+                "source_link_id": link.get("link_id"),
+            }
+        ],
+    }
+
+
+def build_proposal_link_claim_graph_link(
+    evidence_record: dict,
+    link: dict,
+    timestamp: str,
+) -> dict:
+    return {
+        "link_id": new_id("claim_link"),
+        "timestamp": timestamp,
+        "from": evidence_record.get("evidence_id"),
+        "to": link.get("link_id"),
+        "type": "supports",
+        "reason": (
+            "Tool/safety proposal relationship is exposed to the claim graph "
+            "as review-only evidence."
+        ),
+        "confidence": evidence_record.get("confidence", 0.5),
+        "source": "tool_safety_policy_link_bridge",
+        "source_link_id": link.get("link_id"),
+        "evidence_bridge_id": evidence_record.get("evidence_id"),
+        "relationship_mode": "review_link_only",
+        "claim_graph_mode": "evidence_bridge_only",
+        "execution_prohibited": True,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
     }
 
 

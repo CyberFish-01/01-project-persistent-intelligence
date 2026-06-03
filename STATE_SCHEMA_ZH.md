@@ -27,6 +27,7 @@ open_conflicts: []
 claim_graph:
   claims: []
   links: []
+  proposal_link_evidence: []
 context_builder:
   builder_version: "0.3"
   policy: {}
@@ -634,6 +635,41 @@ claim_graph:
       type: "contradicts|supports|supersedes|depends_on"
       reason: "Evidence item supports the existence of this claim record."
       confidence: 0.7
+  proposal_link_evidence:
+    - evidence_id: "proposal_link_evidence_0001"
+      timestamp: "ISO-8601 timestamp"
+      source_link_id: "tool_safety_policy_link_0001"
+      from_proposal_id: "tool_safety_policy_proposal_0002"
+      to_proposal_id: "tool_safety_policy_proposal_0001"
+      link_type: "supersedes"
+      status: "active"
+      reviewer: "manual_review"
+      rationale: "Expose proposal relationship as claim graph evidence."
+      evidence:
+        - "tool_safety_policy_link_0001"
+        - "tool_safety_policy_proposal_0002"
+        - "tool_safety_policy_proposal_0001"
+      confidence: 0.86
+      scope_overlap:
+        score: 0.67
+        shared_terms:
+          - "tool_use"
+          - "preflight"
+      relationship_mode: "review_link_only"
+      claim_graph_mode: "evidence_bridge_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      claim_mutation_allowed: false
+      semantic_memory_mutation_allowed: false
+      provenance:
+        - type: "tool_safety_policy_link_claim_graph_bridge"
+          source_link_id: "tool_safety_policy_link_0001"
+      rollback:
+        snapshot_id: "snapshot_0008"
+        reversible: true
   review_decisions: []
   policy:
     revision_mode: "minimal_change_preview"
@@ -645,6 +681,8 @@ claim_graph:
 每个 claim 都必须有 evidence、provenance、status、dependencies、revision policy、review history 和 resolution metadata。
 
 当前 Dream conflict detection 会同时写入 `open_conflicts`、对应 claim nodes，以及 support/contradiction/dependency links。Claim graph entry 是 review/audit material；`review-claim` 会创建 minimal-change patch preview 和 review decision，但不会直接修改 semantic memory 或 Identity Core。
+
+P29 增加 proposal link evidence bridges。`bridge-proposal-link-claim-evidence` 会把已 review 的 tool/safety proposal relationship 复制到 `claim_graph.proposal_link_evidence`，并添加一条 review-only claim graph support link。它只把 relationship evidence 暴露给 claim graph，不 rewrite claims，不修改 semantic memory、Identity Core，也不创建 executable policy。
 
 ## 13. Task Hub
 
@@ -1514,6 +1552,7 @@ state_transfer_package:
 - 每个 procedural lifecycle decision 都有 memory id、workflow、reviewer、action、result 和 snapshot metadata；
 - 每个 tool/safety policy link 都引用已存在的 proposal，带有 evidence，保持 `review_link_only`，并且不能创建 executable policy 或修改 Identity Core；
 - 每个 tool/safety policy link lifecycle decision 都引用已存在的 link，保持 `review_link_only`，并且不能创建 executable policy 或修改 Identity Core；
+- 每个 proposal link claim-graph evidence bridge 都保持 `evidence_bridge_only`，不能 rewrite claims，不能修改 semantic memory，也不能创建 executable policy；
 - identity update 必须进入 `identity_update_gate`，并保留 gate_result、non_claims_check 和 drift_score；
 - P11 不允许直接 patch `identity_core`，approve 只能追加 identity_memory；
 - 每个 session 都能回答 Identity、Context、Intent 三个锚点。

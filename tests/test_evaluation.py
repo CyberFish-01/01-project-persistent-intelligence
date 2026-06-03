@@ -137,6 +137,16 @@ class FoundationEvaluationTests(unittest.TestCase):
             0,
         )
         self.assertGreaterEqual(
+            metrics["proposal_link_claim_graph_evidence_count"],
+            1,
+        )
+        self.assertGreaterEqual(metrics["proposal_link_claim_graph_link_count"], 1)
+        self.assertEqual(metrics["proposal_link_claim_graph_claim_mutation_count"], 0)
+        self.assertEqual(
+            metrics["proposal_link_claim_graph_executable_policy_count"],
+            0,
+        )
+        self.assertGreaterEqual(
             metrics["tool_safety_policy_lifecycle_decision_count"],
             1,
         )

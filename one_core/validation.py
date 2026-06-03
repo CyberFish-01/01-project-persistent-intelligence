@@ -751,6 +751,7 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
 
     claims = claim_graph.get("claims")
     links = claim_graph.get("links")
+    proposal_link_evidence = claim_graph.get("proposal_link_evidence")
     issues: list[ValidationIssue] = []
     if claim_graph.get("graph_version") != "0.2":
         issues.append(
@@ -773,6 +774,14 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
                 "Claim graph review decisions must be a list.",
             )
         )
+    if not isinstance(proposal_link_evidence, list):
+        issues.append(
+            ValidationIssue(
+                "claim_graph.proposal_link_evidence",
+                "Claim graph proposal link evidence must be a list.",
+            )
+        )
+        proposal_link_evidence = []
     if not isinstance(claims, list):
         issues.append(ValidationIssue("claim_graph.claims", "Claim graph claims must be a list."))
         claims = []
@@ -870,13 +879,80 @@ def validate_claim_graph(state: dict[str, Any]) -> list[ValidationIssue]:
                 )
             )
         endpoints = {str(link.get("from")), str(link.get("to"))}
-        if claim_ids and not any(endpoint in claim_ids for endpoint in endpoints):
+        evidence_bridge_id = str(link.get("evidence_bridge_id") or "")
+        is_evidence_bridge = (
+            link.get("claim_graph_mode") == "evidence_bridge_only"
+            and bool(evidence_bridge_id)
+        )
+        if claim_ids and not is_evidence_bridge and not any(endpoint in claim_ids for endpoint in endpoints):
             issues.append(
                 ValidationIssue(
                     path,
                     "Claim graph link must reference at least one known claim.",
                 )
             )
+        if is_evidence_bridge:
+            if link.get("relationship_mode") != "review_link_only":
+                issues.append(ValidationIssue(path + ".relationship_mode", "Claim graph evidence bridge link must remain review_link_only."))
+            if link.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Claim graph evidence bridge link must prohibit execution."))
+            if link.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Claim graph evidence bridge link must not create executable policy."))
+            if link.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Claim graph evidence bridge link must not mutate Identity Core."))
+    for index, evidence in enumerate(proposal_link_evidence):
+        path = f"claim_graph.proposal_link_evidence[{index}]"
+        if not isinstance(evidence, dict):
+            issues.append(ValidationIssue(path, "Proposal link evidence must be an object."))
+            continue
+        for key in (
+            "evidence_id",
+            "timestamp",
+            "source_link_id",
+            "from_proposal_id",
+            "to_proposal_id",
+            "link_type",
+            "status",
+            "reviewer",
+            "evidence",
+            "relationship_mode",
+            "claim_graph_mode",
+            "requires_review",
+            "execution_prohibited",
+            "executable_policy",
+            "executable_policy_created",
+            "identity_mutation_allowed",
+            "claim_mutation_allowed",
+            "semantic_memory_mutation_allowed",
+            "provenance",
+            "rollback",
+        ):
+            if key not in evidence:
+                issues.append(ValidationIssue(path + f".{key}", "Proposal link evidence key is missing."))
+        if evidence.get("status") not in {"active", "archived", "discarded", "quarantined"}:
+            issues.append(ValidationIssue(path + ".status", "Proposal link evidence status is invalid."))
+        if evidence.get("link_type") not in {"supports", "conflicts_with", "supersedes", "overlaps", "depends_on"}:
+            issues.append(ValidationIssue(path + ".link_type", "Proposal link evidence link type is invalid."))
+        if not isinstance(evidence.get("evidence"), list) or not evidence.get("evidence"):
+            issues.append(ValidationIssue(path + ".evidence", "Proposal link evidence requires evidence."))
+        if evidence.get("relationship_mode") != "review_link_only":
+            issues.append(ValidationIssue(path + ".relationship_mode", "Proposal link evidence must remain review_link_only."))
+        if evidence.get("claim_graph_mode") != "evidence_bridge_only":
+            issues.append(ValidationIssue(path + ".claim_graph_mode", "Proposal link evidence must remain evidence_bridge_only."))
+        if evidence.get("requires_review") is not True:
+            issues.append(ValidationIssue(path + ".requires_review", "Proposal link evidence must require review."))
+        if evidence.get("execution_prohibited") is not True:
+            issues.append(ValidationIssue(path + ".execution_prohibited", "Proposal link evidence must prohibit execution."))
+        if evidence.get("executable_policy") is not False:
+            issues.append(ValidationIssue(path + ".executable_policy", "Proposal link evidence must not be executable policy."))
+        if evidence.get("executable_policy_created") is not False:
+            issues.append(ValidationIssue(path + ".executable_policy_created", "Proposal link evidence must not create executable policy."))
+        if evidence.get("identity_mutation_allowed") is not False:
+            issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Proposal link evidence must not mutate Identity Core."))
+        if evidence.get("claim_mutation_allowed") is not False:
+            issues.append(ValidationIssue(path + ".claim_mutation_allowed", "Proposal link evidence must not mutate claims."))
+        if evidence.get("semantic_memory_mutation_allowed") is not False:
+            issues.append(ValidationIssue(path + ".semantic_memory_mutation_allowed", "Proposal link evidence must not mutate semantic memory."))
     return issues
 
 

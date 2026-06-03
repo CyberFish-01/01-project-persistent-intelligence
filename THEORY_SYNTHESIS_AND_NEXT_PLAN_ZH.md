@@ -883,7 +883,7 @@ P22 Reflection-Policy Linkage
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
 - proposal link lifecycle retention 已由 P28 处理；
-- proposal links 还没有连接到 claim graph dependency/evidence links。
+- proposal link claim-graph evidence bridging 已由 P29 处理。
 
 ### P28 Tool/Safety Proposal Link Lifecycle
 
@@ -904,20 +904,42 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- proposal links 还没有连接到 claim graph dependency/evidence links；
-- link lifecycle decisions 还没有表示为 claim graph evidence。
+- proposal link claim-graph evidence bridging 已由 P29 处理；
+- context builder 仍把 bridged governance evidence 当作 generic claim graph evidence。
+
+### P29 Proposal Link Claim-Graph Evidence Bridge
+
+目标：把已 review 的 tool/safety proposal relationships 作为 evidence/dependency material 暴露给 claim graph，同时不 rewrite claims，也不创建 executable policy。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `claim_graph.proposal_link_evidence` 记录从 tool/safety proposal links 桥接来的 review-only evidence；
+- `bridge-proposal-link-claim-evidence` 会创建 proposal link evidence record 和 claim graph support link；
+- 同一个 source link 的重复 active bridge 会被压制；
+- bridged evidence 会通过 `claim_graph_evidence` 进入 claim graph activation signals；
+- validation 会拒绝 executable policy flags、claim rewrite flags、semantic memory mutation flags、invalid link types 和 missing evidence；
+- scenario evaluation 检查 bridge creation、claim graph link creation、不 rewrite claim、不创建 executable policy，以及不会修改 Identity Core。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- context builder 仍把 bridged governance evidence 当作 generic claim graph evidence；
+- activation traces 还不能区分 identity-gate、claim-conflict、Dream 和 governance proposal-link evidence。
 
 建议下一步：
 
 ```text
-P29 Proposal Link Claim-Graph Evidence Bridge
+P30 Context Builder Governance Signal Calibration
 ```
 
 理由：
 
-- P27 和 P28 已能表达并 retire proposal relationships，但关系层仍然和 claim graph 分离；
-- claim-graph bridge 应该把 proposal links 作为 evidence/dependency records 追踪，但不 rewrite claims，也不创建 executable policy；
-- 这能为未来 policy review 提供 evidence structure，同时保持 auditability；
+- P29 已让 proposal links 能被 claim graph 看见，但 Context Builder 仍只使用粗粒度 `claim_graph_evidence` signal；
+- governance evidence 应该先成为独立 activation reason 和 metric，再考虑任何未来 policy executor；
+- 这会提升 state transfer 质量，让“为什么某条 safety/proposal relationship 进入 context”更可解释；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

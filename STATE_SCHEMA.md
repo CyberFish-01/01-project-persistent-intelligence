@@ -25,6 +25,7 @@ open_conflicts: []
 claim_graph:
   claims: []
   links: []
+  proposal_link_evidence: []
 context_builder:
   builder_version: "0.3"
   policy: {}
@@ -632,6 +633,41 @@ claim_graph:
       type: "contradicts|supports|supersedes|depends_on"
       reason: "Evidence item supports the existence of this claim record."
       confidence: 0.7
+  proposal_link_evidence:
+    - evidence_id: "proposal_link_evidence_0001"
+      timestamp: "ISO-8601 timestamp"
+      source_link_id: "tool_safety_policy_link_0001"
+      from_proposal_id: "tool_safety_policy_proposal_0002"
+      to_proposal_id: "tool_safety_policy_proposal_0001"
+      link_type: "supersedes"
+      status: "active"
+      reviewer: "manual_review"
+      rationale: "Expose proposal relationship as claim graph evidence."
+      evidence:
+        - "tool_safety_policy_link_0001"
+        - "tool_safety_policy_proposal_0002"
+        - "tool_safety_policy_proposal_0001"
+      confidence: 0.86
+      scope_overlap:
+        score: 0.67
+        shared_terms:
+          - "tool_use"
+          - "preflight"
+      relationship_mode: "review_link_only"
+      claim_graph_mode: "evidence_bridge_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      claim_mutation_allowed: false
+      semantic_memory_mutation_allowed: false
+      provenance:
+        - type: "tool_safety_policy_link_claim_graph_bridge"
+          source_link_id: "tool_safety_policy_link_0001"
+      rollback:
+        snapshot_id: "snapshot_0008"
+        reversible: true
   review_decisions: []
   policy:
     revision_mode: "minimal_change_preview"
@@ -643,6 +679,8 @@ claim_graph:
 Every claim must have evidence, provenance, status, dependencies, revision policy, review history, and resolution metadata.
 
 Current Dream conflict detection writes `open_conflicts`, corresponding claim nodes, and support/contradiction/dependency links. Claim graph entries are review/audit material; `review-claim` creates a minimal-change patch preview and review decision, but does not directly mutate semantic memory or Identity Core.
+
+P29 adds proposal link evidence bridges. `bridge-proposal-link-claim-evidence` copies a reviewed tool/safety proposal relationship into `claim_graph.proposal_link_evidence` and adds a review-only claim graph support link. It exposes relationship evidence to the claim graph without rewriting claims, semantic memory, Identity Core, or executable policy.
 
 ## 13. Task Hub
 
@@ -1512,6 +1550,7 @@ A valid 01 state must satisfy:
 - every procedural lifecycle decision has memory id, workflow, reviewer, action, result, and snapshot metadata,
 - every tool/safety policy link references existing proposals, has evidence, remains `review_link_only`, and cannot create executable policy or mutate Identity Core,
 - every tool/safety policy link lifecycle decision references an existing link, remains `review_link_only`, and cannot create executable policy or mutate Identity Core,
+- every proposal link claim-graph evidence bridge remains `evidence_bridge_only`, cannot rewrite claims, cannot mutate semantic memory, and cannot create executable policy,
 - every identity update enters `identity_update_gate` and keeps gate_result, non_claims_check, and drift_score,
 - P11 must not directly patch `identity_core`; approval can only append identity_memory,
 - every session can answer Identity, Context, and Intent anchors.

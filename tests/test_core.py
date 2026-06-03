@@ -1369,6 +1369,106 @@ class CoreStateTests(unittest.TestCase):
                 },
             )
 
+    def test_proposal_link_claim_graph_bridge_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            recorded = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="claim_graph_review",
+                observation="Proposal link evidence should be traceable in claim graph.",
+                lesson="Bridge proposal links as evidence without mutating claims.",
+                expected_behavior="Create claim graph evidence bridge only.",
+                actor="unit_test",
+                source_ids=["action_policy_link_bridge"],
+                evidence=["action_policy_link_bridge"],
+                risk="high",
+                confidence=0.9,
+            )
+            store.verify_reflection(
+                recorded["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=["action_policy_link_bridge"],
+            )
+            guidance_item = store.build_context_package()["reflection_guidance_queue"][0]
+            store.review_reflection_guidance(
+                guidance_item["guidance_item_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Use as proposal link bridge evidence.",
+            )
+            broad = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="tool_use.preflight",
+                proposed_rule="Require readiness review before tool execution.",
+                proposer="unit_test",
+                rationale="Broad preflight proposal.",
+                risk="high",
+                confidence=0.82,
+            )
+            specific = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="tool_use.preflight.input_readiness",
+                proposed_rule="Require explicit input readiness before local tool execution.",
+                proposer="unit_test",
+                rationale="Specific preflight input proposal.",
+                risk="high",
+                confidence=0.9,
+            )
+            linked = store.link_tool_safety_policy_proposals(
+                from_proposal_id=specific["proposal_id"],
+                to_proposal_id=broad["proposal_id"],
+                link_type="supersedes",
+                reviewer="unit_test",
+                reason="Specific proposal supersedes broad proposal.",
+                evidence=["action_policy_link_bridge"],
+                confidence=0.84,
+            )
+
+            bridged = store.bridge_tool_safety_policy_link_to_claim_graph(
+                linked["link_id"],
+                reviewer="unit_test",
+                rationale="Expose proposal relationship as claim graph evidence.",
+            )
+            state = store.load()
+            evidence = state["claim_graph"]["proposal_link_evidence"][-1]
+            claim_link = next(
+                item
+                for item in state["claim_graph"]["links"]
+                if item.get("evidence_bridge_id") == bridged["evidence_id"]
+            )
+            duplicate = store.bridge_tool_safety_policy_link_to_claim_graph(
+                linked["link_id"],
+                reviewer="unit_test",
+                rationale="Duplicate bridge should be suppressed.",
+            )
+
+            self.assertEqual(bridged["status"], "bridged")
+            self.assertEqual(evidence["source_link_id"], linked["link_id"])
+            self.assertEqual(evidence["claim_graph_mode"], "evidence_bridge_only")
+            self.assertEqual(evidence["relationship_mode"], "review_link_only")
+            self.assertTrue(evidence["requires_review"])
+            self.assertTrue(evidence["execution_prohibited"])
+            self.assertFalse(evidence["executable_policy"])
+            self.assertFalse(evidence["executable_policy_created"])
+            self.assertFalse(evidence["identity_mutation_allowed"])
+            self.assertFalse(evidence["claim_mutation_allowed"])
+            self.assertFalse(evidence["semantic_memory_mutation_allowed"])
+            self.assertEqual(claim_link["type"], "supports")
+            self.assertEqual(claim_link["claim_graph_mode"], "evidence_bridge_only")
+            self.assertTrue(claim_link["execution_prohibited"])
+            self.assertFalse(claim_link["executable_policy_created"])
+            self.assertFalse(claim_link["identity_mutation_allowed"])
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(
+                store.list_traces()[-1]["workflow"],
+                "proposal_link_claim_graph_bridge",
+            )
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertEqual(duplicate["status"], "duplicate")
+            self.assertEqual(duplicate["evidence_id"], bridged["evidence_id"])
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

@@ -849,7 +849,7 @@ Remaining gaps:
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
 - proposal link lifecycle retention is handled by P28;
-- proposal links are not yet connected to claim graph dependency/evidence links.
+- proposal link claim-graph evidence bridging is handled by P29.
 
 ### P28 Tool/Safety Proposal Link Lifecycle
 
@@ -870,20 +870,42 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- proposal links are not yet connected to claim graph dependency/evidence links;
-- link lifecycle decisions are not yet represented as claim graph evidence.
+- proposal link claim-graph evidence bridging is handled by P29;
+- context builder treats bridged governance evidence as generic claim graph evidence.
+
+### P29 Proposal Link Claim-Graph Evidence Bridge
+
+Goal: expose reviewed tool/safety proposal relationships to the claim graph as evidence/dependency material without rewriting claims or creating executable policy.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `claim_graph.proposal_link_evidence` records review-only evidence bridged from tool/safety proposal links;
+- `bridge-proposal-link-claim-evidence` creates a proposal link evidence record and a claim graph support link;
+- duplicate active bridges for the same source link are suppressed;
+- bridged evidence enters claim graph activation signals through `claim_graph_evidence`;
+- validation rejects executable policy flags, claim rewrite flags, semantic memory mutation flags, invalid link types, and missing evidence;
+- scenario evaluation verifies bridge creation, claim graph link creation, no claim rewrite, no executable policy creation, and no Identity Core mutation.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- context builder treats bridged governance evidence as generic claim graph evidence;
+- activation traces do not yet distinguish identity-gate, claim-conflict, Dream, and governance proposal-link evidence.
 
 Recommended next step:
 
 ```text
-P29 Proposal Link Claim-Graph Evidence Bridge
+P30 Context Builder Governance Signal Calibration
 ```
 
 Reason:
 
-- P27 and P28 can express and retire proposal relationships, but the relationship layer is still separate from the claim graph;
-- a claim-graph bridge should make proposal links traceable as evidence/dependency records without rewriting claims or creating executable policy;
-- this prepares future policy review to reason over evidence structure while preserving auditability;
+- P29 makes proposal links visible to the claim graph, but Context Builder still uses one coarse `claim_graph_evidence` signal;
+- governance evidence should be traceable as its own activation reason and metric before any future policy executor is considered;
+- this improves state transfer quality by making why a safety/proposal relation entered context more legible;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:

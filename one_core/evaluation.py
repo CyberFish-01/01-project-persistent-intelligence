@@ -945,6 +945,9 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         reviewer="scenario_eval",
         decision_note="Approve as non-executable policy proposal evidence.",
     )
+    claim_count_before_bridge = len(
+        store.load().get("claim_graph", {}).get("claims", [])
+    )
     policy_link = store.link_tool_safety_policy_proposals(
         from_proposal_id=narrower_policy_proposal.get("proposal_id", ""),
         to_proposal_id=policy_proposal.get("proposal_id", ""),
@@ -953,6 +956,11 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         reason="Narrower input-readiness proposal supersedes broader preflight proposal.",
         evidence=[review.get("guidance_item_id", "")],
         confidence=0.86,
+    )
+    proposal_link_bridge = store.bridge_tool_safety_policy_link_to_claim_graph(
+        link_id=policy_link.get("link_id", ""),
+        reviewer="scenario_eval",
+        rationale="Expose reviewed proposal relationship as claim graph evidence.",
     )
     pre_link_lifecycle_package = store.build_context_package()
     policy_link_lifecycle = store.apply_tool_safety_policy_link_lifecycle_action(
@@ -998,6 +1006,12 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         "tool_safety_policy_link_lifecycle_decisions",
         [],
     )
+    proposal_link_evidence = state.get("claim_graph", {}).get(
+        "proposal_link_evidence",
+        [],
+    )
+    claim_graph_links = state.get("claim_graph", {}).get("links", [])
+    claim_count_after_bridge = len(state.get("claim_graph", {}).get("claims", []))
     reviewed_guidance_item = next(
         (
             item
@@ -1131,6 +1145,40 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         "tool_safety_policy_link_identity_locked": all(
             item.get("identity_mutation_allowed") is False
             for item in policy_links
+            if isinstance(item, dict)
+        ),
+        "proposal_link_claim_graph_bridge_created": proposal_link_bridge.get("status")
+        == "bridged",
+        "proposal_link_claim_graph_bridge_recorded": proposal_link_bridge.get(
+            "evidence_id"
+        )
+        in {
+            item.get("evidence_id")
+            for item in proposal_link_evidence
+            if isinstance(item, dict)
+        },
+        "proposal_link_claim_graph_link_created": proposal_link_bridge.get(
+            "claim_graph_link_id"
+        )
+        in {
+            item.get("link_id")
+            for item in claim_graph_links
+            if isinstance(item, dict)
+        },
+        "proposal_link_claim_graph_bridge_no_claim_rewrite": claim_count_after_bridge
+        == claim_count_before_bridge,
+        "proposal_link_claim_graph_bridge_non_executable": all(
+            item.get("execution_prohibited") is True
+            and item.get("executable_policy") is False
+            and item.get("executable_policy_created") is False
+            and item.get("claim_mutation_allowed") is False
+            and item.get("semantic_memory_mutation_allowed") is False
+            for item in proposal_link_evidence
+            if isinstance(item, dict)
+        ),
+        "proposal_link_claim_graph_bridge_identity_locked": all(
+            item.get("identity_mutation_allowed") is False
+            for item in proposal_link_evidence
             if isinstance(item, dict)
         ),
         "tool_safety_policy_link_lifecycle_archived": policy_link_lifecycle.get(
@@ -1294,6 +1342,29 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
                 "tool_safety_policy_link_lifecycle_executable_policy_count": sum(
                     1
                     for item in policy_link_lifecycle_decisions
+                    if isinstance(item, dict)
+                    and (
+                        item.get("executable_policy_created") is not False
+                        or item.get("executable_policy") is not False
+                    )
+                ),
+                "proposal_link_claim_graph_evidence_count": len(
+                    proposal_link_evidence
+                ),
+                "proposal_link_claim_graph_link_count": sum(
+                    1
+                    for item in claim_graph_links
+                    if isinstance(item, dict)
+                    and item.get("claim_graph_mode") == "evidence_bridge_only"
+                ),
+                "proposal_link_claim_graph_claim_mutation_count": (
+                    0
+                    if claim_count_after_bridge == claim_count_before_bridge
+                    else 1
+                ),
+                "proposal_link_claim_graph_executable_policy_count": sum(
+                    1
+                    for item in proposal_link_evidence
                     if isinstance(item, dict)
                     and (
                         item.get("executable_policy_created") is not False
@@ -2284,6 +2355,22 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
                     0,
                 )
             )
+            for item in metrics
+        ),
+        "proposal_link_claim_graph_evidence_count": sum(
+            int(item.get("proposal_link_claim_graph_evidence_count", 0))
+            for item in metrics
+        ),
+        "proposal_link_claim_graph_link_count": sum(
+            int(item.get("proposal_link_claim_graph_link_count", 0))
+            for item in metrics
+        ),
+        "proposal_link_claim_graph_claim_mutation_count": sum(
+            int(item.get("proposal_link_claim_graph_claim_mutation_count", 0))
+            for item in metrics
+        ),
+        "proposal_link_claim_graph_executable_policy_count": sum(
+            int(item.get("proposal_link_claim_graph_executable_policy_count", 0))
             for item in metrics
         ),
         "tool_safety_policy_lifecycle_decision_count": sum(

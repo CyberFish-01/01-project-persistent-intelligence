@@ -314,7 +314,7 @@ It uses temporary state and currently runs:
 - `failure_reflection`: verifies `record-failure-reflection`, failure reflection persistence, cautionary procedural candidate creation, context exposure, and no Identity Core mutation.
 - `cautionary_procedural_review`: verifies `review-cautionary-procedural-candidate`, active warning creation, review decision metadata, context exposure, replay, `executable_policy: false`, and no Identity Core mutation.
 - `cautionary_warning_lifecycle`: verifies `cautionary-warning-lifecycle`, cautionary lifecycle decision metadata, replay, `executable_policy: false`, no Identity Core mutation, and suppression of archived warnings from context.
-- `reflection_log_verification`: verifies `record-reflection`, `verify-reflection`, reflection log persistence, verification history, context exposure, policy-adjacent advisory guidance from verified reflections, durable guidance queue review, non-executable tool/safety policy proposal review, proposal evidence/scope/staleness scoring, review-only proposal relationship links, proposal link lifecycle retention, proposal lifecycle retention, archived proposal/link context suppression, replay, no executable policy creation, and no Identity Core mutation.
+- `reflection_log_verification`: verifies `record-reflection`, `verify-reflection`, reflection log persistence, verification history, context exposure, policy-adjacent advisory guidance from verified reflections, durable guidance queue review, non-executable tool/safety policy proposal review, proposal evidence/scope/staleness scoring, review-only proposal relationship links, proposal-link claim-graph evidence bridging, proposal link lifecycle retention, proposal lifecycle retention, archived proposal/link context suppression, replay, no executable policy creation, and no Identity Core mutation.
 - `procedural_lifecycle_retention`: verifies `procedural-lifecycle`, procedural lifecycle decision metadata, replay, and suppression of archived procedural memory from context.
 - `identity_update_gate_review`: verifies that identity updates require the high gate; single-evidence proposals are quarantined, three-evidence proposals can append identity_memory, and Identity Core is not rewritten.
 - `event_log_replay_rollback`: verifies that real state transitions enter the append-only event log, dry-run preview does not, replay check passes, and rollback preview does not mutate state.
@@ -379,6 +379,10 @@ Current metrics summary includes:
 - tool/safety policy link archived count,
 - tool/safety policy link active context count,
 - tool/safety policy link lifecycle executable policy count,
+- proposal link claim graph evidence count,
+- proposal link claim graph link count,
+- proposal link claim graph claim mutation count,
+- proposal link claim graph executable policy count,
 - tool/safety policy lifecycle decision count,
 - tool/safety policy archived count,
 - tool/safety policy active context count,

@@ -316,7 +316,7 @@ python3 -m one_core.cli evaluate-scenarios
 - `failure_reflection`：检查 `record-failure-reflection`、failure reflection 持久化、cautionary procedural candidate 生成、context 暴露，以及不会修改 Identity Core。
 - `cautionary_procedural_review`：检查 `review-cautionary-procedural-candidate`、active warning 创建、review decision metadata、context 暴露、replay、`executable_policy: false`，以及不会修改 Identity Core。
 - `cautionary_warning_lifecycle`：检查 `cautionary-warning-lifecycle`、cautionary lifecycle decision metadata、replay、`executable_policy: false`、不会修改 Identity Core，以及 archived warning 不再进入 context。
-- `reflection_log_verification`：检查 `record-reflection`、`verify-reflection`、reflection log 持久化、verification history、context 暴露、来自 verified reflections 的 policy-adjacent advisory guidance、durable guidance queue review、非执行 tool/safety policy proposal review、proposal evidence/scope/staleness scoring、review-only proposal relationship links、proposal link lifecycle retention、proposal lifecycle retention、archived proposal/link context suppression、replay、不创建 executable policy，以及不会修改 Identity Core。
+- `reflection_log_verification`：检查 `record-reflection`、`verify-reflection`、reflection log 持久化、verification history、context 暴露、来自 verified reflections 的 policy-adjacent advisory guidance、durable guidance queue review、非执行 tool/safety policy proposal review、proposal evidence/scope/staleness scoring、review-only proposal relationship links、proposal-link claim-graph evidence bridging、proposal link lifecycle retention、proposal lifecycle retention、archived proposal/link context suppression、replay、不创建 executable policy，以及不会修改 Identity Core。
 - `procedural_lifecycle_retention`：检查 `procedural-lifecycle`、procedural lifecycle decision metadata、replay，以及 archived procedural memory 不再进入 context。
 - `identity_update_gate_review`：检查 identity update 必须通过 high gate；单证据会被 quarantine，三证据可批准为 identity_memory，但不会改写 Identity Core。
 - `event_log_replay_rollback`：检查真实 state transition 会进入 append-only event log，dry-run preview 不写入，replay check 通过，rollback preview 不修改 state。
@@ -381,6 +381,10 @@ v0.8 runner 会报告 stateless、retrieval-only、summary-only baseline metadat
 - tool/safety policy link archived count；
 - tool/safety policy link active context count；
 - tool/safety policy link lifecycle executable policy count；
+- proposal link claim graph evidence count；
+- proposal link claim graph link count；
+- proposal link claim graph claim mutation count；
+- proposal link claim graph executable policy count；
 - tool/safety policy lifecycle decision count；
 - tool/safety policy archived count；
 - tool/safety policy active context count；
