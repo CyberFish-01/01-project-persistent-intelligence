@@ -401,6 +401,10 @@ def main() -> None:
         help="Report replay projection coverage and retention suggestions without mutating state.",
     )
     event_report_parser.add_argument("--retention-limit", type=int, default=200)
+    subparsers.add_parser(
+        "event-payload-diff-report",
+        help="Preview event payload and object-diff coverage without mutating state.",
+    )
     event_retention_review_parser = subparsers.add_parser(
         "review-event-retention",
         help="Record a review-only event retention planning record.",
@@ -739,6 +743,8 @@ def main() -> None:
         print_json(store.replay_events())
     elif args.command == "event-report":
         print_json(store.event_projection_report(retention_limit=args.retention_limit))
+    elif args.command == "event-payload-diff-report":
+        print_json(store.event_payload_diff_coverage_preview())
     elif args.command == "review-event-retention":
         print_json(
             store.review_event_retention(

@@ -1246,6 +1246,60 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P39 Event Payload / Diff Coverage Preview
+
+Goal: make event object-payload and object-diff coverage visible before any retention or compaction design can claim safety.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `event-payload-diff-report` CLI previews event payload/diff coverage without mutating state;
+- `StateStore.event_payload_diff_coverage_preview` wraps replay status, projection mode, and read-only state checks;
+- `build_event_payload_diff_coverage` classifies events as `reference_only`, `payload_hint_only`, `diff_ready`, or `missing_transition_reference`;
+- report metrics include transition reference count, payload hint count, payload gap count, diff ready count, diff gap count, high-risk count, and rollback snapshot count;
+- target-path and workflow summaries show where payload/diff gaps concentrate;
+- scenario evaluation verifies the report is read-only, transition references are complete in the normal replay scenario, diff gaps are visible, full object rebuild is not ready, and destructive compaction remains blocked;
+- tests verify both read-only preview behavior and malformed-event high-risk detection.
+
+Remaining gaps:
+
+- events still do not store full object payloads for most state transitions;
+- events still do not store explicit object diffs;
+- rollback snapshots remain metadata-only;
+- no destructive event compaction, summarization, deletion, or rewrite exists.
+
+Recommended next step:
+
+```text
+P40 Event Payload Capture Policy Proposal
+```
+
+Reason:
+
+- P39 shows that transition references are mostly sufficient, but object payload/diff coverage is not;
+- before implementing payload capture, the project should define a review-only capture policy proposal that says which target paths need full payloads, diffs, snapshots, or reference-only treatment;
+- this keeps the next move in governance/report space and avoids prematurely changing the append-only event schema.
+
+Desired acceptance:
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+Research calibration after P39:
+
+- Martin Fowler's Event Sourcing pattern reinforces the requirement that state changes be captured as durable event objects that can support reconstruction of past states: https://www.martinfowler.com/eaaDev/EventSourcing.html
+- W3C PROV-DM gives the project a stable vocabulary for event provenance: entities, activities, agents, usage, generation, and derivation: https://www.w3.org/TR/prov-dm/
+- Tulving's episodic-memory framing connects memory to self, subjective time, and autonoetic continuity; for 01 Core this argues against treating memory as detached text retrieval: https://www.annualreviews.org/doi/10.1146/annurev.psych.53.100901.135114
+- Hassabis and Maguire's construction account of episodic memory supports the idea that future continuity needs structured reconstruction material, not only a flat event reference: https://www.sciencedirect.com/science/article/abs/pii/S1364661307001258
+
+Implication for P40: define a review-only payload capture policy by target path, with explicit requirements for reference-only events, object payload hints, object diffs, snapshot links, and PROV-style provenance fields before any schema-level payload capture or compaction mechanism is attempted.
+
 ### P19 Cautionary Procedural Review
 
 Goal: let warning-style failure candidates become active, reviewable caution memory without becoming executable policy.

@@ -350,6 +350,15 @@ v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、re
 - event report count；
 - event report coverage gap count；
 - event report retention excess count；
+- event payload report count；
+- event payload transition reference count；
+- event payload hint count；
+- event payload gap count；
+- event diff ready count；
+- event diff gap count；
+- event payload high risk count；
+- event payload safe compaction count；
+- event payload state mutation count；
 - event retention review count；
 - event retention lifecycle decision count；
 - event retention archived count；

@@ -2465,6 +2465,91 @@ class CoreStateTests(unittest.TestCase):
             self.assertTrue(report["state_unchanged"])
             self.assertEqual(after, before)
 
+    def test_event_payload_diff_coverage_preview_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P39 payload coverage evidence one")
+            store.record_episode("P39 payload coverage evidence two")
+            created = store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create a review payload hint for P39.",
+            )
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.event_payload_diff_coverage_preview()
+            after = store.load()
+
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(report["mode"], "event_payload_diff_coverage_v0.1")
+            self.assertEqual(report["event_count"], 3)
+            self.assertEqual(report["transition_reference_count"], 3)
+            self.assertEqual(report["payload_hint_count"], 1)
+            self.assertEqual(report["explicit_diff_count"], 0)
+            self.assertEqual(report["diff_ready_count"], 0)
+            self.assertGreaterEqual(report["payload_gap_count"], 2)
+            self.assertEqual(report["high_risk_count"], 0)
+            self.assertFalse(report["full_object_rebuild_ready"])
+            self.assertFalse(report["safe_for_destructive_compaction"])
+            self.assertEqual(
+                report["recommended_next_action"],
+                "define_event_payload_capture_policy",
+            )
+            self.assertTrue(report["report_only"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+            self.assertIn(
+                created["review_id"],
+                {
+                    event["target_identity"]
+                    for event in report["events"]
+                    if event["workflow"] == "event_retention_review"
+                },
+            )
+            self.assertEqual(
+                report["target_paths"]["memory_stores.episodic_memory"][
+                    "payload_hint_count"
+                ],
+                0,
+            )
+
+    def test_event_payload_diff_coverage_flags_missing_transition_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P39 malformed event baseline")
+            event = store.list_events()[0]
+            event["target_path"] = ""
+            event["after"] = None
+            event["target_identity"] = None
+            event["evidence"] = []
+            store.events_path.write_text(
+                json.dumps(event, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+
+            report = store.event_payload_diff_coverage_preview()
+
+            self.assertEqual(report["event_count"], 1)
+            self.assertEqual(report["transition_reference_count"], 0)
+            self.assertEqual(report["high_risk_count"], 1)
+            self.assertEqual(report["high_risk_event_ids"], [event["event_id"]])
+            self.assertEqual(
+                report["events"][0]["payload_status"],
+                "missing_transition_reference",
+            )
+            self.assertIn(
+                "transition_reference",
+                report["events"][0]["missing_capabilities"],
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

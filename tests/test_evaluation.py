@@ -198,6 +198,18 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(metrics["event_report_count"], 1)
         self.assertGreaterEqual(metrics["event_report_coverage_gap_count"], 1)
         self.assertGreaterEqual(metrics["event_report_retention_excess_count"], 1)
+        self.assertEqual(metrics["event_payload_report_count"], 1)
+        self.assertGreaterEqual(
+            metrics["event_payload_transition_reference_count"],
+            metrics["event_count"] - 2,
+        )
+        self.assertGreaterEqual(metrics["event_payload_hint_count"], 1)
+        self.assertGreaterEqual(metrics["event_payload_gap_count"], 1)
+        self.assertEqual(metrics["event_diff_ready_count"], 0)
+        self.assertGreaterEqual(metrics["event_diff_gap_count"], 1)
+        self.assertEqual(metrics["event_payload_high_risk_count"], 0)
+        self.assertEqual(metrics["event_payload_safe_compaction_count"], 0)
+        self.assertEqual(metrics["event_payload_state_mutation_count"], 0)
         self.assertGreaterEqual(metrics["event_retention_review_count"], 1)
         self.assertGreaterEqual(
             metrics["event_retention_lifecycle_decision_count"],

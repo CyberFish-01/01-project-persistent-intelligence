@@ -1381,6 +1381,37 @@ task_hub:
 
 P38 仍然不会 compact、delete、summarize 或 rewrite `events.jsonl`。它只是在设计任何 destructive compaction 机制之前，先记录 human-reviewable retention governance。
 
+P39 增加一个独立的 payload/diff coverage preview：
+
+```bash
+python3 -m one_core.cli event-payload-diff-report
+```
+
+这个 report 是 read-only，会按每条 event 携带多少 object reconstruction evidence 来分类：
+
+```yaml
+event_payload_diff_coverage:
+  mode: "event_payload_diff_coverage_v0.1"
+  event_count: 5
+  transition_reference_count: 5
+  payload_hint_count: 1
+  explicit_diff_count: 0
+  diff_ready_count: 0
+  payload_gap_count: 4
+  diff_gap_count: 5
+  high_risk_count: 0
+  full_object_rebuild_ready: false
+  safe_for_destructive_compaction: false
+  recommended_next_action: "define_event_payload_capture_policy"
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+每条 event 的记录会包含 `payload_status`，例如 `reference_only`、`payload_hint_only`、`diff_ready` 或 `missing_transition_reference`，并列出缺失能力，例如 `object_payload`、`object_diff` 或 `rollback_snapshot`。
+
+P39 不会增加 event compaction、delete、summarize、rewrite、automatic rollback 或 object-level replay。它只是把缺口明确化：当前大多数 events 已经 transition-reference complete，但还不是 object-diff complete。
+
 这个 projection 还不是完整 object-level state rebuild。它是一个可复现的 audit layer，用于在项目尝试 automatic rollback 之前，检查 event log 能否重建 transition references。
 
 Dream artifact 用于保存一次 Dream run 的完整审查材料：

@@ -1271,6 +1271,224 @@ def validate_event_replay_projection(state: dict, projection: dict) -> dict:
     }
 
 
+PAYLOAD_HINT_KEYS = {
+    "payload",
+    "review",
+    "decision",
+    "identity_decision",
+    "review_decision",
+    "event_retention_lifecycle_decision",
+    "proposal",
+    "candidate",
+    "reflection",
+    "memory",
+    "episode",
+    "artifact",
+}
+
+DIFF_HINT_KEYS = {
+    "diff",
+    "patch_diff",
+    "state_diff",
+    "object_diff",
+    "payload_diff",
+}
+
+
+def structured_payload(value: object) -> bool:
+    return isinstance(value, (dict, list)) and bool(value)
+
+
+def contains_nested_key(value: object, keys: set[str], depth: int = 0) -> bool:
+    if depth > 5:
+        return False
+    if isinstance(value, dict):
+        if any(key in value and value.get(key) is not None for key in keys):
+            return True
+        return any(
+            contains_nested_key(item, keys, depth + 1)
+            for item in value.values()
+            if isinstance(item, (dict, list))
+        )
+    if isinstance(value, list):
+        return any(
+            contains_nested_key(item, keys, depth + 1)
+            for item in value
+            if isinstance(item, (dict, list))
+        )
+    return False
+
+
+def event_transition_reference_complete(event: dict) -> bool:
+    if not isinstance(event.get("sequence"), int):
+        return False
+    if not event.get("event_id") or not event.get("operation") or not event.get("target_path"):
+        return False
+    return bool(
+        event.get("target_identity")
+        or scalar_state_ref(event.get("after"))
+        or scalar_state_ref(event.get("before"))
+        or event.get("evidence")
+    )
+
+
+def build_event_payload_diff_coverage(events: List[dict]) -> dict:
+    event_records = []
+    target_paths: dict[str, dict] = {}
+    workflow_counts_by_status: dict[str, dict] = {}
+
+    for event in sorted(events, key=event_sequence_sort_key):
+        target_path = str(event.get("target_path") or "unknown")
+        workflow = str(event.get("workflow") or "unknown")
+        before_is_object = structured_payload(event.get("before"))
+        after_is_object = structured_payload(event.get("after"))
+        before_after_object_pair = before_is_object and after_is_object
+        explicit_diff = contains_nested_key(event, DIFF_HINT_KEYS)
+        payload_hint = (
+            before_is_object
+            or after_is_object
+            or contains_nested_key(event.get("memory_events", []), PAYLOAD_HINT_KEYS)
+            or contains_nested_key(event.get("review_events", []), PAYLOAD_HINT_KEYS)
+        )
+        transition_complete = event_transition_reference_complete(event)
+        rollback_snapshot_id = event.get("rollback", {}).get("snapshot_id")
+        diff_ready = explicit_diff or before_after_object_pair
+
+        if diff_ready:
+            payload_status = "diff_ready"
+            preservation_risk = "low"
+        elif payload_hint:
+            payload_status = "payload_hint_only"
+            preservation_risk = "medium"
+        elif transition_complete:
+            payload_status = "reference_only"
+            preservation_risk = "medium"
+        else:
+            payload_status = "missing_transition_reference"
+            preservation_risk = "high"
+
+        missing_capabilities = []
+        if not transition_complete:
+            missing_capabilities.append("transition_reference")
+        if not payload_hint:
+            missing_capabilities.append("object_payload")
+        if not diff_ready:
+            missing_capabilities.append("object_diff")
+        if not rollback_snapshot_id:
+            missing_capabilities.append("rollback_snapshot")
+
+        record = {
+            "event_id": event.get("event_id"),
+            "sequence": event.get("sequence"),
+            "workflow": workflow,
+            "operation": event.get("operation"),
+            "operation_class": event.get("operation_class"),
+            "target_path": target_path,
+            "target_identity": event.get("target_identity"),
+            "transition_reference_complete": transition_complete,
+            "payload_hint": payload_hint,
+            "explicit_diff": explicit_diff,
+            "before_after_object_pair": before_after_object_pair,
+            "rollback_snapshot_id": rollback_snapshot_id,
+            "payload_status": payload_status,
+            "preservation_risk": preservation_risk,
+            "missing_capabilities": missing_capabilities,
+        }
+        event_records.append(record)
+
+        target = target_paths.setdefault(
+            target_path,
+            {
+                "event_count": 0,
+                "transition_reference_count": 0,
+                "payload_hint_count": 0,
+                "explicit_diff_count": 0,
+                "diff_ready_count": 0,
+                "rollback_snapshot_count": 0,
+                "high_risk_count": 0,
+                "medium_risk_count": 0,
+                "low_risk_count": 0,
+            },
+        )
+        target["event_count"] += 1
+        if transition_complete:
+            target["transition_reference_count"] += 1
+        if payload_hint:
+            target["payload_hint_count"] += 1
+        if explicit_diff:
+            target["explicit_diff_count"] += 1
+        if diff_ready:
+            target["diff_ready_count"] += 1
+        if rollback_snapshot_id:
+            target["rollback_snapshot_count"] += 1
+        target[f"{preservation_risk}_risk_count"] += 1
+
+        workflow_record = workflow_counts_by_status.setdefault(
+            workflow,
+            {
+                "event_count": 0,
+                "reference_only_count": 0,
+                "payload_hint_only_count": 0,
+                "diff_ready_count": 0,
+                "missing_transition_reference_count": 0,
+            },
+        )
+        workflow_record["event_count"] += 1
+        workflow_record[f"{payload_status}_count"] += 1
+
+    event_count = len(event_records)
+    transition_reference_count = sum(
+        1 for item in event_records if item["transition_reference_complete"]
+    )
+    payload_hint_count = sum(1 for item in event_records if item["payload_hint"])
+    explicit_diff_count = sum(1 for item in event_records if item["explicit_diff"])
+    diff_ready_count = sum(
+        1
+        for item in event_records
+        if item["explicit_diff"] or item["before_after_object_pair"]
+    )
+    rollback_snapshot_count = sum(
+        1 for item in event_records if item["rollback_snapshot_id"]
+    )
+    high_risk_event_ids = [
+        item["event_id"] for item in event_records if item["preservation_risk"] == "high"
+    ]
+    payload_gap_event_ids = [
+        item["event_id"] for item in event_records if not item["payload_hint"]
+    ]
+    diff_gap_event_ids = [
+        item["event_id"]
+        for item in event_records
+        if not item["explicit_diff"] and not item["before_after_object_pair"]
+    ]
+
+    return {
+        "mode": "event_payload_diff_coverage_v0.1",
+        "event_count": event_count,
+        "transition_reference_count": transition_reference_count,
+        "payload_hint_count": payload_hint_count,
+        "explicit_diff_count": explicit_diff_count,
+        "diff_ready_count": diff_ready_count,
+        "rollback_snapshot_count": rollback_snapshot_count,
+        "payload_gap_count": len(payload_gap_event_ids),
+        "diff_gap_count": len(diff_gap_event_ids),
+        "high_risk_count": len(high_risk_event_ids),
+        "target_paths": target_paths,
+        "workflows": workflow_counts_by_status,
+        "events": event_records,
+        "payload_gap_event_ids": payload_gap_event_ids,
+        "diff_gap_event_ids": diff_gap_event_ids,
+        "high_risk_event_ids": high_risk_event_ids,
+        "full_object_rebuild_ready": bool(event_count and diff_ready_count == event_count),
+        "safe_for_destructive_compaction": False,
+        "recommended_next_action": "define_event_payload_capture_policy"
+        if diff_gap_event_ids
+        else "review_retention_policy",
+        "report_only": True,
+        "would_modify_state": False,
+    }
+
+
 def event_retention_suggestion(events: List[dict], retention_limit: int) -> dict:
     limit = max(int(retention_limit or 0), 0)
     event_count = len(events)
@@ -5964,6 +6182,26 @@ class StateStore:
         }
         report["state_unchanged"] = before_state == self.load()
         return report
+
+    def event_payload_diff_coverage_preview(self) -> dict:
+        events = self.list_events()
+        before_state = self.load()
+        replay = self.replay_events()
+        coverage = build_event_payload_diff_coverage(events)
+        coverage.update(
+            {
+                "status": "passed" if replay.get("status") == "passed" else "failed",
+                "replay_status": replay.get("status"),
+                "projection_mode": replay.get("projection", {}).get("projection_mode"),
+                "projection_validation_mode": replay.get(
+                    "projection_validation",
+                    {},
+                ).get("mode"),
+                "state_unchanged": before_state == self.load(),
+                "note": "P39 previews event payload and object-diff coverage only; it does not compact, delete, summarize, rewrite, or roll back events.",
+            }
+        )
+        return coverage
 
     def review_event_retention(
         self,

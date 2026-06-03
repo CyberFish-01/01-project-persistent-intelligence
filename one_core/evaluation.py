@@ -1612,6 +1612,9 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
     before_report = store.load()
     event_report = store.event_projection_report(retention_limit=3)
     after_report = store.load()
+    before_payload_report = store.load()
+    payload_report = store.event_payload_diff_coverage_preview()
+    after_payload_report = store.load()
     before_retention_event_ids = [
         event.get("event_id") for event in store.list_events()
     ]
@@ -1681,6 +1684,27 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
             "suggested_action"
         )
         == "review_compaction_policy",
+        "event_payload_diff_report_passed": payload_report.get("status") == "passed",
+        "event_payload_diff_report_read_only": payload_report.get(
+            "would_modify_state"
+        )
+        is False
+        and payload_report.get("state_unchanged") is True
+        and after_payload_report == before_payload_report,
+        "event_payload_transition_references_complete": payload_report.get(
+            "transition_reference_count"
+        )
+        == payload_report.get("event_count"),
+        "event_payload_diff_gap_visible": payload_report.get("diff_gap_count", 0)
+        > 0,
+        "event_payload_full_rebuild_not_ready": payload_report.get(
+            "full_object_rebuild_ready"
+        )
+        is False,
+        "event_payload_destructive_compaction_blocked": payload_report.get(
+            "safe_for_destructive_compaction"
+        )
+        is False,
         "event_retention_review_created": retention_review.get("status")
         == "needs_review",
         "event_retention_lifecycle_archived": retention_lifecycle.get("status")
@@ -1763,6 +1787,33 @@ def check_event_log_replay_rollback(state_dir: Path) -> EvaluationCheck:
                     "retention",
                     {},
                 ).get("excess_event_count", 0),
+                "event_payload_report_count": 1
+                if payload_report.get("status") == "passed"
+                else 0,
+                "event_payload_transition_reference_count": payload_report.get(
+                    "transition_reference_count",
+                    0,
+                ),
+                "event_payload_hint_count": payload_report.get(
+                    "payload_hint_count",
+                    0,
+                ),
+                "event_payload_gap_count": payload_report.get(
+                    "payload_gap_count",
+                    0,
+                ),
+                "event_diff_ready_count": payload_report.get("diff_ready_count", 0),
+                "event_diff_gap_count": payload_report.get("diff_gap_count", 0),
+                "event_payload_high_risk_count": payload_report.get(
+                    "high_risk_count",
+                    0,
+                ),
+                "event_payload_safe_compaction_count": 1
+                if payload_report.get("safe_for_destructive_compaction") is True
+                else 0,
+                "event_payload_state_mutation_count": 0
+                if after_payload_report == before_payload_report
+                else 1,
                 "event_retention_review_count": len(retention_reviews),
                 "event_retention_lifecycle_decision_count": len(
                     retention_lifecycle_decisions
@@ -2801,6 +2852,36 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "event_report_retention_excess_count": sum(
             int(item.get("event_report_retention_excess_count", 0))
+            for item in metrics
+        ),
+        "event_payload_report_count": sum(
+            int(item.get("event_payload_report_count", 0)) for item in metrics
+        ),
+        "event_payload_transition_reference_count": sum(
+            int(item.get("event_payload_transition_reference_count", 0))
+            for item in metrics
+        ),
+        "event_payload_hint_count": sum(
+            int(item.get("event_payload_hint_count", 0)) for item in metrics
+        ),
+        "event_payload_gap_count": sum(
+            int(item.get("event_payload_gap_count", 0)) for item in metrics
+        ),
+        "event_diff_ready_count": sum(
+            int(item.get("event_diff_ready_count", 0)) for item in metrics
+        ),
+        "event_diff_gap_count": sum(
+            int(item.get("event_diff_gap_count", 0)) for item in metrics
+        ),
+        "event_payload_high_risk_count": sum(
+            int(item.get("event_payload_high_risk_count", 0)) for item in metrics
+        ),
+        "event_payload_safe_compaction_count": sum(
+            int(item.get("event_payload_safe_compaction_count", 0))
+            for item in metrics
+        ),
+        "event_payload_state_mutation_count": sum(
+            int(item.get("event_payload_state_mutation_count", 0))
             for item in metrics
         ),
         "event_retention_review_count": sum(

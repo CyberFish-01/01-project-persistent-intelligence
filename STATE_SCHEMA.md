@@ -1379,6 +1379,37 @@ task_hub:
 
 P38 still does not compact, delete, summarize, or rewrite `events.jsonl`. It records human-reviewable retention governance before any destructive compaction mechanism is designed.
 
+P39 adds a standalone payload/diff coverage preview:
+
+```bash
+python3 -m one_core.cli event-payload-diff-report
+```
+
+The report is read-only and classifies every event by how much object reconstruction evidence it carries:
+
+```yaml
+event_payload_diff_coverage:
+  mode: "event_payload_diff_coverage_v0.1"
+  event_count: 5
+  transition_reference_count: 5
+  payload_hint_count: 1
+  explicit_diff_count: 0
+  diff_ready_count: 0
+  payload_gap_count: 4
+  diff_gap_count: 5
+  high_risk_count: 0
+  full_object_rebuild_ready: false
+  safe_for_destructive_compaction: false
+  recommended_next_action: "define_event_payload_capture_policy"
+  report_only: true
+  would_modify_state: false
+  state_unchanged: true
+```
+
+Per-event records include `payload_status` values such as `reference_only`, `payload_hint_only`, `diff_ready`, or `missing_transition_reference`, plus missing capabilities like `object_payload`, `object_diff`, or `rollback_snapshot`.
+
+P39 does not add event compaction, deletion, summarization, rewriting, automatic rollback, or object-level replay. It makes the gap explicit: most current events are transition-reference complete, but not yet object-diff complete.
+
 This projection is not a full object-level state rebuild yet. It is a reproducible audit layer for checking that the event log can reconstruct transition references before the project attempts automatic rollback.
 
 Dream artifacts keep the full review material for one Dream run:

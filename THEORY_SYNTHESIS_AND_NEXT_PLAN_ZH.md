@@ -1237,6 +1237,60 @@ python3 -m one_core.cli evaluate-scenarios
 git diff --check
 ```
 
+### P39 Event Payload / Diff Coverage Preview
+
+目标：在任何 retention 或 compaction 设计声称“安全”之前，先让 event 的 object-payload 和 object-diff 覆盖率可见。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- `event-payload-diff-report` CLI 可以在不修改 state 的情况下 preview event payload/diff coverage；
+- `StateStore.event_payload_diff_coverage_preview` 会包装 replay status、projection mode 和 read-only state checks；
+- `build_event_payload_diff_coverage` 会把 events 分类为 `reference_only`、`payload_hint_only`、`diff_ready` 或 `missing_transition_reference`；
+- report metrics 包含 transition reference count、payload hint count、payload gap count、diff ready count、diff gap count、high-risk count 和 rollback snapshot count；
+- target-path 和 workflow summaries 会显示 payload/diff gaps 集中在哪里；
+- scenario evaluation 会验证 report 是 read-only、正常 replay 场景中的 transition references 完整、diff gaps 可见、full object rebuild 仍未 ready，并且 destructive compaction 仍被阻止；
+- tests 覆盖 read-only preview 行为和 malformed-event high-risk detection。
+
+剩余缺口：
+
+- 大多数 state transitions 的 events 仍不保存完整 object payload；
+- events 仍不保存 explicit object diffs；
+- rollback snapshots 仍是 metadata-only；
+- 仍不存在 destructive event compaction、summarization、deletion 或 rewrite。
+
+建议下一步：
+
+```text
+P40 Event Payload Capture Policy Proposal
+```
+
+理由：
+
+- P39 显示 transition references 大体足够，但 object payload/diff coverage 还不够；
+- 在真正实现 payload capture 之前，项目应该先定义一个 review-only capture policy proposal，说明哪些 target paths 需要 full payload、diff、snapshot 或只需 reference-only；
+- 这能让下一步继续停留在 governance/report 层，避免过早改动 append-only event schema。
+
+期望验收：
+
+```bash
+python3 -m unittest
+python3 -m one_core.cli validate-state
+python3 -m one_core.cli evaluate-foundation
+python3 -m one_core.cli evaluate-scenarios
+git diff --check
+```
+
+P39 后的资料校准：
+
+- Martin Fowler 的 Event Sourcing pattern 强化了一个工程要求：状态变化应被记录为 durable event objects，并支持未来重建过去状态：https://www.martinfowler.com/eaaDev/EventSourcing.html
+- W3C PROV-DM 给项目提供了 provenance 词汇：entities、activities、agents、usage、generation 和 derivation：https://www.w3.org/TR/prov-dm/
+- Tulving 对 episodic memory 的框架把记忆与 self、subjective time 和 autonoetic continuity 联系起来；对 01 Core 来说，这支持“记忆不是脱离状态的文本检索”：https://www.annualreviews.org/doi/10.1146/annurev.psych.53.100901.135114
+- Hassabis 与 Maguire 的 episodic memory construction account 支持一个判断：未来 continuity 需要结构化 reconstruction material，而不只是扁平 event reference：https://www.sciencedirect.com/science/article/abs/pii/S1364661307001258
+
+对 P40 的含义：先按 target path 定义 review-only payload capture policy，明确 reference-only event、object payload hint、object diff、snapshot link 和 PROV-style provenance fields 的要求，再考虑任何 schema-level payload capture 或 compaction 机制。
+
 ### P33 Context Attribution Coverage Review Lifecycle
 
 目标：让 durable attribution coverage review records 可以通过可审计 lifecycle path 被 acknowledge、archive 或 quarantine。
