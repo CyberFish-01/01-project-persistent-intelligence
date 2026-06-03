@@ -39,6 +39,8 @@ task_hub:
   reflection_log: []
   reflection_guidance_queue: []
   reflection_guidance_decisions: []
+  tool_safety_policy_proposals: []
+  tool_safety_policy_decisions: []
   procedural_candidates: []
 identity_update_gate:
   proposals: []
@@ -749,6 +751,62 @@ task_hub:
       execution_prohibited: true
       executable_policy_created: false
       identity_mutation_allowed: false
+  tool_safety_policy_proposals:
+    - proposal_id: "tool_safety_policy_proposal_0001"
+      timestamp: "ISO-8601 timestamp"
+      policy_scope: "tool_use.preflight"
+      proposed_rule: "Require explicit input readiness before tool execution."
+      rationale: "Reviewed reflection guidance supports a proposal-only safety layer."
+      source_guidance_item_id: "reflection_guidance_item_0001"
+      source_reflection_id: "reflection_0001"
+      workflow: "tool_use"
+      review_priority: "high"
+      risk: "high"
+      confidence: 0.88
+      proposer: "manual_review"
+      review_status: "pending|approved|rejected|archived|quarantined"
+      proposal_mode: "proposal_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      evidence:
+        - "reflection_guidance_item_0001"
+        - "reflection_0001"
+        - "action_0002"
+      source_ids:
+        - "action_0002"
+      review_history: []
+      provenance:
+        - type: "reflection_guidance_policy_proposal"
+          guidance_item_id: "reflection_guidance_item_0001"
+          reflection_id: "reflection_0001"
+  tool_safety_policy_decisions:
+    - decision_id: "tool_safety_policy_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      proposal_id: "tool_safety_policy_proposal_0001"
+      policy_scope: "tool_use.preflight"
+      source_guidance_item_id: "reflection_guidance_item_0001"
+      source_reflection_id: "reflection_0001"
+      reviewer: "manual_review"
+      action: "approve"
+      result: "approved"
+      decision_note: "Approve as non-executable policy proposal evidence."
+      snapshot_id: "snapshot_0005"
+      evidence:
+        - "tool_safety_policy_proposal_0001"
+        - "reflection_guidance_item_0001"
+      risk: "high"
+      confidence: 0.88
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      rollback:
+        snapshot_id: "snapshot_0005"
+        reversible: true
   failure_reflections:
     - reflection_id: "failure_reflection_0001"
       timestamp: "ISO-8601 timestamp"
@@ -913,6 +971,8 @@ P20 adds cautionary warning lifecycle retention. `cautionary-warning-lifecycle` 
 P21 adds reflection log. `record-reflection` can record a general reflection entry, and `verify-reflection` can mark it as verified, not observed, regressed, or superseded. Reflection log preserves observation, lesson, expected behavior, source IDs, evidence, verification history, and update history, and exposes recent entries to context. It still does not execute workflows or mutate Identity Core.
 
 P22 adds reflection-policy guidance. `build_context_package()` derives advisory-only `reflection_policy_guidance` from verified reflection log entries. P23 adds durable `task_hub.reflection_guidance_queue` and `task_hub.reflection_guidance_decisions`; `review-reflection-guidance` can acknowledge, archive, or quarantine guidance items, writing snapshot, audit, trace, update log, and replayable event metadata. Reflection guidance remains non-executable and cannot mutate Identity Core.
+
+P24 adds a tool/safety policy proposal layer. `propose-tool-safety-policy` can create a non-executable policy proposal only from reviewed reflection guidance, and `review-tool-safety-policy-proposal` can approve, reject, archive, or quarantine that proposal. Proposal and decision records write snapshot/audit/trace/update metadata and replayable event references. They explicitly preserve `proposal_mode: "proposal_only"`, `requires_review: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`. P24 does not create a policy executor and does not mutate Identity Core.
 
 ## 14. Identity Update Gate
 
@@ -1204,6 +1264,7 @@ state_transfer_package:
       verified_reflections: []
       review_recommendations: []
     reflection_guidance_queue: []
+    tool_safety_policy_proposals: []
     cautionary_procedural_memory: []
     cautionary_lifecycle_decisions: []
     procedural_memory: []
@@ -1221,6 +1282,7 @@ state_transfer_package:
     verified_reflections: []
     review_recommendations: []
   reflection_guidance_queue: []
+  tool_safety_policy_proposals: []
   cautionary_procedural_memory: []
   cautionary_lifecycle_decisions: []
   procedural_memory: []

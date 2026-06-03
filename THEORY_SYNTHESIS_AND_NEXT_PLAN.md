@@ -757,9 +757,44 @@ Implemented result:
 
 Remaining gaps:
 
-- guidance queue is not yet linked to a dedicated tool/safety policy proposal layer;
+- guidance queue is now linked to a dedicated tool/safety policy proposal layer in P24;
 - no tool/safety policy executor exists yet;
 - guidance prioritization is still simple risk/confidence scoring.
+
+### P24 Tool/Safety Policy Proposal Layer
+
+Goal: connect reviewed reflection guidance to explicit tool/safety policy proposals without creating an executor or automatic tool policy.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- `task_hub.tool_safety_policy_proposals` records proposal-only policy candidates derived from reviewed reflection guidance;
+- `task_hub.tool_safety_policy_decisions` records proposal review decisions;
+- `propose-tool-safety-policy` creates proposals only from acknowledged or archived reflection guidance;
+- `review-tool-safety-policy-proposal` can approve, reject, archive, or quarantine a proposal;
+- proposal review writes snapshot, audit, trace, update log, review history, rollback metadata, and replayable event metadata;
+- proposals and decisions preserve `proposal_mode: "proposal_only"`, `requires_review: true`, `execution_prohibited: true`, `executable_policy: false`, `executable_policy_created: false`, and `identity_mutation_allowed: false`;
+- scenario evaluation extends `reflection_log_verification` with proposal creation, proposal review, context exposure, replay, no executable policy creation, and no Identity Core mutation.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- proposal lifecycle retention is not yet implemented;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- policy proposal prioritization is still simple risk/confidence scoring.
+
+Recommended next step:
+
+```text
+P25 Tool/Safety Policy Proposal Lifecycle
+```
+
+Reason:
+
+- P24 creates reviewed proposal records but does not yet provide retention controls for stale, superseded, or quarantined proposals;
+- lifecycle handling is a foundation step before any future executable policy work;
+- this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:
 

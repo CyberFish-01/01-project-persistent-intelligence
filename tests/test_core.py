@@ -919,6 +919,84 @@ class CoreStateTests(unittest.TestCase):
                 },
             )
 
+    def test_tool_safety_policy_proposal_review_is_non_executable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            before_identity = store.init()["identity_core"]
+            recorded = store.record_reflection_log(
+                reflection_type="policy_review",
+                workflow="tool_use",
+                observation="A tool workflow needs a safety proposal layer.",
+                lesson="Tool safety policy should be proposed before any execution.",
+                expected_behavior="Create a reviewed proposal only.",
+                actor="unit_test",
+                source_ids=["action_policy"],
+                evidence=["action_policy"],
+                risk="high",
+                confidence=0.91,
+            )
+            store.verify_reflection(
+                recorded["reflection_log_id"],
+                result="verified",
+                verifier="unit_test",
+                evidence=["action_policy"],
+            )
+            package = store.build_context_package()
+            guidance_item = package["reflection_guidance_queue"][0]
+            store.review_reflection_guidance(
+                guidance_item["guidance_item_id"],
+                action="acknowledge",
+                reviewer="unit_test",
+                decision_note="Use this only as proposal evidence.",
+            )
+
+            proposed = store.propose_tool_safety_policy(
+                guidance_item_id=guidance_item["guidance_item_id"],
+                policy_scope="tool_use.preflight",
+                proposed_rule="Require explicit input readiness before tool execution.",
+                proposer="unit_test",
+                rationale="Verified reflection guidance supports a proposal layer.",
+                risk="high",
+                confidence=0.88,
+            )
+            reviewed = store.review_tool_safety_policy_proposal(
+                proposed["proposal_id"],
+                action="approve",
+                reviewer="unit_test",
+                decision_note="Approve as a non-executable proposal.",
+            )
+            state = store.load()
+            proposal = state["task_hub"]["tool_safety_policy_proposals"][-1]
+            decision = state["task_hub"]["tool_safety_policy_decisions"][-1]
+            package = store.build_context_package()
+
+            self.assertEqual(proposed["status"], "proposed")
+            self.assertEqual(reviewed["status"], "approved")
+            self.assertEqual(proposal["proposal_mode"], "proposal_only")
+            self.assertTrue(proposal["requires_review"])
+            self.assertTrue(proposal["execution_prohibited"])
+            self.assertFalse(proposal["executable_policy"])
+            self.assertFalse(proposal["executable_policy_created"])
+            self.assertFalse(proposal["identity_mutation_allowed"])
+            self.assertEqual(
+                proposal["last_review_decision_id"],
+                reviewed["tool_safety_policy_decision_id"],
+            )
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertEqual(state["identity_core"], before_identity)
+            self.assertEqual(store.list_traces()[-1]["workflow"], "tool_safety_policy_review")
+            self.assertEqual(store.replay_events()["status"], "passed")
+            self.assertIn(
+                proposed["proposal_id"],
+                {
+                    item["proposal_id"]
+                    for item in package["tool_safety_policy_proposals"]
+                },
+            )
+
     def test_context_builder_explains_activation_and_suppression(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

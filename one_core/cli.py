@@ -260,6 +260,31 @@ def main() -> None:
     reflection_guidance_parser.add_argument("--reviewer", default="manual_review")
     reflection_guidance_parser.add_argument("--decision-note", default="")
 
+    tool_safety_proposal_parser = subparsers.add_parser(
+        "propose-tool-safety-policy",
+        help="Create a non-executable tool/safety policy proposal from reviewed guidance.",
+    )
+    tool_safety_proposal_parser.add_argument("guidance_item_id")
+    tool_safety_proposal_parser.add_argument("--policy-scope", required=True)
+    tool_safety_proposal_parser.add_argument("--proposed-rule", required=True)
+    tool_safety_proposal_parser.add_argument("--proposer", default="manual_review")
+    tool_safety_proposal_parser.add_argument("--rationale", default="")
+    tool_safety_proposal_parser.add_argument("--risk", default="medium")
+    tool_safety_proposal_parser.add_argument("--confidence", type=float, default=0.5)
+
+    tool_safety_review_parser = subparsers.add_parser(
+        "review-tool-safety-policy-proposal",
+        help="Review a non-executable tool/safety policy proposal.",
+    )
+    tool_safety_review_parser.add_argument("proposal_id")
+    tool_safety_review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=["approve", "reject", "archive", "quarantine"],
+    )
+    tool_safety_review_parser.add_argument("--reviewer", default="manual_review")
+    tool_safety_review_parser.add_argument("--decision-note", default="")
+
     subparsers.add_parser("context", help="Print the current state transfer package.")
 
     subparsers.add_parser(
@@ -496,6 +521,27 @@ def main() -> None:
         print_json(
             store.review_reflection_guidance(
                 guidance_item_id=args.guidance_item_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                decision_note=args.decision_note,
+            )
+        )
+    elif args.command == "propose-tool-safety-policy":
+        print_json(
+            store.propose_tool_safety_policy(
+                guidance_item_id=args.guidance_item_id,
+                policy_scope=args.policy_scope,
+                proposed_rule=args.proposed_rule,
+                proposer=args.proposer,
+                rationale=args.rationale,
+                risk=args.risk,
+                confidence=args.confidence,
+            )
+        )
+    elif args.command == "review-tool-safety-policy-proposal":
+        print_json(
+            store.review_tool_safety_policy_proposal(
+                proposal_id=args.proposal_id,
                 action=args.action,
                 reviewer=args.reviewer,
                 decision_note=args.decision_note,

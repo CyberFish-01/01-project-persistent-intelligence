@@ -791,9 +791,44 @@ P22 Reflection-Policy Linkage
 
 剩余缺口：
 
-- guidance queue 还没有连接到 dedicated tool/safety policy proposal layer；
+- guidance queue 已经在 P24 连接到 dedicated tool/safety policy proposal layer；
 - 还没有 tool/safety policy executor；
 - guidance prioritization 目前仍然只是简单 risk/confidence scoring。
+
+### P24 Tool/Safety Policy Proposal Layer
+
+目标：把已经 review 的 reflection guidance 接到明确的 tool/safety policy proposal，但不创建 executor，也不创建自动 tool policy。
+
+状态：已实现第一版本地 pass。
+
+已实现结果：
+
+- `task_hub.tool_safety_policy_proposals` 记录从 reviewed reflection guidance 推导出的 proposal-only policy candidates；
+- `task_hub.tool_safety_policy_decisions` 记录 proposal review decisions；
+- `propose-tool-safety-policy` 只能从 acknowledged 或 archived reflection guidance 创建 proposal；
+- `review-tool-safety-policy-proposal` 可以 approve、reject、archive 或 quarantine proposal；
+- proposal review 会写入 snapshot、audit、trace、update log、review history、rollback metadata 和可 replay 的 event metadata；
+- proposal 和 decision 保持 `proposal_mode: "proposal_only"`、`requires_review: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`；
+- scenario evaluation 会扩展 `reflection_log_verification`，检查 proposal 创建、proposal review、context 暴露、replay、不创建 executable policy，以及不修改 Identity Core。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- proposal lifecycle retention 还没有实现；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- policy proposal prioritization 目前仍然只是简单 risk/confidence scoring。
+
+建议下一步：
+
+```text
+P25 Tool/Safety Policy Proposal Lifecycle
+```
+
+理由：
+
+- P24 创建了 reviewed proposal records，但还没有对 stale、superseded 或 quarantined proposals 做 retention 控制；
+- lifecycle handling 是任何未来 executable policy work 之前的地基；
+- 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：
 

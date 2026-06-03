@@ -921,12 +921,35 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
         reviewer="scenario_eval",
         decision_note="Keep reflection guidance advisory-only.",
     )
+    policy_proposal = store.propose_tool_safety_policy(
+        guidance_item_id=review.get("guidance_item_id", ""),
+        policy_scope="tool_use.preflight",
+        proposed_rule="Require explicit readiness evidence before tool execution.",
+        proposer="scenario_eval",
+        rationale="Reviewed reflection guidance supports a proposal-only policy layer.",
+        risk="high",
+        confidence=0.88,
+    )
+    policy_review = store.review_tool_safety_policy_proposal(
+        proposal_id=policy_proposal.get("proposal_id", ""),
+        action="approve",
+        reviewer="scenario_eval",
+        decision_note="Approve as non-executable policy proposal evidence.",
+    )
     state = store.load()
     package = store.build_context_package()
     reflections = state.get("task_hub", {}).get("reflection_log", [])
     guidance_queue = state.get("task_hub", {}).get("reflection_guidance_queue", [])
     guidance_decisions = state.get("task_hub", {}).get(
         "reflection_guidance_decisions",
+        [],
+    )
+    policy_proposals = state.get("task_hub", {}).get(
+        "tool_safety_policy_proposals",
+        [],
+    )
+    policy_decisions = state.get("task_hub", {}).get(
+        "tool_safety_policy_decisions",
         [],
     )
     reviewed_guidance_item = next(
@@ -1004,6 +1027,29 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
             "identity_mutation_allowed"
         )
         is False,
+        "tool_safety_policy_proposed": policy_proposal.get("status") == "proposed",
+        "tool_safety_policy_reviewed": policy_review.get("status") == "approved",
+        "tool_safety_policy_context_exposed": policy_proposal.get("proposal_id")
+        in {
+            item.get("proposal_id")
+            for item in package.get("tool_safety_policy_proposals", [])
+            if isinstance(item, dict)
+        },
+        "tool_safety_policy_non_executable": all(
+            item.get("executable_policy_created") is False
+            and item.get("executable_policy") is False
+            and item.get("execution_prohibited") is True
+            for item in policy_proposals
+            if isinstance(item, dict)
+        ),
+        "tool_safety_policy_identity_locked": all(
+            item.get("identity_mutation_allowed") is False
+            for item in policy_proposals
+            if isinstance(item, dict)
+        ),
+        "tool_safety_policy_decision_recorded": bool(policy_decisions)
+        and policy_decisions[-1].get("decision_id")
+        == policy_review.get("tool_safety_policy_decision_id"),
         "identity_not_mutated": state["identity_core"] == before_identity,
         "event_replay_passed": store.replay_events()["status"] == "passed",
     }
@@ -1043,6 +1089,17 @@ def check_reflection_log_verification(state_dir: Path) -> EvaluationCheck:
                     for item in guidance_queue
                     if isinstance(item, dict)
                     and item.get("executable_policy_created") is not False
+                ),
+                "tool_safety_policy_proposal_count": len(policy_proposals),
+                "tool_safety_policy_review_decision_count": len(policy_decisions),
+                "tool_safety_policy_executable_policy_count": sum(
+                    1
+                    for item in policy_proposals
+                    if isinstance(item, dict)
+                    and (
+                        item.get("executable_policy_created") is not False
+                        or item.get("executable_policy") is not False
+                    )
                 ),
                 "reflection_identity_mutation_count": 0
                 if state["identity_core"] == before_identity
@@ -1934,6 +1991,17 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "reflection_guidance_executable_policy_count": sum(
             int(item.get("reflection_guidance_executable_policy_count", 0))
+            for item in metrics
+        ),
+        "tool_safety_policy_proposal_count": sum(
+            int(item.get("tool_safety_policy_proposal_count", 0)) for item in metrics
+        ),
+        "tool_safety_policy_review_decision_count": sum(
+            int(item.get("tool_safety_policy_review_decision_count", 0))
+            for item in metrics
+        ),
+        "tool_safety_policy_executable_policy_count": sum(
+            int(item.get("tool_safety_policy_executable_policy_count", 0))
             for item in metrics
         ),
         "reflection_identity_mutation_count": sum(

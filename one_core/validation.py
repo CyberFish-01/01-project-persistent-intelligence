@@ -947,6 +947,8 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "reflection_log",
         "reflection_guidance_queue",
         "reflection_guidance_decisions",
+        "tool_safety_policy_proposals",
+        "tool_safety_policy_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -1135,6 +1137,89 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                 issues.append(ValidationIssue(path + ".executable_policy_created", "Reflection guidance decision must not create executable policy."))
             if decision.get("identity_mutation_allowed") is not False:
                 issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Reflection guidance decision must not allow Identity Core mutation."))
+    policy_proposals = task_hub.get("tool_safety_policy_proposals", [])
+    if isinstance(policy_proposals, list):
+        for index, proposal in enumerate(policy_proposals):
+            path = f"task_hub.tool_safety_policy_proposals[{index}]"
+            if not isinstance(proposal, dict):
+                issues.append(ValidationIssue(path, "Tool/safety policy proposal must be an object."))
+                continue
+            for key in (
+                "proposal_id",
+                "timestamp",
+                "policy_scope",
+                "proposed_rule",
+                "source_guidance_item_id",
+                "source_reflection_id",
+                "review_status",
+                "proposal_mode",
+                "requires_review",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+                "evidence",
+                "review_history",
+                "provenance",
+            ):
+                if key not in proposal:
+                    issues.append(ValidationIssue(path + f".{key}", "Tool/safety policy proposal key is missing."))
+            if proposal.get("proposal_mode") != "proposal_only":
+                issues.append(ValidationIssue(path + ".proposal_mode", "Tool/safety policy must remain proposal_only."))
+            if proposal.get("requires_review") is not True:
+                issues.append(ValidationIssue(path + ".requires_review", "Tool/safety policy proposal requires review."))
+            if proposal.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Tool/safety policy proposal must prohibit execution."))
+            if proposal.get("executable_policy") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy", "Tool/safety policy proposal must not be executable policy."))
+            if proposal.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Tool/safety policy proposal must not create executable policy."))
+            if proposal.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy proposal must not allow Identity Core mutation."))
+            if proposal.get("review_status") not in {"pending", "approved", "rejected", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".review_status", "Tool/safety policy proposal must have a valid review status."))
+            if proposal.get("review_status") in {"approved", "rejected", "archived", "quarantined"}:
+                history = proposal.get("review_history")
+                if not isinstance(history, list) or not history:
+                    issues.append(ValidationIssue(path + ".review_history", "Reviewed tool/safety policy proposal requires review history."))
+                elif history[-1].get("decision_id") != proposal.get("last_review_decision_id"):
+                    issues.append(ValidationIssue(path + ".last_review_decision_id", "Tool/safety policy proposal last_review_decision_id must match latest decision."))
+    policy_decisions = task_hub.get("tool_safety_policy_decisions", [])
+    if isinstance(policy_decisions, list):
+        for index, decision in enumerate(policy_decisions):
+            path = f"task_hub.tool_safety_policy_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(ValidationIssue(path, "Tool/safety policy decision must be an object."))
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "proposal_id",
+                "policy_scope",
+                "reviewer",
+                "action",
+                "result",
+                "snapshot_id",
+                "requires_review",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "identity_mutation_allowed",
+            ):
+                if key not in decision:
+                    issues.append(ValidationIssue(path + f".{key}", "Tool/safety policy decision key is missing."))
+            if decision.get("result") not in {"approved", "rejected", "archived", "quarantined"}:
+                issues.append(ValidationIssue(path + ".result", "Tool/safety policy decision must have a valid result."))
+            if decision.get("requires_review") is not True:
+                issues.append(ValidationIssue(path + ".requires_review", "Tool/safety policy decision must require review."))
+            if decision.get("execution_prohibited") is not True:
+                issues.append(ValidationIssue(path + ".execution_prohibited", "Tool/safety policy decision must prohibit execution."))
+            if decision.get("executable_policy") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy", "Tool/safety policy decision must not be executable policy."))
+            if decision.get("executable_policy_created") is not False:
+                issues.append(ValidationIssue(path + ".executable_policy_created", "Tool/safety policy decision must not create executable policy."))
+            if decision.get("identity_mutation_allowed") is not False:
+                issues.append(ValidationIssue(path + ".identity_mutation_allowed", "Tool/safety policy decision must not allow Identity Core mutation."))
     cautions = task_hub.get("cautionary_procedural_candidates", [])
     if isinstance(cautions, list):
         for index, caution in enumerate(cautions):

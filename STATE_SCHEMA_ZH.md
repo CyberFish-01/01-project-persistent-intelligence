@@ -41,6 +41,8 @@ task_hub:
   reflection_log: []
   reflection_guidance_queue: []
   reflection_guidance_decisions: []
+  tool_safety_policy_proposals: []
+  tool_safety_policy_decisions: []
   procedural_candidates: []
 identity_update_gate:
   proposals: []
@@ -751,6 +753,62 @@ task_hub:
       execution_prohibited: true
       executable_policy_created: false
       identity_mutation_allowed: false
+  tool_safety_policy_proposals:
+    - proposal_id: "tool_safety_policy_proposal_0001"
+      timestamp: "ISO-8601 timestamp"
+      policy_scope: "tool_use.preflight"
+      proposed_rule: "Require explicit input readiness before tool execution."
+      rationale: "Reviewed reflection guidance supports a proposal-only safety layer."
+      source_guidance_item_id: "reflection_guidance_item_0001"
+      source_reflection_id: "reflection_0001"
+      workflow: "tool_use"
+      review_priority: "high"
+      risk: "high"
+      confidence: 0.88
+      proposer: "manual_review"
+      review_status: "pending|approved|rejected|archived|quarantined"
+      proposal_mode: "proposal_only"
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      evidence:
+        - "reflection_guidance_item_0001"
+        - "reflection_0001"
+        - "action_0002"
+      source_ids:
+        - "action_0002"
+      review_history: []
+      provenance:
+        - type: "reflection_guidance_policy_proposal"
+          guidance_item_id: "reflection_guidance_item_0001"
+          reflection_id: "reflection_0001"
+  tool_safety_policy_decisions:
+    - decision_id: "tool_safety_policy_decision_0001"
+      timestamp: "ISO-8601 timestamp"
+      proposal_id: "tool_safety_policy_proposal_0001"
+      policy_scope: "tool_use.preflight"
+      source_guidance_item_id: "reflection_guidance_item_0001"
+      source_reflection_id: "reflection_0001"
+      reviewer: "manual_review"
+      action: "approve"
+      result: "approved"
+      decision_note: "Approve as non-executable policy proposal evidence."
+      snapshot_id: "snapshot_0005"
+      evidence:
+        - "tool_safety_policy_proposal_0001"
+        - "reflection_guidance_item_0001"
+      risk: "high"
+      confidence: 0.88
+      requires_review: true
+      execution_prohibited: true
+      executable_policy: false
+      executable_policy_created: false
+      identity_mutation_allowed: false
+      rollback:
+        snapshot_id: "snapshot_0005"
+        reversible: true
   failure_reflections:
     - reflection_id: "failure_reflection_0001"
       timestamp: "ISO-8601 timestamp"
@@ -915,6 +973,8 @@ P20 增加 cautionary warning lifecycle retention。`cautionary-warning-lifecycl
 P21 增加 reflection log。`record-reflection` 可以记录通用 reflection 条目，`verify-reflection` 可以把 reflection 标记为 verified、not_observed、regressed 或 superseded。Reflection log 会保留 observation、lesson、expected_behavior、source_ids、evidence、verification history 和 update history，并暴露最近条目到 context。它仍然不会执行 workflow，也不会修改 Identity Core。
 
 P22 增加 reflection-policy guidance。`build_context_package()` 会从 verified reflection log entries 推导 advisory-only `reflection_policy_guidance`。P23 增加 durable `task_hub.reflection_guidance_queue` 和 `task_hub.reflection_guidance_decisions`；`review-reflection-guidance` 可以 acknowledge、archive 或 quarantine guidance item，并写入 snapshot、audit、trace、update log 和可 replay 的 event metadata。Reflection guidance 仍然不可执行，也不能修改 Identity Core。
+
+P24 增加 tool/safety policy proposal layer。`propose-tool-safety-policy` 只能从已经 review 的 reflection guidance 创建非执行 policy proposal；`review-tool-safety-policy-proposal` 可以 approve、reject、archive 或 quarantine proposal。Proposal 和 decision 会写入 snapshot、audit、trace、update metadata 和可 replay 的 event reference。它们明确保持 `proposal_mode: "proposal_only"`、`requires_review: true`、`execution_prohibited: true`、`executable_policy: false`、`executable_policy_created: false` 和 `identity_mutation_allowed: false`。P24 不创建 policy executor，也不会修改 Identity Core。
 
 ## 14. Identity Update Gate
 
@@ -1206,6 +1266,7 @@ state_transfer_package:
       verified_reflections: []
       review_recommendations: []
     reflection_guidance_queue: []
+    tool_safety_policy_proposals: []
     cautionary_procedural_memory: []
     cautionary_lifecycle_decisions: []
     procedural_memory: []
@@ -1223,6 +1284,7 @@ state_transfer_package:
     verified_reflections: []
     review_recommendations: []
   reflection_guidance_queue: []
+  tool_safety_policy_proposals: []
   cautionary_procedural_memory: []
   cautionary_lifecycle_decisions: []
   procedural_memory: []

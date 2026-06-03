@@ -264,6 +264,44 @@ class StateValidationTests(unittest.TestCase):
                     "identity_mutation_allowed": True,
                 }
             )
+            state["task_hub"]["tool_safety_policy_proposals"].append(
+                {
+                    "proposal_id": "tool_safety_policy_bad",
+                    "timestamp": state["created_at"],
+                    "policy_scope": "tool_use.preflight",
+                    "proposed_rule": "Run tool immediately.",
+                    "source_guidance_item_id": "reflection_guidance_bad",
+                    "source_reflection_id": "reflection_bad",
+                    "review_status": "approved",
+                    "proposal_mode": "executor",
+                    "requires_review": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                    "evidence": ["reflection_guidance_bad"],
+                    "last_review_decision_id": "tool_safety_policy_decision_missing",
+                    "review_history": [],
+                    "provenance": [],
+                }
+            )
+            state["task_hub"]["tool_safety_policy_decisions"].append(
+                {
+                    "decision_id": "tool_safety_policy_decision_bad",
+                    "timestamp": state["created_at"],
+                    "proposal_id": "tool_safety_policy_bad",
+                    "policy_scope": "tool_use.preflight",
+                    "reviewer": "unit_test",
+                    "action": "approve",
+                    "result": "executed",
+                    "snapshot_id": "snapshot_bad",
+                    "requires_review": False,
+                    "execution_prohibited": False,
+                    "executable_policy": True,
+                    "executable_policy_created": True,
+                    "identity_mutation_allowed": True,
+                }
+            )
             state["task_hub"]["failure_reflections"].append(
                 {
                     "reflection_id": "failure_reflection_bad",
@@ -354,6 +392,58 @@ class StateValidationTests(unittest.TestCase):
             )
             self.assertIn(
                 "task_hub.reflection_guidance_decisions[0].identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].proposal_mode",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].requires_review",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].identity_mutation_allowed",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_proposals[0].review_history",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].result",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].requires_review",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].execution_prohibited",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].executable_policy",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].executable_policy_created",
+                paths,
+            )
+            self.assertIn(
+                "task_hub.tool_safety_policy_decisions[0].identity_mutation_allowed",
                 paths,
             )
             self.assertIn(

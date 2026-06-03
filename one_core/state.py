@@ -56,6 +56,7 @@ PROCEDURAL_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 CAUTIONARY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 CAUTIONARY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 REFLECTION_GUIDANCE_REVIEW_ACTIONS = {"acknowledge", "archive", "quarantine"}
+TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 REFLECTION_VERIFICATION_RESULTS = {
     "verified",
     "not_observed",
@@ -201,6 +202,8 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "reflection_log": [],
         "reflection_guidance_queue": [],
         "reflection_guidance_decisions": [],
+        "tool_safety_policy_proposals": [],
+        "tool_safety_policy_decisions": [],
         "failure_reflections": [],
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
@@ -526,6 +529,8 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "reflection_log",
         "reflection_guidance_queue",
         "reflection_guidance_decisions",
+        "tool_safety_policy_proposals",
+        "tool_safety_policy_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -3901,6 +3906,317 @@ class StateStore:
             "snapshot_id": snapshot["snapshot_id"],
         }
 
+    def propose_tool_safety_policy(
+        self,
+        guidance_item_id: str,
+        policy_scope: str,
+        proposed_rule: str,
+        proposer: str = "manual_review",
+        rationale: str = "",
+        risk: str = "medium",
+        confidence: float = 0.5,
+    ) -> dict:
+        normalized_scope = str(policy_scope or "").strip()
+        normalized_rule = str(proposed_rule or "").strip()
+        if not normalized_scope:
+            return {"status": "rejected", "error": "missing_policy_scope"}
+        if not normalized_rule:
+            return {"status": "rejected", "error": "missing_proposed_rule"}
+
+        state = self.load()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(utc_now(), state.get("working_state", {})),
+        )
+        guidance_item = next(
+            (
+                item
+                for item in task_hub.setdefault("reflection_guidance_queue", [])
+                if isinstance(item, dict)
+                and item.get("guidance_item_id") == guidance_item_id
+            ),
+            None,
+        )
+        if guidance_item is None:
+            return {
+                "status": "not_found",
+                "error": "reflection_guidance_item_not_found",
+                "guidance_item_id": guidance_item_id,
+            }
+        if guidance_item.get("review_status") not in {"acknowledged", "archived"}:
+            return {
+                "status": "rejected",
+                "error": "guidance_not_reviewed",
+                "guidance_item_id": guidance_item_id,
+                "review_status": guidance_item.get("review_status"),
+            }
+
+        now = utc_now()
+        proposal = build_tool_safety_policy_proposal(
+            guidance_item=guidance_item,
+            policy_scope=normalized_scope,
+            proposed_rule=normalized_rule,
+            proposer=proposer,
+            rationale=rationale,
+            risk=risk,
+            confidence=confidence,
+            timestamp=now,
+        )
+        task_hub.setdefault("tool_safety_policy_proposals", []).append(proposal)
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": proposer,
+                "target_path": "task_hub.tool_safety_policy_proposals",
+                "operation": "propose_tool_safety_policy",
+                "before": None,
+                "after": proposal["proposal_id"],
+                "evidence": proposal["evidence"],
+                "gate": "medium",
+                "confidence": proposal["confidence"],
+                "tool_safety_policy_proposal_id": proposal["proposal_id"],
+                "rollback": {"reversible": True},
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=proposer,
+            action="propose_tool_safety_policy",
+            target="task_hub.tool_safety_policy_proposals",
+            outcome="proposed",
+            evidence=proposal["evidence"],
+            metadata={
+                "proposal_id": proposal["proposal_id"],
+                "guidance_item_id": guidance_item_id,
+                "reflection_id": guidance_item.get("reflection_id"),
+                "policy_scope": normalized_scope,
+                "executable_policy_created": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="tool_safety_policy_proposal",
+            nodes=[
+                {
+                    "id": "reflection_guidance",
+                    "type": "ReviewQueueItem",
+                    "guidance_item_id": guidance_item_id,
+                    "reflection_id": guidance_item.get("reflection_id"),
+                },
+                {
+                    "id": "policy_proposal",
+                    "type": "PolicyProposal",
+                    "proposal_id": proposal["proposal_id"],
+                    "policy_scope": normalized_scope,
+                    "executable_policy": False,
+                },
+            ],
+            edges=[
+                {
+                    "from": "reflection_guidance",
+                    "to": "policy_proposal",
+                    "type": "proposal",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": "propose",
+                    "target": "task_hub.tool_safety_policy_proposals",
+                    "tool_safety_policy_proposal_id": proposal["proposal_id"],
+                    "reflection_guidance_item_id": guidance_item_id,
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": "propose_tool_safety_policy",
+                    "proposer": proposer,
+                    "policy_scope": normalized_scope,
+                    "rationale": rationale,
+                }
+            ],
+            summary=(
+                f"Proposed non-executable tool/safety policy "
+                f"{proposal['proposal_id']}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": "proposed",
+            "proposal_id": proposal["proposal_id"],
+            "guidance_item_id": guidance_item_id,
+        }
+
+    def review_tool_safety_policy_proposal(
+        self,
+        proposal_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        decision_note: str = "",
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in TOOL_SAFETY_POLICY_REVIEW_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_tool_safety_policy_review_action",
+                "action": action,
+            }
+
+        state = self.load()
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(utc_now(), state.get("working_state", {})),
+        )
+        proposal = next(
+            (
+                item
+                for item in task_hub.setdefault("tool_safety_policy_proposals", [])
+                if isinstance(item, dict) and item.get("proposal_id") == proposal_id
+            ),
+            None,
+        )
+        if proposal is None:
+            return {
+                "status": "not_found",
+                "error": "tool_safety_policy_proposal_not_found",
+                "proposal_id": proposal_id,
+            }
+        before_status = proposal.get("review_status", "pending")
+        if before_status in {"approved", "rejected", "archived", "quarantined"}:
+            return {
+                "status": "already_reviewed",
+                "proposal_id": proposal_id,
+                "review_status": before_status,
+            }
+
+        now = utc_now()
+        result = {
+            "approve": "approved",
+            "reject": "rejected",
+            "archive": "archived",
+            "quarantine": "quarantined",
+        }[normalized_action]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_tool_safety_policy_proposal",
+            target_path="task_hub.tool_safety_policy_proposals",
+            evidence=[proposal_id] + list(proposal.get("evidence", [])),
+            metadata={
+                "proposal_id": proposal_id,
+                "guidance_item_id": proposal.get("source_guidance_item_id"),
+                "reflection_id": proposal.get("source_reflection_id"),
+                "policy_scope": proposal.get("policy_scope"),
+                "executable_policy_created": False,
+            },
+        )
+        decision = build_tool_safety_policy_decision(
+            proposal=proposal,
+            action=normalized_action,
+            result=result,
+            reviewer=reviewer,
+            decision_note=decision_note,
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+        )
+        proposal["review_status"] = result
+        proposal["reviewed_at"] = now
+        proposal["reviewer"] = reviewer
+        proposal["decision_note"] = decision_note
+        proposal["last_review_decision_id"] = decision["decision_id"]
+        proposal["executable_policy_created"] = False
+        proposal["executable_policy"] = False
+        proposal["identity_mutation_allowed"] = False
+        proposal.setdefault("review_history", []).append(decision)
+        task_hub.setdefault("tool_safety_policy_decisions", []).append(decision)
+
+        state["update_log"].append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.tool_safety_policy_proposals",
+                "operation": f"{normalized_action}_tool_safety_policy_proposal",
+                "before": before_status,
+                "after": result,
+                "evidence": [proposal_id] + list(proposal.get("evidence", [])),
+                "gate": "medium",
+                "confidence": proposal.get("confidence", 0.5),
+                "tool_safety_policy_decision_id": decision["decision_id"],
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_tool_safety_policy_proposal",
+            target="task_hub.tool_safety_policy_proposals",
+            outcome=result,
+            evidence=[proposal_id] + list(proposal.get("evidence", [])),
+            metadata={
+                "tool_safety_policy_decision_id": decision["decision_id"],
+                "snapshot_id": snapshot["snapshot_id"],
+                "proposal_id": proposal_id,
+                "policy_scope": proposal.get("policy_scope"),
+                "executable_policy_created": False,
+                "identity_mutation_allowed": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="tool_safety_policy_review",
+            nodes=[
+                {
+                    "id": "policy_proposal",
+                    "type": "PolicyProposal",
+                    "proposal_id": proposal_id,
+                    "policy_scope": proposal.get("policy_scope"),
+                    "executable_policy": False,
+                },
+                {
+                    "id": "review",
+                    "type": "Review",
+                    "reviewer": reviewer,
+                    "decision": normalized_action,
+                },
+            ],
+            edges=[{"from": "policy_proposal", "to": "review", "type": "feedback"}],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.tool_safety_policy_proposals",
+                    "tool_safety_policy_proposal_id": proposal_id,
+                    "tool_safety_policy_decision_id": decision["decision_id"],
+                    "executable_policy_created": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_tool_safety_policy_proposal",
+                    "reviewer": reviewer,
+                    "decision_note": decision_note,
+                    "tool_safety_policy_decision": decision,
+                }
+            ],
+            summary=(
+                f"Reviewed tool/safety policy proposal {proposal_id} "
+                f"with action {normalized_action}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        return {
+            "status": result,
+            "proposal_id": proposal_id,
+            "tool_safety_policy_decision_id": decision["decision_id"],
+            "snapshot_id": snapshot["snapshot_id"],
+        }
+
     def apply_memory_lifecycle_action(
         self,
         store_name: str,
@@ -4548,6 +4864,12 @@ class StateStore:
             and warning.get("status") == "active"
             and warning.get("lifecycle", {}).get("status") == "active"
         ]
+        active_tool_safety_policy_proposals = [
+            proposal
+            for proposal in task_hub.get("tool_safety_policy_proposals", [])
+            if isinstance(proposal, dict)
+            and proposal.get("review_status") in {"pending", "approved"}
+        ][-8:]
         reflection_log = [
             reflection
             for reflection in task_hub.get("reflection_log", [])
@@ -4630,6 +4952,7 @@ class StateStore:
                 "reflection_log": active_reflection_log,
                 "reflection_policy_guidance": reflection_policy_guidance,
                 "reflection_guidance_queue": reflection_guidance_queue,
+                "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
                 "cautionary_procedural_memory": active_cautionary_memory,
                 "procedural_memory": active_procedural_memory,
             },
@@ -4644,6 +4967,7 @@ class StateStore:
             "reflection_log": active_reflection_log,
             "reflection_policy_guidance": reflection_policy_guidance,
             "reflection_guidance_queue": reflection_guidance_queue,
+            "tool_safety_policy_proposals": active_tool_safety_policy_proposals,
             "cautionary_procedural_memory": active_cautionary_memory,
             "procedural_memory": active_procedural_memory,
             "identity_update_gate": {
@@ -5865,6 +6189,94 @@ def build_reflection_guidance_decision(
         "evidence": item.get("evidence", []),
         "source_ids": item.get("source_ids", []),
         "execution_prohibited": True,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
+    }
+
+
+def build_tool_safety_policy_proposal(
+    guidance_item: dict,
+    policy_scope: str,
+    proposed_rule: str,
+    proposer: str,
+    rationale: str,
+    risk: str,
+    confidence: float,
+    timestamp: str,
+) -> dict:
+    evidence = [
+        item
+        for item in [
+            guidance_item.get("guidance_item_id"),
+            guidance_item.get("reflection_id"),
+            *guidance_item.get("evidence", []),
+        ]
+        if item
+    ]
+    return {
+        "proposal_id": new_id("tool_safety_policy_proposal"),
+        "timestamp": timestamp,
+        "policy_scope": policy_scope,
+        "proposed_rule": proposed_rule,
+        "rationale": rationale,
+        "source_guidance_item_id": guidance_item.get("guidance_item_id"),
+        "source_reflection_id": guidance_item.get("reflection_id"),
+        "workflow": guidance_item.get("workflow"),
+        "review_priority": guidance_item.get("review_priority", "medium"),
+        "risk": str(risk or guidance_item.get("review_priority") or "medium"),
+        "confidence": confidence,
+        "proposer": proposer,
+        "review_status": "pending",
+        "proposal_mode": "proposal_only",
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "identity_mutation_allowed": False,
+        "evidence": evidence,
+        "source_ids": guidance_item.get("source_ids", []),
+        "review_history": [],
+        "provenance": [
+            {
+                "type": "reflection_guidance_policy_proposal",
+                "guidance_item_id": guidance_item.get("guidance_item_id"),
+                "reflection_id": guidance_item.get("reflection_id"),
+            }
+        ],
+    }
+
+
+def build_tool_safety_policy_decision(
+    proposal: dict,
+    action: str,
+    result: str,
+    reviewer: str,
+    decision_note: str,
+    snapshot_id: str,
+    timestamp: str,
+) -> dict:
+    return {
+        "decision_id": new_id("tool_safety_policy_decision"),
+        "timestamp": timestamp,
+        "proposal_id": proposal.get("proposal_id"),
+        "policy_scope": proposal.get("policy_scope"),
+        "source_guidance_item_id": proposal.get("source_guidance_item_id"),
+        "source_reflection_id": proposal.get("source_reflection_id"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "decision_note": decision_note,
+        "snapshot_id": snapshot_id,
+        "evidence": proposal.get("evidence", []),
+        "risk": proposal.get("risk", "medium"),
+        "confidence": proposal.get("confidence", 0.5),
+        "requires_review": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
         "executable_policy_created": False,
         "identity_mutation_allowed": False,
         "rollback": {
