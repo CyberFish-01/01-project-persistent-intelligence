@@ -404,6 +404,16 @@ v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、re
 - reconstruction evidence schema checklist reconstruction execution count；
 - reconstruction evidence schema checklist identity mutation count；
 - reconstruction evidence schema checklist state mutation count；
+- reconstruction schema review decision count；
+- reconstruction schema review more evidence count；
+- reconstruction schema review context signal count；
+- reconstruction schema review schema mutation count；
+- reconstruction schema review capture execution count；
+- reconstruction schema review reconstruction execution count；
+- reconstruction schema review identity mutation count；
+- reconstruction schema review compaction count；
+- reconstruction schema review events modified count；
+- reconstruction schema review replay after count；
 - event payload capture policy proposal count；
 - event payload capture policy decision count；
 - event payload capture policy approved count；

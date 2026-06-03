@@ -1339,6 +1339,7 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
         "event_retention_lifecycle_decisions",
         "event_payload_capture_policy_proposals",
         "event_payload_capture_policy_decisions",
+        "reconstruction_schema_review_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -1979,6 +1980,153 @@ def validate_task_hub(state: dict[str, Any]) -> list[ValidationIssue]:
                 issues.append(ValidationIssue(path + ".events_modified", "Event payload capture policy decision must not modify events."))
             if decision.get("safe_for_destructive_compaction") is not False:
                 issues.append(ValidationIssue(path + ".safe_for_destructive_compaction", "Event payload capture policy decision must not mark destructive compaction safe."))
+
+    reconstruction_schema_review_decisions = task_hub.get(
+        "reconstruction_schema_review_decisions",
+        [],
+    )
+    if isinstance(reconstruction_schema_review_decisions, list):
+        for index, decision in enumerate(reconstruction_schema_review_decisions):
+            path = f"task_hub.reconstruction_schema_review_decisions[{index}]"
+            if not isinstance(decision, dict):
+                issues.append(
+                    ValidationIssue(
+                        path,
+                        "Reconstruction schema review decision must be an object.",
+                    )
+                )
+                continue
+            for key in (
+                "decision_id",
+                "timestamp",
+                "checklist_id",
+                "workflow",
+                "reviewer",
+                "action",
+                "result",
+                "rationale",
+                "requested_evidence",
+                "approval_scope",
+                "snapshot_id",
+                "review_mode",
+                "checklist_mode",
+                "checklist_item",
+                "review_questions",
+                "acceptance_criteria",
+                "required_evidence",
+                "source_evidence",
+                "requires_review",
+                "review_only",
+                "execution_prohibited",
+                "executable_policy",
+                "executable_policy_created",
+                "schema_change_approved",
+                "schema_change_allowed",
+                "identity_mutation_allowed",
+                "event_schema_mutation_allowed",
+                "event_payload_capture_executed",
+                "reconstruction_executed",
+                "event_compaction_executed",
+                "automatic_rollback_executed",
+                "events_modified",
+                "rollback",
+            ):
+                if key not in decision:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Reconstruction schema review decision key is missing.",
+                        )
+                    )
+            if decision.get("action") not in {
+                "approve_for_schema_design",
+                "request_more_evidence",
+                "reject_as_low_value",
+                "defer",
+                "quarantine",
+            }:
+                issues.append(
+                    ValidationIssue(
+                        path + ".action",
+                        "Reconstruction schema review action is invalid.",
+                    )
+                )
+            if decision.get("result") not in {
+                "approved_for_schema_design",
+                "more_evidence_requested",
+                "rejected_as_low_value",
+                "deferred",
+                "quarantined",
+            }:
+                issues.append(
+                    ValidationIssue(
+                        path + ".result",
+                        "Reconstruction schema review result is invalid.",
+                    )
+                )
+            if decision.get("review_mode") != "reconstruction_schema_review_v0.1":
+                issues.append(
+                    ValidationIssue(
+                        path + ".review_mode",
+                        "Reconstruction schema review mode is invalid.",
+                    )
+                )
+            if (
+                decision.get("checklist_mode")
+                != "reconstruction_evidence_schema_review_checklist_v0.1"
+            ):
+                issues.append(
+                    ValidationIssue(
+                        path + ".checklist_mode",
+                        "Reconstruction schema review checklist mode is invalid.",
+                    )
+                )
+            if not isinstance(decision.get("requested_evidence"), list):
+                issues.append(
+                    ValidationIssue(
+                        path + ".requested_evidence",
+                        "Reconstruction schema review requested_evidence must be a list.",
+                    )
+                )
+            if not isinstance(decision.get("approval_scope"), list):
+                issues.append(
+                    ValidationIssue(
+                        path + ".approval_scope",
+                        "Reconstruction schema review approval_scope must be a list.",
+                    )
+                )
+            for key in (
+                "requires_review",
+                "review_only",
+                "execution_prohibited",
+            ):
+                if decision.get(key) is not True:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Reconstruction schema review decision must remain review-only.",
+                        )
+                    )
+            for key in (
+                "executable_policy",
+                "executable_policy_created",
+                "schema_change_approved",
+                "schema_change_allowed",
+                "identity_mutation_allowed",
+                "event_schema_mutation_allowed",
+                "event_payload_capture_executed",
+                "reconstruction_executed",
+                "event_compaction_executed",
+                "automatic_rollback_executed",
+                "events_modified",
+            ):
+                if decision.get(key) is not False:
+                    issues.append(
+                        ValidationIssue(
+                            path + f".{key}",
+                            "Reconstruction schema review decision must not execute changes.",
+                        )
+                    )
 
     raw_event_retention_reviews = task_hub.get("event_retention_reviews", [])
     event_retention_reviews = (

@@ -3056,6 +3056,94 @@ class CoreStateTests(unittest.TestCase):
                 before_event_ids,
             )
 
+    def test_reconstruction_schema_checklist_review_record_is_non_executable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            store.record_episode("P46 schema checklist review record episode")
+            store.review_event_retention(
+                reviewer="unit_test",
+                retention_limit=1,
+                note="Create retention workflow gap for P46 review.",
+            )
+            checklist = store.reconstruction_evidence_schema_review_checklist()
+            checklist_id = checklist["checklist_items"][0]["checklist_id"]
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            result = store.review_reconstruction_schema_checklist_item(
+                checklist_id=checklist_id,
+                action="request_more_evidence",
+                reviewer="unit_test",
+                rationale="Need explicit before/after evidence before schema design.",
+                requested_evidence=["object_diff_example"],
+                approval_scope=["schema_design_discussion_only"],
+            )
+            state = store.load()
+            decisions = state["task_hub"]["reconstruction_schema_review_decisions"]
+            decision = decisions[-1]
+            replay = store.replay_events()
+            projected = replay["projection"]["target_paths"][
+                "task_hub.reconstruction_schema_review_decisions"
+            ]
+            validation = replay["projection_validation"]["checked"][
+                "task_hub.reconstruction_schema_review_decisions"
+            ]
+            after_event_ids = [event["event_id"] for event in store.list_events()]
+
+            self.assertEqual(result["status"], "more_evidence_requested")
+            self.assertTrue(
+                result["decision_id"].startswith(
+                    "reconstruction_schema_review_decision_"
+                )
+            )
+            self.assertEqual(decision["decision_id"], result["decision_id"])
+            self.assertEqual(decision["checklist_id"], checklist_id)
+            self.assertEqual(decision["action"], "request_more_evidence")
+            self.assertEqual(decision["result"], "more_evidence_requested")
+            self.assertEqual(
+                decision["review_mode"],
+                "reconstruction_schema_review_v0.1",
+            )
+            self.assertEqual(
+                decision["checklist_mode"],
+                "reconstruction_evidence_schema_review_checklist_v0.1",
+            )
+            self.assertEqual(decision["requested_evidence"], ["object_diff_example"])
+            self.assertEqual(
+                decision["approval_scope"],
+                ["schema_design_discussion_only"],
+            )
+            self.assertTrue(decision["review_only"])
+            self.assertTrue(decision["requires_review"])
+            self.assertTrue(decision["execution_prohibited"])
+            self.assertFalse(decision["executable_policy"])
+            self.assertFalse(decision["executable_policy_created"])
+            self.assertFalse(decision["schema_change_approved"])
+            self.assertFalse(decision["schema_change_allowed"])
+            self.assertFalse(decision["event_schema_mutation_allowed"])
+            self.assertFalse(decision["event_payload_capture_executed"])
+            self.assertFalse(decision["reconstruction_executed"])
+            self.assertFalse(decision["event_compaction_executed"])
+            self.assertFalse(decision["automatic_rollback_executed"])
+            self.assertFalse(decision["identity_mutation_allowed"])
+            self.assertFalse(decision["events_modified"])
+            self.assertFalse(result["event_schema_mutation_allowed"])
+            self.assertFalse(result["event_payload_capture_executed"])
+            self.assertFalse(result["reconstruction_executed"])
+            self.assertFalse(result["event_compaction_executed"])
+            self.assertFalse(result["automatic_rollback_executed"])
+            self.assertFalse(result["identity_mutation_allowed"])
+            self.assertFalse(result["events_modified"])
+            self.assertEqual(after_event_ids[: len(before_event_ids)], before_event_ids)
+            self.assertEqual(projected["latest_after"], result["decision_id"])
+            self.assertTrue(validation["count_consistent"])
+            self.assertGreaterEqual(
+                store.build_context_package()["context_signal_summary"][
+                    "governance_proposal_link_evidence_count"
+                ],
+                1,
+            )
+
     def test_event_retention_review_lifecycle_is_review_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

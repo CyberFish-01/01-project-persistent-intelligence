@@ -429,6 +429,39 @@ def main() -> None:
         "reconstruction-evidence-schema-review-checklist",
         help="Build a review-only schema checklist from prioritized reconstruction evidence gaps.",
     )
+    reconstruction_schema_review_parser = subparsers.add_parser(
+        "review-reconstruction-schema-checklist-item",
+        help="Record a non-executable review decision for a reconstruction schema checklist item.",
+    )
+    reconstruction_schema_review_parser.add_argument("checklist_id")
+    reconstruction_schema_review_parser.add_argument(
+        "--action",
+        required=True,
+        choices=[
+            "approve_for_schema_design",
+            "request_more_evidence",
+            "reject_as_low_value",
+            "defer",
+            "quarantine",
+        ],
+    )
+    reconstruction_schema_review_parser.add_argument(
+        "--reviewer",
+        default="manual_review",
+    )
+    reconstruction_schema_review_parser.add_argument("--rationale", default="")
+    reconstruction_schema_review_parser.add_argument(
+        "--requested-evidence",
+        action="append",
+        default=[],
+        help="Evidence request to attach to the review decision; may be repeated.",
+    )
+    reconstruction_schema_review_parser.add_argument(
+        "--approval-scope",
+        action="append",
+        default=[],
+        help="Schema design scope approved for later review; may be repeated.",
+    )
     payload_capture_policy_parser = subparsers.add_parser(
         "propose-event-payload-capture-policy",
         help="Create a review-only event payload capture policy proposal.",
@@ -797,6 +830,17 @@ def main() -> None:
         print_json(store.reconstruction_evidence_gap_prioritization())
     elif args.command == "reconstruction-evidence-schema-review-checklist":
         print_json(store.reconstruction_evidence_schema_review_checklist())
+    elif args.command == "review-reconstruction-schema-checklist-item":
+        print_json(
+            store.review_reconstruction_schema_checklist_item(
+                checklist_id=args.checklist_id,
+                action=args.action,
+                reviewer=args.reviewer,
+                rationale=args.rationale,
+                requested_evidence=args.requested_evidence,
+                approval_scope=args.approval_scope,
+            )
+        )
     elif args.command == "propose-event-payload-capture-policy":
         print_json(
             store.propose_event_payload_capture_policy(

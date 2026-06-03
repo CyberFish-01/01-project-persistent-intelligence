@@ -1458,12 +1458,11 @@ Implemented result:
 
 Remaining gaps:
 
-- checklist decisions are not yet recorded as durable review records;
 - no schema approval workflow exists;
 - no event schema migration exists;
 - no payload or diff capture implementation exists.
 
-Recommended next step:
+Implemented next step:
 
 ```text
 P46 Reconstruction Schema Checklist Review Record
@@ -1474,6 +1473,33 @@ Reason:
 - P45 prepares review material, but the project still needs a durable, non-executable record for human decisions on each checklist item;
 - this should capture reviewer, decision, rationale, requested evidence, and approval scope without performing schema mutation or payload capture;
 - it keeps the project in Event-Sourcing Groundwork while creating a bridge from review checklist to future schema design.
+
+Implemented result:
+
+- `review-reconstruction-schema-checklist-item` CLI records durable `reconstruction_schema_review_decision` objects under `task_hub.reconstruction_schema_review_decisions`;
+- each decision captures checklist id, workflow, reviewer, action, result, rationale, requested evidence, approval scope, source evidence, review questions, acceptance criteria, required evidence, snapshot metadata, audit trace, and event-log projection support;
+- decisions enter the append-only event log through `task_hub.reconstruction_schema_review_decisions`;
+- the decision keeps `schema_change_approved: false`, `schema_change_allowed: false`, `event_schema_mutation_allowed: false`, `event_payload_capture_executed: false`, `reconstruction_executed: false`, `event_compaction_executed: false`, `automatic_rollback_executed: false`, `identity_mutation_allowed: false`, and `events_modified: false`;
+- scenario evaluation verifies durable decision count, context governance signal visibility, replay-after-review, projection consistency, and zero execution/mutation counts.
+
+Remaining gaps:
+
+- review decisions are not yet mapped back into a coverage report by workflow;
+- no schema approval workflow exists;
+- no event schema migration exists;
+- no payload or diff capture implementation exists.
+
+Recommended next step:
+
+```text
+P47 Reconstruction Schema Review Coverage Map
+```
+
+Reason:
+
+- P46 records individual decisions, but the project still needs a report-only map showing which prioritized workflow gaps have review decisions and which remain unreviewed;
+- this should expose reviewed, deferred, rejected, and evidence-requested checklist items without approving schema changes;
+- it keeps Event-Sourcing Groundwork focused on governance coverage before any schema mutation or payload capture.
 
 Desired acceptance:
 

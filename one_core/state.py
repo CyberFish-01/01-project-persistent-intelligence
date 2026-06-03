@@ -72,6 +72,13 @@ EVENT_PAYLOAD_CAPTURE_POLICY_REVIEW_ACTIONS = {
     "archive",
     "quarantine",
 }
+RECONSTRUCTION_SCHEMA_REVIEW_ACTIONS = {
+    "approve_for_schema_design",
+    "request_more_evidence",
+    "reject_as_low_value",
+    "defer",
+    "quarantine",
+}
 TOOL_SAFETY_POLICY_REVIEW_ACTIONS = {"approve", "reject", "archive", "quarantine"}
 TOOL_SAFETY_POLICY_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
 TOOL_SAFETY_POLICY_LINK_LIFECYCLE_ACTIONS = {"archive", "discard", "quarantine"}
@@ -241,6 +248,7 @@ def default_task_hub(timestamp: str, working_state: Optional[dict] = None) -> di
         "event_retention_lifecycle_decisions": [],
         "event_payload_capture_policy_proposals": [],
         "event_payload_capture_policy_decisions": [],
+        "reconstruction_schema_review_decisions": [],
         "failure_reflections": [],
         "procedural_candidates": [],
         "cautionary_procedural_candidates": [],
@@ -639,6 +647,7 @@ def ensure_task_hub(state: dict, timestamp: str) -> bool:
         "event_retention_lifecycle_decisions",
         "event_payload_capture_policy_proposals",
         "event_payload_capture_policy_decisions",
+        "reconstruction_schema_review_decisions",
         "failure_reflections",
         "procedural_candidates",
         "cautionary_procedural_candidates",
@@ -777,6 +786,7 @@ def task_action_evidence(trace: dict) -> List[str]:
             "event_retention_lifecycle_decision_id",
             "event_payload_capture_policy_proposal_id",
             "event_payload_capture_policy_decision_id",
+            "reconstruction_schema_review_decision_id",
         ):
             value = event.get(key)
             if value:
@@ -1300,6 +1310,7 @@ PAYLOAD_HINT_KEYS = {
     "identity_decision",
     "review_decision",
     "event_retention_lifecycle_decision",
+    "reconstruction_schema_review_decision",
     "proposal",
     "candidate",
     "reflection",
@@ -2614,6 +2625,85 @@ def build_reconstruction_evidence_schema_review_checklist(
         "report_only": True,
         "would_modify_state": False,
         "note": "P45 converts prioritized reconstruction evidence gaps into review-only checklist items; it does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity.",
+    }
+
+
+def build_reconstruction_schema_review_decision(
+    checklist_item: dict,
+    action: str,
+    reviewer: str,
+    rationale: str,
+    requested_evidence: List[str],
+    approval_scope: List[str],
+    snapshot_id: str,
+    timestamp: str,
+) -> dict:
+    result = {
+        "approve_for_schema_design": "approved_for_schema_design",
+        "request_more_evidence": "more_evidence_requested",
+        "reject_as_low_value": "rejected_as_low_value",
+        "defer": "deferred",
+        "quarantine": "quarantined",
+    }[action]
+    return {
+        "decision_id": new_id("reconstruction_schema_review_decision"),
+        "timestamp": timestamp,
+        "checklist_id": checklist_item.get("checklist_id"),
+        "workflow": checklist_item.get("workflow"),
+        "reviewer": reviewer,
+        "action": action,
+        "result": result,
+        "rationale": rationale,
+        "requested_evidence": requested_evidence,
+        "approval_scope": approval_scope,
+        "snapshot_id": snapshot_id,
+        "review_mode": "reconstruction_schema_review_v0.1",
+        "checklist_mode": "reconstruction_evidence_schema_review_checklist_v0.1",
+        "checklist_item": {
+            "checklist_id": checklist_item.get("checklist_id"),
+            "workflow": checklist_item.get("workflow"),
+            "recommended_order": checklist_item.get("recommended_order"),
+            "recommended_priority": checklist_item.get("recommended_priority"),
+            "priority_score": checklist_item.get("priority_score"),
+            "coverage_status": checklist_item.get("coverage_status"),
+            "target_paths": checklist_item.get("target_paths", {}),
+            "missing_capabilities": checklist_item.get("missing_capabilities", []),
+            "required_schema_sections": checklist_item.get(
+                "required_schema_sections",
+                [],
+            ),
+            "minimum_fields": checklist_item.get("minimum_fields", []),
+            "example_event_ids": checklist_item.get("example_event_ids", []),
+        },
+        "review_questions": checklist_item.get("review_questions", []),
+        "acceptance_criteria": checklist_item.get("acceptance_criteria", []),
+        "required_evidence": checklist_item.get("required_evidence", []),
+        "source_evidence": [
+            item
+            for item in [
+                checklist_item.get("checklist_id"),
+                *checklist_item.get("example_event_ids", []),
+            ]
+            if item
+        ],
+        "requires_review": True,
+        "review_only": True,
+        "execution_prohibited": True,
+        "executable_policy": False,
+        "executable_policy_created": False,
+        "schema_change_approved": False,
+        "schema_change_allowed": False,
+        "event_schema_mutation_allowed": False,
+        "event_payload_capture_executed": False,
+        "reconstruction_executed": False,
+        "event_compaction_executed": False,
+        "automatic_rollback_executed": False,
+        "identity_mutation_allowed": False,
+        "events_modified": False,
+        "rollback": {
+            "snapshot_id": snapshot_id,
+            "reversible": True,
+        },
     }
 
 
@@ -7598,6 +7688,243 @@ class StateStore:
         checklist["state_unchanged"] = before_state == self.load()
         return checklist
 
+    def review_reconstruction_schema_checklist_item(
+        self,
+        checklist_id: str,
+        action: str,
+        reviewer: str = "manual_review",
+        rationale: str = "",
+        requested_evidence: Optional[List[str]] = None,
+        approval_scope: Optional[List[str]] = None,
+    ) -> dict:
+        normalized_action = str(action or "").strip().lower()
+        if normalized_action not in RECONSTRUCTION_SCHEMA_REVIEW_ACTIONS:
+            return {
+                "status": "rejected",
+                "error": "unsupported_reconstruction_schema_review_action",
+                "action": action,
+            }
+
+        before_event_ids = [event.get("event_id") for event in self.list_events()]
+        state = self.load()
+        now = utc_now()
+        checklist = self.reconstruction_evidence_schema_review_checklist()
+        after_checklist_event_ids = [
+            event.get("event_id") for event in self.list_events()
+        ]
+        item = next(
+            (
+                candidate
+                for candidate in checklist.get("checklist_items", [])
+                if isinstance(candidate, dict)
+                and candidate.get("checklist_id") == checklist_id
+            ),
+            None,
+        )
+        if item is None:
+            return {
+                "status": "not_found",
+                "error": "reconstruction_schema_checklist_item_not_found",
+                "checklist_id": checklist_id,
+            }
+
+        task_hub = state.setdefault(
+            "task_hub",
+            default_task_hub(now, state.get("working_state", {})),
+        )
+        evidence = [
+            evidence_item
+            for evidence_item in [
+                checklist_id,
+                *item.get("example_event_ids", []),
+                *(requested_evidence or []),
+            ]
+            if evidence_item
+        ]
+        snapshot = self.record_snapshot(
+            state=state,
+            actor=reviewer,
+            operation=f"{normalized_action}_reconstruction_schema_checklist_item",
+            target_path="task_hub.reconstruction_schema_review_decisions",
+            evidence=evidence,
+            metadata={
+                "reconstruction_schema_review_decision_id": None,
+                "checklist_id": checklist_id,
+                "workflow": item.get("workflow"),
+                "review_action": normalized_action,
+                "schema_change_approved": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "identity_mutation_allowed": False,
+                "events_modified": False,
+            },
+        )
+        decision = build_reconstruction_schema_review_decision(
+            checklist_item=item,
+            action=normalized_action,
+            reviewer=reviewer,
+            rationale=rationale,
+            requested_evidence=requested_evidence or [],
+            approval_scope=approval_scope or [],
+            snapshot_id=snapshot["snapshot_id"],
+            timestamp=now,
+        )
+        snapshot["metadata"]["reconstruction_schema_review_decision_id"] = decision[
+            "decision_id"
+        ]
+        task_hub.setdefault("reconstruction_schema_review_decisions", []).append(
+            decision
+        )
+        task_hub["reconstruction_schema_review_decisions"] = task_hub[
+            "reconstruction_schema_review_decisions"
+        ][-50:]
+
+        state.setdefault("update_log", []).append(
+            {
+                "id": new_id("update"),
+                "timestamp": now,
+                "actor": reviewer,
+                "target_path": "task_hub.reconstruction_schema_review_decisions",
+                "operation": f"{normalized_action}_reconstruction_schema_checklist_item",
+                "before": None,
+                "after": decision["decision_id"],
+                "evidence": evidence,
+                "gate": "medium",
+                "confidence": 0.7,
+                "reconstruction_schema_review_decision_id": decision[
+                    "decision_id"
+                ],
+                "checklist_id": checklist_id,
+                "workflow": item.get("workflow"),
+                "requires_review": True,
+                "review_only": True,
+                "execution_prohibited": True,
+                "executable_policy": False,
+                "executable_policy_created": False,
+                "schema_change_approved": False,
+                "schema_change_allowed": False,
+                "identity_mutation_allowed": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "events_modified": False,
+                "rollback": {
+                    "snapshot_id": snapshot["snapshot_id"],
+                    "reversible": True,
+                },
+            }
+        )
+        audit_event = self.record_audit_event(
+            actor=reviewer,
+            action=f"{normalized_action}_reconstruction_schema_checklist_item",
+            target="task_hub.reconstruction_schema_review_decisions",
+            outcome=decision["result"],
+            evidence=evidence,
+            metadata={
+                "reconstruction_schema_review_decision_id": decision[
+                    "decision_id"
+                ],
+                "snapshot_id": snapshot["snapshot_id"],
+                "checklist_id": checklist_id,
+                "workflow": item.get("workflow"),
+                "rationale": rationale,
+                "review_only": True,
+                "schema_change_approved": False,
+                "event_schema_mutation_allowed": False,
+                "event_payload_capture_executed": False,
+                "reconstruction_executed": False,
+                "event_compaction_executed": False,
+                "automatic_rollback_executed": False,
+                "identity_mutation_allowed": False,
+                "events_modified": False,
+            },
+            state=state,
+        )
+        self.record_trace(
+            workflow="reconstruction_schema_review",
+            nodes=[
+                {
+                    "id": "schema_review_checklist_item",
+                    "type": "ReviewChecklistItem",
+                    "checklist_id": checklist_id,
+                    "workflow": item.get("workflow"),
+                    "review_only": True,
+                },
+                {
+                    "id": "schema_review_decision",
+                    "type": "ReviewDecision",
+                    "decision_id": decision["decision_id"],
+                    "reviewer": reviewer,
+                    "action": normalized_action,
+                    "result": decision["result"],
+                    "executable_policy": False,
+                },
+            ],
+            edges=[
+                {
+                    "from": "schema_review_checklist_item",
+                    "to": "schema_review_decision",
+                    "type": "review_decision",
+                }
+            ],
+            memory_events=[
+                {
+                    "operation": normalized_action,
+                    "target": "task_hub.reconstruction_schema_review_decisions",
+                    "reconstruction_schema_review_decision_id": decision[
+                        "decision_id"
+                    ],
+                    "checklist_id": checklist_id,
+                    "event_schema_mutation_allowed": False,
+                    "event_payload_capture_executed": False,
+                    "reconstruction_executed": False,
+                    "event_compaction_executed": False,
+                    "automatic_rollback_executed": False,
+                    "identity_mutation_allowed": False,
+                    "events_modified": False,
+                }
+            ],
+            review_events=[
+                {
+                    "operation": f"{normalized_action}_reconstruction_schema_checklist_item",
+                    "reviewer": reviewer,
+                    "rationale": rationale,
+                    "reconstruction_schema_review_decision": decision,
+                }
+            ],
+            summary=(
+                f"Recorded non-executable reconstruction schema review decision "
+                f"for checklist item {checklist_id}."
+            ),
+            audit_event_ids=[audit_event["id"]],
+            state=state,
+        )
+        self.save(state)
+        after_event_ids = [event.get("event_id") for event in self.list_events()]
+        return {
+            "status": decision["result"],
+            "decision_id": decision["decision_id"],
+            "checklist_id": checklist_id,
+            "workflow": item.get("workflow"),
+            "snapshot_id": snapshot["snapshot_id"],
+            "schema_change_approved": False,
+            "event_schema_mutation_allowed": False,
+            "event_payload_capture_executed": False,
+            "reconstruction_executed": False,
+            "event_compaction_executed": False,
+            "automatic_rollback_executed": False,
+            "identity_mutation_allowed": False,
+            "events_modified": (
+                before_event_ids != after_checklist_event_ids[: len(before_event_ids)]
+                or before_event_ids != after_event_ids[: len(before_event_ids)]
+            ),
+        }
+
     def propose_event_payload_capture_policy(
         self,
         proposer: str = "manual_review",
@@ -9496,6 +9823,34 @@ def build_context_signal_index(state: dict, dream_artifacts: List[dict]) -> dict
                     "source_link_id": evidence_record.get("source_link_id"),
                     "link_type": evidence_record.get("link_type"),
                     "mode": evidence_record.get("claim_graph_mode"),
+                }
+            )
+    for decision in state.get("task_hub", {}).get(
+        "reconstruction_schema_review_decisions",
+        [],
+    ):
+        if not isinstance(decision, dict):
+            continue
+        evidence_ids = [
+            str(item)
+            for item in [
+                decision.get("decision_id"),
+                decision.get("checklist_id"),
+                *decision.get("source_evidence", []),
+                *decision.get("requested_evidence", []),
+            ]
+            if item
+        ]
+        governance_evidence.update(evidence_ids)
+        if evidence_ids:
+            governance_sources.append(
+                {
+                    "source_type": "task_hub.reconstruction_schema_review_decision",
+                    "source_id": decision.get("decision_id"),
+                    "evidence_ids": evidence_ids,
+                    "review_status": decision.get("result"),
+                    "workflow": decision.get("workflow"),
+                    "mode": decision.get("review_mode"),
                 }
             )
 

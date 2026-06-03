@@ -350,6 +350,43 @@ class FoundationEvaluationTests(unittest.TestCase):
             0,
         )
         self.assertGreaterEqual(
+            metrics["reconstruction_schema_review_decision_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_schema_review_more_evidence_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_schema_review_context_signal_count"],
+            1,
+        )
+        self.assertEqual(
+            metrics["reconstruction_schema_review_schema_mutation_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_schema_review_capture_execution_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_schema_review_reconstruction_execution_count"],
+            0,
+        )
+        self.assertEqual(
+            metrics["reconstruction_schema_review_identity_mutation_count"],
+            0,
+        )
+        self.assertEqual(metrics["reconstruction_schema_review_compaction_count"], 0)
+        self.assertEqual(
+            metrics["reconstruction_schema_review_events_modified_count"],
+            0,
+        )
+        self.assertGreaterEqual(
+            metrics["reconstruction_schema_review_replay_after_count"],
+            1,
+        )
+        self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,
         )

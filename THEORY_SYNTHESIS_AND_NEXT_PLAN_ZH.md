@@ -1449,12 +1449,11 @@ P45 Reconstruction Evidence Schema Review Checklist
 
 剩余缺口：
 
-- checklist decisions 还没有作为 durable review records 记录；
 - 还没有 schema approval workflow；
 - 还没有 event schema migration；
 - 还没有 payload 或 diff capture implementation。
 
-建议下一步：
+已实现的下一步：
 
 ```text
 P46 Reconstruction Schema Checklist Review Record
@@ -1465,6 +1464,33 @@ P46 Reconstruction Schema Checklist Review Record
 - P45 准备了 review material，但项目仍然需要一个 durable、non-executable record 来记录人类对每个 checklist item 的决定；
 - 这一步应该记录 reviewer、decision、rationale、requested evidence 和 approval scope，但不执行 schema mutation 或 payload capture；
 - 它让项目继续停留在 Event-Sourcing Groundwork，同时把 review checklist 接到未来 schema design。
+
+已实现结果：
+
+- `review-reconstruction-schema-checklist-item` CLI 会在 `task_hub.reconstruction_schema_review_decisions` 下记录 durable `reconstruction_schema_review_decision` objects；
+- 每个 decision 会捕获 checklist id、workflow、reviewer、action、result、rationale、requested evidence、approval scope、source evidence、review questions、acceptance criteria、required evidence、snapshot metadata、audit trace 和 event-log projection support；
+- decisions 会通过 `task_hub.reconstruction_schema_review_decisions` 进入 append-only event log；
+- decision 保持 `schema_change_approved: false`、`schema_change_allowed: false`、`event_schema_mutation_allowed: false`、`event_payload_capture_executed: false`、`reconstruction_executed: false`、`event_compaction_executed: false`、`automatic_rollback_executed: false`、`identity_mutation_allowed: false` 和 `events_modified: false`；
+- scenario evaluation 会验证 durable decision count、context governance signal visibility、replay-after-review、projection consistency，以及所有 execution/mutation counts 为 0。
+
+剩余缺口：
+
+- review decisions 还没有按 workflow 映射回 coverage report；
+- 还没有 schema approval workflow；
+- 还没有 event schema migration；
+- 还没有 payload 或 diff capture implementation。
+
+建议下一步：
+
+```text
+P47 Reconstruction Schema Review Coverage Map
+```
+
+理由：
+
+- P46 记录了 individual decisions，但项目仍然需要一个 report-only map，显示哪些 prioritized workflow gaps 已有 review decisions，哪些仍未 review；
+- 这一步应该暴露 reviewed、deferred、rejected 和 evidence-requested checklist items，但不批准 schema changes；
+- 它让 Event-Sourcing Groundwork 在任何 schema mutation 或 payload capture 之前先聚焦 governance coverage。
 
 期望验收：
 

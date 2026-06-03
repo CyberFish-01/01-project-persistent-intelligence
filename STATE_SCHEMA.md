@@ -1691,6 +1691,47 @@ reconstruction_evidence_schema_review_checklist:
 
 P45 does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity. It only prepares human review material for future schema design.
 
+P46 adds durable, non-executable review decisions for checklist items:
+
+```bash
+python3 -m one_core.cli review-reconstruction-schema-checklist-item \
+  schema_review_1_record_episode \
+  --action request_more_evidence \
+  --requested-evidence object_diff_example
+```
+
+The decision is stored under `task_hub.reconstruction_schema_review_decisions` and enters the append-only event log through `task_hub.reconstruction_schema_review_decisions`.
+
+```yaml
+reconstruction_schema_review_decision:
+  decision_id: "reconstruction_schema_review_decision_..."
+  review_mode: "reconstruction_schema_review_v0.1"
+  checklist_mode: "reconstruction_evidence_schema_review_checklist_v0.1"
+  checklist_id: "schema_review_1_record_episode"
+  workflow: "record_episode"
+  action: "request_more_evidence"
+  result: "more_evidence_requested"
+  requested_evidence:
+    - "object_diff_example"
+  approval_scope:
+    - "schema_design_discussion_only"
+  review_only: true
+  execution_prohibited: true
+  executable_policy: false
+  executable_policy_created: false
+  schema_change_approved: false
+  schema_change_allowed: false
+  event_schema_mutation_allowed: false
+  event_payload_capture_executed: false
+  reconstruction_executed: false
+  event_compaction_executed: false
+  automatic_rollback_executed: false
+  identity_mutation_allowed: false
+  events_modified: false
+```
+
+P46 records human review intent and evidence requests only. It still does not approve schema changes, capture payloads, reconstruct state, compact events, roll back state, or mutate identity.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml
