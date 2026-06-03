@@ -95,6 +95,39 @@ class StateValidationTests(unittest.TestCase):
                 migrated["context_builder"]["policy"]["signal_weights"],
             )
 
+    def test_context_builder_validates_signal_attribution_shape(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            state["context_builder"]["activation_traces"].append(
+                {
+                    "trace_id": "trace_bad_attribution",
+                    "context_package_id": "context_package_bad_attribution",
+                    "timestamp": state["created_at"],
+                    "policy_version": "0.3",
+                    "metrics": {},
+                    "signal_attribution_summary": [],
+                    "selected": [
+                        {
+                            "memory_id": "episode_bad",
+                            "signal_attribution": {},
+                        }
+                    ],
+                }
+            )
+
+            report = validate_state(state, store.list_episodes())
+            self.assertEqual(report["status"], "failed")
+            paths = {issue["path"] for issue in report["issues"]}
+            self.assertIn(
+                "context_builder.activation_traces[0].signal_attribution_summary",
+                paths,
+            )
+            self.assertIn(
+                "context_builder.activation_traces[0].selected[0].signal_attribution",
+                paths,
+            )
+
     def test_adapter_event_index_must_point_to_episode(self):
         with tempfile.TemporaryDirectory() as tmp:
             store = StateStore(Path(tmp))

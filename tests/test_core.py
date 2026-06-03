@@ -1709,6 +1709,31 @@ class CoreStateTests(unittest.TestCase):
                 "governance_proposal_link_evidence",
                 episode_decision["reasons"],
             )
+            governance_attribution = next(
+                item
+                for item in episode_decision["signal_attribution"]
+                if item["signal"] == "governance_proposal_link_evidence"
+            )
+            self.assertEqual(
+                governance_attribution["signal_bucket"],
+                "claim_graph.proposal_link_evidence",
+            )
+            self.assertIn(episode["id"], governance_attribution["matched_ids"])
+            self.assertTrue(governance_attribution["source_records"])
+            self.assertEqual(
+                governance_attribution["source_records"][0]["source_type"],
+                "claim_graph.proposal_link_evidence",
+            )
+            self.assertIn(
+                "governance_proposal_link_evidence",
+                trace["signal_attribution_summary"],
+            )
+            self.assertGreaterEqual(
+                trace["signal_attribution_summary"][
+                    "governance_proposal_link_evidence"
+                ]["source_record_count"],
+                1,
+            )
             self.assertEqual(
                 package["context_signal_summary"]["identity_gate_evidence_count"],
                 1,

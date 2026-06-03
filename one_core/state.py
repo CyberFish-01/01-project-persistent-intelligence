@@ -5931,6 +5931,10 @@ class StateStore:
             "selected": activation_trace.get("selected", []),
             "suppressed": activation_trace.get("suppressed", []),
             "signal_summary": activation_trace.get("signal_summary", {}),
+            "signal_attribution_summary": activation_trace.get(
+                "signal_attribution_summary",
+                {},
+            ),
         }
         history = context_builder.setdefault("activation_traces", [])
         history.append(entry)
@@ -6104,7 +6108,7 @@ def context_activation_decision(
     source_score = 0.1 if item.get("provenance") or item.get("source") else 0.0
     if source_score:
         reasons.append("source_attributed")
-    signal_score, signal_reasons = context_signal_score(
+    signal_score, signal_reasons, signal_attribution = context_signal_score(
         item_id=item_id,
         item=item,
         context_signals=context_signals,
@@ -6124,57 +6128,160 @@ def context_activation_decision(
         "activated": True,
         "score": round(min(score, 1.0), 2),
         "reasons": reasons,
+        "signal_attribution": signal_attribution,
     }
 
 
 def build_context_signal_index(state: dict, dream_artifacts: List[dict]) -> dict:
     identity_evidence = set()
+    identity_sources = []
     for proposal in state.get("identity_update_gate", {}).get("proposals", []):
         if not isinstance(proposal, dict):
             continue
-        identity_evidence.update(str(item) for item in proposal.get("evidence", []) if item)
+        evidence = [str(item) for item in proposal.get("evidence", []) if item]
+        identity_evidence.update(evidence)
+        if evidence:
+            identity_sources.append(
+                {
+                    "source_type": "identity_update_gate.proposal",
+                    "source_id": proposal.get("proposal_id"),
+                    "evidence_ids": evidence,
+                    "review_status": proposal.get("review_status"),
+                }
+            )
     for decision in state.get("identity_update_gate", {}).get("review_decisions", []):
         if not isinstance(decision, dict):
             continue
-        identity_evidence.update(str(item) for item in decision.get("evidence", []) if item)
+        evidence = [str(item) for item in decision.get("evidence", []) if item]
+        identity_evidence.update(evidence)
+        if evidence:
+            identity_sources.append(
+                {
+                    "source_type": "identity_update_gate.review_decision",
+                    "source_id": decision.get("decision_id"),
+                    "evidence_ids": evidence,
+                    "review_status": decision.get("result") or decision.get("action"),
+                }
+            )
 
     claim_evidence = set()
+    claim_sources = []
     for claim in state.get("claim_graph", {}).get("claims", []):
         if not isinstance(claim, dict):
             continue
-        claim_evidence.update(str(item) for item in claim.get("evidence", []) if item)
+        evidence = [str(item) for item in claim.get("evidence", []) if item]
+        claim_evidence.update(evidence)
+        if evidence:
+            claim_sources.append(
+                {
+                    "source_type": "claim_graph.claim",
+                    "source_id": claim.get("claim_id"),
+                    "evidence_ids": evidence,
+                    "status": claim.get("status"),
+                }
+            )
     for decision in state.get("claim_graph", {}).get("review_decisions", []):
         if not isinstance(decision, dict):
             continue
-        claim_evidence.update(str(item) for item in decision.get("patch_preview", {}).get("affected_evidence", []) if item)
+        evidence = [
+            str(item)
+            for item in decision.get("patch_preview", {}).get("affected_evidence", [])
+            if item
+        ]
+        claim_evidence.update(evidence)
+        if evidence:
+            claim_sources.append(
+                {
+                    "source_type": "claim_graph.review_decision",
+                    "source_id": decision.get("decision_id"),
+                    "evidence_ids": evidence,
+                    "review_status": decision.get("result") or decision.get("action"),
+                }
+            )
     governance_evidence = set()
+    governance_sources = []
     for evidence_record in state.get("claim_graph", {}).get("proposal_link_evidence", []):
         if not isinstance(evidence_record, dict):
             continue
-        governance_evidence.add(str(evidence_record.get("evidence_id")))
-        governance_evidence.update(
-            str(item) for item in evidence_record.get("evidence", []) if item
-        )
+        evidence_ids = [
+            str(item)
+            for item in [
+                evidence_record.get("evidence_id"),
+                *evidence_record.get("evidence", []),
+            ]
+            if item
+        ]
+        governance_evidence.update(evidence_ids)
+        if evidence_ids:
+            governance_sources.append(
+                {
+                    "source_type": "claim_graph.proposal_link_evidence",
+                    "source_id": evidence_record.get("evidence_id"),
+                    "evidence_ids": evidence_ids,
+                    "source_link_id": evidence_record.get("source_link_id"),
+                    "link_type": evidence_record.get("link_type"),
+                    "mode": evidence_record.get("claim_graph_mode"),
+                }
+            )
 
     dream_inputs = set()
     dream_proposals = set()
+    dream_input_sources = []
+    dream_proposal_sources = []
     for artifact in dream_artifacts[-10:]:
         if not isinstance(artifact, dict):
             continue
+        artifact_inputs = []
         for item in artifact.get("input_manifest", {}).get("items", []):
             if isinstance(item, dict) and item.get("id"):
-                dream_inputs.add(str(item["id"]))
+                artifact_inputs.append(str(item["id"]))
+        dream_inputs.update(artifact_inputs)
+        if artifact_inputs:
+            dream_input_sources.append(
+                {
+                    "source_type": "dream_artifact.input_manifest",
+                    "source_id": artifact.get("artifact_id") or artifact.get("dream_id"),
+                    "evidence_ids": artifact_inputs,
+                    "dream_id": artifact.get("dream_id"),
+                }
+            )
         affected = artifact.get("rollback_metadata", {}).get("affected_ids", {})
         if isinstance(affected, dict):
+            affected_ids = []
             for values in affected.values():
                 if isinstance(values, list):
-                    dream_proposals.update(str(item) for item in values if item)
+                    affected_ids.extend(str(item) for item in values if item)
+            dream_proposals.update(affected_ids)
+            if affected_ids:
+                dream_proposal_sources.append(
+                    {
+                        "source_type": "dream_artifact.rollback_metadata",
+                        "source_id": artifact.get("artifact_id") or artifact.get("dream_id"),
+                        "evidence_ids": affected_ids,
+                        "dream_id": artifact.get("dream_id"),
+                    }
+                )
     return {
-        "identity_gate_evidence": identity_evidence,
-        "claim_graph_evidence": claim_evidence,
-        "governance_proposal_link_evidence": governance_evidence,
-        "dream_artifact_inputs": dream_inputs,
-        "dream_artifact_proposals": dream_proposals,
+        "identity_gate_evidence": {
+            "ids": identity_evidence,
+            "sources": identity_sources,
+        },
+        "claim_graph_evidence": {
+            "ids": claim_evidence,
+            "sources": claim_sources,
+        },
+        "governance_proposal_link_evidence": {
+            "ids": governance_evidence,
+            "sources": governance_sources,
+        },
+        "dream_artifact_inputs": {
+            "ids": dream_inputs,
+            "sources": dream_input_sources,
+        },
+        "dream_artifact_proposals": {
+            "ids": dream_proposals,
+            "sources": dream_proposal_sources,
+        },
     }
 
 
@@ -6183,25 +6290,124 @@ def context_signal_score(
     item: dict,
     context_signals: dict,
     policy: dict,
-) -> tuple[float, List[str]]:
+) -> tuple[float, List[str], List[dict]]:
     weights = policy.get("signal_weights", {})
     score = 0.0
     reasons = []
+    attributions = []
     related_ids = set(item_related_ids(item))
     related_ids.add(item_id)
-    if related_ids & context_signals.get("identity_gate_evidence", set()):
+    identity_matches = related_ids & context_signal_ids(
+        context_signals,
+        "identity_gate_evidence",
+    )
+    if identity_matches:
         score += float(weights.get("identity_gate_evidence", 0.08))
         reasons.append("identity_gate_evidence")
-    if related_ids & context_signals.get("claim_graph_evidence", set()):
+        attributions.append(
+            build_context_signal_attribution(
+                signal_name="identity_gate_evidence",
+                signal_bucket="identity_update_gate",
+                matched_ids=identity_matches,
+                context_signals=context_signals,
+            )
+        )
+    claim_matches = related_ids & context_signal_ids(context_signals, "claim_graph_evidence")
+    if claim_matches:
         score += float(weights.get("claim_graph_evidence", 0.08))
         reasons.append("claim_graph_evidence")
-    if related_ids & context_signals.get("governance_proposal_link_evidence", set()):
+        attributions.append(
+            build_context_signal_attribution(
+                signal_name="claim_graph_evidence",
+                signal_bucket="claim_graph",
+                matched_ids=claim_matches,
+                context_signals=context_signals,
+            )
+        )
+    governance_matches = related_ids & context_signal_ids(
+        context_signals,
+        "governance_proposal_link_evidence",
+    )
+    if governance_matches:
         score += float(weights.get("governance_proposal_link_evidence", 0.07))
         reasons.append("governance_proposal_link_evidence")
-    if related_ids & context_signals.get("dream_artifact_inputs", set()):
+        attributions.append(
+            build_context_signal_attribution(
+                signal_name="governance_proposal_link_evidence",
+                signal_bucket="claim_graph.proposal_link_evidence",
+                matched_ids=governance_matches,
+                context_signals=context_signals,
+            )
+        )
+    dream_matches = related_ids & context_signal_ids(context_signals, "dream_artifact_inputs")
+    if dream_matches:
         score += float(weights.get("dream_artifact_input", 0.06))
         reasons.append("dream_artifact_input")
-    return min(score, 0.25), reasons
+        attributions.append(
+            build_context_signal_attribution(
+                signal_name="dream_artifact_input",
+                signal_bucket="dream_artifact.input_manifest",
+                matched_ids=dream_matches,
+                context_signals=context_signals,
+                source_key="dream_artifact_inputs",
+            )
+        )
+    return min(score, 0.25), reasons, attributions
+
+
+def context_signal_ids(context_signals: dict, key: str) -> set:
+    bucket = context_signals.get(key, set())
+    if isinstance(bucket, dict):
+        ids = bucket.get("ids", set())
+    else:
+        ids = bucket
+    if isinstance(ids, set):
+        return ids
+    if isinstance(ids, list):
+        return {str(item) for item in ids if item}
+    return set()
+
+
+def context_signal_sources(context_signals: dict, key: str) -> List[dict]:
+    bucket = context_signals.get(key, {})
+    if isinstance(bucket, dict) and isinstance(bucket.get("sources"), list):
+        return [source for source in bucket["sources"] if isinstance(source, dict)]
+    return []
+
+
+def build_context_signal_attribution(
+    signal_name: str,
+    signal_bucket: str,
+    matched_ids: set,
+    context_signals: dict,
+    source_key: Optional[str] = None,
+) -> dict:
+    key = source_key or signal_name
+    matched = sorted(str(item) for item in matched_ids if item)
+    source_records = []
+    for source in context_signal_sources(context_signals, key):
+        evidence_ids = [str(item) for item in source.get("evidence_ids", []) if item]
+        matched_evidence = sorted(set(evidence_ids) & set(matched))
+        if matched_evidence:
+            source_records.append(
+                {
+                    "source_type": source.get("source_type"),
+                    "source_id": source.get("source_id"),
+                    "matched_evidence_ids": matched_evidence,
+                    "evidence_ids": evidence_ids,
+                    "metadata": {
+                        item_key: value
+                        for item_key, value in source.items()
+                        if item_key not in {"source_type", "source_id", "evidence_ids"}
+                    },
+                }
+            )
+    return {
+        "signal": signal_name,
+        "signal_bucket": signal_bucket,
+        "matched_ids": matched,
+        "source_records": source_records,
+    }
 
 
 def item_related_ids(item: dict) -> List[str]:
@@ -6321,6 +6527,7 @@ def build_activation_trace(
         "selected": selected,
         "suppressed": suppressed,
         "signal_summary": summarize_context_signals(context_signals),
+        "signal_attribution_summary": summarize_signal_attribution(selected),
         "metrics": {
             "selected_count": len(selected),
             "suppressed_count": len(suppressed),
@@ -6340,21 +6547,53 @@ def build_activation_trace(
 def summarize_context_signals(context_signals: dict) -> dict:
     return {
         "identity_gate_evidence_count": len(
-            context_signals.get("identity_gate_evidence", set())
+            context_signal_ids(context_signals, "identity_gate_evidence")
         ),
         "claim_graph_evidence_count": len(
-            context_signals.get("claim_graph_evidence", set())
+            context_signal_ids(context_signals, "claim_graph_evidence")
         ),
         "governance_proposal_link_evidence_count": len(
-            context_signals.get("governance_proposal_link_evidence", set())
+            context_signal_ids(context_signals, "governance_proposal_link_evidence")
         ),
         "dream_artifact_input_count": len(
-            context_signals.get("dream_artifact_inputs", set())
+            context_signal_ids(context_signals, "dream_artifact_inputs")
         ),
         "dream_artifact_proposal_count": len(
-            context_signals.get("dream_artifact_proposals", set())
+            context_signal_ids(context_signals, "dream_artifact_proposals")
         ),
     }
+
+
+def summarize_signal_attribution(selected: List[dict]) -> dict:
+    summary: dict[str, dict] = {}
+    for decision in selected:
+        if not isinstance(decision, dict):
+            continue
+        for attribution in decision.get("signal_attribution", []):
+            if not isinstance(attribution, dict):
+                continue
+            signal = str(attribution.get("signal") or "unknown")
+            bucket = str(attribution.get("signal_bucket") or "")
+            entry = summary.setdefault(
+                signal,
+                {
+                    "signal_bucket": bucket,
+                    "selected_count": 0,
+                    "matched_ids": [],
+                    "source_record_count": 0,
+                },
+            )
+            entry["selected_count"] += 1
+            source_records = attribution.get("source_records", [])
+            if not isinstance(source_records, list):
+                source_records = []
+            entry["source_record_count"] += len(source_records)
+            for matched_id in attribution.get("matched_ids", []):
+                if matched_id and matched_id not in entry["matched_ids"]:
+                    entry["matched_ids"].append(matched_id)
+    for entry in summary.values():
+        entry["matched_ids"] = sorted(entry["matched_ids"])
+    return summary
 
 
 def build_source_attribution(

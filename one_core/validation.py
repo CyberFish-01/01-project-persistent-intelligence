@@ -1081,6 +1081,31 @@ def validate_context_builder(state: dict[str, Any]) -> list[ValidationIssue]:
                         "Context activation trace key is missing.",
                     )
                 )
+        if "signal_attribution_summary" in trace and not isinstance(
+            trace.get("signal_attribution_summary"),
+            dict,
+        ):
+            issues.append(
+                ValidationIssue(
+                    path + ".signal_attribution_summary",
+                    "Context activation trace signal attribution summary must be an object.",
+                )
+            )
+        selected = trace.get("selected", [])
+        if isinstance(selected, list):
+            for item_index, item in enumerate(selected):
+                if not isinstance(item, dict):
+                    continue
+                if "signal_attribution" in item and not isinstance(
+                    item.get("signal_attribution"),
+                    list,
+                ):
+                    issues.append(
+                        ValidationIssue(
+                            path + f".selected[{item_index}].signal_attribution",
+                            "Selected context signal attribution must be a list.",
+                        )
+                    )
     return issues
 
 

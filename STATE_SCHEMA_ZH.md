@@ -1522,9 +1522,18 @@ state_transfer_package:
     trace_id: "context_activation_..."
     context_package_id: "context_package_..."
     policy_version: "0.3"
-    selected: []
+    selected:
+      - memory_id: "episode_..."
+        store_name: "episodic_memory"
+        reasons: []
+        signal_attribution:
+          - signal: "governance_proposal_link_evidence"
+            signal_bucket: "claim_graph.proposal_link_evidence"
+            matched_ids: []
+            source_records: []
     suppressed: []
     signal_summary: {}
+    signal_attribution_summary: {}
     metrics: {}
   context_signal_summary:
     identity_gate_evidence_count: 0

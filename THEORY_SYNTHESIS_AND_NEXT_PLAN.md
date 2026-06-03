@@ -916,19 +916,40 @@ Remaining gaps:
 
 - no tool/safety policy executor exists yet;
 - no structured allow/deny rule semantics are enforced from approved proposals;
-- activation traces identify signal reasons but do not yet explain source buckets and evidence records in a compact per-item report.
+- activation trace signal attribution is handled by P31.
+
+### P31 Context Signal Attribution Report
+
+Goal: make each selected Context Builder item explain which signal bucket activated it, which ids matched, and which source records supplied the evidence.
+
+Status: implemented as a first local pass.
+
+Implemented result:
+
+- Context signal buckets now carry both matched ids and source records;
+- selected activation decisions include `signal_attribution`;
+- activation traces include `signal_attribution_summary`;
+- persisted `context_builder.activation_traces` preserve the attribution summary;
+- validation checks attribution shape without requiring old traces to be migrated;
+- scenario evaluation verifies governance attribution source bucket, matched evidence ids, persisted attribution summary, and `context_signal_attribution_count`.
+
+Remaining gaps:
+
+- no tool/safety policy executor exists yet;
+- no structured allow/deny rule semantics are enforced from approved proposals;
+- attribution coverage is not yet reviewed over time, so weakly attributed activation patterns cannot be flagged for cleanup.
 
 Recommended next step:
 
 ```text
-P31 Context Signal Attribution Report
+P32 Context Attribution Coverage Review
 ```
 
 Reason:
 
-- P30 separates the governance signal, but the trace still only lists reason labels;
-- state transfer quality depends on being able to inspect why a selected memory entered context, which source bucket produced the signal, and which evidence ids were involved;
-- source-bucket attribution is review/evidence infrastructure, not executable policy;
+- P31 makes per-item attribution visible, but it does not yet summarize attribution quality across recent traces;
+- weak or missing source records should become review signals before any future policy layer uses them;
+- coverage review strengthens auditability and source monitoring without creating executable policy;
 - this keeps the project aligned with auditability, state transfer, and local foundation first.
 
 Desired acceptance:

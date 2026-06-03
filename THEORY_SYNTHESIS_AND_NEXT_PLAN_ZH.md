@@ -950,19 +950,40 @@ P22 Reflection-Policy Linkage
 
 - 还没有 tool/safety policy executor；
 - approved proposal 还不会形成可执行 allow/deny rule semantics；
-- activation traces 已能标出 signal reasons，但还没有用紧凑的 per-item report 解释 source buckets 和 evidence records。
+- activation trace signal attribution 已由 P31 处理。
+
+### P31 Context Signal Attribution Report
+
+目标：让每个被 Context Builder 选中的 item 解释是哪个 signal bucket 激活了它、匹配了哪些 ids、哪些 source records 提供了 evidence。
+
+状态：已实现第一版本地实现。
+
+已实现结果：
+
+- Context signal buckets 现在同时携带 matched ids 和 source records；
+- selected activation decisions 包含 `signal_attribution`；
+- activation traces 包含 `signal_attribution_summary`；
+- 持久化的 `context_builder.activation_traces` 会保存 attribution summary；
+- validation 会检查 attribution shape，但不强制迁移旧 traces；
+- scenario evaluation 会验证 governance attribution source bucket、matched evidence ids、持久 attribution summary 和 `context_signal_attribution_count`。
+
+剩余缺口：
+
+- 还没有 tool/safety policy executor；
+- approved proposal 还不会形成可执行 allow/deny rule semantics；
+- attribution coverage 还没有跨 recent traces 进行 review，所以弱归因 activation patterns 还不能被标记为 cleanup/review 信号。
 
 建议下一步：
 
 ```text
-P31 Context Signal Attribution Report
+P32 Context Attribution Coverage Review
 ```
 
 理由：
 
-- P30 已经拆出了 governance signal，但 trace 仍主要只有 reason labels；
-- state transfer 质量依赖于能审计“为什么某条 memory 进入 context”、这个 signal 来自哪个 source bucket、涉及哪些 evidence ids；
-- source-bucket attribution 属于 review/evidence infrastructure，不是 executable policy；
+- P31 已让 per-item attribution 可见，但还没有跨 recent traces 汇总 attribution quality；
+- weak or missing source records 应先成为 review signals，而不是被任何未来 policy layer 直接使用；
+- coverage review 可以增强 auditability 和 source monitoring，同时不创建 executable policy；
 - 这保持项目在 auditability、state transfer、本地地基优先的方向上。
 
 期望验收：

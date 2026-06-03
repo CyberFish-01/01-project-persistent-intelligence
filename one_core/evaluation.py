@@ -1783,6 +1783,10 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
         for item in package.get("activation_trace", {}).get("selected", [])
     }
     trace = persisted[-1] if persisted else {}
+    identity_attributions = selected.get(identity_episode["id"], {}).get(
+        "signal_attribution",
+        [],
+    )
     checks = {
         "context_package_v03": package.get("context_package_version") == "0.3",
         "policy_v03": package.get("context_policy", {}).get("policy_version") == "0.3",
@@ -1794,6 +1798,19 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
         in selected.get(identity_episode["id"], {}).get("reasons", []),
         "governance_signal_used": "governance_proposal_link_evidence"
         in selected.get(identity_episode["id"], {}).get("reasons", []),
+        "governance_signal_attributed": any(
+            item.get("signal") == "governance_proposal_link_evidence"
+            and item.get("signal_bucket") == "claim_graph.proposal_link_evidence"
+            and identity_episode["id"] in item.get("matched_ids", [])
+            and item.get("source_records")
+            for item in identity_attributions
+            if isinstance(item, dict)
+        ),
+        "governance_attribution_summary_persisted": trace.get(
+            "signal_attribution_summary",
+            {},
+        ).get("governance_proposal_link_evidence", {}).get("source_record_count", 0)
+        >= 1,
         "claim_signal_used": "claim_graph_evidence"
         in selected.get(claim_episode["id"], {}).get("reasons", []),
         "dream_signal_used": "dream_artifact_input"
@@ -1830,6 +1847,13 @@ def check_context_builder_policy_trace(state_dir: Path) -> EvaluationCheck:
                     "context_signal_summary",
                     {},
                 ).get("governance_proposal_link_evidence_count", 0),
+                "context_signal_attribution_count": sum(
+                    int(item.get("source_record_count", 0))
+                    for item in package.get("activation_trace", {})
+                    .get("signal_attribution_summary", {})
+                    .values()
+                    if isinstance(item, dict)
+                ),
             },
         },
     )
@@ -2507,6 +2531,9 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "context_governance_signal_count": sum(
             int(item.get("context_governance_signal_count", 0)) for item in metrics
+        ),
+        "context_signal_attribution_count": sum(
+            int(item.get("context_signal_attribution_count", 0)) for item in metrics
         ),
     }
 
