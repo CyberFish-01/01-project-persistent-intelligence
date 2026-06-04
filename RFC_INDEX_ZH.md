@@ -96,6 +96,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P137 | [CONTEXT_PACKAGE_BUILDER_RFC.md](./CONTEXT_PACKAGE_BUILDER_RFC.md) / [ZH](./CONTEXT_PACKAGE_BUILDER_RFC_ZH.md) | builder RFC | RFC-only package contract | 定义 required context packs、trust levels、source references、temporal pack boundary、capability pack boundary 和 response strategy pack。 | builder implementation、retrieval engine、model call、prompt execution、state write、memory write、identity mutation、adapter integration、tool execution 或 rebuild |
+| P138 | [CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN_ZH.md) | CLI plan | document-only plan | 规划 future local deterministic read-only context package preview CLI，但不新增命令。 | command implementation、parser、builder、retrieval engine、model call、prompt execution、state write、memory write、adapter integration、tool execution 或 rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 

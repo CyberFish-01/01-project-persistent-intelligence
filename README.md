@@ -19,10 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P137 Context Package Builder RFC is complete. The project
-now has a required context package shape for future model-as-resource work,
-while builder implementation, retrieval execution, model calls, writes,
-adapters, tools, and rebuild remain blocked.
+Current work status: P138 Context Package Preview CLI Plan is complete. A
+future preview command is planned as local, deterministic, read-only, and
+report-only, but no command, builder, retrieval engine, model call, write path,
+adapter, tool, or rebuild has been implemented.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P137 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P138 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -81,6 +81,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDER_CONSOLE_RISK_REVIEW.md](./FOUNDER_CONSOLE_RISK_REVIEW.md) / [FOUNDER_CONSOLE_RISK_REVIEW_ZH.md](./FOUNDER_CONSOLE_RISK_REVIEW_ZH.md): P135 risk review for founder-console product creep, Companion creep, automation, write paths, adapters, model calls, temporal overreach, and capability overreach.
 - [FOUNDER_CONSOLE_ROADMAP.md](./FOUNDER_CONSOLE_ROADMAP.md) / [FOUNDER_CONSOLE_ROADMAP_ZH.md](./FOUNDER_CONSOLE_ROADMAP_ZH.md): P136 roadmap closing founder-console planning and deferring implementation until context package contracts exist.
 - [CONTEXT_PACKAGE_BUILDER_RFC.md](./CONTEXT_PACKAGE_BUILDER_RFC.md) / [CONTEXT_PACKAGE_BUILDER_RFC_ZH.md](./CONTEXT_PACKAGE_BUILDER_RFC_ZH.md): P137 RFC-only context package contract for future model-as-resource preparation.
+- [CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md) / [CONTEXT_PACKAGE_PREVIEW_CLI_PLAN_ZH.md](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN_ZH.md): P138 document-only plan for a future local deterministic read-only context package preview CLI.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 

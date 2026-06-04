@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P137. It is not a release log. It records how the system
+This index covers P0-P138. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -145,3 +145,4 @@ foundation evolved.
 | P135 | Added Founder Console Risk Review. | The console must not make the project feel product-ready before the core is actually ready. | Founder Console |
 | P136 | Added Founder Console Roadmap. | Founder console planning should close by deferring implementation until context package contracts exist. | Founder Console |
 | P137 | Added Context Package Builder RFC. | Future model use needs a structured context package contract before any model call or builder implementation. | Context Package |
+| P138 | Added Context Package Preview CLI Plan. | A future context package CLI must be local, deterministic, read-only, and report-only before implementation. | Context Package |
