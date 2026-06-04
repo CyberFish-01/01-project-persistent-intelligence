@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P123. It is not a release log. It records how the system
+This index covers P0-P124. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -131,3 +131,4 @@ foundation evolved.
 | P121 | Added Core Lockdown Mode RFC. | External or unverified content must remain sandboxed, quarantined, or candidate-only before it can touch trusted core state. | Core Lockdown |
 | P122 | Added Import Quarantine RFC. | Future imports are not adoption and must remain sandboxed before any memory, identity, event, or capability trust. | Core Lockdown |
 | P123 | Added Shadow Adapter Mode RFC. | Future adapter-shaped input may be observed only as shadow evidence, not ingested state or platform-owned identity. | Core Lockdown |
+| P124 | Added Contamination Scan RFC. | Future scans may identify contamination candidates, but detection is not truth, enforcement, or state mutation. | Core Lockdown |

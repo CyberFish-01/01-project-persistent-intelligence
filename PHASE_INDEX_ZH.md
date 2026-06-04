@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P123。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P124。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -130,3 +130,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P121 | 加入 Core Lockdown Mode RFC。 | external 或 unverified content 在触碰 trusted core state 前必须保持 sandbox、quarantine 或 candidate-only。 | Core Lockdown |
 | P122 | 加入 Import Quarantine RFC。 | future imports 不是 adoption，在获得任何 memory、identity、event 或 capability trust 前必须保持 sandbox。 | Core Lockdown |
 | P123 | 加入 Shadow Adapter Mode RFC。 | future adapter-shaped input 只能作为 shadow evidence 被观察，不能变成 ingested state 或 platform-owned identity。 | Core Lockdown |
+| P124 | 加入 Contamination Scan RFC。 | future scans 可以识别 contamination candidates，但 detection 不是真相、enforcement 或 state mutation。 | Core Lockdown |
