@@ -42,6 +42,7 @@ origin ideas are not implementation approval.
 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | Boundary RFC | 定义 capability evolution 的 allowed / forbidden scope，不实现 tool runtime 或 promotion。 |
 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [VISUAL_NAMING_GUIDE_ZH.md](./VISUAL_NAMING_GUIDE_ZH.md) | Founder-facing vocabulary guide | 把内部英文术语映射成中文显示名，不实现 dashboard、observability CLI 或 product UI。 |
 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [FOUNDATION_OBSERVATORY_REPORT_ZH.md](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | Founder-facing observatory report | 用 Markdown 总结 foundation status，不实现 dashboard、CLI、status API 或 product UI。 |
+| [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI planning RFC | 定义 future read-only observatory CLI report boundary，不实现 commands 或 generators。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -89,6 +90,7 @@ origin ideas are not implementation approval.
 | Capability Evolution Boundary | tool-first capability evolution 在任何 verification 或 library policy work 前需要明确 allowed / forbidden scope。 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
 | Visual Naming Guide | founder-facing views 需要朴素中文标签，同时不能丢失精确的内部英文键。 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 | Foundation Observatory Report | 任何 dashboard 或 CLI plan 前，创始人需要一份可读 Markdown snapshot。 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
+| Minimal Observatory CLI Plan | future generated observatory report 在讨论 implementation 前需要 read-only scope。 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [GLOSSARY.md](./GLOSSARY.md) | `plan-only`, not CLI implementation |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -177,6 +179,9 @@ Research notes 是 source material，不是当前 implementation plan。
 20. 阅读 [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md)
     时，只把它当作 Markdown founder-facing report，不要当作 dashboard runtime、
     observability CLI、status API、product UI 或 runtime monitor。
+21. 阅读 [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md)
+    时，只把它当作 read-only CLI plan，不要当作 CLI implementation、command creation、
+    generator implementation、observability executor 或 P96 approval。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 
@@ -203,6 +208,9 @@ P78 不实现：
 - observability CLI；
 - status API；
 - runtime report generator；
+- observability executor；
+- automatic roadmap execution；
+- automatic next phase creation；
 - identity mutation；
 - memory rewrite；
 - payload capture；

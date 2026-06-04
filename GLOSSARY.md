@@ -593,6 +593,39 @@ observability.
 Boundary: an axis map is a report grouping, not an architecture module or
 runtime boundary.
 
+## Minimal Observatory CLI Plan
+
+The P95 RFC-only plan for a possible future read-only command that could
+generate a Foundation Observatory report from approved documents and static
+state summaries.
+
+Boundary: the plan does not implement CLI commands, parsers, generators,
+dashboards, Web UI, product UI, status APIs, runtime monitors, or executors.
+
+## Observatory CLI Report
+
+A possible future read-only report emitted by a minimal observatory command,
+containing founder snapshot, axes map, readiness matrix, boundary status, risk
+heatmap, next-step recommendations, and blocked-work list.
+
+Boundary: a report is not authorization, execution, mutation, or phase creation.
+
+## Readiness Category
+
+A conservative label such as `implemented`, `report_only`, `rfc_only`,
+`evaluation_only`, `future_direction`, `blocked`, or `dangerous_if_early`.
+
+Boundary: readiness category summarizes current evidence; it is not approval to
+implement.
+
+## Observability Executor
+
+A forbidden future risk where an observability surface starts executing
+roadmaps, creating phases, mutating status, or enforcing decisions.
+
+Boundary: P95 explicitly blocks observability execution. Observatory work must
+remain read-only unless a future founder-approved phase defines otherwise.
+
 ## Readiness Matrix
 
 A report-style view that could show whether a concept is ready, blocked,

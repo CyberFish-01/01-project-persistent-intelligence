@@ -44,6 +44,7 @@ current documents carry it, and what is still only long-term vision?"
 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | Boundary RFC | Defines capability evolution allowed and forbidden scope without implementing tool runtime or promotion. |
 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [VISUAL_NAMING_GUIDE_ZH.md](./VISUAL_NAMING_GUIDE_ZH.md) | Founder-facing vocabulary guide | Maps internal English terms to Chinese display names without implementing dashboard, observability CLI, or product UI. |
 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [FOUNDATION_OBSERVATORY_REPORT_ZH.md](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | Founder-facing observatory report | Summarizes foundation status as Markdown without implementing dashboard, CLI, status API, or product UI. |
+| [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI planning RFC | Defines a future read-only observatory CLI report boundary without implementing commands or generators. |
 
 ## Original Idea Chains
 
@@ -91,6 +92,7 @@ current documents carry it, and what is still only long-term vision?"
 | Capability Evolution Boundary | Tool-first capability evolution needs explicit allowed and forbidden scopes before any verification or library policy work. | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
 | Visual Naming Guide | Founder-facing views need plain Chinese labels without losing precise internal English keys. | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 | Foundation Observatory Report | The founder needs a readable Markdown snapshot before any dashboard or CLI plan. | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
+| Minimal Observatory CLI Plan | A future generated observatory report needs read-only scope before implementation is discussed. | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [GLOSSARY.md](./GLOSSARY.md) | `plan-only`, not CLI implementation |
 
 ## Second Chain Map: Artificial Life History
 
@@ -186,6 +188,9 @@ For origin tracing:
 20. Read [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md)
     only as a Markdown founder-facing report, not as dashboard runtime,
     observability CLI, status API, product UI, or runtime monitor.
+21. Read [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md)
+    only as a read-only CLI plan, not as CLI implementation, command creation,
+    generator implementation, observability executor, or P96 approval.
 
 ## P78 Non-Execution Statement
 
@@ -212,6 +217,9 @@ P78 does not implement:
 - observability CLI;
 - status API;
 - runtime report generator;
+- observability executor;
+- automatic roadmap execution;
+- automatic next phase creation;
 - identity mutation;
 - memory rewrite;
 - payload capture;

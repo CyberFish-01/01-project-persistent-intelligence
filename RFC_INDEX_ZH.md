@@ -69,6 +69,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 |---|---|---|---|---|---|
 | P93 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [ZH](./VISUAL_NAMING_GUIDE_ZH.md) | naming guide | founder-facing vocabulary | 把英文 internal keys 映射为未来视觉基础层表面使用的中文显示名。 | Web UI、dashboard runtime、observability CLI、product layer 或 Foundation Observatory implementation |
 | P94 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [ZH](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | observatory report | founder-facing report | 提供 Markdown foundation snapshot、axes map、readiness matrix、boundary status 和 risk heatmap。 | dashboard runtime、Web UI、observability CLI、product layer、status API 或 runtime report generator |
+| P95 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [ZH](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI plan | RFC-only plan | 定义未来 read-only observatory CLI report 的范围、输入、输出、类别、边界和风险。 | CLI implementation、commands、parser、generator、dashboard runtime、Web UI、product UI 或 executor |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -159,6 +160,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 28. [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md)
     把 P93 naming 应用到 Markdown founder-facing status report，但不批准 dashboard runtime、
     Web UI、observability CLI、product layer、status API 或 runtime report generation。
+29. [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md)
+    规划 future read-only observatory CLI report，但不实现 CLI commands、parsers、
+    generators、dashboard runtime、Web UI、product UI、status API 或 observability executor。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -197,6 +201,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - observability CLI；
 - status API；
 - runtime report generator；
+- observability executor；
+- automatic roadmap execution；
+- automatic next phase creation；
 - harness implementation；
 - fixture schema；
 - output schema；

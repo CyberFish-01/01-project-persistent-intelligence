@@ -38,6 +38,7 @@ not implemented, and not closed as runtime capabilities.
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed and forbidden scope is defined, but verification evidence model, candidate review schema, safe tool library policy, and implementation gates are missing | automatic tool execution, automatic promotion, policy executor, identity mutation |
 | Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys now map to Chinese display names, but no visual surface contract, status assignment policy, or dashboard approval exists | Web UI, dashboard runtime, observability CLI, product layer |
 | Foundation Observatory Report | `report-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) | a Markdown founder-facing report exists, but no CLI, dashboard runtime, status API, automatic report generator, or product surface exists | dashboard runtime, observability CLI, status API, product UI |
+| Minimal Observatory CLI Plan | `plan-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) | read-only CLI scope, inputs, outputs, and risks are planned, but no command, parser, generator, or implementation exists | CLI implementation, observability executor, automatic phase creation |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -313,6 +314,24 @@ Still open:
   kept as a phase artifact;
 - what founder-approved gate is required before any observability tool exists.
 
+### Minimal Observatory CLI Plan
+
+Clarified by
+[MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), but not
+implemented. It remains open because P95 defines possible command name, inputs,
+outputs, readiness categories, boundary status, non-goals, implementation
+boundary, risks, and P96 candidates only.
+
+Still open:
+
+- whether the founder approves moving from plan to implementation;
+- whether P96 should implement the full report or only a static sub-generator;
+- how a future read-only implementation proves no mutation;
+- whether static local state summaries are allowed as inputs;
+- how source freshness and false readiness signals should be shown;
+- how to prevent observability from becoming automatic roadmap execution or
+  automatic next phase creation.
+
 ### Recall Event Write Policy
 
 Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
@@ -460,6 +479,9 @@ The following remain blocked until a future explicit implementation phase:
 - observability CLI;
 - status API;
 - automatic report generator;
+- observability executor;
+- automatic roadmap execution;
+- automatic next phase creation;
 - product-layer visual surface;
 - harness implementation;
 - fixture schema;
@@ -470,6 +492,5 @@ The following remain blocked until a future explicit implementation phase:
 ## Current Recommendation
 
 Continue document-only planning unless the founder explicitly approves an
-implementation phase. The P94 report recommends founder / CTO review first,
-then a possible Minimal Observatory CLI RFC if the founder chooses to continue
-the observability path.
+implementation phase. P95 recommends pausing for founder / CTO review or, if
+approved, considering a P96 read-only Minimal Observatory CLI Implementation.
