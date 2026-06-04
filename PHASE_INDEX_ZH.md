@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P135。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P136。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -142,3 +142,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P133 | 加入 Founder Console No-Write Contract。 | future console 可以生成明确请求的 report files，但不能写 core history 或修改 state。 | Founder Console |
 | P134 | 加入 Founder Console Acceptance Criteria。 | 任何 future console 都必须增加 visibility，而不增加 autonomy。 | Founder Console |
 | P135 | 加入 Founder Console Risk Review。 | console 不能让项目在 core 真正 ready 前感觉已经 product-ready。 | Founder Console |
+| P136 | 加入 Founder Console Roadmap。 | founder console planning 应先收口并后推 implementation，直到 context package contracts 存在。 | Founder Console |

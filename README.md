@@ -19,10 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P135 Founder Console Risk Review is complete. Founder
-console planning now explicitly blocks product creep, Companion creep, automatic
-roadmap selection, write-path creep, adapter pressure, model calls, temporal
-overreach, and capability overreach.
+Current work status: P136 Founder Console Roadmap is complete. Thin Founder
+Console planning is closed for now; the next safe work is Context Package
+Builder planning before any console implementation, model orchestration,
+adapter work, or rebuild.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P135 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P136 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -79,6 +79,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md) / [FOUNDER_CONSOLE_NO_WRITE_CONTRACT_ZH.md](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT_ZH.md): P133 no-write contract for future founder-console reads, explicit report outputs, forbidden writes, and verification expectations.
 - [FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA.md](./FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA.md) / [FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA_ZH.md](./FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA_ZH.md): P134 acceptance criteria for future founder-console visibility, no-write behavior, boundary display, and failure conditions.
 - [FOUNDER_CONSOLE_RISK_REVIEW.md](./FOUNDER_CONSOLE_RISK_REVIEW.md) / [FOUNDER_CONSOLE_RISK_REVIEW_ZH.md](./FOUNDER_CONSOLE_RISK_REVIEW_ZH.md): P135 risk review for founder-console product creep, Companion creep, automation, write paths, adapters, model calls, temporal overreach, and capability overreach.
+- [FOUNDER_CONSOLE_ROADMAP.md](./FOUNDER_CONSOLE_ROADMAP.md) / [FOUNDER_CONSOLE_ROADMAP_ZH.md](./FOUNDER_CONSOLE_ROADMAP_ZH.md): P136 roadmap closing founder-console planning and deferring implementation until context package contracts exist.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 

@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P135. It is not a release log. It records how the system
+This index covers P0-P136. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -143,3 +143,4 @@ foundation evolved.
 | P133 | Added Founder Console No-Write Contract. | A future console may produce explicit report files, but it must not write core history or mutate state. | Founder Console |
 | P134 | Added Founder Console Acceptance Criteria. | Any future console must increase visibility without increasing autonomy. | Founder Console |
 | P135 | Added Founder Console Risk Review. | The console must not make the project feel product-ready before the core is actually ready. | Founder Console |
+| P136 | Added Founder Console Roadmap. | Founder console planning should close by deferring implementation until context package contracts exist. | Founder Console |
