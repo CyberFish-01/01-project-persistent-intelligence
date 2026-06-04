@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P119. It is not a release log. It records how the system
+This index covers P0-P120. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -127,3 +127,4 @@ foundation evolved.
 | P117 | Added harness source inventory CLI. | The approved source whitelist should be visible through a read-only CLI before harness context integration. | Harness Source Backing |
 | P118 | Added harness source-backed context refs. | Dry-run context previews should cite pressure-specific whitelisted sources without retrieval execution or writes. | Harness Source Backing |
 | P119 | Added source-backed risk and open-question mapping. | Dry-run previews should show which documented risks and open questions apply without executing policy. | Harness Source Backing |
+| P120 | Added source-backed harness usability review. | The founder needs to know whether read-only source backing is useful enough before Core Lockdown planning. | Harness Review |
