@@ -19,11 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P109 Harness Roadmap is complete. The current
-`harness-dry-run` is defined as a pressure viewer, not an interaction runtime:
-it can show deterministic pressure routing, candidates, review gates, and
-boundaries, but it still cannot perform real retrieval, writes, adapters, tools,
-or product behavior.
+Current work status: P110 Overnight Harness Work Summary is complete. The
+P102-P110 harness cycle is closed locally: `harness-dry-run` is a pressure
+viewer, not an interaction runtime, and the next phase should wait for
+founder/CTO confirmation.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -39,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P109 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P110 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -58,6 +57,7 @@ Read these first when joining the project or handing it to another agent:
 - [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md): P101 review of whether the P100 dry-run helps the founder understand an input path through 01 Core.
 - [HARNESS_USABILITY_REVIEW_P108.md](./HARNESS_USABILITY_REVIEW_P108.md) / [HARNESS_USABILITY_REVIEW_P108_ZH.md](./HARNESS_USABILITY_REVIEW_P108_ZH.md): P108 re-review after pressure routing, specialized candidates, review gate specialization, and boundary hardening.
 - [HARNESS_ROADMAP.md](./HARNESS_ROADMAP.md) / [HARNESS_ROADMAP_ZH.md](./HARNESS_ROADMAP_ZH.md): P109 roadmap for what `harness-dry-run` can see now, cannot see yet, and may safely plan next as read-only work.
+- [OVERNIGHT_HARNESS_WORK_SUMMARY.md](./OVERNIGHT_HARNESS_WORK_SUMMARY.md) / [OVERNIGHT_HARNESS_WORK_SUMMARY_ZH.md](./OVERNIGHT_HARNESS_WORK_SUMMARY_ZH.md): P110 closure summary for P102-P110, including commits, tests, boundaries, usability change, and stop condition.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 

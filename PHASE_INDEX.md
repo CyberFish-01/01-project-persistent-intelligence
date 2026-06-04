@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P109. It is not a release log. It records how the system
+This index covers P0-P110. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -117,3 +117,4 @@ foundation evolved.
 | P107 | Specialized harness review queue previews. | Review gate rows should explain queue intent, gate routing, blocked lifecycle, and manual-review-only next action without creating a lifecycle. | Harness Preview |
 | P108 | Added harness usability re-review. | The harness should be reassessed after routing and preview specialization before planning another read-only step. | Harness Review |
 | P109 | Added harness roadmap. | The implemented dry-run needs a clear map of what it can see, cannot see, and may only plan next as read-only work. | Harness Roadmap |
+| P110 | Added overnight harness work summary. | The P102-P110 harness cycle should close with commits, tests, boundaries, usability change, and a stop-before-P111 condition. | Harness Audit |
