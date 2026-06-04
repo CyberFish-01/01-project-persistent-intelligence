@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `88fbd5f Extend phase index`
+- End commit before this summary: `323ea60 Update concept map`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -29,6 +29,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P67 Foundation Roadmap Synthesis | `705070d` | `FOUNDATION_ROADMAP.md`, `FOUNDATION_ROADMAP_ZH.md` | No |
 | P68 RFC Index | `b7f85d3` | `RFC_INDEX.md`, `RFC_INDEX_ZH.md` | No |
 | P69 Phase Index Extension | `88fbd5f` | `PHASE_INDEX.md`, `PHASE_INDEX_ZH.md` | No |
+| P70 Concept Map Update | `323ea60` | `CONCEPT_MAP.md`, `CONCEPT_MAP_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -53,7 +54,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P69, each phase ran:
+For P54-P70, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -88,15 +89,15 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P70-P80 low-risk consolidation remains.
-- Next item is P70 Concept Map Update.
+- P71-P80 low-risk consolidation remains.
+- Next item is P71 Open Questions Status Update.
 
 ## Suggested Next Direction
 
 Next safe phase:
 
 ```text
-P70 Concept Map Update
+P71 Open Questions Status Update
 ```
 
 Constraint: low-risk document consolidation only. Do not add runtime behavior,
