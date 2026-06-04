@@ -77,6 +77,7 @@ class HarnessDryRunTests(unittest.TestCase):
         report = json.loads(result.stdout)
 
         self.assertEqual(report["lang"], "en")
+        self.assertEqual(report["report_id"], "minimal_cli_harness_dry_run_v0.3")
         self.assertEqual(report["intake_preview"]["platform_ref"], "cli_dry_run")
         self.assertTrue(report["intake_preview"]["no_write"])
 
@@ -138,6 +139,14 @@ class HarnessDryRunTests(unittest.TestCase):
             "non_execution_invariants",
         ):
             self.assertIn(key, report)
+        for key in (
+            "source_refs_preview",
+            "selected_source_refs",
+            "missing_source_evidence",
+            "source_backing_status",
+            "source_loader_boundaries",
+        ):
+            self.assertIn(key, report["context_package_preview"])
 
     def test_all_candidates_remain_preview_only(self):
         report = build_harness_dry_run_report(user_message="这个想法可能是一次成长吗？")
@@ -285,6 +294,7 @@ class HarnessDryRunTests(unittest.TestCase):
         self.assertIn("tool_execution_enabled", report["boundary_monitor"]["highest_relevant_boundaries"])
         self.assertIn("auto_tool_promotion_enabled", report["boundary_monitor"]["highest_relevant_boundaries"])
         self.assertIn("验证不等于授权", report["context_package_preview"]["profile_refs"])
+        self.assertIn("capability_evolution_boundary", report["context_package_preview"]["selected_source_refs"])
         self.assertIn("人工审查", report["profile_specific_next_step"])
 
         tool_candidate = next(
@@ -292,6 +302,45 @@ class HarnessDryRunTests(unittest.TestCase):
         )
         self.assertIn("不是授权", tool_candidate["blocked_promotion_reason"])
         self.assertEqual(tool_candidate["required_manual_review"], "capability_or_tool_authorization_review")
+
+    def test_context_preview_uses_source_backed_refs_by_pressure(self):
+        temporal_report = build_harness_dry_run_report(user_message="我隔了很久回来，怎么恢复会话？", lang="zh")
+        capability_report = build_harness_dry_run_report(
+            user_message="这个工具候选验证成功了，能不能直接加入工具库？",
+            lang="zh",
+        )
+        reconstruction_report = build_harness_dry_run_report(
+            user_message="这个 event 能回放重建 payload diff 吗？",
+            lang="en",
+        )
+
+        temporal_refs = temporal_report["context_package_preview"]["selected_source_refs"]
+        capability_refs = capability_report["context_package_preview"]["selected_source_refs"]
+        reconstruction_refs = reconstruction_report["context_package_preview"]["selected_source_refs"]
+
+        self.assertIn("ctm_temporal_dynamics", temporal_refs)
+        self.assertIn("temporal_coherence_eval", temporal_refs)
+        self.assertIn("capability_evolution_boundary", capability_refs)
+        self.assertIn("tool_first_self_evolution", capability_refs)
+        self.assertIn("reconstruction_reducer_contract", reconstruction_refs)
+        self.assertNotEqual(temporal_refs, capability_refs)
+        self.assertNotEqual(capability_refs, reconstruction_refs)
+
+        for report in (temporal_report, capability_report, reconstruction_report):
+            context_preview = report["context_package_preview"]
+            self.assertEqual(context_preview["missing_source_evidence"], [])
+            self.assertTrue(context_preview["source_backing_status"]["all_selected_sources_available"])
+            self.assertFalse(context_preview["source_backing_status"]["retrieval_executed"])
+            self.assertFalse(context_preview["source_backing_status"]["state_written"])
+            self.assertTrue(context_preview["source_loader_boundaries"]["whitelist_only"])
+            self.assertFalse(context_preview["source_loader_boundaries"]["user_supplied_paths_allowed"])
+            self.assertFalse(context_preview["source_loader_boundaries"]["external_io_allowed"])
+            self.assertFalse(context_preview["source_loader_boundaries"]["model_call_allowed"])
+            self.assertFalse(context_preview["source_loader_boundaries"]["source_loader_write_enabled"])
+            for source_ref in context_preview["source_refs_preview"]:
+                self.assertEqual(source_ref["read_mode"], "read_only")
+                self.assertEqual(source_ref["source_status"], "approved_whitelist")
+                self.assertTrue(source_ref["path"].endswith(".md"))
 
     def test_candidate_preview_specialization_fields_change_by_pressure(self):
         adapter_report = build_harness_dry_run_report(user_message="我想把这个接进 AstrBot", lang="zh")

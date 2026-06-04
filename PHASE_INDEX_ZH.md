@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P117。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P118。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -124,3 +124,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P115 | 加入 minimal read-only source loader。 | harness 在 CLI 或 harness integration 前需要 deterministic source-ID based loader 读取白名单 Markdown。 | Harness Source Backing |
 | P116 | 加固 source loader safety。 | source loader whitelist 在 CLI 暴露前需要验证 IDs、paths、classes、research lines、mappings 和 missing files。 | Harness Source Backing |
 | P117 | 加入 harness source inventory CLI。 | approved source whitelist 在进入 harness context integration 前应能通过只读 CLI 看见。 | Harness Source Backing |
+| P118 | 加入 harness source-backed context refs。 | dry-run context preview 应引用 pressure-specific 白名单来源，同时不执行 retrieval 或写入。 | Harness Source Backing |

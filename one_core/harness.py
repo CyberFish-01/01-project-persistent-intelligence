@@ -4,6 +4,7 @@ import json
 from typing import Any
 
 from .observatory import build_observatory_report
+from .source_loader import source_refs_for_pressure
 
 
 PRIVACY_SCOPES = ("local", "private", "public")
@@ -679,7 +680,7 @@ def build_harness_dry_run_report(
     observatory_report = build_observatory_report(lang=lang)
     boundary_monitor = _boundary_monitor(lang, profile)
     report = {
-        "report_id": "minimal_cli_harness_dry_run_v0.2",
+        "report_id": "minimal_cli_harness_dry_run_v0.3",
         "generated_by": "harness-dry-run",
         "lang": lang,
         "harness_scope": "read_only_dry_run_preview",
@@ -833,12 +834,44 @@ def _context_package_preview(
     profile: dict[str, Any],
 ) -> dict[str, Any]:
     profile_refs = _localized_list(profile, "profile_refs", lang)
+    source_refs = source_refs_for_pressure(profile["pressure_type"], lang=lang)
+    source_refs_preview = [_source_ref_preview(source_ref) for source_ref in source_refs]
+    selected_source_refs = [source_ref["source_id"] for source_ref in source_refs]
+    missing_source_evidence = [
+        {
+            "source_id": source_ref["source_id"],
+            "path": source_ref["path"],
+            "missing_reason": source_ref["missing_reason"],
+        }
+        for source_ref in source_refs
+        if not source_ref["exists"]
+    ]
+    source_backing_status = {
+        "status": "source_backed_read_only",
+        "source_count": len(source_refs),
+        "all_selected_sources_available": not missing_source_evidence,
+        "selection_method": "deterministic_pressure_to_whitelist_mapping",
+        "retrieval_executed": False,
+        "user_path_read": False,
+        "state_read": False,
+        "state_written": False,
+    }
+    source_loader_boundaries = {
+        "whitelist_only": True,
+        "local_markdown_only": True,
+        "source_id_based": True,
+        "user_supplied_paths_allowed": False,
+        "external_io_allowed": False,
+        "model_call_allowed": False,
+        "source_loader_write_enabled": False,
+    }
     if lang == "zh":
-        source_attribution = "静态来源：FOUNDATION、PHASE_INDEX、OPEN_QUESTIONS、RFC_INDEX、GLOSSARY。"
+        source_attribution = "只读来源：P113/P115 白名单 Markdown source refs，由 pressure type 确定。"
         privacy_note = "private 输入只显示边界和类别，不扩展内容。" if privacy_scope == "private" else "输入保持本地 dry-run，不写入 state。"
         risk_flags = [
             "preview_only",
             "static_pressure_classification",
+            "source_backed_read_only",
             "no_retrieval_execution",
             "no_prompt_construction",
             "no_state_write",
@@ -855,6 +888,11 @@ def _context_package_preview(
             "profile_refs": profile_refs,
             "selection_reason": "使用 deterministic pressure routing 展示处理路径，不执行真实检索。",
             "source_attribution": source_attribution,
+            "source_refs_preview": source_refs_preview,
+            "selected_source_refs": selected_source_refs,
+            "missing_source_evidence": missing_source_evidence,
+            "source_backing_status": source_backing_status,
+            "source_loader_boundaries": source_loader_boundaries,
             "risk_flags": risk_flags,
         }
 
@@ -869,15 +907,35 @@ def _context_package_preview(
         "governance_refs": ["Governance Surface", "Boundary Test Matrix", "P99 no-write harness plan"],
         "profile_refs": profile_refs,
         "selection_reason": "Use deterministic pressure routing to show the processing path without executing retrieval.",
-        "source_attribution": "Static sources: FOUNDATION, PHASE_INDEX, OPEN_QUESTIONS, RFC_INDEX, GLOSSARY.",
+        "source_attribution": "Read-only sources: P113/P115 whitelisted Markdown source refs selected by pressure type.",
+        "source_refs_preview": source_refs_preview,
+        "selected_source_refs": selected_source_refs,
+        "missing_source_evidence": missing_source_evidence,
+        "source_backing_status": source_backing_status,
+        "source_loader_boundaries": source_loader_boundaries,
         "risk_flags": [
             "preview_only",
             "static_pressure_classification",
+            "source_backed_read_only",
             "no_retrieval_execution",
             "no_prompt_construction",
             "no_state_write",
             privacy_note,
         ],
+    }
+
+
+def _source_ref_preview(source_ref: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "source_id": source_ref["source_id"],
+        "path": source_ref["path"],
+        "class": source_ref["class"],
+        "research_line": source_ref["research_line"],
+        "heading": source_ref["heading"],
+        "excerpt": source_ref["excerpt"],
+        "exists": source_ref["exists"],
+        "read_mode": source_ref["read_mode"],
+        "source_status": source_ref["source_status"],
     }
 
 
