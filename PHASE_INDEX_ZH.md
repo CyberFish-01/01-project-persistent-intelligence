@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-P69 把 foundation map 从 P0-P51 扩展到 P0-P68。这不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P90。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -75,3 +75,25 @@ P69 把 foundation map 从 P0-P51 扩展到 P0-P68。这不是提交记录，而
 | P66 | 加入 Payload / Diff Capture Policy RFC。 | capture policy 不是 payload capture 或 schema mutation。 | Reconstruction Readiness |
 | P67 | 加入 Foundation Roadmap。 | foundation work should reduce ambiguity before it adds power。 | Foundation Consolidation |
 | P68 | 加入 RFC Index。 | RFC 定义 review surface，不是 execution approval。 | Foundation Consolidation |
+| P69 | 扩展 phase index。 | phase history 应按 proposition 和 main line 可导航。 | Foundation Consolidation |
+| P70 | 更新 concept map。 | 增加能力前，跨层概念关系需要清楚。 | Foundation Consolidation |
+| P71 | 更新 open question status。 | 选择 future work 前，open questions 需要当前 routing。 | Open Question Governance |
+| P72 | 加入 risk register。 | foundation risks 必须先可见，不能悄悄变成机制。 | Foundation Governance |
+| P73 | 刷新 architecture boundaries。 | boundaries 应阻止 future RFC 被误读为 execution approval。 | Architecture Boundary |
+| P74 | 去重 glossary terms。 | shared terms 应减少歧义，而不是制造更多概念。 | Foundation Vocabulary |
+| P75 | 优化 README foundation entrance。 | 新读者需要一条稳定路径进入 foundation。 | Foundation Navigation |
+| P76 | 加入 foundation review checklist。 | 后续 document-only phases 需要 manual gate。 | Foundation Governance |
+| P77 | 加入 decisions log。 | foundation decisions 需要 durable status，但不能变成 executor。 | Foundation Governance |
+| P78 | 加入 research notes index。 | source ideas 应可追溯，但不是 implementation approval。 | Research Traceability |
+| P79 | 加入 bilingual consistency review。 | 中英文 foundation documents 应保持边界一致。 | Foundation Maintenance |
+| P80 | 加入 foundation maintenance review。 | P54-P80 maintenance cycle 需要在新方向前完成 closure。 | Foundation Maintenance |
+| P81 | 加入 CTM-inspired Temporal Dynamics RFC。 | 外部 temporal ideas 可启发 vocabulary，但不实现 CTM runtime。 | Temporal Dynamics |
+| P82 | 加入 Temporal Coherence Evaluation Plan。 | temporal vocabulary 需要先有 deterministic evaluation design，再谈 runtime。 | Evaluation Planning |
+| P83 | 加入 Deliberation Tick / Review Depth RFC。 | review effort 应按 risk 规划，但不执行 thought loop。 | Review Planning |
+| P84 | 加入 Thought Trace Storage Policy RFC。 | trace language 需要先有 storage boundaries，再谈 trace mechanism。 | Storage Boundary |
+| P85 | 加入 Thin Interaction Harness RFC。 | future harness 在明确批准前必须保持 preview-only。 | Harness Planning |
+| P86 | 加入 Conversation Intake Contract RFC。 | future intake 在 adapter 或 event writes 前需要 envelope contract。 | Harness Planning |
+| P87 | 加入 Context Package Preview RFC。 | context selection 在 harness execution 前应可解释。 | Harness Planning |
+| P88 | 加入 Review Queue Preview RFC。 | candidate queue 在 lifecycle execution 前需要 preview vocabulary。 | Harness Planning |
+| P89 | 加入 Session Resume Scenario Plan。 | resume scenarios 在 temporal runtime 前应保持 deterministic。 | Harness Evaluation Planning |
+| P90 | 加入 Core Interaction Harness Roadmap。 | harness readiness 应先 review，再谈 implementation。 | Harness Planning |

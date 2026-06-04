@@ -2,8 +2,8 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-P69 extends the foundation map from P0-P51 to P0-P68. This index is not a release log.
-It records how the system foundation evolved.
+This index covers P0-P90. It is not a release log. It records how the system
+foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
 |---|---|---|---|
@@ -76,3 +76,25 @@ It records how the system foundation evolved.
 | P66 | Added Payload / Diff Capture Policy RFC. | Capture policy is not payload capture or schema mutation. | Reconstruction Readiness |
 | P67 | Added Foundation Roadmap. | Foundation work should reduce ambiguity before it adds power. | Foundation Consolidation |
 | P68 | Added RFC Index. | RFCs define review surfaces, not execution approval. | Foundation Consolidation |
+| P69 | Extended the phase index. | Phase history should be navigable by proposition and main line. | Foundation Consolidation |
+| P70 | Updated the concept map. | Cross-layer concepts need clear relationships before more power is added. | Foundation Consolidation |
+| P71 | Updated open question status. | Open questions need current routing before future work is chosen. | Open Question Governance |
+| P72 | Added the risk register. | Foundation risks must be visible before they become mechanisms. | Foundation Governance |
+| P73 | Refreshed architecture boundaries. | Boundaries should prevent future RFCs from becoming execution approval. | Architecture Boundary |
+| P74 | Deduplicated glossary terms. | Shared terms should reduce ambiguity, not multiply concepts. | Foundation Vocabulary |
+| P75 | Optimized the README foundation entrance. | New readers need one stable path into the foundation. | Foundation Navigation |
+| P76 | Added the foundation review checklist. | Future document-only phases need a manual gate. | Foundation Governance |
+| P77 | Added the decisions log. | Foundation decisions need durable status without becoming executors. | Foundation Governance |
+| P78 | Added the research notes index. | Source ideas should be traceable without becoming implementation approval. | Research Traceability |
+| P79 | Added bilingual consistency review. | English and Chinese foundation documents should keep aligned boundaries. | Foundation Maintenance |
+| P80 | Added foundation maintenance review. | The P54-P80 maintenance cycle needed closure before new direction. | Foundation Maintenance |
+| P81 | Added CTM-inspired Temporal Dynamics RFC. | External temporal ideas can inform vocabulary without CTM runtime. | Temporal Dynamics |
+| P82 | Added Temporal Coherence Evaluation Plan. | Temporal vocabulary needs deterministic evaluation design before runtime. | Evaluation Planning |
+| P83 | Added Deliberation Tick / Review Depth RFC. | Review effort should be planned by risk without executing thought loops. | Review Planning |
+| P84 | Added Thought Trace Storage Policy RFC. | Trace language needs storage boundaries before any trace mechanism. | Storage Boundary |
+| P85 | Added Thin Interaction Harness RFC. | A future harness must remain preview-only until explicitly approved. | Harness Planning |
+| P86 | Added Conversation Intake Contract RFC. | Future intake needs an envelope contract before adapter or event writes. | Harness Planning |
+| P87 | Added Context Package Preview RFC. | Context selection should be explainable before any harness execution. | Harness Planning |
+| P88 | Added Review Queue Preview RFC. | Candidate queues need preview vocabulary before lifecycle execution. | Harness Planning |
+| P89 | Added Session Resume Scenario Plan. | Resume scenarios should be deterministic before any temporal runtime. | Harness Evaluation Planning |
+| P90 | Added Core Interaction Harness Roadmap. | Harness readiness should be reviewed before any implementation. | Harness Planning |

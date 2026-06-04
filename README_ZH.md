@@ -17,7 +17,14 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P68-P80 是低风险 foundation consolidation。下面的 runtime 和 adapter references 是历史/工程参考；它们不是扩展 UI、AstrBot、product、Temporal Awareness runtime、growth execution、memory rewrite 或 reconstruction reducers 的授权。
+当前工作状态：P82-P90 foundation-to-harness planning 已完成，本地仓库已经通过
+pre-push audit，处于 push-ready 状态。下一步方向必须由项目创始人确认。候选方向包括 P91
+Tool-First Self-Evolution RFC、Minimal CLI Harness Implementation Plan，或 founder /
+CTO review。
+
+下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P91、实现 harness、
+进入应用层、扩展 UI、AstrBot、product、Temporal Awareness runtime、growth execution、
+memory rewrite 或 reconstruction reducers 的授权。
 
 ## 文档入口
 
@@ -26,7 +33,7 @@
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P68 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P90 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -109,8 +116,8 @@ Continuity = State Transfer
 
 ## Prototype Reference / 原型参考
 
-本仓库包含一个最小本地 01 Core。P68-P80 foundation consolidation 期间，
-这些命令只作为验证和理解方向的参考：
+本仓库包含一个最小本地 01 Core。P82-P90 foundation-to-harness planning 完成后，
+这些命令仍只作为验证和理解方向的参考：
 
 ```bash
 python3 -m one_core.cli init
