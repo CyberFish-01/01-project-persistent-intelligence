@@ -54,6 +54,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P88 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [ZH](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | future RFC | review queue preview | 定义 candidate preview types、ordering signals、review depth 和 blocked items。 | lifecycle execution、approval 或 mutation |
 | P89 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [ZH](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | scenario plan | resume simulation plan | 使用 simulated elapsed time 定义 deterministic session resume scenarios。 | Temporal Awareness runtime 或 temporal event writes |
 | P90 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [ZH](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | roadmap | harness readiness roadmap | 评估未来 minimal CLI harness readiness 和 gates。 | harness implementation 或 approval |
+| P82-P90 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [ZH](./HARNESS_TRANSITION_SUMMARY_ZH.md) | summary | transition closure | 总结从 temporal concept safety 到 future harness readiness 的 planning bridge。 | P91 implementation approval |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -130,6 +131,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 23. [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md)
     评估 future minimal CLI harness readiness，但不批准 harness implementation、commands、
     schemas、tests、adapters、UI 或 runtime work。
+24. [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md)
+    收束 P82-P90 planning bridge，并在 explicit future approval 前继续阻塞 P91 implementation。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 

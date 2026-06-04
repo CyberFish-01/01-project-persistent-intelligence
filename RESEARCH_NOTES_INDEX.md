@@ -39,6 +39,7 @@ current documents carry it, and what is still only long-term vision?"
 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [REVIEW_QUEUE_PREVIEW_RFC_ZH.md](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | Queue preview RFC | Defines candidate queue preview vocabulary without lifecycle execution or approval. |
 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [SESSION_RESUME_SCENARIO_PLAN_ZH.md](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | Resume scenario plan | Defines deterministic resume scenarios without temporal events or resume runtime. |
 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [CORE_INTERACTION_HARNESS_ROADMAP_ZH.md](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | Harness roadmap | Assesses future minimal CLI harness readiness without approving implementation. |
+| [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [HARNESS_TRANSITION_SUMMARY_ZH.md](./HARNESS_TRANSITION_SUMMARY_ZH.md) | Harness transition summary | Closes P82-P90 planning and keeps implementation blocked until explicit approval. |
 
 ## Original Idea Chains
 
@@ -81,6 +82,7 @@ current documents carry it, and what is still only long-term vision?"
 | Review Queue Preview | Candidate pressure needs ordering vocabulary before any review queue can be discussed. | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md), [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | `preview-rfc`, not lifecycle execution |
 | Session Resume Scenario Plan | Resume needs deterministic elapsed-time scenarios before any harness runtime. | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md), [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | `scenario-plan`, not temporal runtime |
 | Core Interaction Harness Roadmap | The foundation can now discuss a future fixture-first CLI harness, but implementation remains blocked. | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `roadmap`, not implementation approval |
+| Harness Transition Summary | P82-P90 need a compact closeout before any future P91 contract work. | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md), [RFC_INDEX.md](./RFC_INDEX.md) | `summary`, not implementation approval |
 
 ## Second Chain Map: Artificial Life History
 
@@ -158,6 +160,9 @@ For origin tracing:
 15. Read [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md)
     only as readiness planning, not as harness implementation approval, CLI
     commands, schemas, tests, adapters, UI, or runtime work.
+16. Read [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md)
+    as the P82-P90 closeout, not as permission to enter P91 or implement a
+    harness.
 
 ## P78 Non-Execution Statement
 
