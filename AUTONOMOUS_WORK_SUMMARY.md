@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `6fa347d Refresh architecture boundaries`
+- End commit before this summary: `80e946d Deduplicate glossary terms`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -33,6 +33,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P71 Open Questions Status Update | `66f7af8` | `OPEN_QUESTIONS.md`, `OPEN_QUESTIONS_ZH.md` | No |
 | P72 Risk Register | `17fc3e6` | `RISK_REGISTER.md`, `RISK_REGISTER_ZH.md` | No |
 | P73 Architecture Boundary Refresh | `6fa347d` | `ARCHITECTURE_BOUNDARIES.md`, `ARCHITECTURE_BOUNDARIES_ZH.md` | No |
+| P74 Glossary Deduplication | `80e946d` | `GLOSSARY.md`, `GLOSSARY_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -57,7 +58,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P73, each phase ran:
+For P54-P74, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -92,15 +93,15 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P74-P80 low-risk consolidation remains.
-- Next item is P74 Glossary Deduplication.
+- P75-P80 low-risk consolidation remains.
+- Next item is P75 README Entrance Optimization.
 
 ## Suggested Next Direction
 
 Next safe phase:
 
 ```text
-P74 Glossary Deduplication
+P75 README Entrance Optimization
 ```
 
 Constraint: low-risk document consolidation only. Do not add runtime behavior,

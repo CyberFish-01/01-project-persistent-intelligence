@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`6fa347d Refresh architecture boundaries`
+- 本 summary 前的结束 commit：`80e946d Deduplicate glossary terms`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -33,6 +33,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P71 Open Questions Status Update | `66f7af8` | `OPEN_QUESTIONS.md`, `OPEN_QUESTIONS_ZH.md` | No |
 | P72 Risk Register | `17fc3e6` | `RISK_REGISTER.md`, `RISK_REGISTER_ZH.md` | No |
 | P73 Architecture Boundary Refresh | `6fa347d` | `ARCHITECTURE_BOUNDARIES.md`, `ARCHITECTURE_BOUNDARIES_ZH.md` | No |
+| P74 Glossary Deduplication | `80e946d` | `GLOSSARY.md`, `GLOSSARY_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -57,7 +58,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P73 每个 phase 都执行：
+P54-P74 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -91,15 +92,15 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P74-P80 low-risk consolidation 仍未完成。
-- 下一项是 P74 Glossary Deduplication。
+- P75-P80 low-risk consolidation 仍未完成。
+- 下一项是 P75 README Entrance Optimization。
 
 ## Suggested Next Direction / 明天建议方向
 
 下一步安全 phase：
 
 ```text
-P74 Glossary Deduplication
+P75 README Entrance Optimization
 ```
 
 约束：只做低风险 document consolidation。不要新增 runtime behavior、新 mechanisms、
