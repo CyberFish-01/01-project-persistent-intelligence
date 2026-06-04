@@ -114,6 +114,12 @@ implementation approval.
 | P146 | [MANUAL_REVIEW_GATE_RFC.md](./MANUAL_REVIEW_GATE_RFC.md) / [ZH](./MANUAL_REVIEW_GATE_RFC_ZH.md) | review gate RFC | RFC-only manual gate | Defines required manual gates, review questions, allowed outcomes, and blocked direct-write outcomes before any durable change. | review lifecycle implementation, approval storage, event write, memory write, recall write, identity mutation, growth execution, tool execution, adapter integration, model call, or rebuild |
 | P147 | [REBUILD_MIGRATION_PROTOCOL_RFC.md](./REBUILD_MIGRATION_PROTOCOL_RFC.md) / [ZH](./REBUILD_MIGRATION_PROTOCOL_RFC_ZH.md) | migration RFC | RFC-only rebuild gate | Defines future local rebuild entry gates, migration source classes, non-goals, stop conditions, and first low-risk write direction. | rebuild start, old 01 read, state migration, import runtime, reducer execution, event compaction, state write, memory write, adapter integration, model call, tool execution, or policy executor |
 
+## Pre-Rebuild Verification
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P148 | [REBUILD_ENTRY_GATE_CHECKLIST.md](./REBUILD_ENTRY_GATE_CHECKLIST.md) / [ZH](./REBUILD_ENTRY_GATE_CHECKLIST_ZH.md) | checklist | document-only gate checklist | Defines required gates and evidence before local 01 rebuild can be considered. | verification execution, rebuild start, old 01 read, state migration, memory write, adapter integration, model call, tool execution, reducer execution, or event compaction |
+
 ## Founder-Facing Vocabulary And Visual Naming
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |

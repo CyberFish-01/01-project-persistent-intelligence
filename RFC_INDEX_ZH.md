@@ -112,6 +112,12 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P146 | [MANUAL_REVIEW_GATE_RFC.md](./MANUAL_REVIEW_GATE_RFC.md) / [ZH](./MANUAL_REVIEW_GATE_RFC_ZH.md) | review gate RFC | RFC-only manual gate | 定义 required manual gates、review questions、allowed outcomes 和 blocked direct-write outcomes，早于任何 durable change。 | review lifecycle implementation、approval storage、event write、memory write、recall write、identity mutation、growth execution、tool execution、adapter integration、model call 或 rebuild |
 | P147 | [REBUILD_MIGRATION_PROTOCOL_RFC.md](./REBUILD_MIGRATION_PROTOCOL_RFC.md) / [ZH](./REBUILD_MIGRATION_PROTOCOL_RFC_ZH.md) | migration RFC | RFC-only rebuild gate | 定义 future local rebuild entry gates、migration source classes、non-goals、stop conditions 和 first low-risk write direction。 | rebuild start、old 01 read、state migration、import runtime、reducer execution、event compaction、state write、memory write、adapter integration、model call、tool execution 或 policy executor |
 
+## Pre-Rebuild Verification / 重构前验证
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P148 | [REBUILD_ENTRY_GATE_CHECKLIST.md](./REBUILD_ENTRY_GATE_CHECKLIST.md) / [ZH](./REBUILD_ENTRY_GATE_CHECKLIST_ZH.md) | checklist | document-only gate checklist | 定义本地 01 rebuild 被考虑前所需 gates 和 evidence。 | verification execution、rebuild start、old 01 read、state migration、memory write、adapter integration、model call、tool execution、reducer execution 或 event compaction |
+
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |

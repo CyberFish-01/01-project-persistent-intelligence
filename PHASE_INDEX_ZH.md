@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P147。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P148。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -154,3 +154,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P145 | 加入 Post-Response Candidate Extraction RFC。 | future model output 只能被检查成 preview candidates，不能被持久化或晋升。 | Response Boundary |
 | P146 | 加入 Manual Review Gate RFC。 | manual review 必须位于 candidates 和任何 future durable change 之间，但 review 不是 approval 或 write execution。 | Response Boundary |
 | P147 | 加入 Rebuild Migration Protocol RFC。 | rebuild migration 需要 gates 和 trust review；migration plan 不是 rebuild execution。 | Response Boundary |
+| P148 | 加入 Rebuild Entry Gate Checklist。 | ready for verification 不是 ready for rebuild；rebuild 需要 evidence 和 founder checkpoint。 | Pre-Rebuild Verification |
