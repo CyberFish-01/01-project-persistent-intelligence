@@ -91,6 +91,12 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P135 | [FOUNDER_CONSOLE_RISK_REVIEW.md](./FOUNDER_CONSOLE_RISK_REVIEW.md) / [ZH](./FOUNDER_CONSOLE_RISK_REVIEW_ZH.md) | risk review | document-only risk review | 复盘 founder-console risks，包括 product creep、Companion creep、roadmap automation、write paths、adapters、model calls、temporal overreach 和 capability overreach。 | console implementation、Web UI、Companion、adapter integration、model call、tool execution、write path、policy executor 或 rebuild |
 | P136 | [FOUNDER_CONSOLE_ROADMAP.md](./FOUNDER_CONSOLE_ROADMAP.md) / [ZH](./FOUNDER_CONSOLE_ROADMAP_ZH.md) | roadmap | block closure | 收口 founder-console planning，并把下一条安全工作路由到 context package contracts，早于 implementation。 | console implementation、Web UI、Companion、adapter integration、model call、tool execution、write path、policy executor 或 rebuild |
 
+## Context Package And Response Preparation / 上下文包与回应准备
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P137 | [CONTEXT_PACKAGE_BUILDER_RFC.md](./CONTEXT_PACKAGE_BUILDER_RFC.md) / [ZH](./CONTEXT_PACKAGE_BUILDER_RFC_ZH.md) | builder RFC | RFC-only package contract | 定义 required context packs、trust levels、source references、temporal pack boundary、capability pack boundary 和 response strategy pack。 | builder implementation、retrieval engine、model call、prompt execution、state write、memory write、identity mutation、adapter integration、tool execution 或 rebuild |
+
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |

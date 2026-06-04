@@ -93,6 +93,12 @@ implementation approval.
 | P135 | [FOUNDER_CONSOLE_RISK_REVIEW.md](./FOUNDER_CONSOLE_RISK_REVIEW.md) / [ZH](./FOUNDER_CONSOLE_RISK_REVIEW_ZH.md) | risk review | document-only risk review | Reviews founder-console risks such as product creep, Companion creep, roadmap automation, write paths, adapters, model calls, temporal overreach, and capability overreach. | console implementation, Web UI, Companion, adapter integration, model call, tool execution, write path, policy executor, or rebuild |
 | P136 | [FOUNDER_CONSOLE_ROADMAP.md](./FOUNDER_CONSOLE_ROADMAP.md) / [ZH](./FOUNDER_CONSOLE_ROADMAP_ZH.md) | roadmap | block closure | Closes founder-console planning and routes the next safe work to context package contracts before implementation. | console implementation, Web UI, Companion, adapter integration, model call, tool execution, write path, policy executor, or rebuild |
 
+## Context Package And Response Preparation
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P137 | [CONTEXT_PACKAGE_BUILDER_RFC.md](./CONTEXT_PACKAGE_BUILDER_RFC.md) / [ZH](./CONTEXT_PACKAGE_BUILDER_RFC_ZH.md) | builder RFC | RFC-only package contract | Defines required context packs, trust levels, source references, temporal pack boundary, capability pack boundary, and response strategy pack. | builder implementation, retrieval engine, model call, prompt execution, state write, memory write, identity mutation, adapter integration, tool execution, or rebuild |
+
 ## Founder-Facing Vocabulary And Visual Naming
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
