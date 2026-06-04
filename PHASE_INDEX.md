@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P111. It is not a release log. It records how the system
+This index covers P0-P112. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -119,3 +119,4 @@ foundation evolved.
 | P109 | Added harness roadmap. | The implemented dry-run needs a clear map of what it can see, cannot see, and may only plan next as read-only work. | Harness Roadmap |
 | P110 | Added overnight harness work summary. | The P102-P110 harness cycle should close with commits, tests, boundaries, usability change, and a stop-before-P111 condition. | Harness Audit |
 | P111 | Added post-harness founder review. | The founder needs a review of whether P102-P110 solved P101 before any state-backed read-only harness boundary is considered. | Harness Review |
+| P112 | Added State-Backed Read-Only Harness RFC. | State backing must mean whitelisted local source citation, not retrieval execution, writes, adapters, models, or rebuild. | Harness Source Backing |
