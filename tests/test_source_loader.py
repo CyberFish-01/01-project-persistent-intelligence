@@ -1,5 +1,9 @@
 import tempfile
 import unittest
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 from one_core.source_loader import (
@@ -17,6 +21,28 @@ from one_core.source_loader import (
 
 
 class SourceLoaderTests(unittest.TestCase):
+    def run_inventory_cli(self, *args, state_dir=None):
+        with tempfile.TemporaryDirectory() as tmp:
+            state_path = Path(state_dir) if state_dir else Path(tmp) / "state"
+            env = dict(os.environ)
+            env["PYTHONDONTWRITEBYTECODE"] = "1"
+            return subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "one_core.cli",
+                    "--state-dir",
+                    str(state_path),
+                    "harness-source-inventory",
+                    *args,
+                ],
+                cwd=REPO_ROOT,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
     def test_load_source_inventory_en_and_zh(self):
         en_sources = load_source_inventory(lang="en")
         zh_sources = load_source_inventory(lang="zh")
@@ -118,6 +144,54 @@ class SourceLoaderTests(unittest.TestCase):
             self.assertEqual(after_state, before_state)
             self.assertEqual(marker.read_text(encoding="utf-8"), "unchanged")
         self.assertEqual(source_path.stat().st_mtime_ns, before_source)
+
+    def test_source_inventory_cli_markdown_en_runs(self):
+        result = self.run_inventory_cli("--format", "markdown", "--lang", "en")
+
+        self.assertIn("# Harness Source Inventory", result.stdout)
+        self.assertIn("Pressure Mappings", result.stdout)
+        self.assertIn("Non-Execution Invariants", result.stdout)
+        self.assertIn("source_loader_write_enabled: false", result.stdout)
+
+    def test_source_inventory_cli_json_zh_contains_safety_and_boundaries(self):
+        result = self.run_inventory_cli("--format", "json", "--lang", "zh")
+        report = json.loads(result.stdout)
+
+        self.assertEqual(report["report_id"], "harness_source_inventory_v0.1")
+        self.assertEqual(report["lang"], "zh")
+        self.assertEqual(report["safety_status"], "pass")
+        self.assertEqual(report["source_count"], len(SOURCE_WHITELIST))
+        self.assertIn("temporal_pressure", report["pressure_mappings"])
+        for key, expected in NON_EXECUTION_INVARIANTS.items():
+            self.assertEqual(report["non_execution_invariants"][key], expected)
+
+    def test_source_inventory_cli_output_writes_only_report_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state_dir = Path(tmp) / "state"
+            output_path = Path(tmp) / "inventory.md"
+            before = sorted(Path(tmp).rglob("*"))
+
+            result = self.run_inventory_cli("--output", str(output_path), state_dir=state_dir)
+
+            after = sorted(Path(tmp).rglob("*"))
+            self.assertEqual(result.stdout, "")
+            self.assertTrue(output_path.exists())
+            self.assertFalse(state_dir.exists())
+            self.assertEqual(after, before + [output_path])
+
+    def test_source_inventory_cli_does_not_modify_existing_state_dir(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state_dir = Path(tmp) / "state"
+            state_dir.mkdir()
+            marker = state_dir / "marker.txt"
+            marker.write_text("unchanged", encoding="utf-8")
+            before = {path.relative_to(tmp): path.stat().st_mtime_ns for path in Path(tmp).rglob("*")}
+
+            self.run_inventory_cli("--format", "json", "--lang", "en", state_dir=state_dir)
+
+            after = {path.relative_to(tmp): path.stat().st_mtime_ns for path in Path(tmp).rglob("*")}
+            self.assertEqual(after, before)
+            self.assertEqual(marker.read_text(encoding="utf-8"), "unchanged")
 
 
 if __name__ == "__main__":

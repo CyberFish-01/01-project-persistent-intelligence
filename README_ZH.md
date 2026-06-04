@@ -17,9 +17,9 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P116 Source Loader Safety Hardening 已完成。`one_core/source_loader.py` 现在会在任何
-CLI 或 harness integration 前验证 whitelist safety、pressure mappings、source classes、research lines
-和 missing files。
+当前工作状态：P117 Harness Source Inventory CLI 已完成。`harness-source-inventory` 命令会只读展示
+source whitelist、pressure mappings、safety status 和 non-execution invariants，不触碰 state、memory、
+identity、events、adapters、models、tools 或 external IO。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -33,7 +33,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P116 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P117 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -171,6 +171,18 @@ python3 -m one_core.cli harness-dry-run --input "Preview this." --format json
 scenario routing 和 non-execution previews。它把输入静态分类为可见性、成长审查、接入边界、产品层、
 能力进化、时间、重建或未分类压力。它不写 state、不调用模型、不调用外部 API、不接 adapter、不执行
 retrieval，也不自动执行下一步。
+
+只读 harness source inventory：
+
+```bash
+python3 -m one_core.cli harness-source-inventory
+python3 -m one_core.cli harness-source-inventory --format json
+python3 -m one_core.cli harness-source-inventory --lang zh
+```
+
+这个命令报告 future state-backed read-only harness 使用的本地 Markdown source whitelist 和 pressure
+mappings。它只引用 source IDs 和 safety metadata；不读取用户传入路径、不写 state、不执行 retrieval、
+不调用模型，也不授权 rebuild work。
 
 本地 API 参考：
 
