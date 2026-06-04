@@ -19,10 +19,11 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P114 Read-Only Source Loader Plan is complete. The future
-source loader now has planned functions, record shape, whitelist rules,
-disallowed reads, tests, CLI boundary, and harness integration boundary before
-any implementation.
+Current work status: P115 Minimal Read-Only Source Loader is complete.
+`one_core/source_loader.py` can read only the explicit P113 Markdown whitelist
+by source ID and pressure type. It does not add CLI or harness integration yet,
+and it does not read state logs, adapters, memory dumps, network sources, or
+arbitrary paths.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +39,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P114 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P115 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
