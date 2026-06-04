@@ -17,7 +17,7 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P145 Post-Response Candidate Extraction RFC 已完成。future model output 只能被检查成带 review gates 的 preview candidates；extraction runtime、candidate storage、review lifecycle、model calls、writes、tools、adapters 和 rebuild 仍保持 blocked。
+当前工作状态：P146 Manual Review Gate RFC 已完成。manual review 现在被定义为 future candidates 和任何 durable change 之间的 gate；review lifecycle implementation、approval storage、writes、tools、adapters、model calls 和 rebuild 仍保持 blocked。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -31,7 +31,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P145 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P146 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -82,6 +82,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [RESPONSE_ORCHESTRATION_PREVIEW_RFC.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC.md) / [RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md)：P143 RFC-only response orchestration preview path，默认把 model output 当作 untrusted。
 - [LLM_AS_RESOURCE_BOUNDARY_RFC.md](./LLM_AS_RESOURCE_BOUNDARY_RFC.md) / [LLM_AS_RESOURCE_BOUNDARY_RFC_ZH.md](./LLM_AS_RESOURCE_BOUNDARY_RFC_ZH.md)：P144 RFC-only boundary，把 future LLM calls 视为 resource usage，而不是 subject ownership。
 - [POST_RESPONSE_CANDIDATE_EXTRACTION_RFC.md](./POST_RESPONSE_CANDIDATE_EXTRACTION_RFC.md) / [POST_RESPONSE_CANDIDATE_EXTRACTION_RFC_ZH.md](./POST_RESPONSE_CANDIDATE_EXTRACTION_RFC_ZH.md)：P145 RFC-only extraction boundary，把 future model output 视为 preview-only candidates。
+- [MANUAL_REVIEW_GATE_RFC.md](./MANUAL_REVIEW_GATE_RFC.md) / [MANUAL_REVIEW_GATE_RFC_ZH.md](./MANUAL_REVIEW_GATE_RFC_ZH.md)：P146 RFC-only manual review gate，位于任何 future durable change 之前。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 

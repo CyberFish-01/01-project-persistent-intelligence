@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P145. It is not a release log. It records how the system
+This index covers P0-P146. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -153,3 +153,4 @@ foundation evolved.
 | P143 | Added Response Orchestration Preview RFC. | Response orchestration must be previewed before execution, and model output must remain outside core state. | Response Boundary |
 | P144 | Added LLM-as-Resource Boundary RFC. | Future LLM calls may be resources, but they must not own state, identity, memory, tools, or continuity. | Response Boundary |
 | P145 | Added Post-Response Candidate Extraction RFC. | Future model output may only be inspected into preview candidates, not persisted or promoted. | Response Boundary |
+| P146 | Added Manual Review Gate RFC. | Manual review must sit between candidates and any future durable change, but review is not approval or write execution. | Response Boundary |
