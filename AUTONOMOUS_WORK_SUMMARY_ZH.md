@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`92c5135 Add payload diff capture policy RFC`
+- 本 summary 前的结束 commit：`705070d Add foundation roadmap`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -26,6 +26,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P64 Subject Kernel / World Seed RFC | `438e52e` | `SUBJECT_KERNEL_WORLD_SEED_RFC.md`, `SUBJECT_KERNEL_WORLD_SEED_RFC_ZH.md` | No |
 | P65 Reconstruction Reducer Contract RFC | `613723a` | `RECONSTRUCTION_REDUCER_CONTRACT_RFC.md`, `RECONSTRUCTION_REDUCER_CONTRACT_RFC_ZH.md` | No |
 | P66 Payload / Diff Capture Policy RFC | `92c5135` | `PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md`, `PAYLOAD_DIFF_CAPTURE_POLICY_RFC_ZH.md` | No |
+| P67 Foundation Roadmap Synthesis | `705070d` | `FOUNDATION_ROADMAP.md`, `FOUNDATION_ROADMAP_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -50,7 +51,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P66 每个 phase 都执行：
+P54-P67 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -84,15 +85,16 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P67 Foundation Roadmap Synthesis。
+- P68-P80 low-risk consolidation 仍未完成。
+- 下一项是 P68 RFC Index。
 
 ## Suggested Next Direction / 明天建议方向
 
 下一步安全 phase：
 
 ```text
-P67 Foundation Roadmap Synthesis
+P68 RFC Index
 ```
 
-约束：document-only synthesis。不要新增 runtime behavior、新 mechanisms、adapter/product
-work 或 implementation commitments。
+约束：只做低风险 document consolidation。不要新增 runtime behavior、新 mechanisms、
+adapter/product work 或 implementation commitments。
