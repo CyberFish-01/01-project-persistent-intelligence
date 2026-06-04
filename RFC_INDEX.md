@@ -248,6 +248,10 @@ The current dependency order is:
     [VERIFICATION_REPORT_ZH.md](./VERIFICATION_REPORT_ZH.md) record the P152
     read-only verification evidence and pass status for founder checkpoint,
     not rebuild approval.
+35. [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md)
+    and [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md)
+    record the P153 founder checkpoint: verification evidence is sufficient to
+    ask the founder, but rebuild remains blocked until explicit approval.
 
 ## Runtime-Blocked Topics
 

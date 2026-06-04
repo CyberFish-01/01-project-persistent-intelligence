@@ -235,6 +235,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 34. [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) 和
     [VERIFICATION_REPORT_ZH.md](./VERIFICATION_REPORT_ZH.md) 记录 P152 read-only verification
     evidence 和 pass status；它只允许进入 founder checkpoint，不批准 rebuild。
+35. [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md)
+    和 [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md)
+    记录 P153 founder checkpoint：verification evidence 足以向 founder 提问，但 rebuild 在明确批准前继续 blocked。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
