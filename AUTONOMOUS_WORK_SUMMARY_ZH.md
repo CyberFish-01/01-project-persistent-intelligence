@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`bf260f5 Add recall event write policy RFC`
+- 本 summary 前的结束 commit：`eec695c Add stateful memory encoding policy`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -19,6 +19,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P57 Open Question Triage | `70cc128` | `OPEN_QUESTIONS_TRIAGE.md`, `OPEN_QUESTIONS_TRIAGE_ZH.md` | No |
 | P58 Temporal Awareness RFC v0.1 | `61def0f` | `TEMPORAL_AWARENESS_RFC.md`, `TEMPORAL_AWARENESS_RFC_ZH.md` | No |
 | P59 Recall Event Write Policy RFC | `bf260f5` | `RECALL_EVENT_WRITE_POLICY_RFC.md`, `RECALL_EVENT_WRITE_POLICY_RFC_ZH.md` | No |
+| P60 Stateful Memory Minimal Encoding Policy | `eec695c` | `STATEFUL_MEMORY_ENCODING_POLICY.md`, `STATEFUL_MEMORY_ENCODING_POLICY_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -43,7 +44,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P59 每个 phase 都执行：
+P54-P60 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -77,7 +78,6 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P60 Stateful Memory Minimal Encoding Policy。
 - P61 Growth Candidate Lifecycle RFC，document-only。
 - P62 Productive Drift vs Collapse RFC。
 - P65 Reconstruction Reducer Contract RFC，在 reducer execution 之前。
@@ -87,8 +87,8 @@ No active forbidden pattern matches.
 下一步安全 phase：
 
 ```text
-P60 Stateful Memory Minimal Encoding Policy
+P61 Growth Candidate Lifecycle RFC
 ```
 
-约束：只做 policy/document layer。不要创建新 memory store，不 rewrite memory，不写
-recall events，不 mutate identity，也不 promote growth。
+约束：document-only。不要执行 lifecycle decisions，不 promote growth，不 rewrite
+memory，不 mutate identity，也不创建 policy/runtime executors。

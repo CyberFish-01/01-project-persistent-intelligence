@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `bf260f5 Add recall event write policy RFC`
+- End commit before this summary: `eec695c Add stateful memory encoding policy`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -19,6 +19,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P57 Open Question Triage | `70cc128` | `OPEN_QUESTIONS_TRIAGE.md`, `OPEN_QUESTIONS_TRIAGE_ZH.md` | No |
 | P58 Temporal Awareness RFC v0.1 | `61def0f` | `TEMPORAL_AWARENESS_RFC.md`, `TEMPORAL_AWARENESS_RFC_ZH.md` | No |
 | P59 Recall Event Write Policy RFC | `bf260f5` | `RECALL_EVENT_WRITE_POLICY_RFC.md`, `RECALL_EVENT_WRITE_POLICY_RFC_ZH.md` | No |
+| P60 Stateful Memory Minimal Encoding Policy | `eec695c` | `STATEFUL_MEMORY_ENCODING_POLICY.md`, `STATEFUL_MEMORY_ENCODING_POLICY_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -43,7 +44,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P59, each phase ran:
+For P54-P60, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -78,7 +79,6 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P60 Stateful Memory Minimal Encoding Policy.
 - P61 Growth Candidate Lifecycle RFC, document-only.
 - P62 Productive Drift vs Collapse RFC.
 - P65 Reconstruction Reducer Contract RFC before reducer execution.
@@ -88,8 +88,8 @@ was not itself a git repository.
 Next safe phase:
 
 ```text
-P60 Stateful Memory Minimal Encoding Policy
+P61 Growth Candidate Lifecycle RFC
 ```
 
-Constraint: policy/document layer only. Do not create a new memory store,
-rewrite memory, write recall events, mutate identity, or promote growth.
+Constraint: document-only. Do not execute lifecycle decisions, promote growth,
+rewrite memory, mutate identity, or create policy/runtime executors.
