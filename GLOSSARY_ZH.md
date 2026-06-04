@@ -335,6 +335,13 @@ P103 在 harness dry-run report 前部加入的说明区。它解释分类是什
 边界：founder summary 是 explanation，不是 authorization、execution、memory write、identity
 update、product decision 或 next-step automation。
 
+## Hardened Boundary Monitor / 强化边界监视器
+
+P105 在 `harness-dry-run` 内加入的结构化边界报告。它列出 disabled capabilities、unchanged state、
+active boundary violations，以及与当前 pressure profile 最相关的 boundaries。
+
+边界：boundary monitor 是 audit output。它不执行 policy、不执行 action、不修改 state，也不授权 runtime。
+
 ## Fixture-First Harness / Fixture 优先试验台
 
 一种可能的 future harness approach：在任何 live input、adapter、cloud 或 product surface 前，先使用

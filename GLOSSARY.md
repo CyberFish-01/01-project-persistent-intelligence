@@ -409,6 +409,15 @@ manual next step, and what not to build yet.
 Boundary: founder summary is explanation, not authorization, execution, memory
 write, identity update, product decision, or next-step automation.
 
+## Hardened Boundary Monitor
+
+The P105 structured boundary report inside `harness-dry-run`. It lists disabled
+capabilities, unchanged state, active boundary violations, and the boundaries
+most relevant to the selected pressure profile.
+
+Boundary: boundary monitor is audit output. It does not enforce policy, execute
+actions, mutate state, or authorize a runtime.
+
 ## Fixture-First Harness
 
 A possible future harness approach that uses local deterministic fixture inputs

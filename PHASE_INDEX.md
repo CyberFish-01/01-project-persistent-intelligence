@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P104. It is not a release log. It records how the system
+This index covers P0-P105. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -112,3 +112,4 @@ foundation evolved.
 | P102 | Added Harness Input Classification and Scenario Routing. | Dry-run inputs can be deterministically classified into pressure profiles without retrieval, writes, adapters, tools, or runtime execution. | Harness Preview |
 | P103 | Improved harness output readability. | A dry-run report should start with a founder-facing summary, human risks, next step, and clear "do not do yet" guardrails. | Harness Readability |
 | P104 | Added Scenario Profile Test Matrix. | Harness pressure profiles need a documented expected-output matrix before further specialization. | Harness Evaluation |
+| P105 | Hardened harness boundary monitor. | The dry-run boundary monitor should explicitly show disabled capabilities, unchanged state, and zero active violations. | Harness Boundary |

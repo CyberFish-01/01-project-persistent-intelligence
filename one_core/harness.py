@@ -28,6 +28,21 @@ BOUNDARY_MONITOR = {
     "state_unchanged": True,
 }
 
+BOUNDARY_STATUS_ROWS = (
+    ("identity_core", "identity_core_mutated", "disabled", "Identity Core remains protected.", "身份核心保持受保护。"),
+    ("memory_rewrite", "memory_rewrite_executed", "disabled", "Memory rewrite is not executed.", "不执行 memory rewrite。"),
+    ("recall_write", "recall_mutation_executed", "disabled", "Recall writes and recall mutation stay disabled.", "回忆写入和 recall mutation 保持禁用。"),
+    ("growth_engine", "growth_engine_executed", "disabled", "Growth engine is not executed.", "不执行 growth engine。"),
+    ("tool_execution", "tool_execution_enabled", "disabled", "Tool execution stays disabled.", "工具执行保持禁用。"),
+    ("tool_promotion", "auto_tool_promotion_enabled", "disabled", "Automatic tool promotion stays disabled.", "自动工具提升保持禁用。"),
+    ("temporal_runtime", "temporal_event_executed", "disabled", "Temporal runtime and temporal event writes stay disabled.", "Temporal runtime 和 temporal event writes 保持禁用。"),
+    ("adapter_integration", "adapter_integration_required", "disabled", "No adapter integration is required.", "不要求 adapter integration。"),
+    ("companion_layer", "companion_feature_enabled", "disabled", "Companion features stay disabled.", "Companion features 保持禁用。"),
+    ("policy_executor", "policy_executor_enabled", "disabled", "Policy executor stays disabled.", "Policy executor 保持禁用。"),
+    ("state_write", "harness_write_enabled", "disabled", "Harness writes stay disabled.", "Harness writes 保持禁用。"),
+    ("state", "state_unchanged", "unchanged", "State is reported unchanged.", "State 报告为 unchanged。"),
+)
+
 NON_EXECUTION_INVARIANTS = {
     "dry_run": True,
     "no_write": True,
@@ -922,7 +937,26 @@ def _review_queue_preview(lang: str, profile: dict[str, Any]) -> list[dict[str, 
 
 def _boundary_monitor(lang: str, profile: dict[str, Any]) -> dict[str, Any]:
     monitor = dict(BOUNDARY_MONITOR)
+    disabled_capabilities = []
+    unchanged_state = []
+    for category, key, expected_status, en_note, zh_note in BOUNDARY_STATUS_ROWS:
+        value = monitor[key]
+        row = {
+            "category": category,
+            "flag": key,
+            "status": expected_status,
+            "value": value,
+            "note": zh_note if lang == "zh" else en_note,
+        }
+        if expected_status == "unchanged":
+            unchanged_state.append(row)
+        else:
+            disabled_capabilities.append(row)
     monitor["highest_relevant_boundaries"] = profile["boundaries"]
+    monitor["disabled_capabilities"] = disabled_capabilities
+    monitor["unchanged_state"] = unchanged_state
+    monitor["active_boundary_violations"] = []
+    monitor["all_forbidden_actions_disabled"] = True
     monitor["boundary_note"] = (
         "相关边界被突出显示，但仍全部保持 disabled/false。"
         if lang == "zh"

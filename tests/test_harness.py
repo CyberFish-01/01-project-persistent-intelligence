@@ -176,6 +176,33 @@ class HarnessDryRunTests(unittest.TestCase):
         ):
             self.assertFalse(report[key])
         self.assertTrue(report["state_unchanged"])
+        self.assertTrue(report["boundary_monitor"]["all_forbidden_actions_disabled"])
+        self.assertEqual(report["boundary_monitor"]["active_boundary_violations"], [])
+
+    def test_boundary_monitor_has_structured_disabled_capabilities(self):
+        report = build_harness_dry_run_report(user_message="我想把这个接进 AstrBot", lang="zh")
+        monitor = report["boundary_monitor"]
+        rows = {row["flag"]: row for row in monitor["disabled_capabilities"]}
+
+        for key in (
+            "identity_core_mutated",
+            "memory_rewrite_executed",
+            "recall_mutation_executed",
+            "growth_engine_executed",
+            "tool_execution_enabled",
+            "auto_tool_promotion_enabled",
+            "temporal_event_executed",
+            "adapter_integration_required",
+            "companion_feature_enabled",
+            "harness_write_enabled",
+        ):
+            self.assertIn(key, rows)
+            self.assertEqual(rows[key]["status"], "disabled")
+            self.assertFalse(rows[key]["value"])
+
+        self.assertEqual(monitor["unchanged_state"][0]["flag"], "state_unchanged")
+        self.assertEqual(monitor["unchanged_state"][0]["status"], "unchanged")
+        self.assertTrue(monitor["unchanged_state"][0]["value"])
 
     def test_non_execution_invariants_are_explicit(self):
         report = build_harness_dry_run_report(user_message="Hello 01")
