@@ -24,6 +24,7 @@ capabilities 被关闭。
 | Question | Current Status | Main Artifact | Still Open Because | Forbidden Now |
 |---|---|---|---|---|
 | Temporal Awareness | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | elapsed-time evidence rules、temporal review placement 和 write policy 不是 accepted runtime contracts | Temporal Awareness runtime、temporal event execution |
+| CTM-inspired Temporal Dynamics | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) | CTM concepts 只被翻译成 symbolic foundation vocabulary；storage policy、evaluation 和 runtime contracts 缺失 | CTM runtime、model training、temporal event writes |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -49,6 +50,22 @@ routing 或 validation。
 - `long_pause`、`interruption`、`resumed_session` 是否未来可能成为 temporal events；
 - 如何表示 task staleness、claim staleness、memory decay、relationship silence，同时不引入
   companion 或 social-layer behavior。
+- CTM-inspired temporal dynamics 应保持 review vocabulary，还是未来拆成 deliberation ticks、
+  thought traces 和 temporal coherence evaluation 等更小 RFC。
+
+### CTM-inspired Temporal Dynamics / CTM 启发的时间动力学
+
+已由 [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) 澄清，但没有实现。
+它仍然 open，因为 P81 只把 CTM-inspired concepts 翻译成 symbolic foundation vocabulary。
+
+仍开放：
+
+- deliberation ticks 是 events、traces，还是 ephemeral review steps；
+- 是否应该 persist 任何 thought trace；
+- 如何测试 temporal coherence，同时不制造 pseudo-consciousness claims；
+- review depth budget 应如何关联 risk level；
+- unresolved tension 或 delayed alignment 如何成为 review evidence；
+- CTM-inspired dynamics 如何与 reconstruction evidence 关联。
 
 ### Recall Event Write Policy / 回忆事件写入策略
 
@@ -164,6 +181,7 @@ policy 仍与 payload capture 分离。
 - event schema mutation；
 - reconstruction reducer execution；
 - event compaction；
+- CTM runtime 或 model training；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 

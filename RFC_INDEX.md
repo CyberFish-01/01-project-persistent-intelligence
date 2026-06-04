@@ -46,6 +46,7 @@ implementation approval.
 | P60 | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) / [ZH](./STATEFUL_MEMORY_ENCODING_POLICY_ZH.md) | policy | review policy | Defines minimum encoding references for meaning-shift review. | new memory store |
 | P61 | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) / [ZH](./GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md) | lifecycle RFC | future review-object policy | Defines future review-object states such as deferred, archived, or quarantined. | growth lifecycle execution |
 | P62 | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) / [ZH](./PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md) | boundary RFC | review vocabulary | Separates productive drift, random drift, identity-threatening drift, and collapse. | automatic drift classifier |
+| P81 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [ZH](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | future RFC | RFC-only mapping | Translates CTM-inspired temporal dynamics into symbolic foundation vocabulary. | CTM runtime or temporal event execution |
 
 ## Exploration And Subject Boundary
 
@@ -93,12 +94,16 @@ The current dependency order is:
     review.
 13. [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md)
     closes the P54-P80 maintenance cycle without approving runtime work.
+14. [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) maps
+    CTM-inspired temporal concepts into foundation vocabulary without approving
+    CTM runtime, temporal event writes, or model training.
 
 ## Runtime-Blocked Topics
 
 The indexed documents do not approve:
 
 - Temporal Awareness runtime;
+- CTM runtime or model training;
 - recall event writes;
 - growth lifecycle execution;
 - automatic growth classification;

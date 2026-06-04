@@ -158,3 +158,54 @@ memory = event + encoding_state + recall_state + meaning_shift
 foundation risks 的文档级 watchlist，例如 concept inflation、premature runtime pressure、boundary drift 和 bilingual drift。
 
 边界：Risk register 记录风险；它不是 governance execution。
+
+## CTM-inspired Temporal Dynamics / CTM 启发的时间动力学
+
+一种 RFC-only vocabulary，把 Continuous Thought Machines 的启发翻译成 01 Core 的 symbolic
+temporal review concepts。
+
+边界：01 Core 不是 CTM implementation。该 term 不批准 CTM runtime、model training、
+temporal event writes 或 neural synchronization claims。
+
+## Deliberation Tick / 审议 tick
+
+未来可能用于表示 conclusion 前 internal review progression 的单位。
+
+边界：deliberation tick 当前不被 persist，不是 event，也不是 runtime step，除非未来 policy 明确定义。
+
+## Thought Trace / 思考轨迹
+
+未来可能用于记录 review state 如何随 deliberation 演化。
+
+边界：thought trace 在 P81 没有 storage policy，不能创建 event payloads、memory rewrites、
+identity changes 或 pseudo-consciousness claims。
+
+## Temporal Coherence / 时间一致性
+
+用于 review later state 是否仍能与 earlier state、current evidence 和 continuity anchors 相容的概念。
+
+边界：temporal coherence 不是真理、growth、consciousness，也不是 automatic claim revision。
+
+## Review Depth Budget / 审查深度预算
+
+未来可能用于让 review effort 匹配 risk level 的 policy concept。
+
+边界：review depth budget 不是 adaptive compute runtime、不是 policy execution，也不是 automatic approval。
+
+## Unresolved Tension / 未解决张力
+
+未来可能用于表示 persistent conflict 的 review signal；该 conflict 尚未成为 decision、claim revision 或 growth candidate。
+
+边界：unresolved tension 不能自动创建 growth candidates、rewrite claims 或 mutate identity。
+
+## Delayed Alignment / 延迟对齐
+
+未来可能表示 later evidence 让 earlier state 或 memory 符合 stable pattern 的 review signal。
+
+边界：delayed alignment 可以提示 review evidence；它不是 semantic promotion、identity update 或 memory rewrite。
+
+## Coherence Break / 一致性断裂
+
+未来可能表示 current state 已不能安全地从 prior state 和 evidence 推导出来。
+
+边界：coherence break 是 review concern，不是 automatic collapse classification 或 reconstruction。

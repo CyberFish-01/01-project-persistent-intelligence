@@ -27,6 +27,7 @@ origin ideas are not implementation approval.
 | [VISION.md](./VISION.md) / [VISION_ZH.md](./VISION_ZH.md) | Vision synthesis | 把第一条思想链整理成项目愿景。 |
 | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md) | Life-history synthesis | 把第二条思想链整理成 Identity Seed 边界。 |
 | [THEORY_SYNTHESIS_AND_NEXT_PLAN.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN.md) / [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md) | later synthesis and phase planning | 把早期理论接到 implementation-phase planning。 |
+| [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [CTM_TEMPORAL_DYNAMICS_RFC_ZH.md](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | External inspiration RFC | 把 Continuous Thought Machines 启发映射为未来 temporal-dynamics vocabulary，不实现 CTM。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -54,6 +55,12 @@ origin ideas are not implementation approval.
 | Cognitive Ecology | interacting persistent subjects 的长期愿景。 | [VISION.md](./VISION.md), [NON_CLAIMS.md](./NON_CLAIMS.md) | `long-term-vision`, not product work |
 | Artificial Personality Engineering | 研究 artificial subject 如何成为自己。 | [VISION.md](./VISION.md), [FOUNDATION.md](./FOUNDATION.md) | `research-frame` |
 | Continuity Era | 项目属于 continuity，不只属于 capability 或 agents。 | [README.md](./README.md), [VISION.md](./VISION.md) | `accepted-foundation` |
+
+## External Inspiration Map / 外部启发地图
+
+| External Theme | Current Use | Current Foundation Artifact | Current Status |
+|---|---|---|---|
+| CTM-inspired Temporal Dynamics | time-varying internal state 可能启发未来 continuity review。 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not runtime |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -85,6 +92,7 @@ Research notes 是 source material，不是当前 implementation plan。
 - companion 或 relationship memory；
 - Temporal Awareness runtime；
 - automatic growth or drift classification；
+- CTM runtime 或 model training；
 - identity mutation、memory rewrite、payload capture、reducer execution。
 
 ## Reading Order / 阅读顺序
@@ -97,6 +105,9 @@ Research notes 是 source material，不是当前 implementation plan。
 4. 阅读 [FOUNDATION.md](./FOUNDATION.md)、[CONCEPT_MAP.md](./CONCEPT_MAP.md)
    和 [DECISIONS.md](./DECISIONS.md)，了解当前稳定边界。
 5. 阅读 [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) 和 [RISK_REGISTER.md](./RISK_REGISTER.md)，了解哪些仍 open、watch 或 blocked。
+6. 阅读 [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) 时，只把它当作
+   temporal dynamics vocabulary 的 external-inspiration RFC，不要当作 CTM implementation
+   approval。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 

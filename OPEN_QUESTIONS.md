@@ -24,6 +24,7 @@ not implemented, and not closed as runtime capabilities.
 | Question | Current Status | Main Artifact | Still Open Because | Forbidden Now |
 |---|---|---|---|---|
 | Temporal Awareness | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | elapsed-time evidence rules, temporal review placement, and write policy are not accepted runtime contracts | Temporal Awareness runtime, temporal event execution |
+| CTM-inspired Temporal Dynamics | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) | CTM concepts are translated only as symbolic foundation vocabulary; storage policy, evaluation, and runtime contracts are missing | CTM runtime, model training, temporal event writes |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -50,6 +51,24 @@ Still open:
   temporal events;
 - how task staleness, claim staleness, memory decay, and relationship silence
   can be represented without companion or social-layer behavior.
+- whether CTM-inspired temporal dynamics should remain review vocabulary or
+  later split into smaller RFCs such as deliberation ticks, thought traces, and
+  temporal coherence evaluation.
+
+### CTM-inspired Temporal Dynamics
+
+Clarified by [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md),
+but not implemented. It remains open because P81 only translates CTM-inspired
+concepts into symbolic foundation vocabulary.
+
+Still open:
+
+- whether deliberation ticks are events, traces, or ephemeral review steps;
+- whether any thought trace should be persisted;
+- how to test temporal coherence without pseudo-consciousness claims;
+- how review depth budget should relate to risk level;
+- how unresolved tension or delayed alignment could become review evidence;
+- how CTM-inspired dynamics should relate to reconstruction evidence.
 
 ### Recall Event Write Policy
 
@@ -166,6 +185,7 @@ The following remain blocked until a future explicit implementation phase:
 - event schema mutation;
 - reconstruction reducer execution;
 - event compaction;
+- CTM runtime or model training;
 - policy executor;
 - companion, relationship memory, UI, AstrBot, adapter, or product layer.
 

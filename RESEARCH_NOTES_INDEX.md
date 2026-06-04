@@ -29,6 +29,7 @@ current documents carry it, and what is still only long-term vision?"
 | [VISION.md](./VISION.md) / [VISION_ZH.md](./VISION_ZH.md) | Vision synthesis | Turns the first idea chain into the project vision. |
 | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md) | Life-history synthesis | Turns the second idea chain into the Identity Seed boundary. |
 | [THEORY_SYNTHESIS_AND_NEXT_PLAN.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN.md) / [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md) | Later synthesis and phase planning | Connects the early theory to implementation-phase planning. |
+| [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [CTM_TEMPORAL_DYNAMICS_RFC_ZH.md](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | External inspiration RFC | Maps Continuous Thought Machines inspiration into future temporal-dynamics vocabulary without implementing CTM. |
 
 ## Original Idea Chains
 
@@ -56,6 +57,12 @@ current documents carry it, and what is still only long-term vision?"
 | Cognitive Ecology | Long-term vision of interacting persistent subjects. | [VISION.md](./VISION.md), [NON_CLAIMS.md](./NON_CLAIMS.md) | `long-term-vision`, not product work |
 | Artificial Personality Engineering | Study how an artificial subject becomes itself. | [VISION.md](./VISION.md), [FOUNDATION.md](./FOUNDATION.md) | `research-frame` |
 | Continuity Era | The project belongs to persistent continuity, not only capability or agents. | [README.md](./README.md), [VISION.md](./VISION.md) | `accepted-foundation` |
+
+## External Inspiration Map
+
+| External Theme | Current Use | Current Foundation Artifact | Current Status |
+|---|---|---|---|
+| CTM-inspired Temporal Dynamics | Time-varying internal state may inform future continuity review. | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not runtime |
 
 ## Second Chain Map: Artificial Life History
 
@@ -87,6 +94,7 @@ Still future or blocked:
 - companion or relationship memory;
 - Temporal Awareness runtime;
 - automatic growth or drift classification;
+- CTM runtime or model training;
 - identity mutation, memory rewrite, payload capture, reducer execution.
 
 ## Reading Order
@@ -102,6 +110,9 @@ For origin tracing:
    and [DECISIONS.md](./DECISIONS.md) for current stable boundaries.
 5. Read [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) and [RISK_REGISTER.md](./RISK_REGISTER.md)
    for what remains open, watched, or blocked.
+6. Read [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) only as
+   an external-inspiration RFC for temporal dynamics vocabulary, not as CTM
+   implementation approval.
 
 ## P78 Non-Execution Statement
 

@@ -44,6 +44,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P60 | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) / [ZH](./STATEFUL_MEMORY_ENCODING_POLICY_ZH.md) | policy | review policy | 定义 meaning-shift review 所需的 minimum encoding references。 | new memory store |
 | P61 | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) / [ZH](./GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md) | lifecycle RFC | future review-object policy | 定义 future review-object states，例如 deferred、archived、quarantined。 | growth lifecycle execution |
 | P62 | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) / [ZH](./PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md) | boundary RFC | review vocabulary | 区分 productive drift、random drift、identity-threatening drift 和 collapse。 | automatic drift classifier |
+| P81 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [ZH](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | future RFC | RFC-only mapping | 把 CTM-inspired temporal dynamics 翻译成 symbolic foundation vocabulary。 | CTM runtime 或 temporal event execution |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -90,12 +91,16 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     记录最新 manual bilingual consistency baseline，但不自动执行 review。
 13. [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md)
     关闭 P54-P80 maintenance cycle，但不批准 runtime work。
+14. [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md)
+    把 CTM-inspired temporal concepts 映射到 foundation vocabulary，但不批准 CTM
+    runtime、temporal event writes 或 model training。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
 这些被索引文档不批准：
 
 - Temporal Awareness runtime；
+- CTM runtime 或 model training；
 - recall event writes；
 - growth lifecycle execution；
 - automatic growth classification；

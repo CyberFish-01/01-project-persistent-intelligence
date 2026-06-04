@@ -211,3 +211,64 @@ The document-level watchlist for foundation risks such as concept inflation,
 premature runtime pressure, boundary drift, and bilingual drift.
 
 Boundary: the risk register records risk; it is not governance execution.
+
+## CTM-inspired Temporal Dynamics
+
+An RFC-only vocabulary that translates Continuous Thought Machines inspiration
+into symbolic 01 Core temporal review concepts.
+
+Boundary: 01 Core is not a CTM implementation. This term does not approve CTM
+runtime, model training, temporal event writes, or neural synchronization claims.
+
+## Deliberation Tick
+
+A possible future unit of internal review progression before a conclusion.
+
+Boundary: a deliberation tick is not currently persisted, not an event, and not
+a runtime step until a future policy explicitly defines it.
+
+## Thought Trace
+
+A possible future record of how review state evolved across deliberation.
+
+Boundary: thought trace has no storage policy in P81 and must not create event
+payloads, memory rewrites, identity changes, or pseudo-consciousness claims.
+
+## Temporal Coherence
+
+A review idea for whether later state still fits earlier state, current
+evidence, and continuity anchors.
+
+Boundary: temporal coherence is not truth, growth, consciousness, or automatic
+claim revision.
+
+## Review Depth Budget
+
+A possible future policy concept for matching review effort to risk level.
+
+Boundary: review depth budget is not adaptive compute runtime, not policy
+execution, and not automatic approval.
+
+## Unresolved Tension
+
+A possible future review signal for persistent conflict that has not yet become
+a decision, claim revision, or growth candidate.
+
+Boundary: unresolved tension must not automatically create growth candidates,
+rewrite claims, or mutate identity.
+
+## Delayed Alignment
+
+A possible future review signal where later evidence makes earlier state or
+memory fit a stable pattern.
+
+Boundary: delayed alignment can suggest review evidence; it is not semantic
+promotion, identity update, or memory rewrite.
+
+## Coherence Break
+
+A possible future signal that current state no longer safely follows from prior
+state and evidence.
+
+Boundary: coherence break is a review concern, not automatic collapse
+classification or reconstruction.
