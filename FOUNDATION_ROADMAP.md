@@ -106,7 +106,7 @@ Only low-risk consolidation should continue:
 - risk register;
 - architecture boundary refresh;
 - RFC index;
-- `DECISIONS.md`;
+- `DECISIONS.md` foundation decisions log;
 - `RESEARCH_NOTES_INDEX.md`;
 - `FOUNDATION_REVIEW_CHECKLIST.md` manual phase review gate.
 
@@ -133,6 +133,9 @@ This order is advisory. Skip or merge steps if they do not add clarity.
 P76 is satisfied by [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md)
 and its Chinese pair. The checklist is a manual review gate, not an automated
 executor.
+
+P77 is satisfied by [DECISIONS.md](./DECISIONS.md) and its Chinese pair. The
+decisions log records project stance; it is not an approval engine.
 
 ## Completion Definition For Foundation Layer
 

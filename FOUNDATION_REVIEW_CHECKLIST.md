@@ -36,6 +36,7 @@ Before review, inspect the current versions of:
 - [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md)
 - [RFC_INDEX.md](./RFC_INDEX.md)
 - [RISK_REGISTER.md](./RISK_REGISTER.md)
+- [DECISIONS.md](./DECISIONS.md)
 - [GLOSSARY.md](./GLOSSARY.md)
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 

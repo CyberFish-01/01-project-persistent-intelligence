@@ -104,7 +104,7 @@ P67 不批准这些 dependencies。
 - risk register；
 - architecture boundary refresh；
 - RFC index；
-- `DECISIONS.md`；
+- `DECISIONS.md` foundation decisions log；
 - `RESEARCH_NOTES_INDEX.md`；
 - `FOUNDATION_REVIEW_CHECKLIST.md` manual phase review gate。
 
@@ -131,6 +131,9 @@ P67 不批准这些 dependencies。
 P76 已由 [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md)
 及其中文配对文档满足。该 checklist 是 manual review gate，不是 automated
 executor。
+
+P77 已由 [DECISIONS.md](./DECISIONS.md) 及其中文配对文档满足。该 decisions
+log 记录 project stance；它不是 approval engine。
 
 ## Completion Definition For Foundation Layer / 基础层完成定义
 
