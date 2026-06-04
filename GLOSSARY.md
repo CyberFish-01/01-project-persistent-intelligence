@@ -400,6 +400,15 @@ Boundary: scenario routing is deterministic and local. It does not call an LLM,
 perform real retrieval, read or write state, integrate AstrBot, execute tools,
 or create review lifecycles.
 
+## Founder Summary
+
+The P103 front section of a harness dry-run report. It explains the
+classification, why it matched, what the preview can and cannot do, the safest
+manual next step, and what not to build yet.
+
+Boundary: founder summary is explanation, not authorization, execution, memory
+write, identity update, product decision, or next-step automation.
+
 ## Fixture-First Harness
 
 A possible future harness approach that uses local deterministic fixture inputs

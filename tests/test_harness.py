@@ -46,6 +46,7 @@ class HarnessDryRunTests(unittest.TestCase):
         result = self.run_cli("--format", "markdown", "--lang", "en")
 
         self.assertIn("# Minimal CLI Harness Dry-Run Report", result.stdout)
+        self.assertIn("founder_summary", result.stdout)
         self.assertIn("intake_preview", result.stdout)
         self.assertIn("context_package_preview", result.stdout)
         self.assertIn("candidate_preview", result.stdout)
@@ -58,6 +59,9 @@ class HarnessDryRunTests(unittest.TestCase):
 
         self.assertIn("最小 CLI 试验台 Dry-Run 报告", result.stdout)
         for label in (
+            "一屏摘要",
+            "场景分流",
+            "人话风险",
             "输入预览",
             "上下文包预览",
             "候选项预览",
@@ -122,6 +126,9 @@ class HarnessDryRunTests(unittest.TestCase):
             "matched_signals",
             "profile_specific_risks",
             "profile_specific_next_step",
+            "profile_specific_do_not_do",
+            "founder_summary",
+            "human_readable_risks",
             "intake_preview",
             "context_package_preview",
             "candidate_preview",
@@ -235,6 +242,24 @@ class HarnessDryRunTests(unittest.TestCase):
         self.assertIn("auto_tool_promotion_enabled", report["boundary_monitor"]["highest_relevant_boundaries"])
         self.assertIn("验证不等于授权", report["context_package_preview"]["profile_refs"])
         self.assertIn("人工审查", report["profile_specific_next_step"])
+
+    def test_founder_summary_is_human_readable_and_non_executing(self):
+        report = build_harness_dry_run_report(
+            user_message="我们是不是该开始做应用层了？",
+            lang="zh",
+        )
+
+        summary = report["founder_summary"]
+        self.assertEqual(summary["classification"], "产品层压力 (product_layer_pressure)")
+        self.assertIn("命中信号", summary["why_this_classification"])
+        self.assertIn("不能检索真实记忆", summary["what_it_cannot_do_now"])
+        self.assertTrue(any("不要进入产品层" in item for item in summary["do_not_do_yet"]))
+        self.assertIn("profile_specific_do_not_do", report)
+        self.assertGreater(len(report["human_readable_risks"]), 0)
+        for risk in report["human_readable_risks"]:
+            self.assertIn("why_it_matters", risk)
+            self.assertIn("current_guardrail", risk)
+            self.assertIn("next_manual_check", risk)
 
 
 if __name__ == "__main__":

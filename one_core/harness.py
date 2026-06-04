@@ -540,6 +540,105 @@ PRESSURE_PROFILES: dict[str, dict[str, Any]] = {
     },
 }
 
+DO_NOT_DO_YET = {
+    "observability_pressure": {
+        "en": [
+            "Do not build UI just because the project feels unclear.",
+            "Do not turn the observatory into an executor.",
+            "Do not create the next phase automatically.",
+        ],
+        "zh": [
+            "不要因为项目看不清就立刻做 UI。",
+            "不要把观察台变成执行器。",
+            "不要自动创建下一阶段。",
+        ],
+    },
+    "growth_review_pressure": {
+        "en": [
+            "Do not mutate identity from a growth-sounding input.",
+            "Do not promote a growth candidate automatically.",
+            "Do not rewrite memory to make the change fit.",
+        ],
+        "zh": [
+            "不要因为听起来像成长就修改身份。",
+            "不要自动提升成长候选。",
+            "不要为了让变化成立而重写记忆。",
+        ],
+    },
+    "adapter_boundary_pressure": {
+        "en": [
+            "Do not integrate AstrBot from a dry-run report.",
+            "Do not let a platform own identity or memory.",
+            "Do not require adapter work before local boundaries are clearer.",
+        ],
+        "zh": [
+            "不要从 dry-run 报告直接接 AstrBot。",
+            "不要让平台拥有身份或记忆。",
+            "不要在本地边界更清楚前要求 adapter work。",
+        ],
+    },
+    "product_layer_pressure": {
+        "en": [
+            "Do not enter product or application-layer implementation.",
+            "Do not build Companion or Web UI from this preview.",
+            "Do not turn next-step recommendations into automatic decisions.",
+        ],
+        "zh": [
+            "不要进入产品层或应用层实现。",
+            "不要从这个 preview 开始做 Companion 或 Web UI。",
+            "不要把下一步建议变成自动决策。",
+        ],
+    },
+    "capability_evolution_pressure": {
+        "en": [
+            "Do not execute tools from harness output.",
+            "Do not promote a tool because one verification succeeded.",
+            "Do not treat capability improvement as subject growth.",
+        ],
+        "zh": [
+            "不要从 harness 输出执行工具。",
+            "不要因为一次验证成功就提升工具。",
+            "不要把能力改进当成主体成长。",
+        ],
+    },
+    "temporal_pressure": {
+        "en": [
+            "Do not write temporal events.",
+            "Do not mutate salience or memory because time passed.",
+            "Do not treat elapsed time as a runtime signal yet.",
+        ],
+        "zh": [
+            "不要写 temporal events。",
+            "不要因为时间流逝就修改 salience 或 memory。",
+            "不要把 elapsed time 当成 runtime signal。",
+        ],
+    },
+    "reconstruction_pressure": {
+        "en": [
+            "Do not execute reconstruction reducers.",
+            "Do not compact events.",
+            "Do not treat reference-only evidence as reconstructable state.",
+        ],
+        "zh": [
+            "不要执行 reconstruction reducers。",
+            "不要压缩 events。",
+            "不要把 reference-only evidence 当成可重建状态。",
+        ],
+    },
+    "unknown_pressure": {
+        "en": [
+            "Do not guess a high-risk route from weak signals.",
+            "Do not create tasks before the review target is clear.",
+            "Do not execute any next step automatically.",
+        ],
+        "zh": [
+            "不要从弱信号猜测高风险路线。",
+            "不要在审查目标不清楚前创建任务。",
+            "不要自动执行任何下一步。",
+        ],
+    },
+}
+
 
 def build_harness_dry_run_report(
     *,
@@ -575,6 +674,9 @@ def build_harness_dry_run_report(
         "matched_signals": classification["matched_signals"],
         "profile_specific_risks": _localized_list(profile, "risks", lang),
         "profile_specific_next_step": _localized(profile, "next_step", lang),
+        "profile_specific_do_not_do": _do_not_do_yet(profile, lang),
+        "founder_summary": _founder_summary(lang, profile, classification["matched_signals"]),
+        "human_readable_risks": _human_readable_risks(lang, profile),
         "intake_preview": _intake_preview(
             user_message=user_message,
             session_id=session_id,
@@ -634,6 +736,63 @@ def _scenario_profile(lang: str, profile: dict[str, Any]) -> dict[str, Any]:
         "classification_only": True,
         "dry_run_only": True,
     }
+
+
+def _do_not_do_yet(profile: dict[str, Any], lang: str) -> list[str]:
+    return DO_NOT_DO_YET[profile["pressure_type"]][lang]
+
+
+def _founder_summary(
+    lang: str,
+    profile: dict[str, Any],
+    matched_signals: list[str],
+) -> dict[str, Any]:
+    signals = matched_signals if matched_signals else ["no configured signal"]
+    if lang == "zh":
+        return {
+            "headline": _localized(profile, "summary", lang),
+            "classification": f"{_localized(profile, 'display_name', lang)} ({profile['pressure_type']})",
+            "why_this_classification": f"{_localized(profile, 'reason', lang)} 命中信号：{', '.join(signals)}。",
+            "what_this_preview_shows": "这是一份静态预演：它只显示可能的背景、候选、审查门和边界。",
+            "what_it_can_do_now": "它可以帮助 founder 判断这条输入属于哪类压力，以及哪些边界必须保持关闭。",
+            "what_it_cannot_do_now": "它不能检索真实记忆、写入 state、调用模型、接 adapter、执行工具或推进下一步。",
+            "recommended_next_step": _localized(profile, "next_step", lang),
+            "do_not_do_yet": _do_not_do_yet(profile, lang),
+        }
+    return {
+        "headline": _localized(profile, "summary", lang),
+        "classification": f"{_localized(profile, 'display_name', lang)} ({profile['pressure_type']})",
+        "why_this_classification": f"{_localized(profile, 'reason', lang)} Matched signals: {', '.join(signals)}.",
+        "what_this_preview_shows": "This is a static preview: it only shows possible context, candidates, review gates, and boundaries.",
+        "what_it_can_do_now": "It can help the founder see what kind of pressure the input creates and which boundaries must stay closed.",
+        "what_it_cannot_do_now": "It cannot retrieve real memory, write state, call a model, integrate an adapter, execute tools, or advance the next step.",
+        "recommended_next_step": _localized(profile, "next_step", lang),
+        "do_not_do_yet": _do_not_do_yet(profile, lang),
+    }
+
+
+def _human_readable_risks(lang: str, profile: dict[str, Any]) -> list[dict[str, str]]:
+    rows = []
+    for risk in _localized_list(profile, "risks", lang):
+        if lang == "zh":
+            rows.append(
+                {
+                    "risk": risk,
+                    "why_it_matters": "如果忽略这个风险，dry-run 可能被误读成可以执行或可以写入。",
+                    "current_guardrail": "当前只输出 preview；所有 forbidden boundary 仍保持 false/disabled。",
+                    "next_manual_check": _localized(profile, "next_step", lang),
+                }
+            )
+        else:
+            rows.append(
+                {
+                    "risk": risk,
+                    "why_it_matters": "If ignored, the dry-run may be mistaken for permission to execute or write state.",
+                    "current_guardrail": "The command only emits preview output; all forbidden boundaries remain false/disabled.",
+                    "next_manual_check": _localized(profile, "next_step", lang),
+                }
+            )
+    return rows
 
 
 def _intake_preview(
@@ -819,6 +978,7 @@ def _render_markdown(report: dict[str, Any]) -> str:
         "matched_signals": report["matched_signals"],
         "profile_specific_risks": report["profile_specific_risks"],
         "profile_specific_next_step": report["profile_specific_next_step"],
+        "profile_specific_do_not_do": report["profile_specific_do_not_do"],
     }
     lines = [
         title,
@@ -828,7 +988,9 @@ def _render_markdown(report: dict[str, Any]) -> str:
         f"`harness_scope`: `{report['harness_scope']}`",
         "",
     ]
+    lines.extend(_render_object_section("founder_summary", "一屏摘要", report["founder_summary"], zh))
     lines.extend(_render_object_section("scenario_routing", "场景分流", scenario_routing, zh))
+    lines.extend(_render_list_section("human_readable_risks", "人话风险", report["human_readable_risks"], zh))
     lines.extend(_render_object_section("intake_preview", "输入预览", report["intake_preview"], zh))
     lines.extend(_render_object_section("context_package_preview", "上下文包预览", report["context_package_preview"], zh))
     lines.extend(_render_list_section("candidate_preview", "候选项预览", report["candidate_preview"], zh))

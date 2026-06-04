@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P102。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P103。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -109,3 +109,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P100 | 加入 Minimal CLI Harness Dry-Run implementation。 | founder-facing interaction pressure 可以本地 preview，同时不写入、不调用模型、不接 adapter、不进入产品层。 | Harness Preview |
 | P101 | 加入 Harness Usability Review。 | dry-run preview 对边界可见性有用，但仍太静态，不能指导真实 routing 或 next-step decision。 | Harness Review |
 | P102 | 加入 Harness Input Classification and Scenario Routing。 | dry-run inputs 可以 deterministic 分类为 pressure profiles，同时不检索、不写入、不接 adapter、不执行工具或 runtime。 | Harness Preview |
+| P103 | 改进 harness output readability。 | dry-run report 应先给 founder-facing 摘要、人话风险、下一步和明确“不要做什么”的护栏。 | Harness Readability |
