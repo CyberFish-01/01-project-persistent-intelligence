@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P113. It is not a release log. It records how the system
+This index covers P0-P114. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -121,3 +121,4 @@ foundation evolved.
 | P111 | Added post-harness founder review. | The founder needs a review of whether P102-P110 solved P101 before any state-backed read-only harness boundary is considered. | Harness Review |
 | P112 | Added State-Backed Read-Only Harness RFC. | State backing must mean whitelisted local source citation, not retrieval execution, writes, adapters, models, or rebuild. | Harness Source Backing |
 | P113 | Added Harness Source Inventory. | A state-backed read-only harness needs an explicit Markdown whitelist and pressure mapping before loader implementation. | Harness Source Backing |
+| P114 | Added Read-Only Source Loader Plan. | The source loader needs a deterministic no-write API, record shape, whitelist rule, and test boundary before code. | Harness Source Backing |
