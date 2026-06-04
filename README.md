@@ -19,11 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P120 Source-Backed Harness Usability Review is complete.
-P112-P119 now form a read-only source-backed harness cycle: source inventory,
-safe loader, inventory CLI, pressure-specific source refs, and risk/open-question
-refs. P120 recommends moving next into Core Lockdown / Quarantine planning, not
-rebuild, adapters, product, model calls, or writes.
+Current work status: P121 Core Lockdown Mode RFC is complete. The project now
+has an RFC-only boundary for freezing the core before any future old 01 import,
+model output, adapter context, tool evidence, external IO, or rebuild pressure
+can touch trusted state. It does not implement lockdown runtime or writes.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -39,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P120 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P121 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -65,6 +64,7 @@ Read these first when joining the project or handing it to another agent:
 - [READ_ONLY_SOURCE_LOADER_PLAN.md](./READ_ONLY_SOURCE_LOADER_PLAN.md) / [READ_ONLY_SOURCE_LOADER_PLAN_ZH.md](./READ_ONLY_SOURCE_LOADER_PLAN_ZH.md): P114 implementation plan for a deterministic no-write source loader over the P113 whitelist.
 - [SOURCE_LOADER_SAFETY_HARDENING.md](./SOURCE_LOADER_SAFETY_HARDENING.md) / [SOURCE_LOADER_SAFETY_HARDENING_ZH.md](./SOURCE_LOADER_SAFETY_HARDENING_ZH.md): P116 safety validation for the source loader whitelist before CLI or harness integration.
 - [SOURCE_BACKED_HARNESS_USABILITY_REVIEW.md](./SOURCE_BACKED_HARNESS_USABILITY_REVIEW.md) / [SOURCE_BACKED_HARNESS_USABILITY_REVIEW_ZH.md](./SOURCE_BACKED_HARNESS_USABILITY_REVIEW_ZH.md): P120 review of whether P112-P119 made the harness source-backed and founder-readable enough to proceed to Core Lockdown / Quarantine planning.
+- [CORE_LOCKDOWN_MODE_RFC.md](./CORE_LOCKDOWN_MODE_RFC.md) / [CORE_LOCKDOWN_MODE_RFC_ZH.md](./CORE_LOCKDOWN_MODE_RFC_ZH.md): P121 RFC-only boundary for sandbox/quarantine/candidate handling before future imports, model output, adapters, tools, or rebuild work.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 

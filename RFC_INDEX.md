@@ -67,6 +67,12 @@ implementation approval.
 | P91 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [ZH](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | future RFC | capability evolution boundary | Translates Yunjue / zero-start tool-first self-evolution into review-only capability evolution vocabulary. | tool execution, auto tool generation, auto promotion, policy executor, or identity growth |
 | P92 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [ZH](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | boundary RFC | capability boundary | Defines allowed and forbidden scopes for capability evolution before any tool runtime or promotion policy. | automatic tool execution, automatic tool promotion, policy executor, identity mutation, memory rewrite |
 
+## Core Lockdown And Quarantine
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P121 | [CORE_LOCKDOWN_MODE_RFC.md](./CORE_LOCKDOWN_MODE_RFC.md) / [ZH](./CORE_LOCKDOWN_MODE_RFC_ZH.md) | boundary RFC | RFC-only lockdown boundary | Defines sandbox/quarantine/candidate handling before future old 01 imports, model output, adapter context, tool evidence, external IO, or rebuild pressure can touch trusted state. | lockdown runtime, validator, import pipeline, adapter hook, model call, write path, or rebuild |
+
 ## Founder-Facing Vocabulary And Visual Naming
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |

@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P120。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P121。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -127,3 +127,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P118 | 加入 harness source-backed context refs。 | dry-run context preview 应引用 pressure-specific 白名单来源，同时不执行 retrieval 或写入。 | Harness Source Backing |
 | P119 | 加入 source-backed risk 和 open-question mapping。 | dry-run preview 应显示哪些文档风险和未决问题相关，但不执行 policy。 | Harness Source Backing |
 | P120 | 加入 source-backed harness usability review。 | 进入 Core Lockdown planning 前，founder 需要知道只读 source backing 是否足够有用。 | Harness Review |
+| P121 | 加入 Core Lockdown Mode RFC。 | external 或 unverified content 在触碰 trusted core state 前必须保持 sandbox、quarantine 或 candidate-only。 | Core Lockdown |
