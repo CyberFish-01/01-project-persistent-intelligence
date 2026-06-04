@@ -19,10 +19,11 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P124 Contamination Scan RFC is complete. The project now
-has an RFC-only scan boundary for future unverified model memory claims,
-identity claim candidates, adapter context artifacts, prompt contamination
-candidates, and unverified capability claims. It does not implement a scanner.
+Current work status: P125 Lockdown Integration Readiness is complete. P121-P124
+now form a coherent RFC-only lockdown stack: Core Lockdown, Import Quarantine,
+Shadow Adapter Mode, and Contamination Scan. The next safe direction is
+document-only lockdown fixture and review planning, not old 01 connection,
+adapters, model calls, writes, or rebuild.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +39,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P124 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P125 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -68,6 +69,7 @@ Read these first when joining the project or handing it to another agent:
 - [IMPORT_QUARANTINE_RFC.md](./IMPORT_QUARANTINE_RFC.md) / [IMPORT_QUARANTINE_RFC_ZH.md](./IMPORT_QUARANTINE_RFC_ZH.md): P122 RFC-only quarantine boundary for future imports from old 01, logs, memory dumps, model output, adapter exports, tool results, or external files.
 - [SHADOW_ADAPTER_MODE_RFC.md](./SHADOW_ADAPTER_MODE_RFC.md) / [SHADOW_ADAPTER_MODE_RFC_ZH.md](./SHADOW_ADAPTER_MODE_RFC_ZH.md): P123 RFC-only shadow boundary for observing adapter-shaped input without live integration, ingest, event writes, or platform-owned identity.
 - [CONTAMINATION_SCAN_RFC.md](./CONTAMINATION_SCAN_RFC.md) / [CONTAMINATION_SCAN_RFC_ZH.md](./CONTAMINATION_SCAN_RFC_ZH.md): P124 RFC-only scan boundary for future contamination candidate detection without scanner runtime or enforcement.
+- [LOCKDOWN_INTEGRATION_READINESS.md](./LOCKDOWN_INTEGRATION_READINESS.md) / [LOCKDOWN_INTEGRATION_READINESS_ZH.md](./LOCKDOWN_INTEGRATION_READINESS_ZH.md): P125 review of whether P121-P124 are coherent enough to continue Core Lockdown / Quarantine planning.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 
