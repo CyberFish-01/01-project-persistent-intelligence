@@ -69,7 +69,7 @@ class PreRebuildVerificationTests(unittest.TestCase):
         for gate in report["gate_results"]:
             self.assertEqual(gate["status"], "pass", gate)
 
-    def test_required_artifacts_include_p151_and_future_artifacts_pending(self):
+    def test_required_artifacts_include_p151_and_future_artifacts_are_not_required_now(self):
         report = build_pre_rebuild_verification_report(lang="zh")
         required = {row["phase"]: row for row in report["required_artifacts"]}
         future = {row["phase"]: row for row in report["future_artifacts"]}
@@ -77,8 +77,9 @@ class PreRebuildVerificationTests(unittest.TestCase):
         self.assertEqual(required["P151"]["status"], "present")
         self.assertEqual(required["P151"]["en_path"], "PRE_REBUILD_VERIFICATION_SUITE.md")
         self.assertEqual(required["P151"]["zh_path"], "PRE_REBUILD_VERIFICATION_SUITE_ZH.md")
-        self.assertEqual(future["P152"]["status"], "pending_future_phase")
-        self.assertEqual(future["P153"]["status"], "pending_future_phase")
+        for row in future.values():
+            self.assertFalse(row["required_now"])
+            self.assertIn(row["status"], {"pending_future_phase", "present"})
 
     def test_forbidden_patterns_and_boundaries_are_clear(self):
         report = build_pre_rebuild_verification_report(lang="en")

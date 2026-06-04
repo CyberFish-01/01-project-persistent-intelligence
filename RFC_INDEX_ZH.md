@@ -232,6 +232,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     rebuild。
 33. [PRE_REBUILD_VERIFICATION_SUITE_ZH.md](./PRE_REBUILD_VERIFICATION_SUITE_ZH.md)
     以中文镜像 P151 read-only verification suite boundary。
+34. [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) 和
+    [VERIFICATION_REPORT_ZH.md](./VERIFICATION_REPORT_ZH.md) 记录 P152 read-only verification
+    evidence 和 pass status；它只允许进入 founder checkpoint，不批准 rebuild。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 

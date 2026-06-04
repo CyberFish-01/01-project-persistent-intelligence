@@ -19,9 +19,9 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P151 Pre-Rebuild Verification Suite is complete. The
-final read-only verification suite command now exists and can support P152
-Verification Report; founder checkpoint and rebuild remain pending.
+Current work status: P152 Verification Report is complete. The read-only
+pre-rebuild verification pass succeeded and supports moving to P153 Final
+Pre-Rebuild Founder Checkpoint; rebuild remains pending and unapproved.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -37,7 +37,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P151 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P152 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -94,6 +94,7 @@ Read these first when joining the project or handing it to another agent:
 - [PRE_REBUILD_SYSTEM_REVIEW.md](./PRE_REBUILD_SYSTEM_REVIEW.md) / [PRE_REBUILD_SYSTEM_REVIEW_ZH.md](./PRE_REBUILD_SYSTEM_REVIEW_ZH.md): P149 system review concluding the project is ready for final read-only verification, not rebuild.
 - [FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md) / [FULL_VERIFICATION_PLAN_BEFORE_REBUILD_ZH.md](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD_ZH.md): P150 full read-only verification plan before rebuild.
 - [PRE_REBUILD_VERIFICATION_SUITE.md](./PRE_REBUILD_VERIFICATION_SUITE.md) / [PRE_REBUILD_VERIFICATION_SUITE_ZH.md](./PRE_REBUILD_VERIFICATION_SUITE_ZH.md): P151 read-only local verification suite command for checking artifacts, links, forbidden flags, boundaries, and report builders before P152.
+- [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) / [VERIFICATION_REPORT_ZH.md](./VERIFICATION_REPORT_ZH.md): P152 read-only verification report; passes for founder checkpoint, not rebuild approval.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 

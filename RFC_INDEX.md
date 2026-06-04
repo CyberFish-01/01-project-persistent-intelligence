@@ -244,6 +244,10 @@ The current dependency order is:
     rebuild.
 33. [PRE_REBUILD_VERIFICATION_SUITE_ZH.md](./PRE_REBUILD_VERIFICATION_SUITE_ZH.md)
     mirrors the P151 read-only verification suite boundary in Chinese.
+34. [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) and
+    [VERIFICATION_REPORT_ZH.md](./VERIFICATION_REPORT_ZH.md) record the P152
+    read-only verification evidence and pass status for founder checkpoint,
+    not rebuild approval.
 
 ## Runtime-Blocked Topics
 

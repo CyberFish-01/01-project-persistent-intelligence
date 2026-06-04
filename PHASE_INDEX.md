@@ -159,3 +159,4 @@ foundation evolved.
 | P149 | Added Pre-Rebuild System Review. | The system is ready for final read-only verification, not for rebuild itself. | Pre-Rebuild Verification |
 | P150 | Added Full Verification Plan Before Rebuild. | Final verification needs explicit read-only checks, pass criteria, and failure handling before rebuild can be considered. | Pre-Rebuild Verification |
 | P151 | Added Pre-Rebuild Verification Suite. | The final verification plan needs a deterministic read-only local suite before a verification report. | Pre-Rebuild Verification |
+| P152 | Added Verification Report. | Passing verification allows a founder checkpoint, not automatic rebuild. | Pre-Rebuild Verification |

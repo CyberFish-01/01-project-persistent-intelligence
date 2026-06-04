@@ -158,3 +158,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P149 | 加入 Pre-Rebuild System Review。 | 系统已经可以进入 final read-only verification，但不能进入 rebuild 本身。 | Pre-Rebuild Verification |
 | P150 | 加入 Full Verification Plan Before Rebuild。 | final verification 需要 explicit read-only checks、pass criteria 和 failure handling，之后才能考虑 rebuild。 | Pre-Rebuild Verification |
 | P151 | 加入 Pre-Rebuild Verification Suite。 | final verification plan 在 verification report 前需要 deterministic read-only local suite。 | Pre-Rebuild Verification |
+| P152 | 加入 Verification Report。 | verification 通过只允许进入 founder checkpoint，不自动批准 rebuild。 | Pre-Rebuild Verification |
