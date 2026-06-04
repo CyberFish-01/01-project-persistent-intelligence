@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `3df077e Add foundation decisions log`
+- End commit before this summary: `6746259 Add research notes index`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -37,6 +37,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P75 README Entrance Optimization | `7c16ea2` | `README.md`, `README_ZH.md` | No |
 | P76 Foundation Review Checklist | `b8b0b5c` | `FOUNDATION_REVIEW_CHECKLIST.md`, `FOUNDATION_REVIEW_CHECKLIST_ZH.md` | No |
 | P77 Decisions Log | `3df077e` | `DECISIONS.md`, `DECISIONS_ZH.md` | No |
+| P78 Research Notes Index | `6746259` | `RESEARCH_NOTES_INDEX.md`, `RESEARCH_NOTES_INDEX_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -61,7 +62,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P77, each phase ran:
+For P54-P78, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -96,15 +97,15 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P78-P80 low-risk consolidation remains.
-- Next item is P78 Research Notes Index.
+- P79-P80 low-risk consolidation remains.
+- Next item is P79 Bilingual Consistency Pass.
 
 ## Suggested Next Direction
 
 Next safe phase:
 
 ```text
-P78 Research Notes Index
+P79 Bilingual Consistency Pass
 ```
 
 Constraint: low-risk document consolidation only. Do not add runtime behavior,

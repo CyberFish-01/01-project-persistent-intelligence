@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`3df077e Add foundation decisions log`
+- 本 summary 前的结束 commit：`6746259 Add research notes index`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -37,6 +37,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P75 README Entrance Optimization | `7c16ea2` | `README.md`, `README_ZH.md` | No |
 | P76 Foundation Review Checklist | `b8b0b5c` | `FOUNDATION_REVIEW_CHECKLIST.md`, `FOUNDATION_REVIEW_CHECKLIST_ZH.md` | No |
 | P77 Decisions Log | `3df077e` | `DECISIONS.md`, `DECISIONS_ZH.md` | No |
+| P78 Research Notes Index | `6746259` | `RESEARCH_NOTES_INDEX.md`, `RESEARCH_NOTES_INDEX_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -61,7 +62,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P77 每个 phase 都执行：
+P54-P78 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -95,15 +96,15 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P78-P80 low-risk consolidation 仍未完成。
-- 下一项是 P78 Research Notes Index。
+- P79-P80 low-risk consolidation 仍未完成。
+- 下一项是 P79 Bilingual Consistency Pass。
 
 ## Suggested Next Direction / 明天建议方向
 
 下一步安全 phase：
 
 ```text
-P78 Research Notes Index
+P79 Bilingual Consistency Pass
 ```
 
 约束：只做低风险 document consolidation。不要新增 runtime behavior、新 mechanisms、
