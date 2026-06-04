@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`70cc128 Add open questions triage`
+- 本 summary 前的结束 commit：`61def0f Add temporal awareness RFC`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -17,6 +17,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P55 Concept Overlap Reduction | `f3ed18a` | `CONCEPT_OVERLAP_REVIEW.md`, `CONCEPT_OVERLAP_REVIEW_ZH.md` | No |
 | P56 Boundary Test Matrix | `175f577` | `BOUNDARY_TEST_MATRIX.md`, `BOUNDARY_TEST_MATRIX_ZH.md` | No |
 | P57 Open Question Triage | `70cc128` | `OPEN_QUESTIONS_TRIAGE.md`, `OPEN_QUESTIONS_TRIAGE_ZH.md` | No |
+| P58 Temporal Awareness RFC v0.1 | `61def0f` | `TEMPORAL_AWARENESS_RFC.md`, `TEMPORAL_AWARENESS_RFC_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -34,14 +35,14 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 - memory rewrite；
 - recall event write；
 - growth lifecycle execution；
-- temporal awareness runtime；
+- temporal awareness runtime 或 temporal event execution；
 - event compaction；
 - reconstruction reducer execution；
 - irreversible migration。
 
 ## Verification Performed / 已执行验证
 
-P54-P57 每个 phase 都执行：
+P54-P58 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -75,7 +76,6 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P58 Temporal Awareness RFC v0.1，document-only。
 - P59 Recall Event Write Policy RFC，document-only。
 - P60 Stateful Memory Minimal Encoding Policy。
 - P61 Growth Candidate Lifecycle RFC，document-only。
@@ -87,7 +87,8 @@ No active forbidden pattern matches.
 下一步安全 phase：
 
 ```text
-P58 Temporal Awareness RFC v0.1
+P59 Recall Event Write Policy RFC
 ```
 
-约束：document-only。不要实现 temporal runtime、temporal events 或 elapsed-time state transitions。
+约束：document-only。不要写 recall events，不 mutate memory，不 promote growth
+candidates，也不引入 temporal event execution。

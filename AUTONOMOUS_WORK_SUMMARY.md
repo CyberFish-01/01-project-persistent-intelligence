@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `70cc128 Add open questions triage`
+- End commit before this summary: `61def0f Add temporal awareness RFC`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -17,6 +17,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P55 Concept Overlap Reduction | `f3ed18a` | `CONCEPT_OVERLAP_REVIEW.md`, `CONCEPT_OVERLAP_REVIEW_ZH.md` | No |
 | P56 Boundary Test Matrix | `175f577` | `BOUNDARY_TEST_MATRIX.md`, `BOUNDARY_TEST_MATRIX_ZH.md` | No |
 | P57 Open Question Triage | `70cc128` | `OPEN_QUESTIONS_TRIAGE.md`, `OPEN_QUESTIONS_TRIAGE_ZH.md` | No |
+| P58 Temporal Awareness RFC v0.1 | `61def0f` | `TEMPORAL_AWARENESS_RFC.md`, `TEMPORAL_AWARENESS_RFC_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -34,14 +35,14 @@ Not implemented:
 - memory rewrite;
 - recall event write;
 - growth lifecycle execution;
-- temporal awareness runtime;
+- temporal awareness runtime or temporal event execution;
 - event compaction;
 - reconstruction reducer execution;
 - irreversible migration.
 
 ## Verification Performed
 
-For P54-P57, each phase ran:
+For P54-P58, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -76,7 +77,6 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P58 Temporal Awareness RFC v0.1, document-only.
 - P59 Recall Event Write Policy RFC, document-only.
 - P60 Stateful Memory Minimal Encoding Policy.
 - P61 Growth Candidate Lifecycle RFC, document-only.
@@ -88,8 +88,8 @@ was not itself a git repository.
 Next safe phase:
 
 ```text
-P58 Temporal Awareness RFC v0.1
+P59 Recall Event Write Policy RFC
 ```
 
-Constraint: document-only. Do not implement temporal runtime, temporal events,
-or elapsed-time state transitions.
+Constraint: document-only. Do not write recall events, mutate memory, promote
+growth candidates, or introduce temporal event execution.
