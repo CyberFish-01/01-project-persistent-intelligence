@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P144。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P145。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -151,3 +151,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P142 | 加入 Capability Context Pack RFC。 | Tool-First capability evidence 在 context packages 中只能作为 candidate/evidence/review material。 | Context Package |
 | P143 | 加入 Response Orchestration Preview RFC。 | response orchestration 必须先 preview 再 execution，且 model output 必须保持在 core state 之外。 | Response Boundary |
 | P144 | 加入 LLM-as-Resource Boundary RFC。 | future LLM calls 可以是 resources，但不能拥有 state、identity、memory、tools 或 continuity。 | Response Boundary |
+| P145 | 加入 Post-Response Candidate Extraction RFC。 | future model output 只能被检查成 preview candidates，不能被持久化或晋升。 | Response Boundary |

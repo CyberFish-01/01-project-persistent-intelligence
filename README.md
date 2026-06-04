@@ -19,10 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P144 LLM-as-Resource Boundary RFC is complete. Future LLM
-calls are defined as resource usage only, with output untrusted by default and
-outside subject ownership; model calls, prompt engines, writes, tools, adapters,
-policy execution, and rebuild remain blocked.
+Current work status: P145 Post-Response Candidate Extraction RFC is complete.
+Future model output may only be inspected into preview candidates with review
+gates; extraction runtime, candidate storage, review lifecycle, model calls,
+writes, tools, adapters, and rebuild remain blocked.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P144 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P145 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -88,6 +88,7 @@ Read these first when joining the project or handing it to another agent:
 - [CAPABILITY_CONTEXT_PACK_RFC.md](./CAPABILITY_CONTEXT_PACK_RFC.md) / [CAPABILITY_CONTEXT_PACK_RFC_ZH.md](./CAPABILITY_CONTEXT_PACK_RFC_ZH.md): P142 RFC-only capability pack contract for Tool-First candidate/evidence/review context.
 - [RESPONSE_ORCHESTRATION_PREVIEW_RFC.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC.md) / [RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md): P143 RFC-only response orchestration preview path with model output treated as untrusted by default.
 - [LLM_AS_RESOURCE_BOUNDARY_RFC.md](./LLM_AS_RESOURCE_BOUNDARY_RFC.md) / [LLM_AS_RESOURCE_BOUNDARY_RFC_ZH.md](./LLM_AS_RESOURCE_BOUNDARY_RFC_ZH.md): P144 RFC-only boundary for treating future LLM calls as resource usage rather than subject ownership.
+- [POST_RESPONSE_CANDIDATE_EXTRACTION_RFC.md](./POST_RESPONSE_CANDIDATE_EXTRACTION_RFC.md) / [POST_RESPONSE_CANDIDATE_EXTRACTION_RFC_ZH.md](./POST_RESPONSE_CANDIDATE_EXTRACTION_RFC_ZH.md): P145 RFC-only extraction boundary for future model output as preview-only candidates.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 
