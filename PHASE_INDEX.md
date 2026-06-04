@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P95. It is not a release log. It records how the system
+This index covers P0-P96. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -103,3 +103,4 @@ foundation evolved.
 | P93 | Added Visual Naming Guide. | Founder-facing views need plain Chinese labels while preserving English internal keys. | Foundation Vocabulary |
 | P94 | Added Foundation Observatory Report. | The founder needs a readable Markdown view before any dashboard or CLI runtime. | Foundation Observatory |
 | P95 | Added Minimal Observatory CLI Plan. | A future generated observatory report needs read-only scope before implementation. | Foundation Observatory |
+| P96 | Added Minimal Observatory CLI implementation. | A founder-facing observatory report can be generated read-only without mutation. | Foundation Observatory |

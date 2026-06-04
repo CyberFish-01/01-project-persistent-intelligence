@@ -19,18 +19,19 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P95 Minimal Observatory CLI Plan is complete as
-planning/RFC-only work. The next direction must be confirmed by the founder.
-Recommended next step is founder / CTO review before any P96 implementation;
-if approved, P96 may consider a read-only Minimal Observatory CLI
-Implementation.
+Current work status: P96 Minimal Observatory CLI Implementation is complete.
+The repository now includes a read-only `foundation-observatory-report` command
+that generates founder-facing Markdown or JSON from approved static foundation
+artifacts. The next direction must be confirmed by the founder; candidates may
+include founder / CTO review, a static readiness generator, or another bounded
+planning phase.
 
 The runtime and adapter references below are historical/engineering references;
-they are not approval to enter P96, implement a CLI, implement a harness, build
-dashboard runtime, Web UI, observability executor, status API, expand into the
-application layer, UI, AstrBot, product, Temporal Awareness runtime, tool
-execution, automatic tool generation, automatic tool promotion, growth
-execution, memory rewrite, or reconstruction reducers.
+they are not approval to enter P97, implement a harness, build dashboard
+runtime, Web UI, observability executor, status API, expand into the application
+layer, UI, AstrBot, product, Temporal Awareness runtime, tool execution,
+automatic tool generation, automatic tool promotion, growth execution, memory
+rewrite, or reconstruction reducers.
 
 ## Document Entrance
 
@@ -39,7 +40,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P95 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P96 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -124,8 +125,8 @@ The central claim:
 ## Prototype Reference
 
 This repository includes a minimal local prototype. After P95 planning/RFC-only
-Minimal Observatory CLI planning, these commands remain verification and
-orientation references only:
+Minimal Observatory CLI planning, P96 adds one read-only observatory report
+command. The other commands remain verification and orientation references only:
 
 ```bash
 python3 -m one_core.cli init
@@ -138,6 +139,18 @@ python3 -m one_core.cli evaluate-scenarios
 ```
 
 It stores state under `work/01_state` by default.
+
+Read-only founder-facing observatory report:
+
+```bash
+python3 -m one_core.cli foundation-observatory-report
+python3 -m one_core.cli foundation-observatory-report --format json
+python3 -m one_core.cli foundation-observatory-report --lang zh
+```
+
+This command reads approved foundation documents and emits a static report. It
+does not mutate state, execute policy, create roadmap phases, or become a
+dashboard runtime.
 
 Local API reference:
 

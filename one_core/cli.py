@@ -16,6 +16,7 @@ from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
 from .evaluation import run_foundation_evaluation, run_scenario_evaluation
 from .importer import import_text_file
+from .observatory import build_observatory_report, render_observatory_report
 from .state import DEFAULT_STATE_DIR, StateStore
 from .validation import validate_state
 
@@ -395,6 +396,26 @@ def main() -> None:
     subparsers.add_parser(
         "validate-state",
         help="Validate the current state structure without mutating it.",
+    )
+    observatory_parser = subparsers.add_parser(
+        "foundation-observatory-report",
+        help="Generate a read-only founder-facing Foundation Observatory report.",
+    )
+    observatory_parser.add_argument(
+        "--format",
+        choices=["markdown", "json"],
+        default="markdown",
+        help="Output format. Defaults to markdown.",
+    )
+    observatory_parser.add_argument(
+        "--lang",
+        choices=["en", "zh"],
+        default="en",
+        help="Report language. Defaults to en.",
+    )
+    observatory_parser.add_argument(
+        "--output",
+        help="Optional path to write the generated report.",
     )
     subparsers.add_parser(
         "replay-events",
@@ -859,6 +880,15 @@ def main() -> None:
                 dream_artifacts=store.list_dream_artifacts(),
             )
         )
+    elif args.command == "foundation-observatory-report":
+        report = build_observatory_report(lang=args.lang)
+        output = render_observatory_report(report, args.format)
+        if args.output:
+            output_path = Path(args.output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(output + "\n", encoding="utf-8")
+        else:
+            print(output)
     elif args.command == "replay-events":
         print_json(store.replay_events())
     elif args.command == "event-report":

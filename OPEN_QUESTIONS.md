@@ -37,8 +37,8 @@ not implemented, and not closed as runtime capabilities.
 | Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary exists, but no tool execution, verification schema, review schema, safe tool library policy, or promotion gate exists | tool execution, auto tool generation, auto tool promotion, policy executor |
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed and forbidden scope is defined, but verification evidence model, candidate review schema, safe tool library policy, and implementation gates are missing | automatic tool execution, automatic promotion, policy executor, identity mutation |
 | Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys now map to Chinese display names, but no visual surface contract, status assignment policy, or dashboard approval exists | Web UI, dashboard runtime, observability CLI, product layer |
-| Foundation Observatory Report | `report-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) | a Markdown founder-facing report exists, but no CLI, dashboard runtime, status API, automatic report generator, or product surface exists | dashboard runtime, observability CLI, status API, product UI |
-| Minimal Observatory CLI Plan | `plan-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) | read-only CLI scope, inputs, outputs, and risks are planned, but no command, parser, generator, or implementation exists | CLI implementation, observability executor, automatic phase creation |
+| Foundation Observatory Report | `report-drafted`, `indexed`, `static-cli-implemented`, `blocked-runtime` | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) | a Markdown founder-facing report and read-only static CLI exist, but no dashboard runtime, status API, product surface, or live monitor exists | dashboard runtime, status API, product UI, observability executor |
+| Minimal Observatory CLI | `implemented-static-report`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) | the P96 command exists, but source freshness, status assignment policy, generated-report maintenance, and false readiness risks remain open | observability executor, automatic phase creation, dashboard runtime |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -283,7 +283,7 @@ Still open:
 Clarified by [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), but not
 implemented. It remains open because P93 defines naming rules and display-card
 shape only. It does not create a Foundation Observatory, dashboard, Web UI,
-observability CLI, report generator, status API, or product surface.
+dashboard runtime, live report generator, status API, or product surface.
 
 Still open:
 
@@ -298,35 +298,31 @@ Still open:
 ### Foundation Observatory Report
 
 Clarified by
-[FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), but not
-implemented as a runtime surface. It remains open because P94 creates a
-Markdown report only. It does not create a dashboard runtime, Web UI,
-observability CLI, automatic report generator, status API, product surface, or
-runtime monitor.
+[FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) and the
+P96 read-only `foundation-observatory-report` command, but not implemented as a
+runtime surface. It remains open because the current command generates a static
+Markdown or JSON report only. It does not create a dashboard runtime, Web UI,
+status API, product surface, observability executor, or runtime monitor.
 
 Still open:
 
-- whether future observatory output should stay Markdown-only or gain a CLI
-  report boundary;
+- whether future observatory output should stay limited to static Markdown/JSON;
 - whether status assignment needs a separate Visual Status Assignment Policy;
 - how a future CLI would avoid becoming a dashboard runtime;
-- whether the report should be generated from files, manually maintained, or
-  kept as a phase artifact;
-- what founder-approved gate is required before any observability tool exists.
+- whether generated output should be committed, ignored, or treated as ephemeral;
+- what founder-approved gate is required before any runtime observability exists.
 
-### Minimal Observatory CLI Plan
+### Minimal Observatory CLI
 
 Clarified by
-[MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), but not
-implemented. It remains open because P95 defines possible command name, inputs,
-outputs, readiness categories, boundary status, non-goals, implementation
-boundary, risks, and P96 candidates only.
+[MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) and
+implemented narrowly in P96 as `python3 -m one_core.cli
+foundation-observatory-report`. It remains open because P96 only implements a
+read-only static report generator.
 
 Still open:
 
-- whether the founder approves moving from plan to implementation;
-- whether P96 should implement the full report or only a static sub-generator;
-- how a future read-only implementation proves no mutation;
+- how future changes prove no mutation;
 - whether static local state summaries are allowed as inputs;
 - how source freshness and false readiness signals should be shown;
 - how to prevent observability from becoming automatic roadmap execution or
@@ -476,9 +472,9 @@ The following remain blocked until a future explicit implementation phase:
 - Web UI;
 - dashboard runtime;
 - Foundation Observatory runtime;
-- observability CLI;
+- observability CLI with runtime monitoring, enforcement, or execution;
 - status API;
-- automatic report generator;
+- automatic report generator beyond the read-only static P96 command;
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
@@ -491,6 +487,7 @@ The following remain blocked until a future explicit implementation phase:
 
 ## Current Recommendation
 
-Continue document-only planning unless the founder explicitly approves an
-implementation phase. P95 recommends pausing for founder / CTO review or, if
-approved, considering a P96 read-only Minimal Observatory CLI Implementation.
+Pause for founder / CTO review before selecting P97. P96 is intentionally
+limited to a read-only static observatory report; it is not approval for
+dashboard runtime, harness implementation, policy execution, product UI, or
+automatic roadmap execution.

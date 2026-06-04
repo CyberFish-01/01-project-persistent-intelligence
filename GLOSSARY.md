@@ -561,11 +561,12 @@ founder-facing views to use paper-like titles.
 
 A possible future founder-facing surface for viewing foundation status, concept
 boundaries, readiness, risks, and open questions. P94 provides a Markdown report
-version of this observatory layer.
+version of this observatory layer, and P96 provides a read-only static CLI
+report generator.
 
-Boundary: the P94 report is document-only. It does not implement dashboard
-runtime, Web UI, observability CLI, status API, runtime report generator, or a
-product surface.
+Boundary: P96 is still only a static report generator. It does not implement
+dashboard runtime, Web UI, status API, observability executor, live monitor, or
+a product surface.
 
 ## Foundation Observatory Report
 
@@ -595,18 +596,31 @@ runtime boundary.
 
 ## Minimal Observatory CLI Plan
 
-The P95 RFC-only plan for a possible future read-only command that could
-generate a Foundation Observatory report from approved documents and static
-state summaries.
+The P95 RFC-only plan for the P96 read-only command that generates a Foundation
+Observatory report from approved documents and static foundation status.
 
-Boundary: the plan does not implement CLI commands, parsers, generators,
-dashboards, Web UI, product UI, status APIs, runtime monitors, or executors.
+Boundary: the plan did not approve dashboards, Web UI, product UI, status APIs,
+runtime monitors, policy execution, or executors.
+
+## Minimal Observatory CLI
+
+The P96 read-only CLI command:
+
+```bash
+python3 -m one_core.cli foundation-observatory-report
+```
+
+It emits Markdown or JSON founder-facing observatory output using static
+foundation artifacts and approved naming/status categories.
+
+Boundary: it reads and renders. It does not mutate state, execute policy,
+promote roadmap work, create phases, or become a dashboard runtime.
 
 ## Observatory CLI Report
 
-A possible future read-only report emitted by a minimal observatory command,
-containing founder snapshot, axes map, readiness matrix, boundary status, risk
-heatmap, next-step recommendations, and blocked-work list.
+A read-only P96 report emitted by the minimal observatory command, containing
+founder snapshot, axes map, readiness matrix, boundary status, risk heatmap,
+next-step recommendations, and blocked-work list.
 
 Boundary: a report is not authorization, execution, mutation, or phase creation.
 
@@ -623,8 +637,8 @@ implement.
 A forbidden future risk where an observability surface starts executing
 roadmaps, creating phases, mutating status, or enforcing decisions.
 
-Boundary: P95 explicitly blocks observability execution. Observatory work must
-remain read-only unless a future founder-approved phase defines otherwise.
+Boundary: P96 still blocks observability execution. Observatory work must remain
+read-only unless a future founder-approved phase defines otherwise.
 
 ## Readiness Matrix
 

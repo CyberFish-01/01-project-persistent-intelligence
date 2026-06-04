@@ -72,6 +72,7 @@ implementation approval.
 | P93 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [ZH](./VISUAL_NAMING_GUIDE_ZH.md) | naming guide | founder-facing vocabulary | Maps English internal keys to Chinese display names for future visual foundation surfaces. | Web UI, dashboard runtime, observability CLI, product layer, or Foundation Observatory implementation |
 | P94 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [ZH](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | observatory report | founder-facing report | Provides a Markdown snapshot, axes map, readiness matrix, boundary status, and risk heatmap for the foundation. | dashboard runtime, Web UI, observability CLI, product layer, status API, or runtime report generator |
 | P95 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [ZH](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI plan | RFC-only plan | Defines the possible scope, inputs, outputs, categories, boundaries, and risks for a future read-only observatory CLI report. | CLI implementation, commands, parser, generator, dashboard runtime, Web UI, product UI, or executor |
+| P96 | `python3 -m one_core.cli foundation-observatory-report` | read-only CLI | implemented static report | Generates founder-facing Markdown or JSON from static foundation artifacts. | dashboard runtime, Web UI, product UI, status API, observability executor, policy execution, state mutation, or phase creation |
 
 ## Exploration And Subject Boundary
 
@@ -207,9 +208,9 @@ The indexed documents do not approve:
 - Web UI;
 - dashboard runtime;
 - Foundation Observatory runtime;
-- observability CLI;
+- observability CLI with runtime monitoring, enforcement, or execution;
 - status API;
-- runtime report generator;
+- runtime report generator beyond the read-only static P96 command;
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;

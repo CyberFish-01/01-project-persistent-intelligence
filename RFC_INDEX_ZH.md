@@ -70,6 +70,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P93 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [ZH](./VISUAL_NAMING_GUIDE_ZH.md) | naming guide | founder-facing vocabulary | 把英文 internal keys 映射为未来视觉基础层表面使用的中文显示名。 | Web UI、dashboard runtime、observability CLI、product layer 或 Foundation Observatory implementation |
 | P94 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [ZH](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | observatory report | founder-facing report | 提供 Markdown foundation snapshot、axes map、readiness matrix、boundary status 和 risk heatmap。 | dashboard runtime、Web UI、observability CLI、product layer、status API 或 runtime report generator |
 | P95 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [ZH](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI plan | RFC-only plan | 定义未来 read-only observatory CLI report 的范围、输入、输出、类别、边界和风险。 | CLI implementation、commands、parser、generator、dashboard runtime、Web UI、product UI 或 executor |
+| P96 | `python3 -m one_core.cli foundation-observatory-report` | read-only CLI | implemented static report | 从静态 foundation artifacts 生成 founder-facing Markdown 或 JSON。 | dashboard runtime、Web UI、product UI、status API、observability executor、policy execution、state mutation 或 phase creation |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -198,9 +199,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - Web UI；
 - dashboard runtime；
 - Foundation Observatory runtime；
-- observability CLI；
+- 带 runtime monitoring、enforcement 或 execution 的 observability CLI；
 - status API；
-- runtime report generator；
+- 超出 P96 read-only static command 的 runtime report generator；
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
