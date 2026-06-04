@@ -1,0 +1,125 @@
+# Research Notes Index
+
+Chinese version: [RESEARCH_NOTES_INDEX_ZH.md](./RESEARCH_NOTES_INDEX_ZH.md)
+
+Status: `document-only`, `research-index`, `non-runtime`.
+
+P78 indexes the original Chinese research notes and maps them to the current
+foundation documents. It does not add theory, runtime behavior, schemas, CLI
+commands, validators, policy executors, identity mutation, memory rewrite,
+Temporal Awareness runtime, adapter work, UI, cloud rollout, or product
+behavior.
+
+## Index Rule
+
+```text
+research notes preserve origin.
+an index improves traceability.
+origin ideas are not implementation approval.
+```
+
+Use this document to answer: "Where did this foundation idea come from, which
+current documents carry it, and what is still only long-term vision?"
+
+## Source Documents
+
+| Source | Role | Reading Use |
+|---|---|---|
+| [RESEARCH_NOTES_ZH.md](./RESEARCH_NOTES_ZH.md) | Original Chinese source notes | Preserves the two initial idea chains in full. |
+| [VISION.md](./VISION.md) / [VISION_ZH.md](./VISION_ZH.md) | Vision synthesis | Turns the first idea chain into the project vision. |
+| [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md) | Life-history synthesis | Turns the second idea chain into the Identity Seed boundary. |
+| [THEORY_SYNTHESIS_AND_NEXT_PLAN.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN.md) / [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md) | Later synthesis and phase planning | Connects the early theory to implementation-phase planning. |
+
+## Original Idea Chains
+
+| Chain | Source Range | Core Question | Current Foundation Carrying It |
+|---|---|---|---|
+| Persistent Intelligence | `RESEARCH_NOTES_ZH.md`, first part | How can AI move from isolated answers to persistent existence? | [VISION.md](./VISION.md), [FOUNDATION.md](./FOUNDATION.md), [CONCEPT_MAP.md](./CONCEPT_MAP.md) |
+| Artificial Life History | `RESEARCH_NOTES_ZH.md`, second part | Where should 01's history come from? | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md), [DECISIONS.md](./DECISIONS.md) |
+
+## First Chain Map: Persistent Intelligence
+
+| Source Theme | Meaning In Original Notes | Current Foundation Artifact | Current Status |
+|---|---|---|---|
+| Continuity != Memory | Continuity requires more than remembered facts. | [README.md](./README.md), [FOUNDATION.md](./FOUNDATION.md), [DECISIONS.md](./DECISIONS.md) | `accepted-foundation` |
+| State Transfer | A living state must pass across time. | [VISION.md](./VISION.md), [STATE_SCHEMA.md](./STATE_SCHEMA.md), [CONCEPT_MAP.md](./CONCEPT_MAP.md) | `accepted-foundation` |
+| Fact / Working / Identity / Emotional / Dream state | Continuity has multiple state layers. | [VISION.md](./VISION.md), [STATE_SCHEMA.md](./STATE_SCHEMA.md), [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) | `foundation-vocabulary` |
+| Dream Engine | Dream organizes experience into meaning. | [DREAM_ENGINE_SPEC.md](./DREAM_ENGINE_SPEC.md), [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) | `accepted-boundary`: Dream proposes, review decides |
+| Memory Lifecycle | Episodes can become semantic memory, identity memory, or be forgotten. | [DREAM_ENGINE_SPEC.md](./DREAM_ENGINE_SPEC.md), [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md), [GLOSSARY.md](./GLOSSARY.md) | `bounded-semantics` |
+| Identity First Architecture | Conversation is not identity; identity precedes sessions. | [ARCHITECTURE.md](./ARCHITECTURE.md), [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) | `accepted-boundary` |
+| Three Meta Questions | Who am I, where am I, what am I doing? | [VISION.md](./VISION.md), [CONCEPT_MAP.md](./CONCEPT_MAP.md) | `foundation-vocabulary` |
+| Cognitive Drift | Loss of identity/context/intent creates drift. | [EVALUATION.md](./EVALUATION.md), [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md), [GLOSSARY.md](./GLOSSARY.md) | `review-vocabulary` |
+| Personality as interpreter | Personality is not the sum of memories; it interprets memory. | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md), [GLOSSARY.md](./GLOSSARY.md) | `bounded-semantics` |
+| Identity Growth | Growth comes from experience, reflection, Dream, and review. | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md), [DECISIONS.md](./DECISIONS.md) | `blocked-runtime`: growth candidate is not growth |
+| Conflict-driven growth | Conflict can pressure review and meaning shift. | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `future-contract-needed` |
+| Social Cognition Layer | Multi-agent and social context can deepen growth. | [RISK_REGISTER.md](./RISK_REGISTER.md), [DECISIONS.md](./DECISIONS.md) | `blocked-runtime` in foundation loop |
+| Cognitive Ecology | Long-term vision of interacting persistent subjects. | [VISION.md](./VISION.md), [NON_CLAIMS.md](./NON_CLAIMS.md) | `long-term-vision`, not product work |
+| Artificial Personality Engineering | Study how an artificial subject becomes itself. | [VISION.md](./VISION.md), [FOUNDATION.md](./FOUNDATION.md) | `research-frame` |
+| Continuity Era | The project belongs to persistent continuity, not only capability or agents. | [README.md](./README.md), [VISION.md](./VISION.md) | `accepted-foundation` |
+
+## Second Chain Map: Artificial Life History
+
+| Source Theme | Meaning In Original Notes | Current Foundation Artifact | Current Status |
+|---|---|---|---|
+| Assigned false history | A prewritten biography creates narrative appearance, not lived continuity. | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md), [NON_CLAIMS.md](./NON_CLAIMS.md) | `accepted-boundary` |
+| Generated life history | History should grow from experience passing through state. | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md), [DECISIONS.md](./DECISIONS.md) | `accepted-foundation` |
+| Identity Seed | The beginning should be a seed, not a complete fictional life. | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md), [FOUNDATION.md](./FOUNDATION.md) | `accepted-foundation` |
+| Over-complete history risk | Too much assigned biography can trap identity. | [NON_CLAIMS.md](./NON_CLAIMS.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `watch` |
+| History earns identity change | Only experience that passes through state, conflict, Dream, and review should change "Who am I?" | [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md), [DECISIONS.md](./DECISIONS.md) | `accepted-boundary` |
+
+## Current Interpretation
+
+The research notes are source material, not a current implementation plan.
+
+Stable today:
+
+- Continuity is State Transfer, not retrieval.
+- 01 begins as Identity Seed, not full fictional biography.
+- Identity Core is protected by gate.
+- Dream proposes; review decides.
+- Growth candidate is not growth.
+- Review object is not execution.
+
+Still future or blocked:
+
+- Social Cognition Layer;
+- Cognitive Ecology as product or multi-subject system;
+- companion or relationship memory;
+- Temporal Awareness runtime;
+- automatic growth or drift classification;
+- identity mutation, memory rewrite, payload capture, reducer execution.
+
+## Reading Order
+
+For origin tracing:
+
+1. Read [RESEARCH_NOTES_ZH.md](./RESEARCH_NOTES_ZH.md) for the original two
+   idea chains.
+2. Read [VISION.md](./VISION.md) for the Persistent Intelligence synthesis.
+3. Read [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md)
+   for the artificial life-history synthesis.
+4. Read [FOUNDATION.md](./FOUNDATION.md), [CONCEPT_MAP.md](./CONCEPT_MAP.md),
+   and [DECISIONS.md](./DECISIONS.md) for current stable boundaries.
+5. Read [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) and [RISK_REGISTER.md](./RISK_REGISTER.md)
+   for what remains open, watched, or blocked.
+
+## P78 Non-Execution Statement
+
+P78 does not implement:
+
+- new research theory;
+- social cognition layer;
+- cognitive ecology;
+- companion or relationship memory;
+- product behavior;
+- runtime changes;
+- Temporal Awareness runtime;
+- recall event writes;
+- growth lifecycle execution;
+- identity mutation;
+- memory rewrite;
+- payload capture;
+- event schema mutation;
+- reconstruction reducer execution;
+- event compaction;
+- UI, AstrBot, adapter integration, cloud rollout, or product layer.

@@ -107,7 +107,7 @@ Only low-risk consolidation should continue:
 - architecture boundary refresh;
 - RFC index;
 - `DECISIONS.md` foundation decisions log;
-- `RESEARCH_NOTES_INDEX.md`;
+- `RESEARCH_NOTES_INDEX.md` source-note traceability index;
 - `FOUNDATION_REVIEW_CHECKLIST.md` manual phase review gate.
 
 Do not open new runtime capability phases merely to reach P80.
@@ -136,6 +136,10 @@ executor.
 
 P77 is satisfied by [DECISIONS.md](./DECISIONS.md) and its Chinese pair. The
 decisions log records project stance; it is not an approval engine.
+
+P78 is satisfied by [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md) and
+its Chinese pair. The index maps origin notes to current foundation artifacts;
+it does not add new theory or implementation approval.
 
 ## Completion Definition For Foundation Layer
 

@@ -105,7 +105,7 @@ P67 不批准这些 dependencies。
 - architecture boundary refresh；
 - RFC index；
 - `DECISIONS.md` foundation decisions log；
-- `RESEARCH_NOTES_INDEX.md`；
+- `RESEARCH_NOTES_INDEX.md` source-note traceability index；
 - `FOUNDATION_REVIEW_CHECKLIST.md` manual phase review gate。
 
 不要为了到 P80 而打开新的 runtime capability phase。
@@ -134,6 +134,10 @@ executor。
 
 P77 已由 [DECISIONS.md](./DECISIONS.md) 及其中文配对文档满足。该 decisions
 log 记录 project stance；它不是 approval engine。
+
+P78 已由 [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md) 及其中文配对文档
+满足。该 index 把 origin notes 映射到当前 foundation artifacts；它不新增 theory 或
+implementation approval。
 
 ## Completion Definition For Foundation Layer / 基础层完成定义
 

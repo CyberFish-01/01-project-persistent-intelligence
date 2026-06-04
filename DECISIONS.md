@@ -33,7 +33,7 @@ that decision evidenced, and what must not be inferred from it?"
 
 | ID | Decision | Status | Evidence | Explicitly Not |
 |---|---|---|---|---|
-| D01 | Continuity is State Transfer through time, not memory retrieval alone. | `accepted-foundation` | [README.md](./README.md), [FOUNDATION.md](./FOUNDATION.md), [VISION.md](./VISION.md) | retrieval-only continuity |
+| D01 | Continuity is State Transfer through time, not memory retrieval alone. | `accepted-foundation` | [README.md](./README.md), [FOUNDATION.md](./FOUNDATION.md), [VISION.md](./VISION.md), [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md) | retrieval-only continuity |
 | D02 | 01 Core owns continuity state; models, platforms, and adapters do not own identity. | `accepted-foundation` | [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md), [ADAPTER_PROTOCOL.md](./ADAPTER_PROTOCOL.md) | platform-owned identity |
 | D03 | Identity Core is protected by gate and must not be automatically mutated. | `accepted-boundary` | [FOUNDATION.md](./FOUNDATION.md), [BOUNDARY_TEST_MATRIX.md](./BOUNDARY_TEST_MATRIX.md), [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) | direct identity rewrite |
 | D04 | Event Log is append-only audit evidence. | `accepted-boundary` | [BOUNDARY_TEST_MATRIX.md](./BOUNDARY_TEST_MATRIX.md), [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) | event rewrite or compaction |
@@ -95,6 +95,8 @@ Before adding or changing a decision:
 3. State what must not be inferred from the decision.
 4. Check [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md).
 5. Keep the Chinese paired document synchronized.
+6. Use [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md) for origin tracing
+   without treating origin notes as implementation approval.
 
 ## P77 Non-Execution Statement
 

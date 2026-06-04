@@ -31,7 +31,7 @@ blocked decisions remain blocked until an explicit future implementation phase.
 
 | ID | Decision | Status | Evidence | Explicitly Not |
 |---|---|---|---|---|
-| D01 | Continuity 是穿过时间的 State Transfer，不只是 memory retrieval。 | `accepted-foundation` | [README.md](./README.md), [FOUNDATION.md](./FOUNDATION.md), [VISION.md](./VISION.md) | retrieval-only continuity |
+| D01 | Continuity 是穿过时间的 State Transfer，不只是 memory retrieval。 | `accepted-foundation` | [README.md](./README.md), [FOUNDATION.md](./FOUNDATION.md), [VISION.md](./VISION.md), [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md) | retrieval-only continuity |
 | D02 | 01 Core owns continuity state；models、platforms 和 adapters 不拥有 identity。 | `accepted-foundation` | [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md), [ADAPTER_PROTOCOL.md](./ADAPTER_PROTOCOL.md) | platform-owned identity |
 | D03 | Identity Core 受 gate 保护，不能被自动 mutation。 | `accepted-boundary` | [FOUNDATION.md](./FOUNDATION.md), [BOUNDARY_TEST_MATRIX.md](./BOUNDARY_TEST_MATRIX.md), [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) | direct identity rewrite |
 | D04 | Event Log 是 append-only audit evidence。 | `accepted-boundary` | [BOUNDARY_TEST_MATRIX.md](./BOUNDARY_TEST_MATRIX.md), [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) | event rewrite 或 compaction |
@@ -93,6 +93,8 @@ blocked decisions remain blocked until an explicit future implementation phase.
 3. 写清楚不能从该 decision 推导出什么。
 4. 检查 [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md)。
 5. 保持中文配对文档同步。
+6. 使用 [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md) 做 origin tracing，
+   但不要把 origin notes 当作 implementation approval。
 
 ## P77 Non-Execution Statement / P77 非执行声明
 
