@@ -120,6 +120,94 @@ PRESSURE_SOURCE_IDS = {
     "unknown_pressure": ("foundation", "open_questions", "risk_register", "boundary_test_matrix"),
 }
 
+PRESSURE_RISK_MAPPINGS = {
+    "observability_pressure": (
+        ("R1", "Concept inflation", "概念膨胀", "high", "risk_register"),
+        ("R3", "Reports outnumber mechanisms", "报告多于机制", "medium", "risk_register"),
+        ("R16", "README entrance overload", "README 入口过载", "medium", "risk_register"),
+    ),
+    "growth_review_pressure": (
+        ("R4", "Growth misunderstood as automatic growth", "把成长误解为自动成长", "high", "risk_register"),
+        ("R7", "Memory rewrite pressure", "记忆重写压力", "high", "risk_register"),
+        ("R10", "Identity boundary dilution", "身份边界稀释", "high", "risk_register"),
+    ),
+    "adapter_boundary_pressure": (
+        ("R12", "Adapter or platform owns identity", "adapter 或平台拥有身份", "high", "risk_register"),
+        ("R18", "Cloud/AstrBot deployment pressure", "云端/AstrBot 部署压力", "medium", "risk_register"),
+        ("R11", "Companion/social layer arrives early", "Companion / social layer 过早进入", "high", "risk_register"),
+    ),
+    "product_layer_pressure": (
+        ("R11", "Companion/social layer arrives early", "Companion / social layer 过早进入", "high", "risk_register"),
+        ("R16", "README entrance overload", "README 入口过载", "medium", "risk_register"),
+        ("R3", "Reports outnumber mechanisms", "报告多于机制", "medium", "risk_register"),
+    ),
+    "capability_evolution_pressure": (
+        ("R19", "Tool evolution becomes uncontrolled autonomy", "工具演化变成失控自治", "high", "risk_register"),
+        ("R20", "Verification mistaken for authorization", "把验证误解为授权", "high", "risk_register"),
+        ("R21", "Tool library pollution", "工具库污染", "high", "risk_register"),
+        ("R22", "Capability growth mistaken for identity growth", "能力成长被误解为主体成长", "high", "risk_register"),
+    ),
+    "temporal_pressure": (
+        ("R5", "Temporal Awareness implemented too early", "时间感知过早实现", "high", "risk_register"),
+        ("R6", "Recall retrieval becomes write path", "回忆检索变成写入路径", "high", "risk_register"),
+        ("R7", "Memory rewrite pressure", "记忆重写压力", "high", "risk_register"),
+    ),
+    "reconstruction_pressure": (
+        ("R8", "Reconstruction readiness mistaken for reconstruction", "把重建就绪误解为重建执行", "high", "risk_register"),
+        ("R9", "Payload capture slips into schema mutation", "payload capture 滑向 schema mutation", "high", "risk_register"),
+        ("R13", "Event audit trail weakened", "事件审计链被削弱", "high", "risk_register"),
+    ),
+    "unknown_pressure": (
+        ("R1", "Concept inflation", "概念膨胀", "high", "risk_register"),
+        ("R2", "Review layer over review layer", "审查层套审查层", "high", "risk_register"),
+        ("R17", "P80 pressure", "为了阶段编号而推进", "medium", "risk_register"),
+    ),
+}
+
+PRESSURE_OPEN_QUESTION_MAPPINGS = {
+    "observability_pressure": (
+        ("Minimal CLI Harness Dry-Run", "最小 CLI 试验台 Dry-Run", "open_questions"),
+        ("Foundation Observatory Report", "地基观察台报告", "open_questions"),
+        ("Visual Naming / Founder-Facing Vocabulary", "视觉命名 / 创始人可读词汇", "open_questions"),
+    ),
+    "growth_review_pressure": (
+        ("Growth Candidate Lifecycle", "成长候选生命周期", "open_questions"),
+        ("Productive Drift vs Collapse", "生产性漂移与崩塌", "open_questions"),
+        ("Stateful Memory Minimal Encoding Policy", "状态化记忆最小编码策略", "open_questions"),
+    ),
+    "adapter_boundary_pressure": (
+        ("Thin Interaction Harness", "薄交互试验台", "open_questions"),
+        ("Conversation Intake Contract", "对话输入合同", "open_questions"),
+        ("Core Interaction Harness Roadmap", "Core 交互试验台路线图", "open_questions"),
+    ),
+    "product_layer_pressure": (
+        ("Visual Naming / Founder-Facing Vocabulary", "视觉命名 / 创始人可读词汇", "open_questions"),
+        ("Foundation Observatory Report", "地基观察台报告", "open_questions"),
+        ("Minimal Observatory CLI", "最小观察台 CLI", "open_questions"),
+    ),
+    "capability_evolution_pressure": (
+        ("Tool-First Self-Evolution", "工具优先自进化", "open_questions"),
+        ("Capability Evolution Boundary", "能力演化边界", "open_questions"),
+        ("Deliberation Tick / Review Depth", "审议 Tick 与审查深度", "open_questions"),
+    ),
+    "temporal_pressure": (
+        ("Temporal Awareness", "时间感知", "open_questions"),
+        ("CTM-inspired Temporal Dynamics", "CTM 启发的时间动力学", "open_questions"),
+        ("Temporal Coherence Evaluation", "时间一致性评估", "open_questions"),
+        ("Thought Trace Storage Policy", "思考轨迹存储策略", "open_questions"),
+    ),
+    "reconstruction_pressure": (
+        ("Reconstruction Reducer Contract", "重建 Reducer 契约", "open_questions"),
+        ("Payload / Diff Capture Policy", "Payload / Diff 捕获策略", "open_questions"),
+        ("Context Package Preview", "上下文包预览", "open_questions"),
+    ),
+    "unknown_pressure": (
+        ("Core Interaction Harness Roadmap", "Core 交互试验台路线图", "open_questions"),
+        ("Context Package Preview", "上下文包预览", "open_questions"),
+        ("Review Queue Preview", "审查队列预览", "open_questions"),
+    ),
+}
+
 
 def load_source_inventory(lang: str = "en") -> list[dict[str, Any]]:
     _validate_lang(lang)
@@ -140,6 +228,51 @@ def source_refs_for_pressure(pressure_type: str, lang: str = "en") -> list[dict[
     return [load_source_record(source_id, lang=lang) for source_id in PRESSURE_SOURCE_IDS[pressure_type]]
 
 
+def risk_refs_for_pressure(pressure_type: str, lang: str = "en") -> list[dict[str, Any]]:
+    _validate_lang(lang)
+    if pressure_type not in PRESSURE_RISK_MAPPINGS:
+        raise ValueError(f"unknown pressure_type: {pressure_type}")
+    refs = []
+    for risk_id, en_title, zh_title, level, source_id in PRESSURE_RISK_MAPPINGS[pressure_type]:
+        source = load_source_record(source_id, lang=lang)
+        refs.append(
+            {
+                "risk_id": risk_id,
+                "display_name": zh_title if lang == "zh" else en_title,
+                "level": level,
+                "source_id": source_id,
+                "source_path": source["path"],
+                "source_heading": source["heading"],
+                "read_mode": "read_only",
+                "mapping_mode": "deterministic_pressure_mapping",
+                "policy_executed": False,
+            }
+        )
+    return refs
+
+
+def open_question_refs_for_pressure(pressure_type: str, lang: str = "en") -> list[dict[str, Any]]:
+    _validate_lang(lang)
+    if pressure_type not in PRESSURE_OPEN_QUESTION_MAPPINGS:
+        raise ValueError(f"unknown pressure_type: {pressure_type}")
+    refs = []
+    for en_title, zh_title, source_id in PRESSURE_OPEN_QUESTION_MAPPINGS[pressure_type]:
+        source = load_source_record(source_id, lang=lang)
+        refs.append(
+            {
+                "question": zh_title if lang == "zh" else en_title,
+                "source_id": source_id,
+                "source_path": source["path"],
+                "source_heading": source["heading"],
+                "status": "open_or_future_contract_needed",
+                "read_mode": "read_only",
+                "mapping_mode": "deterministic_pressure_mapping",
+                "policy_executed": False,
+            }
+        )
+    return refs
+
+
 def build_source_inventory_report(lang: str = "en") -> dict[str, Any]:
     _validate_lang(lang)
     records = load_source_inventory(lang=lang)
@@ -156,6 +289,14 @@ def build_source_inventory_report(lang: str = "en") -> dict[str, Any]:
         "pressure_mappings": {
             pressure: [record["source_id"] for record in source_refs_for_pressure(pressure, lang=lang)]
             for pressure in PRESSURE_SOURCE_IDS
+        },
+        "risk_mappings": {
+            pressure: [record["risk_id"] for record in risk_refs_for_pressure(pressure, lang=lang)]
+            for pressure in PRESSURE_RISK_MAPPINGS
+        },
+        "open_question_mappings": {
+            pressure: [record["question"] for record in open_question_refs_for_pressure(pressure, lang=lang)]
+            for pressure in PRESSURE_OPEN_QUESTION_MAPPINGS
         },
         "disallowed_sources": [
             "user_supplied_paths",
@@ -219,6 +360,38 @@ def validate_source_whitelist() -> dict[str, Any]:
                         "issue": "pressure_mapping_unknown_source_id",
                     }
                 )
+    for pressure_type, risk_refs in PRESSURE_RISK_MAPPINGS.items():
+        if pressure_type not in PRESSURE_TYPES:
+            issues.append({"pressure_type": pressure_type, "issue": "unknown_risk_mapping"})
+        if not risk_refs:
+            issues.append({"pressure_type": pressure_type, "issue": "empty_risk_mapping"})
+        for risk_id, _en_title, _zh_title, level, source_id in risk_refs:
+            if not risk_id.startswith("R"):
+                issues.append({"pressure_type": pressure_type, "risk_id": risk_id, "issue": "invalid_risk_id"})
+            if level not in {"high", "medium", "low"}:
+                issues.append({"pressure_type": pressure_type, "risk_id": risk_id, "issue": "invalid_risk_level"})
+            if source_id not in SOURCE_BY_ID:
+                issues.append(
+                    {
+                        "pressure_type": pressure_type,
+                        "source_id": source_id,
+                        "issue": "risk_mapping_unknown_source_id",
+                    }
+                )
+    for pressure_type, question_refs in PRESSURE_OPEN_QUESTION_MAPPINGS.items():
+        if pressure_type not in PRESSURE_TYPES:
+            issues.append({"pressure_type": pressure_type, "issue": "unknown_open_question_mapping"})
+        if not question_refs:
+            issues.append({"pressure_type": pressure_type, "issue": "empty_open_question_mapping"})
+        for _en_title, _zh_title, source_id in question_refs:
+            if source_id not in SOURCE_BY_ID:
+                issues.append(
+                    {
+                        "pressure_type": pressure_type,
+                        "source_id": source_id,
+                        "issue": "open_question_mapping_unknown_source_id",
+                    }
+                )
     return {
         "status": "pass" if not issues else "fail",
         "issues": issues,
@@ -270,6 +443,24 @@ def render_source_inventory_report(report: dict[str, Any], output_format: str) -
     ])
     for pressure, source_ids in report["pressure_mappings"].items():
         lines.append(f"| `{pressure}` | {', '.join(source_ids)} |")
+    lines.extend([
+        "",
+        "## Risk Mappings" if not zh else "## Risk Mappings / 风险映射",
+        "",
+        "| pressure_type | risk_ids |",
+        "| --- | --- |",
+    ])
+    for pressure, risk_ids in report["risk_mappings"].items():
+        lines.append(f"| `{pressure}` | {', '.join(risk_ids)} |")
+    lines.extend([
+        "",
+        "## Open Question Mappings" if not zh else "## Open Question Mappings / 未决问题映射",
+        "",
+        "| pressure_type | questions |",
+        "| --- | --- |",
+    ])
+    for pressure, questions in report["open_question_mappings"].items():
+        lines.append(f"| `{pressure}` | {_escape_table(', '.join(questions))} |")
     lines.extend([
         "",
         "## Safety" if not zh else "## Safety / 安全检查",

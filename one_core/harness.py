@@ -4,7 +4,7 @@ import json
 from typing import Any
 
 from .observatory import build_observatory_report
-from .source_loader import source_refs_for_pressure
+from .source_loader import open_question_refs_for_pressure, risk_refs_for_pressure, source_refs_for_pressure
 
 
 PRIVACY_SCOPES = ("local", "private", "public")
@@ -835,6 +835,8 @@ def _context_package_preview(
 ) -> dict[str, Any]:
     profile_refs = _localized_list(profile, "profile_refs", lang)
     source_refs = source_refs_for_pressure(profile["pressure_type"], lang=lang)
+    risk_refs = risk_refs_for_pressure(profile["pressure_type"], lang=lang)
+    open_question_refs = open_question_refs_for_pressure(profile["pressure_type"], lang=lang)
     source_refs_preview = [_source_ref_preview(source_ref) for source_ref in source_refs]
     selected_source_refs = [source_ref["source_id"] for source_ref in source_refs]
     missing_source_evidence = [
@@ -890,6 +892,15 @@ def _context_package_preview(
             "source_attribution": source_attribution,
             "source_refs_preview": source_refs_preview,
             "selected_source_refs": selected_source_refs,
+            "risk_refs_preview": risk_refs,
+            "open_question_refs_preview": open_question_refs,
+            "risk_question_mapping_status": {
+                "status": "source_backed_read_only_mapping",
+                "risk_count": len(risk_refs),
+                "open_question_count": len(open_question_refs),
+                "policy_executed": False,
+                "automatic_decision": False,
+            },
             "missing_source_evidence": missing_source_evidence,
             "source_backing_status": source_backing_status,
             "source_loader_boundaries": source_loader_boundaries,
@@ -910,6 +921,15 @@ def _context_package_preview(
         "source_attribution": "Read-only sources: P113/P115 whitelisted Markdown source refs selected by pressure type.",
         "source_refs_preview": source_refs_preview,
         "selected_source_refs": selected_source_refs,
+        "risk_refs_preview": risk_refs,
+        "open_question_refs_preview": open_question_refs,
+        "risk_question_mapping_status": {
+            "status": "source_backed_read_only_mapping",
+            "risk_count": len(risk_refs),
+            "open_question_count": len(open_question_refs),
+            "policy_executed": False,
+            "automatic_decision": False,
+        },
         "missing_source_evidence": missing_source_evidence,
         "source_backing_status": source_backing_status,
         "source_loader_boundaries": source_loader_boundaries,

@@ -142,6 +142,9 @@ class HarnessDryRunTests(unittest.TestCase):
         for key in (
             "source_refs_preview",
             "selected_source_refs",
+            "risk_refs_preview",
+            "open_question_refs_preview",
+            "risk_question_mapping_status",
             "missing_source_evidence",
             "source_backing_status",
             "source_loader_boundaries",
@@ -337,10 +340,45 @@ class HarnessDryRunTests(unittest.TestCase):
             self.assertFalse(context_preview["source_loader_boundaries"]["external_io_allowed"])
             self.assertFalse(context_preview["source_loader_boundaries"]["model_call_allowed"])
             self.assertFalse(context_preview["source_loader_boundaries"]["source_loader_write_enabled"])
+            self.assertFalse(context_preview["risk_question_mapping_status"]["policy_executed"])
+            self.assertFalse(context_preview["risk_question_mapping_status"]["automatic_decision"])
             for source_ref in context_preview["source_refs_preview"]:
                 self.assertEqual(source_ref["read_mode"], "read_only")
                 self.assertEqual(source_ref["source_status"], "approved_whitelist")
                 self.assertTrue(source_ref["path"].endswith(".md"))
+
+    def test_context_preview_includes_source_backed_risk_and_question_refs(self):
+        temporal_report = build_harness_dry_run_report(user_message="我隔了很久回来，怎么恢复会话？", lang="zh")
+        capability_report = build_harness_dry_run_report(
+            user_message="这个工具候选验证成功了，能不能直接加入工具库？",
+            lang="zh",
+        )
+        reconstruction_report = build_harness_dry_run_report(
+            user_message="这个 event 能回放重建 payload diff 吗？",
+            lang="en",
+        )
+
+        temporal_context = temporal_report["context_package_preview"]
+        capability_context = capability_report["context_package_preview"]
+        reconstruction_context = reconstruction_report["context_package_preview"]
+
+        self.assertIn("R5", {row["risk_id"] for row in temporal_context["risk_refs_preview"]})
+        self.assertIn("时间感知", {row["question"] for row in temporal_context["open_question_refs_preview"]})
+        self.assertIn("R20", {row["risk_id"] for row in capability_context["risk_refs_preview"]})
+        self.assertIn("工具优先自进化", {row["question"] for row in capability_context["open_question_refs_preview"]})
+        self.assertIn("R8", {row["risk_id"] for row in reconstruction_context["risk_refs_preview"]})
+        self.assertIn(
+            "Reconstruction Reducer Contract",
+            {row["question"] for row in reconstruction_context["open_question_refs_preview"]},
+        )
+
+        for context in (temporal_context, capability_context, reconstruction_context):
+            self.assertGreater(context["risk_question_mapping_status"]["risk_count"], 0)
+            self.assertGreater(context["risk_question_mapping_status"]["open_question_count"], 0)
+            for row in context["risk_refs_preview"] + context["open_question_refs_preview"]:
+                self.assertEqual(row["read_mode"], "read_only")
+                self.assertEqual(row["mapping_mode"], "deterministic_pressure_mapping")
+                self.assertFalse(row["policy_executed"])
 
     def test_candidate_preview_specialization_fields_change_by_pressure(self):
         adapter_report = build_harness_dry_run_report(user_message="我想把这个接进 AstrBot", lang="zh")

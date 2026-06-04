@@ -19,11 +19,12 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P118 Harness Source-Backed Context Refs is complete.
-`harness-dry-run` now includes pressure-specific `source_refs_preview` from the
-approved local Markdown whitelist. This is source citation only: it does not
-execute retrieval, read user-supplied paths, write state, call a model, integrate
-adapters, or start rebuild work.
+Current work status: P119 Source-Backed Risk and Open Question Mapping is
+complete. `harness-dry-run` now includes pressure-specific source refs, risk
+refs, and open-question refs from approved local Markdown documents. These are
+read-only mappings for founder review; they do not execute policy, make
+automatic decisions, write state, call a model, integrate adapters, or start
+rebuild work.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -39,7 +40,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P118 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P119 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -179,8 +180,9 @@ observatory, scenario routing, and non-execution previews. It classifies inputs
 into pressure profiles such as observability, growth review, adapter boundary,
 product layer, capability evolution, temporal, reconstruction, or unknown. It
 now cites pressure-specific whitelisted Markdown source refs inside
-`context_package_preview`; it does not write state, call a model, call external
-APIs, integrate adapters, run retrieval, or execute the next step.
+`context_package_preview`, including source-backed risk and open-question refs;
+it does not write state, call a model, call external APIs, integrate adapters,
+run retrieval, execute policy, or execute the next step.
 
 Read-only harness source inventory:
 
@@ -190,10 +192,11 @@ python3 -m one_core.cli harness-source-inventory --format json
 python3 -m one_core.cli harness-source-inventory --lang zh
 ```
 
-This command reports the approved local Markdown source whitelist and pressure
-mappings used by future state-backed read-only harness work. It only cites
-source IDs and safety metadata; it does not read user-supplied paths, write
-state, execute retrieval, call a model, or authorize rebuild work.
+This command reports the approved local Markdown source whitelist plus pressure,
+risk, and open-question mappings used by future state-backed read-only harness
+work. It only cites source IDs and safety metadata; it does not read
+user-supplied paths, write state, execute retrieval, call a model, execute
+policy, or authorize rebuild work.
 
 Local API reference:
 

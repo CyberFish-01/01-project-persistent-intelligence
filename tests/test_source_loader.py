@@ -14,7 +14,9 @@ from one_core.source_loader import (
     build_source_inventory_report,
     load_source_inventory,
     load_source_record,
+    open_question_refs_for_pressure,
     render_source_inventory_report,
+    risk_refs_for_pressure,
     source_refs_for_pressure,
     validate_source_whitelist,
 )
@@ -86,6 +88,25 @@ class SourceLoaderTests(unittest.TestCase):
         self.assertIn("capability_evolution_boundary", pressure_records["capability_evolution_pressure"])
         self.assertIn("reconstruction_reducer_contract", pressure_records["reconstruction_pressure"])
 
+    def test_risk_and_open_question_mappings_are_read_only(self):
+        temporal_risks = risk_refs_for_pressure("temporal_pressure", lang="zh")
+        capability_risks = risk_refs_for_pressure("capability_evolution_pressure", lang="en")
+        temporal_questions = open_question_refs_for_pressure("temporal_pressure", lang="zh")
+        capability_questions = open_question_refs_for_pressure("capability_evolution_pressure", lang="en")
+
+        self.assertIn("R5", {risk["risk_id"] for risk in temporal_risks})
+        self.assertIn("R20", {risk["risk_id"] for risk in capability_risks})
+        self.assertIn("时间感知", {question["question"] for question in temporal_questions})
+        self.assertIn("Capability Evolution Boundary", {question["question"] for question in capability_questions})
+        self.assertNotEqual(
+            tuple(risk["risk_id"] for risk in temporal_risks),
+            tuple(risk["risk_id"] for risk in capability_risks),
+        )
+        for row in temporal_risks + capability_risks + temporal_questions + capability_questions:
+            self.assertEqual(row["read_mode"], "read_only")
+            self.assertEqual(row["mapping_mode"], "deterministic_pressure_mapping")
+            self.assertFalse(row["policy_executed"])
+
     def test_source_inventory_report_contains_boundaries(self):
         report = build_source_inventory_report(lang="en")
 
@@ -94,6 +115,9 @@ class SourceLoaderTests(unittest.TestCase):
         self.assertEqual(report["source_count"], len(SOURCE_WHITELIST))
         self.assertEqual(report["safety_status"], "pass")
         self.assertEqual(report["safety_issues"], [])
+        self.assertIn("temporal_pressure", report["risk_mappings"])
+        self.assertIn("capability_evolution_pressure", report["open_question_mappings"])
+        self.assertIn("R5", report["risk_mappings"]["temporal_pressure"])
         self.assertIn("work_01_state", report["disallowed_sources"])
         for key, expected in NON_EXECUTION_INVARIANTS.items():
             self.assertEqual(report["non_execution_invariants"][key], expected)
@@ -115,6 +139,8 @@ class SourceLoaderTests(unittest.TestCase):
 
         self.assertIn("Harness Source Inventory", markdown)
         self.assertIn("Pressure Mappings", markdown)
+        self.assertIn("Risk Mappings", markdown)
+        self.assertIn("Open Question Mappings", markdown)
         self.assertIn("safety_status", markdown)
         self.assertIn("issue_count: 0", markdown)
         self.assertIn("source_loader_write_enabled: false", markdown)
