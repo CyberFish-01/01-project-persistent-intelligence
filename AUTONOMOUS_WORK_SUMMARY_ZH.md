@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`b7f85d3 Add RFC index`
+- 本 summary 前的结束 commit：`88fbd5f Extend phase index`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -28,6 +28,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P66 Payload / Diff Capture Policy RFC | `92c5135` | `PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md`, `PAYLOAD_DIFF_CAPTURE_POLICY_RFC_ZH.md` | No |
 | P67 Foundation Roadmap Synthesis | `705070d` | `FOUNDATION_ROADMAP.md`, `FOUNDATION_ROADMAP_ZH.md` | No |
 | P68 RFC Index | `b7f85d3` | `RFC_INDEX.md`, `RFC_INDEX_ZH.md` | No |
+| P69 Phase Index Extension | `88fbd5f` | `PHASE_INDEX.md`, `PHASE_INDEX_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -52,7 +53,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P68 每个 phase 都执行：
+P54-P69 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -86,15 +87,15 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P69-P80 low-risk consolidation 仍未完成。
-- 下一项是 P69 Phase Index Extension。
+- P70-P80 low-risk consolidation 仍未完成。
+- 下一项是 P70 Concept Map Update。
 
 ## Suggested Next Direction / 明天建议方向
 
 下一步安全 phase：
 
 ```text
-P69 Phase Index Extension
+P70 Concept Map Update
 ```
 
 约束：只做低风险 document consolidation。不要新增 runtime behavior、新 mechanisms、
