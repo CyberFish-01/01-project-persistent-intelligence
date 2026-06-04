@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P121. It is not a release log. It records how the system
+This index covers P0-P122. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -129,3 +129,4 @@ foundation evolved.
 | P119 | Added source-backed risk and open-question mapping. | Dry-run previews should show which documented risks and open questions apply without executing policy. | Harness Source Backing |
 | P120 | Added source-backed harness usability review. | The founder needs to know whether read-only source backing is useful enough before Core Lockdown planning. | Harness Review |
 | P121 | Added Core Lockdown Mode RFC. | External or unverified content must remain sandboxed, quarantined, or candidate-only before it can touch trusted core state. | Core Lockdown |
+| P122 | Added Import Quarantine RFC. | Future imports are not adoption and must remain sandboxed before any memory, identity, event, or capability trust. | Core Lockdown |

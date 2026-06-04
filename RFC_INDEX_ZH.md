@@ -70,6 +70,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P121 | [CORE_LOCKDOWN_MODE_RFC.md](./CORE_LOCKDOWN_MODE_RFC.md) / [ZH](./CORE_LOCKDOWN_MODE_RFC_ZH.md) | boundary RFC | RFC-only lockdown boundary | 定义未来 old 01 imports、model output、adapter context、tool evidence、external IO 或 rebuild pressure 触碰 trusted state 前的 sandbox/quarantine/candidate handling。 | lockdown runtime、validator、import pipeline、adapter hook、model call、write path 或 rebuild |
+| P122 | [IMPORT_QUARANTINE_RFC.md](./IMPORT_QUARANTINE_RFC.md) / [ZH](./IMPORT_QUARANTINE_RFC_ZH.md) | quarantine RFC | RFC-only import boundary | 定义未来来自 old 01、logs、memory dumps、model output、adapter exports、tool results 或 external files 的 source classes、quarantine routes 和 review gates。 | import runtime、file loading、quarantine storage、memory write、identity mutation、adapter integration、model call 或 rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
