@@ -18,6 +18,10 @@ from .evaluation import run_foundation_evaluation, run_scenario_evaluation
 from .harness import build_harness_dry_run_report, render_harness_dry_run_report
 from .importer import import_text_file
 from .observatory import build_observatory_report, render_observatory_report
+from .pre_rebuild_verification import (
+    build_pre_rebuild_verification_report,
+    render_pre_rebuild_verification_report,
+)
 from .source_loader import build_source_inventory_report, render_source_inventory_report
 from .state import DEFAULT_STATE_DIR, StateStore
 from .validation import validate_state
@@ -438,6 +442,26 @@ def main() -> None:
     source_inventory_parser.add_argument(
         "--output",
         help="Optional path to write the generated source inventory report.",
+    )
+    pre_rebuild_verification_parser = subparsers.add_parser(
+        "pre-rebuild-verification",
+        help="Generate a read-only pre-rebuild verification suite report.",
+    )
+    pre_rebuild_verification_parser.add_argument(
+        "--format",
+        choices=["markdown", "json"],
+        default="markdown",
+        help="Output format. Defaults to markdown.",
+    )
+    pre_rebuild_verification_parser.add_argument(
+        "--lang",
+        choices=["en", "zh"],
+        default="en",
+        help="Report language. Defaults to en.",
+    )
+    pre_rebuild_verification_parser.add_argument(
+        "--output",
+        help="Optional path to write the generated pre-rebuild verification report.",
     )
     harness_parser = subparsers.add_parser(
         "harness-dry-run",
@@ -952,6 +976,15 @@ def main() -> None:
     elif args.command == "harness-source-inventory":
         report = build_source_inventory_report(lang=args.lang)
         output = render_source_inventory_report(report, args.format)
+        if args.output:
+            output_path = Path(args.output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(output + "\n", encoding="utf-8")
+        else:
+            print(output)
+    elif args.command == "pre-rebuild-verification":
+        report = build_pre_rebuild_verification_report(lang=args.lang)
+        output = render_pre_rebuild_verification_report(report, args.format)
         if args.output:
             output_path = Path(args.output)
             output_path.parent.mkdir(parents=True, exist_ok=True)

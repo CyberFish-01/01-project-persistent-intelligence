@@ -158,3 +158,4 @@ foundation evolved.
 | P148 | Added Rebuild Entry Gate Checklist. | Ready for verification is not ready for rebuild; rebuild requires evidence and founder checkpoint. | Pre-Rebuild Verification |
 | P149 | Added Pre-Rebuild System Review. | The system is ready for final read-only verification, not for rebuild itself. | Pre-Rebuild Verification |
 | P150 | Added Full Verification Plan Before Rebuild. | Final verification needs explicit read-only checks, pass criteria, and failure handling before rebuild can be considered. | Pre-Rebuild Verification |
+| P151 | Added Pre-Rebuild Verification Suite. | The final verification plan needs a deterministic read-only local suite before a verification report. | Pre-Rebuild Verification |

@@ -237,6 +237,13 @@ The current dependency order is:
 31. `python3 -m one_core.cli harness-dry-run` implements the P100 local dry-run
     preview command without state writes, model calls, external APIs, adapter
     integration, product behavior, or automatic next-step execution.
+32. [PRE_REBUILD_VERIFICATION_SUITE.md](./PRE_REBUILD_VERIFICATION_SUITE.md)
+    documents and implements the P151 read-only `pre-rebuild-verification`
+    report command for artifact, link, forbidden-pattern, boundary, and
+    read-only builder checks before P152. It does not run rebuild or approve
+    rebuild.
+33. [PRE_REBUILD_VERIFICATION_SUITE_ZH.md](./PRE_REBUILD_VERIFICATION_SUITE_ZH.md)
+    mirrors the P151 read-only verification suite boundary in Chinese.
 
 ## Runtime-Blocked Topics
 
@@ -278,6 +285,7 @@ The indexed documents do not approve:
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
+- pre-rebuild verification as rebuild approval;
 - harness implementation beyond the P100 read-only dry-run command;
 - harness runtime beyond the P100 read-only dry-run command;
 - fixture schema;

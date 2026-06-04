@@ -226,6 +226,12 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     model calls、external APIs、state writes、adapter integration、product behavior 或 P101。
 31. `python3 -m one_core.cli harness-dry-run` 实现 P100 local dry-run preview command，
     不写 state、不调用模型、不调用外部 API、不接 adapter、不进入产品层，也不自动执行下一步。
+32. [PRE_REBUILD_VERIFICATION_SUITE.md](./PRE_REBUILD_VERIFICATION_SUITE.md)
+    记录并实现 P151 read-only `pre-rebuild-verification` report command，用于在 P152 前检查
+    artifact、link、forbidden-pattern、boundary 和 read-only builder。它不运行 rebuild，也不批准
+    rebuild。
+33. [PRE_REBUILD_VERIFICATION_SUITE_ZH.md](./PRE_REBUILD_VERIFICATION_SUITE_ZH.md)
+    以中文镜像 P151 read-only verification suite boundary。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -267,6 +273,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
+- pre-rebuild verification as rebuild approval；
 - 超出 P100 read-only dry-run command 的 harness implementation；
 - 超出 P100 read-only dry-run command 的 harness runtime；
 - fixture schema；

@@ -157,3 +157,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P148 | 加入 Rebuild Entry Gate Checklist。 | ready for verification 不是 ready for rebuild；rebuild 需要 evidence 和 founder checkpoint。 | Pre-Rebuild Verification |
 | P149 | 加入 Pre-Rebuild System Review。 | 系统已经可以进入 final read-only verification，但不能进入 rebuild 本身。 | Pre-Rebuild Verification |
 | P150 | 加入 Full Verification Plan Before Rebuild。 | final verification 需要 explicit read-only checks、pass criteria 和 failure handling，之后才能考虑 rebuild。 | Pre-Rebuild Verification |
+| P151 | 加入 Pre-Rebuild Verification Suite。 | final verification plan 在 verification report 前需要 deterministic read-only local suite。 | Pre-Rebuild Verification |
