@@ -148,6 +148,10 @@ class HarnessDryRunTests(unittest.TestCase):
             self.assertTrue(candidate["preview_only"])
             self.assertFalse(candidate["promoted"])
             self.assertFalse(candidate["persisted"])
+            self.assertIn("candidate_intent", candidate)
+            self.assertIn("why_selected", candidate)
+            self.assertIn("blocked_promotion_reason", candidate)
+            self.assertIn("required_manual_review", candidate)
 
     def test_forbidden_boundaries_are_disabled(self):
         report = build_harness_dry_run_report(user_message="Hello 01")
@@ -269,6 +273,22 @@ class HarnessDryRunTests(unittest.TestCase):
         self.assertIn("auto_tool_promotion_enabled", report["boundary_monitor"]["highest_relevant_boundaries"])
         self.assertIn("验证不等于授权", report["context_package_preview"]["profile_refs"])
         self.assertIn("人工审查", report["profile_specific_next_step"])
+
+        tool_candidate = next(
+            row for row in report["candidate_preview"] if row["candidate_type"] == "tool_authorization_candidate"
+        )
+        self.assertIn("不是授权", tool_candidate["blocked_promotion_reason"])
+        self.assertEqual(tool_candidate["required_manual_review"], "capability_or_tool_authorization_review")
+
+    def test_candidate_preview_specialization_fields_change_by_pressure(self):
+        adapter_report = build_harness_dry_run_report(user_message="我想把这个接进 AstrBot", lang="zh")
+        temporal_report = build_harness_dry_run_report(user_message="我隔了很久回来，怎么恢复会话？", lang="zh")
+
+        adapter_candidate = adapter_report["candidate_preview"][0]
+        temporal_candidate = temporal_report["candidate_preview"][0]
+        self.assertNotEqual(adapter_candidate["candidate_intent"], temporal_candidate["candidate_intent"])
+        self.assertIn("不批准接入", adapter_candidate["candidate_intent"])
+        self.assertIn("不写 temporal/recall event", temporal_candidate["candidate_intent"])
 
     def test_founder_summary_is_human_readable_and_non_executing(self):
         report = build_harness_dry_run_report(

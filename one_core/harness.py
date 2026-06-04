@@ -897,6 +897,10 @@ def _candidate_preview(
                 "candidate_type": candidate_type,
                 "display_name": zh_name if lang == "zh" else en_name,
                 "route_role": route_role,
+                "candidate_intent": _candidate_intent(candidate_type, lang),
+                "why_selected": _candidate_why_selected(profile, candidate_type, lang),
+                "blocked_promotion_reason": _candidate_blocked_reason(candidate_type, lang),
+                "required_manual_review": _candidate_manual_review(candidate_type, lang),
                 "preview_reason": zh_reason if lang == "zh" else en_reason,
                 "input_excerpt": preview_excerpt,
                 "preview_only": True,
@@ -905,6 +909,102 @@ def _candidate_preview(
             }
         )
     return candidates
+
+
+def _candidate_intent(candidate_type: str, lang: str) -> str:
+    if lang == "zh":
+        if "adapter" in candidate_type:
+            return "检查平台接入压力，不批准接入。"
+        if "growth" in candidate_type or "meaning_shift" in candidate_type or "identity" in candidate_type:
+            return "检查成长或解释变化压力，不修改身份。"
+        if "tool" in candidate_type or "capability" in candidate_type or "procedural" in candidate_type:
+            return "检查能力或工具压力，不执行工具、不提升工具。"
+        if "product" in candidate_type or "observatory" in candidate_type:
+            return "检查可见性或产品压力，不进入产品层。"
+        if "temporal" in candidate_type or "recall" in candidate_type:
+            return "检查时间或回忆写入压力，不写 temporal/recall event。"
+        if "reconstruction" in candidate_type or "payload" in candidate_type or "replay" in candidate_type:
+            return "检查重建证据压力，不执行 reducer。"
+        return "保留为通用人工审查对象，不自动执行。"
+    if "adapter" in candidate_type:
+        return "Check platform-integration pressure without approving integration."
+    if "growth" in candidate_type or "meaning_shift" in candidate_type or "identity" in candidate_type:
+        return "Check growth or interpretation pressure without mutating identity."
+    if "tool" in candidate_type or "capability" in candidate_type or "procedural" in candidate_type:
+        return "Check capability or tool pressure without executing or promoting tools."
+    if "product" in candidate_type or "observatory" in candidate_type:
+        return "Check visibility or product pressure without entering the product layer."
+    if "temporal" in candidate_type or "recall" in candidate_type:
+        return "Check temporal or recall-write pressure without writing temporal/recall events."
+    if "reconstruction" in candidate_type or "payload" in candidate_type or "replay" in candidate_type:
+        return "Check reconstruction evidence pressure without executing reducers."
+    return "Hold as a general manual-review object without automatic execution."
+
+
+def _candidate_why_selected(profile: dict[str, Any], candidate_type: str, lang: str) -> str:
+    if lang == "zh":
+        return f"因为输入被分类为{_localized(profile, 'display_name', lang)}，该候选用于 preview 这一类压力。"
+    return f"Selected because the input was classified as {_localized(profile, 'display_name', lang)}."
+
+
+def _candidate_blocked_reason(candidate_type: str, lang: str) -> str:
+    if lang == "zh":
+        if "tool" in candidate_type or "capability" in candidate_type:
+            return "验证或能力信号不是授权，也不是 tool promotion。"
+        if "growth" in candidate_type or "identity" in candidate_type:
+            return "成长候选不是身份更新，也不是 growth execution。"
+        if "recall" in candidate_type or "temporal" in candidate_type:
+            return "时间/回忆候选不是 event write。"
+        if "adapter" in candidate_type:
+            return "接入候选不是 adapter integration。"
+        if "product" in candidate_type:
+            return "产品候选不是产品层实现。"
+        if "reconstruction" in candidate_type or "payload" in candidate_type or "replay" in candidate_type:
+            return "重建候选不是 reducer execution。"
+        return "候选只是 preview，不是 persistence 或 execution。"
+    if "tool" in candidate_type or "capability" in candidate_type:
+        return "Verification or capability signal is not authorization or tool promotion."
+    if "growth" in candidate_type or "identity" in candidate_type:
+        return "Growth candidate is not identity update or growth execution."
+    if "recall" in candidate_type or "temporal" in candidate_type:
+        return "Temporal/recall candidate is not an event write."
+    if "adapter" in candidate_type:
+        return "Adapter candidate is not adapter integration."
+    if "product" in candidate_type:
+        return "Product candidate is not product-layer implementation."
+    if "reconstruction" in candidate_type or "payload" in candidate_type or "replay" in candidate_type:
+        return "Reconstruction candidate is not reducer execution."
+    return "Candidate is preview only, not persistence or execution."
+
+
+def _candidate_manual_review(candidate_type: str, lang: str) -> str:
+    if lang == "zh":
+        if "identity" in candidate_type:
+            return "identity_high_gate"
+        if "tool" in candidate_type or "capability" in candidate_type:
+            return "capability_or_tool_authorization_review"
+        if "adapter" in candidate_type:
+            return "adapter_boundary_review"
+        if "product" in candidate_type:
+            return "product_boundary_review"
+        if "temporal" in candidate_type or "recall" in candidate_type:
+            return "temporal_or_recall_policy_review"
+        if "reconstruction" in candidate_type or "payload" in candidate_type or "replay" in candidate_type:
+            return "reconstruction_readiness_review"
+        return "manual_review"
+    if "identity" in candidate_type:
+        return "identity_high_gate"
+    if "tool" in candidate_type or "capability" in candidate_type:
+        return "capability_or_tool_authorization_review"
+    if "adapter" in candidate_type:
+        return "adapter_boundary_review"
+    if "product" in candidate_type:
+        return "product_boundary_review"
+    if "temporal" in candidate_type or "recall" in candidate_type:
+        return "temporal_or_recall_policy_review"
+    if "reconstruction" in candidate_type or "payload" in candidate_type or "replay" in candidate_type:
+        return "reconstruction_readiness_review"
+    return "manual_review"
 
 
 def _review_queue_preview(lang: str, profile: dict[str, Any]) -> list[dict[str, Any]]:

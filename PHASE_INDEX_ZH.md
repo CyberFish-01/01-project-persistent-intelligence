@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P105。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P106。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -112,3 +112,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P103 | 改进 harness output readability。 | dry-run report 应先给 founder-facing 摘要、人话风险、下一步和明确“不要做什么”的护栏。 | Harness Readability |
 | P104 | 加入 Scenario Profile Test Matrix。 | harness pressure profiles 在继续 specialization 前需要 documented expected-output matrix。 | Harness Evaluation |
 | P105 | 强化 harness boundary monitor。 | dry-run boundary monitor 应明确显示 disabled capabilities、unchanged state 和零 active violations。 | Harness Boundary |
+| P106 | 专门化 harness candidate previews。 | candidate rows 应解释 intent、selection reason、blocked promotion 和 required manual review，同时保持 preview-only。 | Harness Preview |

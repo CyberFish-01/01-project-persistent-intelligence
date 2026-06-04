@@ -342,6 +342,14 @@ active boundary violations，以及与当前 pressure profile 最相关的 bound
 
 边界：boundary monitor 是 audit output。它不执行 policy、不执行 action、不修改 state，也不授权 runtime。
 
+## Specialized Candidate Preview / 专门化候选预览
+
+P106 为 `harness-dry-run` 加入的 candidate-row 格式。每个 candidate 会说明 intent、为什么被选中、
+为什么不能 promotion，以及未来需要哪个 manual review gate。
+
+边界：specialized candidate preview 仍是 preview-only。它不是 persistence、promotion、lifecycle
+creation、tool authorization 或 execution。
+
 ## Fixture-First Harness / Fixture 优先试验台
 
 一种可能的 future harness approach：在任何 live input、adapter、cloud 或 product surface 前，先使用

@@ -418,6 +418,15 @@ most relevant to the selected pressure profile.
 Boundary: boundary monitor is audit output. It does not enforce policy, execute
 actions, mutate state, or authorize a runtime.
 
+## Specialized Candidate Preview
+
+The P106 candidate-row format for `harness-dry-run`. Each candidate explains its
+intent, why it was selected, why it cannot be promoted, and which manual review
+gate would be required later.
+
+Boundary: specialized candidate preview is still preview-only. It is not
+persistence, promotion, lifecycle creation, tool authorization, or execution.
+
 ## Fixture-First Harness
 
 A possible future harness approach that uses local deterministic fixture inputs
