@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P93。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P94。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -100,3 +100,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P91 | 加入 Tool-First Self-Evolution RFC。 | capability 应先在 feedback 可验证处演化，同时不修改 identity。 | Capability Evolution |
 | P92 | 加入 Capability Evolution Boundary RFC。 | capability evolution 在 tool runtime 前需要明确 allowed / forbidden scope。 | Capability Evolution |
 | P93 | 加入 Visual Naming Guide。 | founder-facing views 需要朴素中文标签，同时保留 English internal keys。 | Foundation Vocabulary |
+| P94 | 加入 Foundation Observatory Report。 | 任何 dashboard 或 CLI runtime 前，创始人需要一份可读 Markdown 视图。 | Foundation Observatory |

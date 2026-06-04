@@ -70,6 +70,7 @@ implementation approval.
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P93 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [ZH](./VISUAL_NAMING_GUIDE_ZH.md) | naming guide | founder-facing vocabulary | Maps English internal keys to Chinese display names for future visual foundation surfaces. | Web UI, dashboard runtime, observability CLI, product layer, or Foundation Observatory implementation |
+| P94 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [ZH](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | observatory report | founder-facing report | Provides a Markdown snapshot, axes map, readiness matrix, boundary status, and risk heatmap for the foundation. | dashboard runtime, Web UI, observability CLI, product layer, status API, or runtime report generator |
 
 ## Exploration And Subject Boundary
 
@@ -162,6 +163,10 @@ The current dependency order is:
     Chinese display names to English internal keys without approving Web UI,
     dashboard runtime, observability CLI, product layer, or Foundation
     Observatory implementation.
+28. [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md)
+    applies P93 naming to a Markdown founder-facing status report without
+    approving dashboard runtime, Web UI, observability CLI, product layer,
+    status API, or runtime report generation.
 
 ## Runtime-Blocked Topics
 
@@ -198,6 +203,8 @@ The indexed documents do not approve:
 - dashboard runtime;
 - Foundation Observatory runtime;
 - observability CLI;
+- status API;
+- runtime report generator;
 - harness implementation;
 - fixture schema;
 - output schema;

@@ -43,6 +43,7 @@ current documents carry it, and what is still only long-term vision?"
 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | External inspiration RFC | Translates Yunjue / zero-start in-situ self-evolving agent ideas into review-only capability evolution vocabulary without tool execution. |
 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | Boundary RFC | Defines capability evolution allowed and forbidden scope without implementing tool runtime or promotion. |
 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [VISUAL_NAMING_GUIDE_ZH.md](./VISUAL_NAMING_GUIDE_ZH.md) | Founder-facing vocabulary guide | Maps internal English terms to Chinese display names without implementing dashboard, observability CLI, or product UI. |
+| [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [FOUNDATION_OBSERVATORY_REPORT_ZH.md](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | Founder-facing observatory report | Summarizes foundation status as Markdown without implementing dashboard, CLI, status API, or product UI. |
 
 ## Original Idea Chains
 
@@ -89,6 +90,7 @@ current documents carry it, and what is still only long-term vision?"
 | Tool-First Self-Evolution | Yunjue-style zero-start tool evolution suggests capability should evolve first where feedback is verifiable. | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not tool runtime |
 | Capability Evolution Boundary | Tool-first capability evolution needs explicit allowed and forbidden scopes before any verification or library policy work. | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
 | Visual Naming Guide | Founder-facing views need plain Chinese labels without losing precise internal English keys. | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
+| Foundation Observatory Report | The founder needs a readable Markdown snapshot before any dashboard or CLI plan. | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
 
 ## Second Chain Map: Artificial Life History
 
@@ -181,6 +183,9 @@ For origin tracing:
 19. Read [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) only as a
     founder-facing naming guide, not as dashboard implementation, Web UI,
     observability CLI, product layer, or Foundation Observatory runtime.
+20. Read [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md)
+    only as a Markdown founder-facing report, not as dashboard runtime,
+    observability CLI, status API, product UI, or runtime monitor.
 
 ## P78 Non-Execution Statement
 
@@ -205,6 +210,8 @@ P78 does not implement:
 - dashboard runtime;
 - Foundation Observatory runtime;
 - observability CLI;
+- status API;
+- runtime report generator;
 - identity mutation;
 - memory rewrite;
 - payload capture;

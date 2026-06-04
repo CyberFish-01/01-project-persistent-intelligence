@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P93. It is not a release log. It records how the system
+This index covers P0-P94. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -101,3 +101,4 @@ foundation evolved.
 | P91 | Added Tool-First Self-Evolution RFC. | Capability should evolve first where feedback is verifiable, without identity mutation. | Capability Evolution |
 | P92 | Added Capability Evolution Boundary RFC. | Capability evolution needs explicit allowed and forbidden scope before tool runtime. | Capability Evolution |
 | P93 | Added Visual Naming Guide. | Founder-facing views need plain Chinese labels while preserving English internal keys. | Foundation Vocabulary |
+| P94 | Added Foundation Observatory Report. | The founder needs a readable Markdown view before any dashboard or CLI runtime. | Foundation Observatory |

@@ -462,10 +462,31 @@ RFCs、papers、code identifiers、schemas、audits 和 cross-project comparison
 ## Foundation Observatory / 地基观察台
 
 未来可能面向 founder 展示 foundation status、concept boundaries、readiness、risks 和 open
-questions 的表面。
+questions 的表面。P94 提供这个 observatory layer 的 Markdown report 版本。
 
-边界：它当前仍是 future direction。P93 不实现 observatory、dashboard、UI、runtime、report
-generator 或 status API。
+边界：P94 report 是 document-only。它不实现 dashboard runtime、Web UI、observability CLI、
+status API、runtime report generator 或 product surface。
+
+## Foundation Observatory Report / 地基观察台报告
+
+P94 founder-facing Markdown report，用 snapshot、main axes map、readiness matrix、boundary
+status、risk heatmap 和 next-step recommendation 总结当前 foundation 状态。
+
+边界：它是 report artifact，不是 dashboard、CLI、runtime monitor、status endpoint、product UI
+或 implementation approval。
+
+## Founder Snapshot / 创始人快照
+
+用简短 founder-facing 语言说明当前 01 Core 是什么、不是什么，以及现在最重要的状态。
+
+边界：snapshot 不是 release note、product claim 或 runtime status endpoint。
+
+## Main Axes Map / 主轴地图
+
+把 foundation 按 continuity、growth、temporal review、capability evolution、interaction planning
+和 observability 等主轴组织起来的 founder-facing report grouping。
+
+边界：axis map 是报告分组，不是 architecture module 或 runtime boundary。
 
 ## Readiness Matrix / 就绪度矩阵
 

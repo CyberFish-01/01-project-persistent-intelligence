@@ -560,10 +560,38 @@ founder-facing views to use paper-like titles.
 ## Foundation Observatory
 
 A possible future founder-facing surface for viewing foundation status, concept
-boundaries, readiness, risks, and open questions.
+boundaries, readiness, risks, and open questions. P94 provides a Markdown report
+version of this observatory layer.
 
-Boundary: it is currently a future direction. P93 does not implement an
-observatory, dashboard, UI, runtime, report generator, or status API.
+Boundary: the P94 report is document-only. It does not implement dashboard
+runtime, Web UI, observability CLI, status API, runtime report generator, or a
+product surface.
+
+## Foundation Observatory Report
+
+The P94 founder-facing Markdown report that summarizes current foundation
+status through a snapshot, main axes map, readiness matrix, boundary status,
+risk heatmap, and next-step recommendation.
+
+Boundary: it is a report artifact, not a dashboard, CLI, runtime monitor,
+status endpoint, product UI, or implementation approval.
+
+## Founder Snapshot
+
+A short founder-facing summary of what 01 Core currently is, what it is not, and
+which state matters most now.
+
+Boundary: a snapshot is not a release note, product claim, or runtime status
+endpoint.
+
+## Main Axes Map
+
+A founder-facing grouping of the foundation into major axes such as continuity,
+growth, temporal review, capability evolution, interaction planning, and
+observability.
+
+Boundary: an axis map is a report grouping, not an architecture module or
+runtime boundary.
 
 ## Readiness Matrix
 

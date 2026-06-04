@@ -37,6 +37,7 @@ not implemented, and not closed as runtime capabilities.
 | Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary exists, but no tool execution, verification schema, review schema, safe tool library policy, or promotion gate exists | tool execution, auto tool generation, auto tool promotion, policy executor |
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed and forbidden scope is defined, but verification evidence model, candidate review schema, safe tool library policy, and implementation gates are missing | automatic tool execution, automatic promotion, policy executor, identity mutation |
 | Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys now map to Chinese display names, but no visual surface contract, status assignment policy, or dashboard approval exists | Web UI, dashboard runtime, observability CLI, product layer |
+| Foundation Observatory Report | `report-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) | a Markdown founder-facing report exists, but no CLI, dashboard runtime, status API, automatic report generator, or product surface exists | dashboard runtime, observability CLI, status API, product UI |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -293,6 +294,25 @@ Still open:
 - whether any future Observatory should be docs-only, report-only, CLI-only, or
   UI-based after explicit founder approval.
 
+### Foundation Observatory Report
+
+Clarified by
+[FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), but not
+implemented as a runtime surface. It remains open because P94 creates a
+Markdown report only. It does not create a dashboard runtime, Web UI,
+observability CLI, automatic report generator, status API, product surface, or
+runtime monitor.
+
+Still open:
+
+- whether future observatory output should stay Markdown-only or gain a CLI
+  report boundary;
+- whether status assignment needs a separate Visual Status Assignment Policy;
+- how a future CLI would avoid becoming a dashboard runtime;
+- whether the report should be generated from files, manually maintained, or
+  kept as a phase artifact;
+- what founder-approved gate is required before any observability tool exists.
+
 ### Recall Event Write Policy
 
 Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
@@ -438,6 +458,8 @@ The following remain blocked until a future explicit implementation phase:
 - dashboard runtime;
 - Foundation Observatory runtime;
 - observability CLI;
+- status API;
+- automatic report generator;
 - product-layer visual surface;
 - harness implementation;
 - fixture schema;
@@ -448,7 +470,6 @@ The following remain blocked until a future explicit implementation phase:
 ## Current Recommendation
 
 Continue document-only planning unless the founder explicitly approves an
-implementation phase. Useful future directions include Tool Verification
-Evidence Model, Tool Candidate Review Schema, Procedural Memory Alignment, Safe
-Tool Library Policy, Capability Growth Evaluation Plan, Visual Status Assignment
-Policy, or founder / CTO review.
+implementation phase. The P94 report recommends founder / CTO review first,
+then a possible Minimal Observatory CLI RFC if the founder chooses to continue
+the observability path.

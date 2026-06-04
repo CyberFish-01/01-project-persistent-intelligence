@@ -68,6 +68,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P93 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [ZH](./VISUAL_NAMING_GUIDE_ZH.md) | naming guide | founder-facing vocabulary | 把英文 internal keys 映射为未来视觉基础层表面使用的中文显示名。 | Web UI、dashboard runtime、observability CLI、product layer 或 Foundation Observatory implementation |
+| P94 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [ZH](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | observatory report | founder-facing report | 提供 Markdown foundation snapshot、axes map、readiness matrix、boundary status 和 risk heatmap。 | dashboard runtime、Web UI、observability CLI、product layer、status API 或 runtime report generator |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -155,6 +156,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 27. [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) 把 founder-facing
     中文显示名映射到 English internal keys，但不批准 Web UI、dashboard runtime、
     observability CLI、product layer 或 Foundation Observatory implementation。
+28. [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md)
+    把 P93 naming 应用到 Markdown founder-facing status report，但不批准 dashboard runtime、
+    Web UI、observability CLI、product layer、status API 或 runtime report generation。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -191,6 +195,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - dashboard runtime；
 - Foundation Observatory runtime；
 - observability CLI；
+- status API；
+- runtime report generator；
 - harness implementation；
 - fixture schema；
 - output schema；

@@ -19,16 +19,15 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P93 Visual Naming Guide is complete as document-only
-planning. The next direction must be confirmed by the founder. Candidate
-directions include Visual Status Assignment Policy, Tool Verification Evidence
-Model, Tool Candidate Review Schema, Procedural Memory Alignment, Safe Tool
-Library Policy, Capability Growth Evaluation Plan, Minimal CLI Harness
-Implementation Plan, or founder / CTO review.
+Current work status: P94 Foundation Observatory Report is complete as
+document/report-only planning. The next direction must be confirmed by the
+founder. Recommended next step is founder / CTO review before any P95 direction;
+if observability continues, a Minimal Observatory CLI RFC should come before any
+CLI, dashboard, Web UI, status API, or product work.
 
 The runtime and adapter references below are historical/engineering references;
-they are not approval to enter P94, implement a harness, build Foundation
-Observatory, dashboard, Web UI, observability CLI, expand into the application
+they are not approval to enter P95, implement a harness, build dashboard
+runtime, Web UI, observability CLI, status API, expand into the application
 layer, UI, AstrBot, product, Temporal Awareness runtime, tool execution,
 automatic tool generation, automatic tool promotion, growth execution, memory
 rewrite, or reconstruction reducers.
@@ -40,7 +39,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P93 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P94 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -52,6 +51,7 @@ Read these first when joining the project or handing it to another agent:
 - [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) / [OPEN_QUESTIONS_ZH.md](./OPEN_QUESTIONS_ZH.md): current open foundation questions and status.
 - [RFC_INDEX.md](./RFC_INDEX.md) / [RFC_INDEX_ZH.md](./RFC_INDEX_ZH.md): index for foundation RFC, policy, review, audit, and matrix artifacts.
 - [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [VISUAL_NAMING_GUIDE_ZH.md](./VISUAL_NAMING_GUIDE_ZH.md): P93 founder-facing vocabulary and Chinese display-name mapping for future visual surfaces.
+- [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [FOUNDATION_OBSERVATORY_REPORT_ZH.md](./FOUNDATION_OBSERVATORY_REPORT_ZH.md): P94 Markdown founder-facing snapshot, readiness matrix, boundary status, risk heatmap, and next-step recommendation.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 
 ## Foundation Review Artifacts
@@ -122,8 +122,8 @@ The central claim:
 
 ## Prototype Reference
 
-This repository includes a minimal local prototype. After P93 document-only
-visual naming planning, these commands remain verification and
+This repository includes a minimal local prototype. After P94 document/report-only
+Foundation Observatory reporting, these commands remain verification and
 orientation references only:
 
 ```bash
