@@ -17,7 +17,7 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P138 Context Package Preview CLI Plan 已完成。future preview command 被规划为 local、deterministic、read-only、report-only，但没有实现 command、builder、retrieval engine、model call、write path、adapter、tool 或 rebuild。
+当前工作状态：P139 Source Selection Matrix 已完成。future context packages 现在有 document-only rules，用于 selected 和 omitted sources、trust levels、risks，以及 temporal/capability selection boundaries；仍未实现 retrieval、ranking、builder、model calls、writes、adapters、tools 或 rebuild。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -31,7 +31,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P138 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P139 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -75,6 +75,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDER_CONSOLE_ROADMAP.md](./FOUNDER_CONSOLE_ROADMAP.md) / [FOUNDER_CONSOLE_ROADMAP_ZH.md](./FOUNDER_CONSOLE_ROADMAP_ZH.md)：P136 roadmap，收口 founder-console planning，并后推 implementation，直到 context package contracts 存在。
 - [CONTEXT_PACKAGE_BUILDER_RFC.md](./CONTEXT_PACKAGE_BUILDER_RFC.md) / [CONTEXT_PACKAGE_BUILDER_RFC_ZH.md](./CONTEXT_PACKAGE_BUILDER_RFC_ZH.md)：P137 RFC-only context package contract，用于 future model-as-resource preparation。
 - [CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md) / [CONTEXT_PACKAGE_PREVIEW_CLI_PLAN_ZH.md](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN_ZH.md)：P138 document-only plan，规划 future local deterministic read-only context package preview CLI。
+- [SOURCE_SELECTION_MATRIX.md](./SOURCE_SELECTION_MATRIX.md) / [SOURCE_SELECTION_MATRIX_ZH.md](./SOURCE_SELECTION_MATRIX_ZH.md)：P139 source selection matrix，覆盖 future context packages、trust levels、omission reasons 和 temporal/capability boundaries。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 

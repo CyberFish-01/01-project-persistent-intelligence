@@ -99,6 +99,7 @@ implementation approval.
 |---|---|---|---|---|---|
 | P137 | [CONTEXT_PACKAGE_BUILDER_RFC.md](./CONTEXT_PACKAGE_BUILDER_RFC.md) / [ZH](./CONTEXT_PACKAGE_BUILDER_RFC_ZH.md) | builder RFC | RFC-only package contract | Defines required context packs, trust levels, source references, temporal pack boundary, capability pack boundary, and response strategy pack. | builder implementation, retrieval engine, model call, prompt execution, state write, memory write, identity mutation, adapter integration, tool execution, or rebuild |
 | P138 | [CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_CLI_PLAN_ZH.md) | CLI plan | document-only plan | Plans a future local deterministic read-only context package preview CLI without adding the command. | command implementation, parser, builder, retrieval engine, model call, prompt execution, state write, memory write, adapter integration, tool execution, or rebuild |
+| P139 | [SOURCE_SELECTION_MATRIX.md](./SOURCE_SELECTION_MATRIX.md) / [ZH](./SOURCE_SELECTION_MATRIX_ZH.md) | matrix | document-only selection matrix | Defines pack-level source preferences, trust levels, omission reasons, and temporal/capability selection boundaries. | retrieval implementation, ranking engine, builder, model call, prompt execution, state write, memory write, adapter integration, tool execution, or rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
