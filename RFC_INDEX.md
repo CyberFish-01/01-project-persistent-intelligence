@@ -58,6 +58,12 @@ implementation approval.
 | P90 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [ZH](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | roadmap | harness readiness roadmap | Assesses future minimal CLI harness readiness and gates. | harness implementation or approval |
 | P82-P90 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [ZH](./HARNESS_TRANSITION_SUMMARY_ZH.md) | summary | transition closure | Summarizes the planning bridge from temporal concept safety to future harness readiness. | P91 implementation approval |
 
+## Capability Evolution And Tool Boundary
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P91 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [ZH](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | future RFC | capability evolution boundary | Translates Yunjue / zero-start tool-first self-evolution into review-only capability evolution vocabulary. | tool execution, auto tool generation, auto promotion, policy executor, or identity growth |
+
 ## Exploration And Subject Boundary
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
@@ -138,6 +144,10 @@ The current dependency order is:
 24. [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md)
     closes the P82-P90 planning bridge and keeps P91 implementation blocked
     until explicit future approval.
+25. [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md)
+    translates zero-start, tool-first self-evolution into capability review
+    vocabulary without approving tool execution, tool generation, tool
+    promotion, policy execution, or Identity Core mutation.
 
 ## Runtime-Blocked Topics
 
@@ -162,6 +172,10 @@ The indexed documents do not approve:
 - scenario tests for harness work;
 - memory decay;
 - salience mutation;
+- tool execution runtime;
+- automatic tool generation;
+- automatic tool promotion;
+- tool library mutation;
 - harness implementation;
 - fixture schema;
 - output schema;

@@ -347,3 +347,58 @@ temporal coherence vocabulary。
 未来可能用于表示需要 shallow、normal 还是 deep review。
 
 边界：它不是 adaptive compute runtime、不是 thought loop，也不是 policy execution。
+
+## Capability Evolution / 能力演化
+
+使用 objective task evidence，在 review 管控下改进 tools、skills 和 procedures。
+
+边界：capability evolution 不是 subject evolution，也不修改 Identity Core。
+
+## Subject Evolution / 主体演化
+
+可能影响 continuity、identity interpretation 或 long-term subject history 的 meaning-bearing
+subject-state transition。
+
+边界：subject evolution 仍是 high-gated，不能只由 tool success 触发。
+
+## Tool Candidate / 工具候选
+
+可能帮助完成任务的 proposed tool、script、function、command pattern 或 external capability wrapper。
+
+边界：tool candidate 不是 trusted code、不是 tool-library entry，也不是 execution approval。
+
+## Procedure Candidate / 流程候选
+
+包含 steps、checks、inputs、outputs、rollback notes 和 safety boundaries 的 proposed repeatable
+workflow。
+
+边界：procedure candidate 不是 active procedural memory，也不是 executable policy。
+
+## Skill Memory / 技能记忆
+
+未来可能用于保存经过 review 的 reusable capability knowledge 的 memory category。
+
+边界：skill memory 不是 identity memory、不是 policy execution，也不是 automatic tool invocation。
+
+## Capability Growth Candidate / 能力成长候选
+
+一个 review object，用于提出 tool 或 procedure use 的 evidence 可能表示 durable capability
+improvement。
+
+边界：capability growth candidate 不是 subject growth、tool promotion、memory rewrite 或 identity
+mutation。
+
+## Tool Candidate Review / 工具候选审查
+
+未来 review surface，用于检查 proposed tool 是否 safe、relevant、testable、reproducible、bounded
+且 dependency-aware。
+
+边界：tool candidate review 不执行 tool、不安装 dependencies，也不把 tool 加入 library。
+
+## Tool-First Self-Evolution / 工具优先自进化
+
+一个 RFC-only direction，把可验证的 tool、skill 和 procedure improvement 放在 subject 或 identity
+evolution 之前。
+
+边界：tool-first self-evolution 不批准 tool execution、automatic tool generation、automatic tool
+promotion、policy execution 或 Identity Core mutation。

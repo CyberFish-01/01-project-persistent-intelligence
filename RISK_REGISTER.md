@@ -16,8 +16,8 @@ mitigation guidance is not policy execution.
 blocked runtime work remains blocked.
 ```
 
-This register exists to keep the foundation layer honest while P68-P80 continue
-low-risk consolidation.
+This register exists to keep the foundation layer honest while P91 and later
+planning phases discuss capability evolution without approving runtime work.
 
 ## Risk Levels
 
@@ -48,6 +48,11 @@ low-risk consolidation.
 | R16 | README entrance overload | medium | new readers cannot find stable foundation vs future-only work | optimize README entrance and index docs without adding features | productizing the README |
 | R17 | P80 pressure | medium | phases are opened just to advance numbering | use [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) as the stop condition; skip, merge, or stop if a phase does not add clarity | opening empty phases |
 | R18 | Cloud/AstrBot deployment pressure | medium | local foundation docs are treated as a reason to update cloud or AstrBot now | keep cloud and AstrBot pushed back until foundation loop ends | cloud runtime rollout, AstrBot specialization |
+| R19 | Tool evolution becomes uncontrolled autonomy | high | tool candidates, verification, and reuse are connected into an action loop | keep [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) review-only until tool verification, safe library, and human review gates exist | tool execution runtime, automatic tool generation |
+| R20 | Verification mistaken for authorization | high | a passing tool check is treated as permission to promote or reuse | require separate tool candidate review, procedure review, capability growth review, and founder gate | automatic tool promotion, policy executor |
+| R21 | Tool library pollution | high | one-off or unsafe candidates accumulate as reusable capability | require reproducibility, dependency checks, safety boundary checks, rollback notes, and quarantine path | tool library mutation |
+| R22 | Capability growth mistaken for identity growth | high | better task performance is described as subject growth | keep capability evolution and subject evolution layered; route identity pressure to Identity Gate | Identity Core mutation from capability evidence |
+| R23 | Dependency / network / filesystem risk | high | tool candidates require packages, APIs, files, credentials, or network access | require dependency check, safety boundary check, and human review before any future execution | dependency installation, network calls, filesystem mutation |
 
 ## Risk Clusters
 
@@ -91,6 +96,14 @@ Risks: R10, R12, R18.
 Primary control: Identity Core stays high-gated. Subject Kernel / World Seed
 remain conceptual. Platforms and adapters translate; they do not own identity.
 
+### Capability Evolution And Tools
+
+Risks: R19, R20, R21, R22, R23.
+
+Primary control: tool-first self-evolution remains a review-only capability
+boundary. Tool improvement is not identity growth. Verification evidence is not
+authorization. Candidate review is not promotion.
+
 ### Documentation Operations
 
 Risks: R15, R16.
@@ -98,16 +111,16 @@ Risks: R15, R16.
 Primary control: keep bilingual docs synchronized, reduce README overload, and
 make stable/future/blocked status visible through indexes.
 
-## Immediate Watch Items For P73-P80
+## Immediate Watch Items For P91-P92
 
-- P73 Architecture Boundary Refresh should update older P53 boundary language
-  with P58-P72 artifacts.
-- P74 Glossary Deduplication should reduce term drift around growth, drift,
-  lifecycle, recall, temporal awareness, reducer, and capture.
-- P75 README Entrance Optimization should make foundation, RFCs, and blocked
-  runtime work easier to scan.
-- P76 Foundation Review Checklist should convert this register into a manual
-  review checklist, not an automated executor.
+- P91 Tool-First Self-Evolution RFC must remain RFC-only and must not create
+  tool execution, automatic tool generation, automatic tool promotion, or a
+  policy executor.
+- P92 should only proceed after choosing a narrow document-only direction such
+  as Tool Verification Evidence Model, Tool Candidate Review Schema, Safe Tool
+  Library Policy, or Capability Growth Evaluation Plan.
+- Any future implementation phase needs explicit founder approval and a
+  separate no-write, no-identity-mutation validation gate.
 
 ## Non-Execution Statement
 
@@ -118,6 +131,10 @@ P72 does not implement:
 - Temporal Awareness runtime;
 - recall event writes;
 - growth lifecycle execution;
+- tool execution runtime;
+- automatic tool generation;
+- automatic tool promotion;
+- tool library mutation;
 - identity mutation;
 - memory rewrite;
 - payload capture;

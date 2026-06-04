@@ -34,6 +34,7 @@ not implemented, and not closed as runtime capabilities.
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview and ordering vocabulary exists, but no queue runtime, storage, lifecycle execution, or approval path exists | queue execution, lifecycle execution, candidate approval |
 | Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios exist, but no harness, tests, temporal runtime, temporal events, or salience policy exists | session runtime, temporal event write, memory decay |
 | Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness is assessed, but fixture contract, output contract, boundary test plan, and explicit implementation approval are missing | harness implementation, CLI commands, runtime work |
+| Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary exists, but no tool execution, verification schema, review schema, safe tool library policy, or promotion gate exists | tool execution, auto tool generation, auto tool promotion, policy executor |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -230,6 +231,28 @@ Still open:
 - privacy and redaction policy;
 - explicit founder approval for any future implementation phase.
 
+### Tool-First Self-Evolution
+
+Clarified by
+[TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md), but not
+implemented. It remains open because P91 defines a capability evolution layer
+only as review vocabulary and does not create tool execution, auto tool
+generation, auto tool promotion, tool library mutation, policy execution, or
+identity mutation.
+
+Still open:
+
+- what future tool candidate review schema should contain;
+- how verification evidence should be represented without becoming
+  authorization;
+- how failed tool candidates become cautionary procedural memory candidates;
+- what gate separates capability growth candidate review from subject growth
+  candidate review;
+- what safe tool library policy would block pollution, unsafe reuse, dependency
+  risk, network risk, and filesystem risk;
+- whether capability evidence can enter Event Log only by reference, and under
+  which future event policy.
+
 ### Recall Event Write Policy
 
 Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
@@ -364,6 +387,10 @@ The following remain blocked until a future explicit implementation phase:
 - scenario tests for harness work;
 - memory decay;
 - salience mutation;
+- tool execution runtime;
+- automatic tool generation;
+- automatic tool promotion;
+- tool library mutation;
 - harness implementation;
 - fixture schema;
 - output schema;
@@ -372,5 +399,7 @@ The following remain blocked until a future explicit implementation phase:
 
 ## Current Recommendation
 
-Continue low-risk consolidation only. The next useful work is a risk register
-or architecture boundary refresh, not runtime capability.
+Continue RFC-only capability planning unless the founder explicitly approves an
+implementation phase. Useful P92 candidates include Tool Verification Evidence
+Model, Tool Candidate Review Schema, Safe Tool Library Policy, or Capability
+Growth Evaluation Plan.

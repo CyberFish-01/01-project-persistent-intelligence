@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P90。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P91。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -97,3 +97,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P88 | 加入 Review Queue Preview RFC。 | candidate queue 在 lifecycle execution 前需要 preview vocabulary。 | Harness Planning |
 | P89 | 加入 Session Resume Scenario Plan。 | resume scenarios 在 temporal runtime 前应保持 deterministic。 | Harness Evaluation Planning |
 | P90 | 加入 Core Interaction Harness Roadmap。 | harness readiness 应先 review，再谈 implementation。 | Harness Planning |
+| P91 | 加入 Tool-First Self-Evolution RFC。 | capability 应先在 feedback 可验证处演化，同时不修改 identity。 | Capability Evolution |

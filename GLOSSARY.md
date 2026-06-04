@@ -429,3 +429,67 @@ needed.
 
 Boundary: it is not adaptive compute runtime, not a thought loop, and not policy
 execution.
+
+## Capability Evolution
+
+The review-governed improvement of tools, skills, and procedures using objective
+task evidence.
+
+Boundary: capability evolution is not subject evolution and does not modify
+Identity Core.
+
+## Subject Evolution
+
+A meaning-bearing subject-state transition that may affect continuity, identity
+interpretation, or long-term subject history.
+
+Boundary: subject evolution remains high-gated and must not be triggered by tool
+success alone.
+
+## Tool Candidate
+
+A proposed tool, script, function, command pattern, or external capability
+wrapper that may help complete a task.
+
+Boundary: a tool candidate is not trusted code, not a tool-library entry, and not
+execution approval.
+
+## Procedure Candidate
+
+A proposed repeatable workflow with steps, checks, inputs, outputs, rollback
+notes, and safety boundaries.
+
+Boundary: a procedure candidate is not active procedural memory and not
+executable policy.
+
+## Skill Memory
+
+A possible future memory category for reviewed, reusable capability knowledge.
+
+Boundary: skill memory is not identity memory, not policy execution, and not
+automatic tool invocation.
+
+## Capability Growth Candidate
+
+A review object proposing that evidence from tool or procedure use may indicate
+durable capability improvement.
+
+Boundary: capability growth candidate is not subject growth, tool promotion,
+memory rewrite, or identity mutation.
+
+## Tool Candidate Review
+
+A future review surface for checking whether a proposed tool is safe, relevant,
+testable, reproducible, bounded, and dependency-aware.
+
+Boundary: tool candidate review does not execute the tool, install dependencies,
+or add the tool to a library.
+
+## Tool-First Self-Evolution
+
+An RFC-only direction that puts verifiable tool, skill, and procedure improvement
+before subject or identity evolution.
+
+Boundary: tool-first self-evolution does not approve tool execution, automatic
+tool generation, automatic tool promotion, policy execution, or Identity Core
+mutation.

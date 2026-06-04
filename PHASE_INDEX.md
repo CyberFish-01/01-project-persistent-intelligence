@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P90. It is not a release log. It records how the system
+This index covers P0-P91. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -98,3 +98,4 @@ foundation evolved.
 | P88 | Added Review Queue Preview RFC. | Candidate queues need preview vocabulary before lifecycle execution. | Harness Planning |
 | P89 | Added Session Resume Scenario Plan. | Resume scenarios should be deterministic before any temporal runtime. | Harness Evaluation Planning |
 | P90 | Added Core Interaction Harness Roadmap. | Harness readiness should be reviewed before any implementation. | Harness Planning |
+| P91 | Added Tool-First Self-Evolution RFC. | Capability should evolve first where feedback is verifiable, without identity mutation. | Capability Evolution |

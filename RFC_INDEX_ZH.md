@@ -56,6 +56,12 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P90 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [ZH](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | roadmap | harness readiness roadmap | 评估未来 minimal CLI harness readiness 和 gates。 | harness implementation 或 approval |
 | P82-P90 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [ZH](./HARNESS_TRANSITION_SUMMARY_ZH.md) | summary | transition closure | 总结从 temporal concept safety 到 future harness readiness 的 planning bridge。 | P91 implementation approval |
 
+## Capability Evolution And Tool Boundary / 能力演化与工具边界
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P91 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [ZH](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | future RFC | capability evolution boundary | 把 Yunjue / zero-start tool-first self-evolution 翻译成 review-only capability evolution vocabulary。 | tool execution、auto tool generation、auto promotion、policy executor 或 identity growth |
+
 ## Exploration And Subject Boundary / 探索与主体边界
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
@@ -133,6 +139,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     schemas、tests、adapters、UI 或 runtime work。
 24. [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md)
     收束 P82-P90 planning bridge，并在 explicit future approval 前继续阻塞 P91 implementation。
+25. [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md)
+    把 zero-start、tool-first self-evolution 翻译成 capability review vocabulary，但不批准 tool
+    execution、tool generation、tool promotion、policy execution 或 Identity Core mutation。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -157,6 +166,10 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - scenario tests for harness work；
 - memory decay；
 - salience mutation；
+- tool execution runtime；
+- automatic tool generation；
+- automatic tool promotion；
+- tool library mutation；
 - harness implementation；
 - fixture schema；
 - output schema；

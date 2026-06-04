@@ -34,6 +34,7 @@ capabilities 被关闭。
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview 和 ordering vocabulary 已存在，但没有 queue runtime、storage、lifecycle execution 或 approval path | queue execution、lifecycle execution、candidate approval |
 | Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios 已存在，但没有 harness、tests、temporal runtime、temporal events 或 salience policy | session runtime、temporal event write、memory decay |
 | Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness 已评估，但缺 fixture contract、output contract、boundary test plan 和 explicit implementation approval | harness implementation、CLI commands、runtime work |
+| Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary 已存在，但没有 tool execution、verification schema、review schema、safe tool library policy 或 promotion gate | tool execution、auto tool generation、auto tool promotion、policy executor |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -202,6 +203,23 @@ harness implementation。
 - privacy 和 redaction policy；
 - 任何 future implementation phase 都需要 explicit founder approval。
 
+### Tool-First Self-Evolution / 工具优先自进化
+
+已由 [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) 澄清，但没有实现。
+它仍然 open，因为 P91 只把 capability evolution layer 定义为 review vocabulary，没有创建 tool
+execution、auto tool generation、auto tool promotion、tool library mutation、policy execution 或
+identity mutation。
+
+仍开放：
+
+- future tool candidate review schema 应包含什么；
+- verification evidence 如何表示，同时不变成 authorization；
+- failed tool candidates 如何成为 cautionary procedural memory candidates；
+- 什么 gate 区分 capability growth candidate review 和 subject growth candidate review；
+- safe tool library policy 如何阻止 pollution、unsafe reuse、dependency risk、network risk 和
+  filesystem risk；
+- capability evidence 是否只能通过 reference 进入 Event Log，以及需要哪种 future event policy。
+
 ### Recall Event Write Policy / 回忆事件写入策略
 
 已由 [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) 澄清。Ordinary
@@ -335,6 +353,10 @@ policy 仍与 payload capture 分离。
 - scenario tests for harness work；
 - memory decay；
 - salience mutation；
+- tool execution runtime；
+- automatic tool generation；
+- automatic tool promotion；
+- tool library mutation；
 - harness implementation；
 - fixture schema；
 - output schema；
@@ -343,5 +365,6 @@ policy 仍与 payload capture 分离。
 
 ## Current Recommendation / 当前建议
 
-继续低风险 consolidation。下一项有价值工作是 risk register 或 architecture boundary refresh，
-不是 runtime capability。
+继续 RFC-only capability planning，除非项目创始人明确批准 implementation phase。可用的 P92
+候选包括 Tool Verification Evidence Model、Tool Candidate Review Schema、Safe Tool Library Policy
+或 Capability Growth Evaluation Plan。

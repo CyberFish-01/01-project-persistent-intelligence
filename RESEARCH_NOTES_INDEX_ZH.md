@@ -38,6 +38,7 @@ origin ideas are not implementation approval.
 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [SESSION_RESUME_SCENARIO_PLAN_ZH.md](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | Resume scenario plan | 定义 deterministic resume scenarios，不写 temporal events，也不做 resume runtime。 |
 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [CORE_INTERACTION_HARNESS_ROADMAP_ZH.md](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | Harness roadmap | 评估 future minimal CLI harness readiness，但不批准 implementation。 |
 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [HARNESS_TRANSITION_SUMMARY_ZH.md](./HARNESS_TRANSITION_SUMMARY_ZH.md) | Harness transition summary | 收束 P82-P90 planning，并在 explicit approval 前继续阻塞 implementation。 |
+| [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | External inspiration RFC | 把 Yunjue / zero-start in-situ self-evolving agent 思想翻译成 review-only capability evolution vocabulary，不执行工具。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -81,6 +82,7 @@ origin ideas are not implementation approval.
 | Session Resume Scenario Plan | 任何 harness runtime 前，resume 需要 deterministic elapsed-time scenarios。 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md), [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | `scenario-plan`, not temporal runtime |
 | Core Interaction Harness Roadmap | foundation 现在可以讨论 future fixture-first CLI harness，但 implementation 仍 blocked。 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `roadmap`, not implementation approval |
 | Harness Transition Summary | future P91 contract work 前，P82-P90 需要 compact closeout。 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md), [RFC_INDEX.md](./RFC_INDEX.md) | `summary`, not implementation approval |
+| Tool-First Self-Evolution | Yunjue-style zero-start tool evolution 提示应先在 feedback 可验证的能力层演化。 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not tool runtime |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -114,6 +116,8 @@ Research notes 是 source material，不是当前 implementation plan。
 - automatic growth or drift classification；
 - CTM runtime 或 model training；
 - thought loop execution；
+- tool execution 或 automatic tool generation；
+- automatic tool promotion 或 tool library mutation；
 - identity mutation、memory rewrite、payload capture、reducer execution。
 
 ## Reading Order / 阅读顺序
@@ -154,6 +158,9 @@ Research notes 是 source material，不是当前 implementation plan。
     schemas、tests、adapters、UI 或 runtime work。
 16. 阅读 [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md)
     时，把它当作 P82-P90 closeout，不要当作进入 P91 或实现 harness 的许可。
+17. 阅读 [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md)
+    时，只把它当作 tool-first capability evolution RFC，不要当作 tool execution、tool generation、
+    tool promotion、policy execution 或 identity mutation approval。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 
@@ -168,6 +175,10 @@ P78 不实现：
 - Temporal Awareness runtime；
 - recall event writes；
 - growth lifecycle execution；
+- tool execution；
+- automatic tool generation；
+- automatic tool promotion；
+- policy executor；
 - identity mutation；
 - memory rewrite；
 - payload capture；
