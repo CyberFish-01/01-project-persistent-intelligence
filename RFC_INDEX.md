@@ -120,6 +120,7 @@ implementation approval.
 |---|---|---|---|---|---|
 | P148 | [REBUILD_ENTRY_GATE_CHECKLIST.md](./REBUILD_ENTRY_GATE_CHECKLIST.md) / [ZH](./REBUILD_ENTRY_GATE_CHECKLIST_ZH.md) | checklist | document-only gate checklist | Defines required gates and evidence before local 01 rebuild can be considered. | verification execution, rebuild start, old 01 read, state migration, memory write, adapter integration, model call, tool execution, reducer execution, or event compaction |
 | P149 | [PRE_REBUILD_SYSTEM_REVIEW.md](./PRE_REBUILD_SYSTEM_REVIEW.md) / [ZH](./PRE_REBUILD_SYSTEM_REVIEW_ZH.md) | system review | document-only review | Reviews whether P112-P148 prepared the system for final read-only pre-rebuild verification. | verification execution, rebuild start, old 01 read, state migration, memory write, adapter integration, model call, tool execution, reducer execution, or event compaction |
+| P150 | [FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md) / [ZH](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD_ZH.md) | verification plan | document-only plan | Defines final read-only verification areas, commands, forbidden patterns, pass criteria, and failure handling before rebuild. | verification execution, rebuild start, old 01 read, state migration, memory write, adapter integration, model call, tool execution, reducer execution, or event compaction |
 
 ## Founder-Facing Vocabulary And Visual Naming
 

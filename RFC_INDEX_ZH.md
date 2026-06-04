@@ -118,6 +118,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 |---|---|---|---|---|---|
 | P148 | [REBUILD_ENTRY_GATE_CHECKLIST.md](./REBUILD_ENTRY_GATE_CHECKLIST.md) / [ZH](./REBUILD_ENTRY_GATE_CHECKLIST_ZH.md) | checklist | document-only gate checklist | 定义本地 01 rebuild 被考虑前所需 gates 和 evidence。 | verification execution、rebuild start、old 01 read、state migration、memory write、adapter integration、model call、tool execution、reducer execution 或 event compaction |
 | P149 | [PRE_REBUILD_SYSTEM_REVIEW.md](./PRE_REBUILD_SYSTEM_REVIEW.md) / [ZH](./PRE_REBUILD_SYSTEM_REVIEW_ZH.md) | system review | document-only review | 复盘 P112-P148 是否让系统准备好进入 final read-only pre-rebuild verification。 | verification execution、rebuild start、old 01 read、state migration、memory write、adapter integration、model call、tool execution、reducer execution 或 event compaction |
+| P150 | [FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md) / [ZH](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD_ZH.md) | verification plan | document-only plan | 定义 rebuild 前 final read-only verification areas、commands、forbidden patterns、pass criteria 和 failure handling。 | verification execution、rebuild start、old 01 read、state migration、memory write、adapter integration、model call、tool execution、reducer execution 或 event compaction |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 

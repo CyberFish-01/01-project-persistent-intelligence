@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P149. It is not a release log. It records how the system
+This index covers P0-P150. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -157,3 +157,4 @@ foundation evolved.
 | P147 | Added Rebuild Migration Protocol RFC. | Rebuild migration requires gates and trust review; a migration plan is not rebuild execution. | Response Boundary |
 | P148 | Added Rebuild Entry Gate Checklist. | Ready for verification is not ready for rebuild; rebuild requires evidence and founder checkpoint. | Pre-Rebuild Verification |
 | P149 | Added Pre-Rebuild System Review. | The system is ready for final read-only verification, not for rebuild itself. | Pre-Rebuild Verification |
+| P150 | Added Full Verification Plan Before Rebuild. | Final verification needs explicit read-only checks, pass criteria, and failure handling before rebuild can be considered. | Pre-Rebuild Verification |

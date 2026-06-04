@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P149。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P150。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -156,3 +156,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P147 | 加入 Rebuild Migration Protocol RFC。 | rebuild migration 需要 gates 和 trust review；migration plan 不是 rebuild execution。 | Response Boundary |
 | P148 | 加入 Rebuild Entry Gate Checklist。 | ready for verification 不是 ready for rebuild；rebuild 需要 evidence 和 founder checkpoint。 | Pre-Rebuild Verification |
 | P149 | 加入 Pre-Rebuild System Review。 | 系统已经可以进入 final read-only verification，但不能进入 rebuild 本身。 | Pre-Rebuild Verification |
+| P150 | 加入 Full Verification Plan Before Rebuild。 | final verification 需要 explicit read-only checks、pass criteria 和 failure handling，之后才能考虑 rebuild。 | Pre-Rebuild Verification |
