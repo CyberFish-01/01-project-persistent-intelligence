@@ -292,15 +292,40 @@ P99 document-only plan，用于规划 P100 `harness-dry-run` command。它定义
 input fields、output sections、candidate preview types、boundary rules 和 initial tests plan。
 
 边界：该 plan 不批准 model calls、external API calls、state writes、adapter integration、product
-behavior 或 P101。
+behavior 或 P103。
 
 ## Harness Dry-Run / 试验台 Dry-Run
 
-P100 本地 CLI pressure test，用于 preview 一条 user message 如何经过 intake、context preview、
-candidate preview、review queue preview、boundary monitor 和 observatory snapshot。
+P100 本地 CLI pressure test，并在 P102 增加 deterministic input classification，用于 preview 一条
+user message 如何经过 intake、scenario routing、context preview、candidate preview、review queue
+preview、boundary monitor 和 observatory snapshot。
 
 边界：dry-run means no writes、no model call、no external API call、no adapter ownership、no
 identity mutation、no memory rewrite、no recall event write、no growth execution、no tool execution。
+
+## Input Pressure Type / 输入压力类型
+
+`harness-dry-run` 为解释 user input 可能造成哪类压力而赋予的 deterministic label。P102 支持
+observability、growth review、adapter boundary、product layer、capability evolution、temporal、
+reconstruction 和 unknown pressure。
+
+边界：input pressure type 是 static dry-run classification。它不是 intent understanding、model
+inference、retrieval、event writing、authorization 或 automatic routing。
+
+## Scenario Profile / 场景档案
+
+由 input pressure type 选择的 dry-run profile。它会改变 context preview、candidate preview、review
+gates、highlighted boundaries、profile-specific risks 和 recommended next step。
+
+边界：scenario profile 不是 runtime plan、policy executor、adapter flow、tool execution path 或
+product workflow。
+
+## Harness Scenario Routing / 试验台场景分流
+
+P102 rule-based dry-run mechanism，在渲染报告前把 matched keywords 映射到 scenario profile。
+
+边界：scenario routing 是 deterministic 和 local 的。它不调用 LLM、不执行真实 retrieval、不读写
+state、不接 AstrBot、不执行 tools，也不创建 review lifecycles。
 
 ## Fixture-First Harness / Fixture 优先试验台
 

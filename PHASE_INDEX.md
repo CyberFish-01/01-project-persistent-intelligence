@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P101. It is not a release log. It records how the system
+This index covers P0-P102. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -109,3 +109,4 @@ foundation evolved.
 | P99 | Added Minimal CLI Harness Implementation Plan. | A future interaction pressure test needs a no-write dry-run plan before implementation. | Harness Planning |
 | P100 | Added Minimal CLI Harness Dry-Run implementation. | Founder-facing interaction pressure can be previewed locally without writes, model calls, adapters, or product behavior. | Harness Preview |
 | P101 | Added Harness Usability Review. | The dry-run preview is useful for boundaries, but still too static to guide real routing or next-step decisions. | Harness Review |
+| P102 | Added Harness Input Classification and Scenario Routing. | Dry-run inputs can be deterministically classified into pressure profiles without retrieval, writes, adapters, tools, or runtime execution. | Harness Preview |

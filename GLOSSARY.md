@@ -358,17 +358,47 @@ dry-run scope, input fields, output sections, candidate preview types, boundary
 rules, and the initial tests plan.
 
 Boundary: the plan does not approve model calls, external API calls, state
-writes, adapter integration, product behavior, or P101.
+writes, adapter integration, product behavior, or P103.
 
 ## Harness Dry-Run
 
-A P100 local CLI pressure test that previews how one user message moves through
-intake, context preview, candidate preview, review queue preview, boundary
-monitor, and observatory snapshot.
+A P100 local CLI pressure test, improved in P102 with deterministic input
+classification, that previews how one user message moves through intake,
+scenario routing, context preview, candidate preview, review queue preview,
+boundary monitor, and observatory snapshot.
 
 Boundary: dry-run means no writes, no model call, no external API call, no
 adapter ownership, no identity mutation, no memory rewrite, no recall event
 write, no growth execution, and no tool execution.
+
+## Input Pressure Type
+
+A deterministic label assigned by `harness-dry-run` to explain what kind of
+pressure a user input appears to create. P102 supports observability, growth
+review, adapter boundary, product layer, capability evolution, temporal,
+reconstruction, and unknown pressure.
+
+Boundary: input pressure type is a static dry-run classification. It is not
+intent understanding, model inference, retrieval, event writing, authorization,
+or automatic routing.
+
+## Scenario Profile
+
+The dry-run profile selected from the input pressure type. It changes the
+context preview, candidate preview, review gates, highlighted boundaries,
+profile-specific risks, and recommended next step.
+
+Boundary: a scenario profile is not a runtime plan, policy executor, adapter
+flow, tool execution path, or product workflow.
+
+## Harness Scenario Routing
+
+The P102 rule-based dry-run mechanism that maps matched keywords to a scenario
+profile before rendering a report.
+
+Boundary: scenario routing is deterministic and local. It does not call an LLM,
+perform real retrieval, read or write state, integrate AstrBot, execute tools,
+or create review lifecycles.
 
 ## Fixture-First Harness
 

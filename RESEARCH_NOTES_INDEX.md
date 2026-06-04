@@ -48,7 +48,7 @@ current documents carry it, and what is still only long-term vision?"
 | `python3 -m one_core.cli foundation-observatory-report` | Read-only observatory CLI | Implements the P96 static founder-facing report generator without dashboard runtime, policy execution, state mutation, or phase creation. |
 | [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md) | Usability review | Reviews founder-facing readability and keeps harness implementation blocked. |
 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | Plans the no-write dry-run CLI pressure test later implemented narrowly in P100. |
-| `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | Implements P100 local interaction-path preview without state writes, model calls, external APIs, adapters, or product behavior. |
+| `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | Implements P100 local interaction-path preview and P102 deterministic scenario routing without state writes, model calls, external APIs, adapters, retrieval, or product behavior. |
 | [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | Reviews whether the P100 dry-run helps the founder understand input flow and keeps real routing, retrieval, adapters, and product work blocked. |
 
 ## Original Idea Chains
@@ -98,7 +98,7 @@ current documents carry it, and what is still only long-term vision?"
 | Visual Naming Guide | Founder-facing views need plain Chinese labels without losing precise internal English keys. | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 | Foundation Observatory Report | The founder needs a readable Markdown snapshot before any dashboard or CLI plan. | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
 | Minimal Observatory CLI | A generated observatory report now needs to stay read-only and founder-facing. | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
-| Minimal CLI Harness Dry-Run | Interaction pressure now has a local no-write preview command, but no runtime, adapter, model call, or product surface. | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, not harness runtime |
+| Minimal CLI Harness Dry-Run | Interaction pressure now has a local no-write preview command with deterministic scenario routing, but no runtime, adapter, model call, retrieval, or product surface. | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, `scenario-routing`, not harness runtime |
 
 ## Second Chain Map: Artificial Life History
 
@@ -198,9 +198,9 @@ For origin tracing:
     as the boundary plan behind the P96 read-only command, not as approval for
     observability executor, dashboard runtime, status API, or phase automation.
 22. Read [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
-    as the boundary plan behind the P100 read-only `harness-dry-run` command,
+    as the boundary plan behind the P100/P102 read-only `harness-dry-run` command,
     not as approval for harness runtime, model calls, external API calls,
-    adapter integration, product layer, or P101.
+    retrieval, adapter integration, product layer, or P103.
 
 ## P78 Non-Execution Statement
 
@@ -230,8 +230,8 @@ P78 does not implement:
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
-- harness implementation beyond the P100 read-only dry-run command;
-- harness runtime beyond the P100 read-only dry-run command;
+- harness implementation beyond the P102 read-only dry-run scenario routing;
+- harness runtime beyond the P102 read-only dry-run scenario routing;
 - model calls from harness work;
 - external API calls from harness work;
 - identity mutation;

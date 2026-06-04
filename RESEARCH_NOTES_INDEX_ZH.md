@@ -46,7 +46,7 @@ origin ideas are not implementation approval.
 | `python3 -m one_core.cli foundation-observatory-report` | Read-only observatory CLI | 实现 P96 static founder-facing report generator，不做 dashboard runtime、policy execution、state mutation 或 phase creation。 |
 | [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md) | Usability review | 审查 founder-facing readability，并继续阻塞 harness implementation。 |
 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | 规划 no-write dry-run CLI pressure test，之后在 P100 中窄范围实现。 |
-| `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | 实现 P100 local interaction-path preview，不写 state、不调用模型、不调用外部 API、不接 adapter、不进入产品层。 |
+| `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | 实现 P100 local interaction-path preview 和 P102 deterministic scenario routing，不写 state、不调用模型、不调用外部 API、不接 adapter、不执行 retrieval、不进入产品层。 |
 | [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | 审查 P100 dry-run 是否帮助 founder 看懂 input flow，并继续阻塞 real routing、retrieval、adapters 和 product work。 |
 
 ## Original Idea Chains / 原始思想链
@@ -96,7 +96,7 @@ origin ideas are not implementation approval.
 | Visual Naming Guide | founder-facing views 需要朴素中文标签，同时不能丢失精确的内部英文键。 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 | Foundation Observatory Report | 任何 dashboard 或 CLI plan 前，创始人需要一份可读 Markdown snapshot。 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
 | Minimal Observatory CLI | generated observatory report 现在需要保持 read-only 和 founder-facing。 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
-| Minimal CLI Harness Dry-Run | interaction pressure 现在有 local no-write preview command，但没有 runtime、adapter、model call 或 product surface。 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, not harness runtime |
+| Minimal CLI Harness Dry-Run | interaction pressure 现在有 local no-write preview command 和 deterministic scenario routing，但没有 runtime、adapter、model call、retrieval 或 product surface。 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, `scenario-routing`, not harness runtime |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -189,8 +189,8 @@ Research notes 是 source material，不是当前 implementation plan。
     时，把它当作 P96 read-only command 背后的 boundary plan，不要当作 observability executor、
     dashboard runtime、status API 或 phase automation 的许可。
 22. 阅读 [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
-    时，把它当作 P100 read-only `harness-dry-run` command 背后的 boundary plan，不要当作
-    harness runtime、model calls、external API calls、adapter integration、product layer 或 P101 approval。
+    时，把它当作 P100/P102 read-only `harness-dry-run` command 背后的 boundary plan，不要当作
+    harness runtime、model calls、external API calls、retrieval、adapter integration、product layer 或 P103 approval。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 
@@ -220,8 +220,8 @@ P78 不实现：
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
-- 超出 P100 read-only dry-run command 的 harness implementation；
-- 超出 P100 read-only dry-run command 的 harness runtime；
+- 超出 P102 read-only dry-run scenario routing 的 harness implementation；
+- 超出 P102 read-only dry-run scenario routing 的 harness runtime；
 - model calls from harness work；
 - external API calls from harness work；
 - identity mutation；

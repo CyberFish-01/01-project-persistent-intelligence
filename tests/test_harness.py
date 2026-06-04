@@ -10,6 +10,7 @@ from one_core.harness import (
     BOUNDARY_MONITOR,
     NON_EXECUTION_INVARIANTS,
     build_harness_dry_run_report,
+    classify_input_pressure,
 )
 
 
@@ -81,7 +82,7 @@ class HarnessDryRunTests(unittest.TestCase):
 
         self.assertEqual(report["lang"], "zh")
         self.assertIn("身份核心", report["context_package_preview"]["identity_refs"])
-        self.assertEqual(report["observatory_snapshot"]["current_phase"], "P100 最小 CLI 试验台 dry-run")
+        self.assertEqual(report["observatory_snapshot"]["current_phase"], "P102 最小 CLI 试验台 scenario routing dry-run")
 
     def test_output_writes_temp_file_without_state(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -115,6 +116,12 @@ class HarnessDryRunTests(unittest.TestCase):
         report = build_harness_dry_run_report(user_message="Hello 01")
 
         for key in (
+            "input_pressure_type",
+            "scenario_profile",
+            "pressure_reason",
+            "matched_signals",
+            "profile_specific_risks",
+            "profile_specific_next_step",
             "intake_preview",
             "context_package_preview",
             "candidate_preview",
@@ -126,17 +133,10 @@ class HarnessDryRunTests(unittest.TestCase):
             self.assertIn(key, report)
 
     def test_all_candidates_remain_preview_only(self):
-        report = build_harness_dry_run_report(user_message="Hello 01")
+        report = build_harness_dry_run_report(user_message="这个想法可能是一次成长吗？")
 
-        expected_types = {
-            "memory_candidate",
-            "claim_candidate",
-            "growth_candidate_review",
-            "meaning_shift_candidate",
-            "recall_event_candidate",
-            "task_update_candidate",
-        }
-        self.assertEqual({row["candidate_type"] for row in report["candidate_preview"]}, expected_types)
+        self.assertEqual(report["input_pressure_type"], "growth_review_pressure")
+        self.assertIn("growth_candidate_review", {row["candidate_type"] for row in report["candidate_preview"]})
         for candidate in report["candidate_preview"]:
             self.assertTrue(candidate["preview_only"])
             self.assertFalse(candidate["promoted"])
@@ -156,10 +156,16 @@ class HarnessDryRunTests(unittest.TestCase):
             "growth_engine_executed",
             "temporal_event_executed",
             "tool_execution_enabled",
+            "auto_tool_promotion_enabled",
             "policy_executor_enabled",
             "companion_feature_enabled",
             "adapter_integration_required",
             "harness_write_enabled",
+            "observability_executor_enabled",
+            "automatic_next_step_enabled",
+            "product_layer_enabled",
+            "reconstruction_reducer_executed",
+            "event_compaction_executed",
         ):
             self.assertFalse(report[key])
         self.assertTrue(report["state_unchanged"])
@@ -170,6 +176,65 @@ class HarnessDryRunTests(unittest.TestCase):
         for key, expected in NON_EXECUTION_INVARIANTS.items():
             self.assertEqual(report["non_execution_invariants"][key], expected)
             self.assertEqual(report[key], expected)
+
+    def test_pressure_classifier_routes_known_inputs(self):
+        cases = [
+            ("我现在有点看不清这个项目到底做了什么", "observability_pressure", "可见性压力"),
+            ("这个想法可能是一次成长吗？", "growth_review_pressure", "成长审查压力"),
+            ("我想把这个接进 AstrBot", "adapter_boundary_pressure", "接入边界压力"),
+            ("我们是不是该开始做应用层了？", "product_layer_pressure", "产品层压力"),
+            ("这个工具候选验证成功了，能不能直接加入工具库？", "capability_evolution_pressure", "能力进化压力"),
+            ("我隔了很久回来，怎么恢复会话？", "temporal_pressure", "时间压力"),
+            ("这个 event 能回放重建 payload diff 吗？", "reconstruction_pressure", "重建压力"),
+            ("请记录一个普通观察", "unknown_pressure", "未分类压力"),
+        ]
+
+        for user_message, pressure_type, zh_name in cases:
+            with self.subTest(pressure_type=pressure_type):
+                classification = classify_input_pressure(user_message)
+                report = build_harness_dry_run_report(user_message=user_message, lang="zh")
+
+                self.assertEqual(classification["input_pressure_type"], pressure_type)
+                self.assertEqual(report["input_pressure_type"], pressure_type)
+                self.assertEqual(report["scenario_profile"]["internal_key"], pressure_type)
+                self.assertEqual(report["scenario_profile"]["display_name"], zh_name)
+                self.assertEqual(report["observatory_snapshot"]["input_pressure_type"], pressure_type)
+                if pressure_type == "unknown_pressure":
+                    self.assertEqual(report["matched_signals"], [])
+                else:
+                    self.assertGreater(len(report["matched_signals"]), 0)
+
+    def test_different_pressures_produce_different_candidate_previews(self):
+        messages = {
+            "observability_pressure": "我现在有点看不清这个项目到底做了什么",
+            "growth_review_pressure": "这个想法可能是一次成长吗？",
+            "adapter_boundary_pressure": "我想把这个接进 AstrBot",
+            "product_layer_pressure": "我们是不是该开始做应用层了？",
+            "capability_evolution_pressure": "这个工具候选验证成功了，能不能直接加入工具库？",
+            "temporal_pressure": "我隔了很久回来，怎么恢复会话？",
+            "reconstruction_pressure": "这个 event 能回放重建 payload diff 吗？",
+            "unknown_pressure": "请记录一个普通观察",
+        }
+        previews = {}
+
+        for pressure_type, user_message in messages.items():
+            report = build_harness_dry_run_report(user_message=user_message)
+            previews[pressure_type] = tuple(row["candidate_type"] for row in report["candidate_preview"])
+
+        self.assertEqual(len(set(previews.values())), len(messages))
+
+    def test_pressure_specific_fields_are_present(self):
+        report = build_harness_dry_run_report(
+            user_message="这个工具候选验证成功了，能不能直接加入工具库？",
+            lang="zh",
+        )
+
+        self.assertEqual(report["input_pressure_type"], "capability_evolution_pressure")
+        self.assertIn("工具授权候选", {row["display_name"] for row in report["candidate_preview"]})
+        self.assertIn("tool_execution_enabled", report["boundary_monitor"]["highest_relevant_boundaries"])
+        self.assertIn("auto_tool_promotion_enabled", report["boundary_monitor"]["highest_relevant_boundaries"])
+        self.assertIn("验证不等于授权", report["context_package_preview"]["profile_refs"])
+        self.assertIn("人工审查", report["profile_specific_next_step"])
 
 
 if __name__ == "__main__":

@@ -17,11 +17,12 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P101 Harness Usability Review 已完成。仓库现在包含本地只读 `harness-dry-run`
-命令；P101 审查认为它对边界可见性有用，但仍太静态，不能当作真实 routing、retrieval、adapter、
-product behavior 或高风险下一步决策依据。
+当前工作状态：P102 Harness Input Classification and Scenario Routing 已完成。本地只读
+`harness-dry-run` 命令现在使用 deterministic keyword routing 来分类 input pressure，并展示对应的
+context、candidates、review gates、risks、boundaries 和 next steps；仍不执行 retrieval、model
+calls、adapter、product behavior 或写入。
 
-下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P102、建设 dashboard
+下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
 Companion、Temporal Awareness runtime、tool execution、automatic tool generation、
 automatic tool promotion、growth execution、memory rewrite 或 reconstruction reducers 的授权。
@@ -33,7 +34,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P101 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P102 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -122,9 +123,10 @@ Continuity = State Transfer
 
 ## Prototype Reference / 原型参考
 
-本仓库包含一个最小本地 01 Core。P98 可读性改进后，observatory CLI 仍保持只读。P100 新增一个
-minimal local `harness-dry-run` 命令，但它仍是 dry-run preview surface，不是聊天应用、产品层、
-Companion、adapter、模型调用器或 memory writer。其他命令仍只作为验证和理解方向的参考：
+本仓库包含一个最小本地 01 Core。P98 可读性改进后，observatory CLI 仍保持只读。P102 保持
+`harness-dry-run` 为 local dry-run preview surface，并增加 deterministic scenario routing。它仍不是聊天
+应用、产品层、Companion、adapter、模型调用器、retrieval engine、event writer 或 memory writer。
+其他命令仍只作为验证和理解方向的参考：
 
 ```bash
 python3 -m one_core.cli init
@@ -157,8 +159,10 @@ python3 -m one_core.cli harness-dry-run --input "只做预览，不写 state。"
 python3 -m one_core.cli harness-dry-run --input "Preview this." --format json
 ```
 
-这个命令输出 intake、context package、candidate、review queue、boundary、observatory 和
-non-execution previews。它不写 state、不调用模型、不调用外部 API、不接 adapter，也不自动执行下一步。
+这个命令输出 intake、context package、candidate、review queue、boundary、observatory、
+scenario routing 和 non-execution previews。它把输入静态分类为可见性、成长审查、接入边界、产品层、
+能力进化、时间、重建或未分类压力。它不写 state、不调用模型、不调用外部 API、不接 adapter、不执行
+retrieval，也不自动执行下一步。
 
 本地 API 参考：
 

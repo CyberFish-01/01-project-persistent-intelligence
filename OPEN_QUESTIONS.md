@@ -33,8 +33,8 @@ not implemented, and not closed as runtime capabilities.
 | Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary exists, but no harness preview, retrieval execution, activation trace write, or storage policy exists | retrieval as continuity, context mutation, activation trace writes |
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview and ordering vocabulary exists, but no queue runtime, storage, lifecycle execution, or approval path exists | queue execution, lifecycle execution, candidate approval |
 | Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios exist, but no harness, tests, temporal runtime, temporal events, or salience policy exists | session runtime, temporal event write, memory decay |
-| Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `dry-run-cli-implemented`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | P100 implements a minimal dry-run CLI, but fixture/output contracts, richer privacy policy, and runtime/product gates remain missing | harness runtime, UI, adapter integration, mutation path |
-| Minimal CLI Harness Dry-Run | `implemented-static-dry-run`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) | the P100 command previews the path, but uses deterministic static context and is not a real context builder, review queue runtime, model caller, or adapter surface | model calls, external APIs, state writes, adapter integration, product layer |
+| Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `dry-run-cli-implemented`, `scenario-routing-implemented`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | P102 adds deterministic pressure routing, but fixture/output contracts, richer privacy policy, and runtime/product gates remain missing | harness runtime, UI, adapter integration, mutation path |
+| Minimal CLI Harness Dry-Run | `implemented-static-dry-run`, `scenario-routing-implemented`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) | the command now classifies input pressure and changes previews by profile, but is still not a real context builder, review queue runtime, model caller, or adapter surface | model calls, external APIs, state writes, adapter integration, product layer |
 | Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary exists, but no tool execution, verification schema, review schema, safe tool library policy, or promotion gate exists | tool execution, auto tool generation, auto tool promotion, policy executor |
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed and forbidden scope is defined, but verification evidence model, candidate review schema, safe tool library policy, and implementation gates are missing | automatic tool execution, automatic promotion, policy executor, identity mutation |
 | Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys now map to Chinese display names, but no visual surface contract, status assignment policy, or dashboard approval exists | Web UI, dashboard runtime, observability CLI, product layer |
@@ -226,9 +226,11 @@ Clarified by
 [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md),
 refined by
 [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md),
-and narrowly implemented as a P100 dry-run command. It remains open because the
-command is static and no-write only. It is not a context builder, review queue
-runtime, product surface, adapter surface, model caller, or mutation path.
+and narrowly implemented as a P100 dry-run command, then improved in P102 with
+deterministic input pressure routing. It remains open because the command is
+still static and no-write only. It is not a context builder, review queue
+runtime, product surface, adapter surface, model caller, retrieval engine, or
+mutation path.
 
 Still open:
 
@@ -237,6 +239,8 @@ Still open:
 - stronger no-write validation beyond the current deterministic tests;
 - broader forbidden-output test plan;
 - privacy and redaction policy;
+- whether `input_pressure_type` needs a stable public schema;
+- how to prevent keyword routing from looking more intelligent than it is;
 - whether context preview may ever read real state references;
 - explicit founder approval for any future runtime, adapter, UI, or product phase.
 
@@ -245,13 +249,14 @@ Still open:
 Clarified by
 [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md),
 and implemented narrowly in P100 as
-`python3 -m one_core.cli harness-dry-run`. It remains open because the command is
-only a deterministic local preview.
+`python3 -m one_core.cli harness-dry-run`, then improved in P102 with
+`input_pressure_type` and `scenario_profile`. It remains open because the command
+is only a deterministic local preview.
 
 Still open:
 
-- whether P101 should review usability, add stricter output schema, or pause for
-  founder / CTO review;
+- whether P103 should do usability review, add stricter output schema, or pause
+  for founder / CTO review;
 - how to strengthen no-write proof across more filesystem edge cases;
 - how much of context preview can be generated from static references without
   retrieval execution;
@@ -259,6 +264,8 @@ Still open:
   report files;
 - whether static candidate previews need risk calibration before any real state
   references are read.
+- whether pressure routing should remain keyword-only or move to reviewed
+  fixture scenarios before any broader implementation.
 
 ### Tool-First Self-Evolution
 
@@ -507,8 +514,8 @@ The following remain blocked until a future explicit implementation phase:
 - automatic roadmap execution;
 - automatic next phase creation;
 - product-layer visual surface;
-- harness implementation beyond P100 read-only dry-run;
-- harness runtime beyond P100 read-only dry-run;
+- harness implementation beyond P102 read-only dry-run scenario routing;
+- harness runtime beyond P102 read-only dry-run scenario routing;
 - fixture schema;
 - output schema;
 - model calls from harness work;
@@ -518,8 +525,8 @@ The following remain blocked until a future explicit implementation phase:
 
 ## Current Recommendation
 
-Pause for founder / CTO review before selecting P101. P100 implements only a
-local no-write harness dry-run; it is not approval for dashboard runtime,
-harness runtime, policy execution, product UI, model calls, external API calls,
-adapter integration, state writes, memory writes, identity mutation, or
-automatic roadmap execution.
+Pause for founder / CTO review before selecting P103. P102 implements only local
+no-write scenario routing for the harness dry-run; it is not approval for
+dashboard runtime, harness runtime, policy execution, product UI, model calls,
+external API calls, adapter integration, state writes, memory writes, identity
+mutation, or automatic roadmap execution.
