@@ -19,10 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P141 CTM Temporal Context Pack RFC is complete.
-CTM-inspired temporal dynamics now have a symbolic review-only `temporal_pack`
-contract, while temporal runtime, CTM runtime, thought loops, thought traces,
-recall/temporal writes, model calls, and rebuild remain blocked.
+Current work status: P142 Capability Context Pack RFC is complete. Tool-First
+capability evidence now has a candidate/evidence/review-only `capability_pack`
+contract, while tool execution, verification runtime, promotion, dependency
+installation, policy execution, model calls, writes, and rebuild remain blocked.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P141 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P142 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -85,6 +85,7 @@ Read these first when joining the project or handing it to another agent:
 - [SOURCE_SELECTION_MATRIX.md](./SOURCE_SELECTION_MATRIX.md) / [SOURCE_SELECTION_MATRIX_ZH.md](./SOURCE_SELECTION_MATRIX_ZH.md): P139 source selection matrix for future context packages, trust levels, omission reasons, and temporal/capability boundaries.
 - [BOUNDARY_INJECTION_RFC.md](./BOUNDARY_INJECTION_RFC.md) / [BOUNDARY_INJECTION_RFC_ZH.md](./BOUNDARY_INJECTION_RFC_ZH.md): P140 RFC-only boundary injection contract for future context package boundary and response-strategy packs.
 - [CTM_TEMPORAL_CONTEXT_PACK_RFC.md](./CTM_TEMPORAL_CONTEXT_PACK_RFC.md) / [CTM_TEMPORAL_CONTEXT_PACK_RFC_ZH.md](./CTM_TEMPORAL_CONTEXT_PACK_RFC_ZH.md): P141 RFC-only symbolic temporal pack contract for CTM-inspired review cues.
+- [CAPABILITY_CONTEXT_PACK_RFC.md](./CAPABILITY_CONTEXT_PACK_RFC.md) / [CAPABILITY_CONTEXT_PACK_RFC_ZH.md](./CAPABILITY_CONTEXT_PACK_RFC_ZH.md): P142 RFC-only capability pack contract for Tool-First candidate/evidence/review context.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 
