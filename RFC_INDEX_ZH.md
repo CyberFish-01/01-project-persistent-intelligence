@@ -63,6 +63,12 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P91 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [ZH](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | future RFC | capability evolution boundary | 把 Yunjue / zero-start tool-first self-evolution 翻译成 review-only capability evolution vocabulary。 | tool execution、auto tool generation、auto promotion、policy executor 或 identity growth |
 | P92 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [ZH](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | boundary RFC | capability boundary | 定义 capability evolution 在任何 tool runtime 或 promotion policy 前的 allowed / forbidden scope。 | automatic tool execution、automatic tool promotion、policy executor、identity mutation、memory rewrite |
 
+## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P93 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [ZH](./VISUAL_NAMING_GUIDE_ZH.md) | naming guide | founder-facing vocabulary | 把英文 internal keys 映射为未来视觉基础层表面使用的中文显示名。 | Web UI、dashboard runtime、observability CLI、product layer 或 Foundation Observatory implementation |
+
 ## Exploration And Subject Boundary / 探索与主体边界
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
@@ -146,6 +152,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 26. [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
     定义 capability evolution 的 proposal/evidence/review 允许范围，以及
     execution/promotion/policy/identity 禁止边界。
+27. [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) 把 founder-facing
+    中文显示名映射到 English internal keys，但不批准 Web UI、dashboard runtime、
+    observability CLI、product layer 或 Foundation Observatory implementation。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -178,6 +187,10 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - self-modifying runtime；
 - unreviewed dependency installation；
 - uncontrolled filesystem 或 network access；
+- Web UI；
+- dashboard runtime；
+- Foundation Observatory runtime；
+- observability CLI；
 - harness implementation；
 - fixture schema；
 - output schema；

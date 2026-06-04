@@ -36,6 +36,7 @@ not implemented, and not closed as runtime capabilities.
 | Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness is assessed, but fixture contract, output contract, boundary test plan, and explicit implementation approval are missing | harness implementation, CLI commands, runtime work |
 | Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary exists, but no tool execution, verification schema, review schema, safe tool library policy, or promotion gate exists | tool execution, auto tool generation, auto tool promotion, policy executor |
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed and forbidden scope is defined, but verification evidence model, candidate review schema, safe tool library policy, and implementation gates are missing | automatic tool execution, automatic promotion, policy executor, identity mutation |
+| Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys now map to Chinese display names, but no visual surface contract, status assignment policy, or dashboard approval exists | Web UI, dashboard runtime, observability CLI, product layer |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -275,6 +276,23 @@ Still open:
 - what human / founder review gate is required before any future tool
   authorization.
 
+### Visual Naming / Founder-Facing Vocabulary
+
+Clarified by [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), but not
+implemented. It remains open because P93 defines naming rules and display-card
+shape only. It does not create a Foundation Observatory, dashboard, Web UI,
+observability CLI, report generator, status API, or product surface.
+
+Still open:
+
+- which concepts deserve future founder-facing visual cards;
+- who assigns `已实现`, `报告层`, `RFC 层`, `未来方向`, and `危险过早`;
+- how to prevent RFC-only concepts from appearing implemented;
+- how to prevent candidate labels from appearing promoted;
+- how bilingual display names and English internal keys are reviewed for drift;
+- whether any future Observatory should be docs-only, report-only, CLI-only, or
+  UI-based after explicit founder approval.
+
 ### Recall Event Write Policy
 
 Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
@@ -416,6 +434,11 @@ The following remain blocked until a future explicit implementation phase:
 - self-modifying runtime;
 - unreviewed dependency installation;
 - uncontrolled filesystem or network access;
+- Web UI;
+- dashboard runtime;
+- Foundation Observatory runtime;
+- observability CLI;
+- product-layer visual surface;
 - harness implementation;
 - fixture schema;
 - output schema;
@@ -424,7 +447,8 @@ The following remain blocked until a future explicit implementation phase:
 
 ## Current Recommendation
 
-Continue RFC-only capability planning unless the founder explicitly approves an
-implementation phase. Useful P93 candidates include Tool Verification Evidence
-Model, Tool Candidate Review Schema, Procedural Memory Alignment, Safe Tool
-Library Policy, or Capability Growth Evaluation Plan.
+Continue document-only planning unless the founder explicitly approves an
+implementation phase. Useful future directions include Tool Verification
+Evidence Model, Tool Candidate Review Schema, Procedural Memory Alignment, Safe
+Tool Library Policy, Capability Growth Evaluation Plan, Visual Status Assignment
+Policy, or founder / CTO review.

@@ -431,3 +431,58 @@ promotion、policy execution、identity mutation、memory rewrite、uncontrolled
 installation 和 self-modifying runtime。
 
 边界：它是 document-only boundary，不是 enforcement code。
+
+## Visual Naming Guide / 视觉命名指南
+
+P93 document-only guide，用于把 English internal keys 映射为未来视觉基础层表面使用的中文
+founder-facing display names。
+
+边界：该 guide 不是 Web UI、dashboard runtime、observability CLI、product surface 或
+Foundation Observatory implementation。
+
+## Founder-Facing Vocabulary / 创始人可读词汇
+
+面向项目创始人或 CTO 阅读 summaries、readiness views、risk views 或 future observatory surfaces
+时使用的朴素标签和解释。
+
+边界：founder-facing vocabulary 简化展示，但不能改变底层 RFC、audit、code 或 paper meaning。
+
+## Display Name / 显示名
+
+未来 visual card 或 summary surface 上优先展示的中文标签。
+
+边界：display name 不是 implementation status、capability claim 或 promotion decision。
+
+## Internal Key / 内部键
+
+RFCs、papers、code identifiers、schemas、audits 和 cross-project comparison 使用的稳定英文术语。
+
+边界：internal key 应保持精确，但不能迫使 founder-facing views 使用论文式标题。
+
+## Foundation Observatory / 地基观察台
+
+未来可能面向 founder 展示 foundation status、concept boundaries、readiness、risks 和 open
+questions 的表面。
+
+边界：它当前仍是 future direction。P93 不实现 observatory、dashboard、UI、runtime、report
+generator 或 status API。
+
+## Readiness Matrix / 就绪度矩阵
+
+未来可能用于显示一个概念是 ready、blocked、RFC-only、future-only，还是缺少 required gates 的
+report-style view。
+
+边界：readiness 不是 authorization，也不批准 implementation。
+
+## Risk Heatmap / 风险热力图
+
+未来可能用于把 concept、identity、memory、runtime、tools、governance 和 product boundaries 上的风险压力可视化分组。
+
+边界：heatmap 不是 governance execution、policy enforcement 或 risk resolution。
+
+## Boundary Status / 边界状态
+
+用于说明一个概念是 allowed、blocked、RFC-only、report-only、future-only 还是 dangerously early
+的可见标签。
+
+边界：boundary status 不是 runtime enforcement，也不能替代 review。

@@ -524,3 +524,66 @@ memory rewrite, uncontrolled access, dependency installation, and self-modifying
 runtime.
 
 Boundary: it is a document-only boundary, not enforcement code.
+
+## Visual Naming Guide
+
+The P93 document-only guide that maps English internal keys to Chinese
+founder-facing display names for future visual foundation surfaces.
+
+Boundary: the guide is not Web UI, dashboard runtime, an observability CLI, a
+product surface, or Foundation Observatory implementation.
+
+## Founder-Facing Vocabulary
+
+Plain-language labels and explanations intended for the project founder or CTO
+when reading summaries, readiness views, risk views, or future observatory
+surfaces.
+
+Boundary: founder-facing vocabulary simplifies presentation; it must not change
+the underlying RFC, audit, code, or paper meaning.
+
+## Display Name
+
+The Chinese-first label shown on a future visual card or summary surface.
+
+Boundary: a display name is not an implementation status, capability claim, or
+promotion decision.
+
+## Internal Key
+
+The stable English term used by RFCs, papers, code identifiers, schemas, audits,
+and cross-project comparison.
+
+Boundary: an internal key should remain precise, but it must not force
+founder-facing views to use paper-like titles.
+
+## Foundation Observatory
+
+A possible future founder-facing surface for viewing foundation status, concept
+boundaries, readiness, risks, and open questions.
+
+Boundary: it is currently a future direction. P93 does not implement an
+observatory, dashboard, UI, runtime, report generator, or status API.
+
+## Readiness Matrix
+
+A report-style view that could show whether a concept is ready, blocked,
+RFC-only, future-only, or missing required gates.
+
+Boundary: readiness is not authorization and does not approve implementation.
+
+## Risk Heatmap
+
+A possible future view that groups visible risk pressure across concepts,
+identity, memory, runtime, tools, governance, and product boundaries.
+
+Boundary: a heatmap is not governance execution, policy enforcement, or risk
+resolution.
+
+## Boundary Status
+
+A visible label explaining whether a concept is allowed, blocked, RFC-only,
+report-only, future-only, or dangerously early.
+
+Boundary: boundary status is not runtime enforcement and does not replace
+review.

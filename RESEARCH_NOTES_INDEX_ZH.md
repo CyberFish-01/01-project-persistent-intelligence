@@ -40,6 +40,7 @@ origin ideas are not implementation approval.
 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [HARNESS_TRANSITION_SUMMARY_ZH.md](./HARNESS_TRANSITION_SUMMARY_ZH.md) | Harness transition summary | 收束 P82-P90 planning，并在 explicit approval 前继续阻塞 implementation。 |
 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | External inspiration RFC | 把 Yunjue / zero-start in-situ self-evolving agent 思想翻译成 review-only capability evolution vocabulary，不执行工具。 |
 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | Boundary RFC | 定义 capability evolution 的 allowed / forbidden scope，不实现 tool runtime 或 promotion。 |
+| [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [VISUAL_NAMING_GUIDE_ZH.md](./VISUAL_NAMING_GUIDE_ZH.md) | Founder-facing vocabulary guide | 把内部英文术语映射成中文显示名，不实现 dashboard、observability CLI 或 product UI。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -85,6 +86,7 @@ origin ideas are not implementation approval.
 | Harness Transition Summary | future P91 contract work 前，P82-P90 需要 compact closeout。 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md), [RFC_INDEX.md](./RFC_INDEX.md) | `summary`, not implementation approval |
 | Tool-First Self-Evolution | Yunjue-style zero-start tool evolution 提示应先在 feedback 可验证的能力层演化。 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not tool runtime |
 | Capability Evolution Boundary | tool-first capability evolution 在任何 verification 或 library policy work 前需要明确 allowed / forbidden scope。 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
+| Visual Naming Guide | founder-facing views 需要朴素中文标签，同时不能丢失精确的内部英文键。 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -167,6 +169,9 @@ Research notes 是 source material，不是当前 implementation plan。
 18. 阅读 [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
     时，只把它当作 capability boundary vocabulary，不要当作 tool authorization、verification
     implementation、safe library policy 或 runtime approval。
+19. 阅读 [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) 时，只把它当作
+    founder-facing naming guide，不要当作 dashboard implementation、Web UI、
+    observability CLI、product layer 或 Foundation Observatory runtime。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 
@@ -187,6 +192,10 @@ P78 不实现：
 - policy executor；
 - self-modifying runtime；
 - unreviewed dependency installation；
+- Web UI；
+- dashboard runtime；
+- Foundation Observatory runtime；
+- observability CLI；
 - identity mutation；
 - memory rewrite；
 - payload capture；

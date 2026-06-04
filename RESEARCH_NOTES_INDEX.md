@@ -42,6 +42,7 @@ current documents carry it, and what is still only long-term vision?"
 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [HARNESS_TRANSITION_SUMMARY_ZH.md](./HARNESS_TRANSITION_SUMMARY_ZH.md) | Harness transition summary | Closes P82-P90 planning and keeps implementation blocked until explicit approval. |
 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | External inspiration RFC | Translates Yunjue / zero-start in-situ self-evolving agent ideas into review-only capability evolution vocabulary without tool execution. |
 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | Boundary RFC | Defines capability evolution allowed and forbidden scope without implementing tool runtime or promotion. |
+| [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [VISUAL_NAMING_GUIDE_ZH.md](./VISUAL_NAMING_GUIDE_ZH.md) | Founder-facing vocabulary guide | Maps internal English terms to Chinese display names without implementing dashboard, observability CLI, or product UI. |
 
 ## Original Idea Chains
 
@@ -87,6 +88,7 @@ current documents carry it, and what is still only long-term vision?"
 | Harness Transition Summary | P82-P90 need a compact closeout before any future P91 contract work. | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md), [RFC_INDEX.md](./RFC_INDEX.md) | `summary`, not implementation approval |
 | Tool-First Self-Evolution | Yunjue-style zero-start tool evolution suggests capability should evolve first where feedback is verifiable. | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not tool runtime |
 | Capability Evolution Boundary | Tool-first capability evolution needs explicit allowed and forbidden scopes before any verification or library policy work. | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
+| Visual Naming Guide | Founder-facing views need plain Chinese labels without losing precise internal English keys. | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 
 ## Second Chain Map: Artificial Life History
 
@@ -176,6 +178,9 @@ For origin tracing:
 18. Read [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
     only as capability boundary vocabulary, not as tool authorization,
     verification implementation, safe library policy, or runtime approval.
+19. Read [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) only as a
+    founder-facing naming guide, not as dashboard implementation, Web UI,
+    observability CLI, product layer, or Foundation Observatory runtime.
 
 ## P78 Non-Execution Statement
 
@@ -196,6 +201,10 @@ P78 does not implement:
 - policy executor;
 - self-modifying runtime;
 - unreviewed dependency installation;
+- Web UI;
+- dashboard runtime;
+- Foundation Observatory runtime;
+- observability CLI;
 - identity mutation;
 - memory rewrite;
 - payload capture;

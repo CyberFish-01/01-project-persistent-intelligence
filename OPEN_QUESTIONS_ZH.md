@@ -36,6 +36,7 @@ capabilities 被关闭。
 | Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness 已评估，但缺 fixture contract、output contract、boundary test plan 和 explicit implementation approval | harness implementation、CLI commands、runtime work |
 | Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary 已存在，但没有 tool execution、verification schema、review schema、safe tool library policy 或 promotion gate | tool execution、auto tool generation、auto tool promotion、policy executor |
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed / forbidden scope 已定义，但缺 verification evidence model、candidate review schema、safe tool library policy 和 implementation gates | automatic tool execution、automatic promotion、policy executor、identity mutation |
+| Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys 已映射为中文显示名，但仍缺 visual surface contract、status assignment policy 和 dashboard approval | Web UI、dashboard runtime、observability CLI、product layer |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -237,6 +238,21 @@ growth evaluation plan。
 - 哪些 evaluation cases 能证明 capability candidates 不 mutate identity；
 - future tool authorization 前需要什么 human / founder review gate。
 
+### Visual Naming / Founder-Facing Vocabulary / 视觉命名与创始人可读词汇
+
+已由 [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) 澄清，但没有实现。它仍然 open，
+因为 P93 只定义 naming rules 和 display-card shape。它不创建 Foundation Observatory、
+dashboard、Web UI、observability CLI、report generator、status API 或 product surface。
+
+仍开放：
+
+- 哪些概念未来值得放入 founder-facing visual cards；
+- 谁来分配 `已实现`、`报告层`、`RFC 层`、`未来方向` 和 `危险过早`；
+- 如何防止 RFC-only concepts 被显示成已实现；
+- 如何防止 candidate labels 被显示成 promoted results；
+- 如何审查 bilingual display names 与 English internal keys 的 drift；
+- 未来 Observatory 在创始人明确批准后应是 docs-only、report-only、CLI-only，还是 UI-based。
+
 ### Recall Event Write Policy / 回忆事件写入策略
 
 已由 [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) 澄清。Ordinary
@@ -377,6 +393,11 @@ policy 仍与 payload capture 分离。
 - self-modifying runtime；
 - unreviewed dependency installation；
 - uncontrolled filesystem 或 network access；
+- Web UI；
+- dashboard runtime；
+- Foundation Observatory runtime；
+- observability CLI；
+- product-layer visual surface；
 - harness implementation；
 - fixture schema；
 - output schema；
@@ -385,6 +406,7 @@ policy 仍与 payload capture 分离。
 
 ## Current Recommendation / 当前建议
 
-继续 RFC-only capability planning，除非项目创始人明确批准 implementation phase。可用的 P93
-候选包括 Tool Verification Evidence Model、Tool Candidate Review Schema、Procedural Memory
-Alignment、Safe Tool Library Policy 或 Capability Growth Evaluation Plan。
+继续 document-only planning，除非项目创始人明确批准 implementation phase。可用的未来方向包括
+Tool Verification Evidence Model、Tool Candidate Review Schema、Procedural Memory Alignment、
+Safe Tool Library Policy、Capability Growth Evaluation Plan、Visual Status Assignment Policy 或
+founder / CTO review。

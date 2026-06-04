@@ -65,6 +65,12 @@ implementation approval.
 | P91 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [ZH](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | future RFC | capability evolution boundary | Translates Yunjue / zero-start tool-first self-evolution into review-only capability evolution vocabulary. | tool execution, auto tool generation, auto promotion, policy executor, or identity growth |
 | P92 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [ZH](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | boundary RFC | capability boundary | Defines allowed and forbidden scopes for capability evolution before any tool runtime or promotion policy. | automatic tool execution, automatic tool promotion, policy executor, identity mutation, memory rewrite |
 
+## Founder-Facing Vocabulary And Visual Naming
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P93 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [ZH](./VISUAL_NAMING_GUIDE_ZH.md) | naming guide | founder-facing vocabulary | Maps English internal keys to Chinese display names for future visual foundation surfaces. | Web UI, dashboard runtime, observability CLI, product layer, or Foundation Observatory implementation |
+
 ## Exploration And Subject Boundary
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
@@ -152,6 +158,10 @@ The current dependency order is:
 26. [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
     defines the allowed proposal/evidence/review scope and the forbidden
     execution/promotion/policy/identity boundaries for capability evolution.
+27. [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) maps founder-facing
+    Chinese display names to English internal keys without approving Web UI,
+    dashboard runtime, observability CLI, product layer, or Foundation
+    Observatory implementation.
 
 ## Runtime-Blocked Topics
 
@@ -184,6 +194,10 @@ The indexed documents do not approve:
 - self-modifying runtime;
 - unreviewed dependency installation;
 - uncontrolled filesystem or network access;
+- Web UI;
+- dashboard runtime;
+- Foundation Observatory runtime;
+- observability CLI;
 - harness implementation;
 - fixture schema;
 - output schema;
