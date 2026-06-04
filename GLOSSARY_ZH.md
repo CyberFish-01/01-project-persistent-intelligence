@@ -264,6 +264,20 @@ policy execution，也不是 mutation。
 
 边界：candidate preview 不是 durable candidate、不是 approval，也不是 state transition。
 
+## Session Resume Scenario / 会话恢复场景
+
+未来 deterministic scenario，用于模拟 interrupted 或 paused session 如何恢复 task、claim、memory、
+candidate 和 context references。
+
+边界：session resume scenario 不是 session runtime、不是 temporal event、不是 memory decay，也不是
+resume automation。
+
+## Context Gap / 上下文缺口
+
+resume 或 context preview 中被披露的 evidence 或 state references 缺失。
+
+边界：context gap 不得通过 fabricated memory、memory rewrite、claim revision 或 identity update 来修复。
+
 ## Temporal Coherence / 时间一致性
 
 用于 review later state 是否仍能与 earlier state、current evidence 和 continuity anchors 相容的概念。

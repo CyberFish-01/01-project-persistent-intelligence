@@ -32,6 +32,7 @@ not implemented, and not closed as runtime capabilities.
 | Conversation Intake Contract | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) | envelope fields are named, but no intake runtime, API, CLI, adapter ingest, privacy validation, or storage policy exists | conversation runtime, adapter ingest, event write |
 | Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary exists, but no harness preview, retrieval execution, activation trace write, or storage policy exists | retrieval as continuity, context mutation, activation trace writes |
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview and ordering vocabulary exists, but no queue runtime, storage, lifecycle execution, or approval path exists | queue execution, lifecycle execution, candidate approval |
+| Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios exist, but no harness, tests, temporal runtime, temporal events, or salience policy exists | session runtime, temporal event write, memory decay |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -196,6 +197,22 @@ Still open:
 - whether context gaps can create review candidates in a future harness;
 - how low-risk items avoid review overload.
 
+### Session Resume Scenario Plan
+
+Clarified by [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md),
+but not implemented. It remains open because P89 defines deterministic scenario
+plans only and does not create tests, harness runtime, temporal events, memory
+decay, salience mutation, or resume automation.
+
+Still open:
+
+- which elapsed-time buckets are useful before Temporal Awareness runtime exists;
+- whether unknown gaps should differ from known gaps;
+- whether context gaps can create queue candidates;
+- how stale task pressure differs from stale claim pressure;
+- whether resume scenarios should become deterministic tests before harness
+  implementation.
+
 ### Recall Event Write Policy
 
 Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
@@ -326,6 +343,10 @@ The following remain blocked until a future explicit implementation phase:
 - review queue execution;
 - queue storage;
 - candidate approval;
+- session resume runtime;
+- scenario tests for harness work;
+- memory decay;
+- salience mutation;
 - policy executor;
 - companion, relationship memory, UI, AstrBot, adapter, or product layer.
 

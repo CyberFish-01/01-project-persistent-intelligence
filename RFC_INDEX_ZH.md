@@ -52,6 +52,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P86 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [ZH](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | contract RFC | intake envelope boundary | 定义未来 conversation intake preview fields，但不做 adapter ingest 或 writes。 | conversation runtime、adapter ingest 或 event write |
 | P87 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | future RFC | context preview boundary | 为 future harness previews 定义 selected 与 omitted context reference explanations。 | retrieval as continuity 或 activation trace writes |
 | P88 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [ZH](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | future RFC | review queue preview | 定义 candidate preview types、ordering signals、review depth 和 blocked items。 | lifecycle execution、approval 或 mutation |
+| P89 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [ZH](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | scenario plan | resume simulation plan | 使用 simulated elapsed time 定义 deterministic session resume scenarios。 | Temporal Awareness runtime 或 temporal event writes |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -122,6 +123,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 21. [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md)
     定义 future candidate queue preview vocabulary，但不执行 lifecycle、automatic approval、
     policy execution 或 mutation。
+22. [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md)
+    定义 deterministic resume scenario inputs 和 expected previews，但不做 temporal runtime、
+    temporal event writes、memory decay 或 salience mutation。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -142,6 +146,10 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - review queue execution；
 - queue storage；
 - candidate approval；
+- session resume runtime；
+- scenario tests for harness work；
+- memory decay；
+- salience mutation；
 - recall event writes；
 - growth lifecycle execution；
 - automatic growth classification；

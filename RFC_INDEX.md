@@ -54,6 +54,7 @@ implementation approval.
 | P86 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [ZH](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | contract RFC | intake envelope boundary | Defines future conversation intake preview fields without adapter ingest or writes. | conversation runtime, adapter ingest, or event write |
 | P87 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | future RFC | context preview boundary | Defines selected and omitted context reference explanations for future harness previews. | retrieval as continuity or activation trace writes |
 | P88 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [ZH](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | future RFC | review queue preview | Defines candidate preview types, ordering signals, review depth, and blocked items. | lifecycle execution, approval, or mutation |
+| P89 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [ZH](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | scenario plan | resume simulation plan | Defines deterministic session resume scenarios using simulated elapsed time. | Temporal Awareness runtime or temporal event writes |
 
 ## Exploration And Subject Boundary
 
@@ -126,6 +127,9 @@ The current dependency order is:
 21. [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md)
     defines future candidate queue preview vocabulary without lifecycle
     execution, automatic approval, policy execution, or mutation.
+22. [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md)
+    defines deterministic resume scenario inputs and expected previews without
+    temporal runtime, temporal event writes, memory decay, or salience mutation.
 
 ## Runtime-Blocked Topics
 
@@ -146,6 +150,10 @@ The indexed documents do not approve:
 - review queue execution;
 - queue storage;
 - candidate approval;
+- session resume runtime;
+- scenario tests for harness work;
+- memory decay;
+- salience mutation;
 - recall event writes;
 - growth lifecycle execution;
 - automatic growth classification;

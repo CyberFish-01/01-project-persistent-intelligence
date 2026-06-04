@@ -32,6 +32,7 @@ capabilities 被关闭。
 | Conversation Intake Contract | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) | envelope fields 已命名，但没有 intake runtime、API、CLI、adapter ingest、privacy validation 或 storage policy | conversation runtime、adapter ingest、event write |
 | Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary 已存在，但没有 harness preview、retrieval execution、activation trace write 或 storage policy | retrieval as continuity、context mutation、activation trace writes |
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview 和 ordering vocabulary 已存在，但没有 queue runtime、storage、lifecycle execution 或 approval path | queue execution、lifecycle execution、candidate approval |
+| Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios 已存在，但没有 harness、tests、temporal runtime、temporal events 或 salience policy | session runtime、temporal event write、memory decay |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -171,6 +172,20 @@ lifecycle execution 或 approval paths。
 - future harness 中 context gaps 能否创建 review candidates；
 - low-risk items 如何避免 review overload。
 
+### Session Resume Scenario Plan / 会话恢复场景计划
+
+已由 [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) 澄清，但没有实现。
+它仍然 open，因为 P89 只定义 deterministic scenario plans，没有创建 tests、harness runtime、
+temporal events、memory decay、salience mutation 或 resume automation。
+
+仍开放：
+
+- Temporal Awareness runtime 存在前，哪些 elapsed-time buckets 有用；
+- unknown gaps 是否应与 known gaps 区分；
+- context gaps 能否创建 queue candidates；
+- stale task pressure 与 stale claim pressure 应如何区分；
+- resume scenarios 是否应在 harness implementation 前变成 deterministic tests。
+
 ### Recall Event Write Policy / 回忆事件写入策略
 
 已由 [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) 澄清。Ordinary
@@ -300,6 +315,10 @@ policy 仍与 payload capture 分离。
 - review queue execution；
 - queue storage；
 - candidate approval；
+- session resume runtime；
+- scenario tests for harness work；
+- memory decay；
+- salience mutation；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 

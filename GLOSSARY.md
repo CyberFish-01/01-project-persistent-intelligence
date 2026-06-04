@@ -327,6 +327,22 @@ recall, task, governance, identity, temporal, or trace review object.
 Boundary: candidate preview is not a durable candidate, not approval, and not a
 state transition.
 
+## Session Resume Scenario
+
+A deterministic future scenario for simulating how an interrupted or paused
+session should recover task, claim, memory, candidate, and context references.
+
+Boundary: session resume scenario is not session runtime, not a temporal event,
+not memory decay, and not resume automation.
+
+## Context Gap
+
+A disclosed absence of evidence or state references during resume or context
+preview.
+
+Boundary: context gap must not be repaired by fabricated memory, memory rewrite,
+claim revision, or identity update.
+
 ## Temporal Coherence
 
 A review idea for whether later state still fits earlier state, current
