@@ -17,7 +17,7 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P134 Founder Console Acceptance Criteria 已完成。任何 future console 都必须提升 founder visibility，同时不增加 autonomy、external connectivity、write capability、product behavior 或 rebuild pressure。
+当前工作状态：P135 Founder Console Risk Review 已完成。Founder console planning 现在明确阻止 product creep、Companion creep、automatic roadmap selection、write-path creep、adapter pressure、model calls、temporal overreach 和 capability overreach。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -31,7 +31,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P134 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P135 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -71,6 +71,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDER_CONSOLE_USER_FLOW.md](./FOUNDER_CONSOLE_USER_FLOW.md) / [FOUNDER_CONSOLE_USER_FLOW_ZH.md](./FOUNDER_CONSOLE_USER_FLOW_ZH.md)：P132 document-only founder-console flow，从 status visibility 到 preview 再到 manual decision。
 - [FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md) / [FOUNDER_CONSOLE_NO_WRITE_CONTRACT_ZH.md](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT_ZH.md)：P133 no-write contract，定义 future founder-console reads、explicit report outputs、forbidden writes 和 verification expectations。
 - [FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA.md](./FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA.md) / [FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA_ZH.md](./FOUNDER_CONSOLE_ACCEPTANCE_CRITERIA_ZH.md)：P134 acceptance criteria，定义 future founder-console visibility、no-write behavior、boundary display 和 failure conditions。
+- [FOUNDER_CONSOLE_RISK_REVIEW.md](./FOUNDER_CONSOLE_RISK_REVIEW.md) / [FOUNDER_CONSOLE_RISK_REVIEW_ZH.md](./FOUNDER_CONSOLE_RISK_REVIEW_ZH.md)：P135 risk review，覆盖 founder-console product creep、Companion creep、automation、write paths、adapters、model calls、temporal overreach 和 capability overreach。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 
