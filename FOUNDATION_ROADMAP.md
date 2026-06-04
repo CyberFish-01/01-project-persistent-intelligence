@@ -108,7 +108,7 @@ Only low-risk consolidation should continue:
 - RFC index;
 - `DECISIONS.md`;
 - `RESEARCH_NOTES_INDEX.md`;
-- `FOUNDATION_REVIEW_CHECKLIST.md`.
+- `FOUNDATION_REVIEW_CHECKLIST.md` manual phase review gate.
 
 Do not open new runtime capability phases merely to reach P80.
 
@@ -129,6 +129,10 @@ Do not open new runtime capability phases merely to reach P80.
 13. P80 Final Foundation Maintenance Review.
 
 This order is advisory. Skip or merge steps if they do not add clarity.
+
+P76 is satisfied by [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md)
+and its Chinese pair. The checklist is a manual review gate, not an automated
+executor.
 
 ## Completion Definition For Foundation Layer
 

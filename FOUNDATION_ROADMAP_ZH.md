@@ -106,7 +106,7 @@ P67 不批准这些 dependencies。
 - RFC index；
 - `DECISIONS.md`；
 - `RESEARCH_NOTES_INDEX.md`；
-- `FOUNDATION_REVIEW_CHECKLIST.md`。
+- `FOUNDATION_REVIEW_CHECKLIST.md` manual phase review gate。
 
 不要为了到 P80 而打开新的 runtime capability phase。
 
@@ -127,6 +127,10 @@ P67 不批准这些 dependencies。
 13. P80 Final Foundation Maintenance Review。
 
 这个顺序只是建议。如果某一步不能增加清晰度，可以跳过或合并。
+
+P76 已由 [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md)
+及其中文配对文档满足。该 checklist 是 manual review gate，不是 automated
+executor。
 
 ## Completion Definition For Foundation Layer / 基础层完成定义
 

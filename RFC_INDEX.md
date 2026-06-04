@@ -31,6 +31,7 @@ implementation approval.
 | P56 | [BOUNDARY_TEST_MATRIX.md](./BOUNDARY_TEST_MATRIX.md) / [ZH](./BOUNDARY_TEST_MATRIX_ZH.md) | matrix | stable doc gate | Lists allowed and forbidden foundation outputs. | runtime test expansion |
 | P57 | [OPEN_QUESTIONS_TRIAGE.md](./OPEN_QUESTIONS_TRIAGE.md) / [ZH](./OPEN_QUESTIONS_TRIAGE_ZH.md) | triage | active routing | Sorts open questions into safe RFCs, watch items, and blocked runtime work. | closing the questions |
 | P67 | [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [ZH](./FOUNDATION_ROADMAP_ZH.md) | roadmap | active guidance | Synthesizes stable foundation, blocked runtime work, future dependencies, and low-risk backlog. | runtime authorization |
+| P76 | [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [ZH](./FOUNDATION_REVIEW_CHECKLIST_ZH.md) | manual checklist | phase review gate | Converts boundary, risk, RFC, bilingual, verification, and commit checks into a human review gate. | automated executor |
 
 ## Stateful Memory And Growth Semantics
 
@@ -81,6 +82,8 @@ The current dependency order is:
    defines capture policy vocabulary but does not capture payloads.
 10. [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) keeps future work in
     low-risk consolidation until implementation is explicitly approved.
+11. [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) provides
+    a manual gate for later document-only phases without approving execution.
 
 ## Runtime-Blocked Topics
 

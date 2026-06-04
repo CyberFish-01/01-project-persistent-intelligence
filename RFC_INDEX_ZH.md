@@ -30,6 +30,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P56 | [BOUNDARY_TEST_MATRIX.md](./BOUNDARY_TEST_MATRIX.md) / [ZH](./BOUNDARY_TEST_MATRIX_ZH.md) | matrix | stable doc gate | 列出 foundation allowed / forbidden outputs。 | runtime test expansion |
 | P57 | [OPEN_QUESTIONS_TRIAGE.md](./OPEN_QUESTIONS_TRIAGE.md) / [ZH](./OPEN_QUESTIONS_TRIAGE_ZH.md) | triage | active routing | 把 open questions 分为 safe RFC、watch items 和 blocked runtime work。 | closing the questions |
 | P67 | [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [ZH](./FOUNDATION_ROADMAP_ZH.md) | roadmap | active guidance | 综合 stable foundation、blocked runtime work、future dependencies 和 low-risk backlog。 | runtime authorization |
+| P76 | [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [ZH](./FOUNDATION_REVIEW_CHECKLIST_ZH.md) | manual checklist | phase review gate | 把 boundary、risk、RFC、bilingual、verification 和 commit checks 转成 human review gate。 | automated executor |
 
 ## Stateful Memory And Growth Semantics / 状态化记忆与成长语义
 
@@ -80,6 +81,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
    定义 capture policy vocabulary，但不捕获 payloads。
 10. [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) 让未来工作保持在
     low-risk consolidation，直到 implementation 被明确批准。
+11. [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) 为后续
+    document-only phases 提供 manual gate，但不批准执行。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
