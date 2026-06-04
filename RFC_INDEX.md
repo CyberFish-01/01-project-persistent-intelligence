@@ -88,6 +88,7 @@ implementation approval.
 |---|---|---|---|---|---|
 | P131 | [FOUNDER_CONSOLE_BOUNDARY_RFC.md](./FOUNDER_CONSOLE_BOUNDARY_RFC.md) / [ZH](./FOUNDER_CONSOLE_BOUNDARY_RFC_ZH.md) | boundary RFC | RFC-only console boundary | Defines the future Thin Founder Console as local, founder-only, no-write visibility rather than product behavior. | console implementation, Web UI, Companion, adapter integration, model call, tool execution, write path, policy executor, or rebuild |
 | P132 | [FOUNDER_CONSOLE_USER_FLOW.md](./FOUNDER_CONSOLE_USER_FLOW.md) / [ZH](./FOUNDER_CONSOLE_USER_FLOW_ZH.md) | user flow | document-only flow | Defines the future founder-console path from status visibility to dry-run preview to manual next-step decision. | console implementation, automatic roadmap, Web UI, Companion, adapter integration, model call, write path, or rebuild |
+| P133 | [FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md) / [ZH](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT_ZH.md) | contract | no-write contract | Defines allowed reads, explicit report-output writes, forbidden formal writes, invariants, and future verification expectations. | console implementation, state write, memory write, recall write, identity mutation, adapter integration, model call, tool execution, or rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming
 

@@ -19,10 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P132 Founder Console User Flow is complete. The future
-console flow is defined as see, preview, review, and manually decide, without
-automatic action, Web UI, Companion behavior, adapter integration, model calls,
-write paths, or rebuild.
+Current work status: P133 Founder Console No-Write Contract is complete. A
+future console may only produce explicit report outputs and must not write core
+history, formal state, memory, recall, identity, tools, adapters, or rebuild
+migration files.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P132 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P133 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -76,6 +76,7 @@ Read these first when joining the project or handing it to another agent:
 - [CORE_LOCKDOWN_CYCLE_REVIEW.md](./CORE_LOCKDOWN_CYCLE_REVIEW.md) / [CORE_LOCKDOWN_CYCLE_REVIEW_ZH.md](./CORE_LOCKDOWN_CYCLE_REVIEW_ZH.md): P130 closure review for Core Lockdown / Quarantine readiness, gaps, risks, and next safe planning boundary.
 - [FOUNDER_CONSOLE_BOUNDARY_RFC.md](./FOUNDER_CONSOLE_BOUNDARY_RFC.md) / [FOUNDER_CONSOLE_BOUNDARY_RFC_ZH.md](./FOUNDER_CONSOLE_BOUNDARY_RFC_ZH.md): P131 RFC-only boundary for a local, founder-only, no-write visibility surface.
 - [FOUNDER_CONSOLE_USER_FLOW.md](./FOUNDER_CONSOLE_USER_FLOW.md) / [FOUNDER_CONSOLE_USER_FLOW_ZH.md](./FOUNDER_CONSOLE_USER_FLOW_ZH.md): P132 document-only founder-console flow from status visibility to preview to manual decision.
+- [FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT.md) / [FOUNDER_CONSOLE_NO_WRITE_CONTRACT_ZH.md](./FOUNDER_CONSOLE_NO_WRITE_CONTRACT_ZH.md): P133 no-write contract for future founder-console reads, explicit report outputs, forbidden writes, and verification expectations.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 

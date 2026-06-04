@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P132. It is not a release log. It records how the system
+This index covers P0-P133. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -140,3 +140,4 @@ foundation evolved.
 | P130 | Added Core Lockdown Cycle Review. | The lockdown block must close with readiness, gaps, risks, and the next safe planning boundary. | Core Lockdown |
 | P131 | Added Founder Console Boundary RFC. | The first application-adjacent surface must be local, founder-only, no-write visibility, not product behavior. | Founder Console |
 | P132 | Added Founder Console User Flow. | The founder console flow must move from seeing to previewing to manual decision without automatic action. | Founder Console |
+| P133 | Added Founder Console No-Write Contract. | A future console may produce explicit report files, but it must not write core history or mutate state. | Founder Console |
