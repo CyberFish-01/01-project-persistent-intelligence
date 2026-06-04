@@ -30,6 +30,7 @@ not implemented, and not closed as runtime capabilities.
 | Thought Trace Storage Policy | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) | storage boundaries are defined, but no trace schema, storage backend, redaction policy, or approval gate exists | trace storage, hidden chain-of-thought capture, private reasoning persistence |
 | Thin Interaction Harness | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) | preview surfaces are named, but no CLI, runtime, context builder, review queue, or boundary monitor exists | harness runtime, UI, adapter integration, mutation path |
 | Conversation Intake Contract | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) | envelope fields are named, but no intake runtime, API, CLI, adapter ingest, privacy validation, or storage policy exists | conversation runtime, adapter ingest, event write |
+| Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary exists, but no harness preview, retrieval execution, activation trace write, or storage policy exists | retrieval as continuity, context mutation, activation trace writes |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -160,6 +161,23 @@ Still open:
 - whether `context_request` should be explicit, inferred, or absent;
 - what minimal cross-user privacy test should precede interaction work.
 
+### Context Package Preview
+
+Clarified by
+[CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md), but not
+implemented. It remains open because P87 defines selected/omitted reference
+vocabulary only and does not execute retrieval, mutate context, persist
+activation traces, or build prompts.
+
+Still open:
+
+- whether preview output should include exact selected text or only references
+  and summaries;
+- how token budget notes avoid becoming salience mutation;
+- whether privacy-suppressed omitted references can be visible;
+- how governance refs can appear without policy execution;
+- whether context gaps should create review candidates or remain preview-only.
+
 ### Recall Event Write Policy
 
 Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
@@ -285,6 +303,8 @@ The following remain blocked until a future explicit implementation phase:
 - conversation intake runtime;
 - adapter ingestion for harness work;
 - context builder execution;
+- retrieval execution as continuity;
+- activation trace writes for harness previews;
 - review queue execution;
 - policy executor;
 - companion, relationship memory, UI, AstrBot, adapter, or product layer.

@@ -234,6 +234,21 @@ sensitivity、context request、boundary flags 和 storage stance。
 边界：intake envelope 不是 implemented schema、不是 full payload capture mechanism，也不是
 memory record。
 
+## Context Package Preview / 上下文包预览
+
+未来可能存在的 harness surface，用于解释 selected context references、omitted references、
+attribution、token budget、privacy suppression、risk flags 和 context gaps。
+
+边界：context package preview 不是 retrieval as continuity、不是 context mutation、不是 prompt
+construction，也不是 activation trace persistence。
+
+## Omitted Reference / 被省略引用
+
+未来 context preview 故意省略的 reference，并附带 privacy、archived status、weak evidence、token
+budget 或 forbidden boundary 等原因。
+
+边界：omitted 不表示 deleted、forgotten、永久无关或 rewritten。
+
 ## Temporal Coherence / 时间一致性
 
 用于 review later state 是否仍能与 earlier state、current evidence 和 continuity anchors 相容的概念。

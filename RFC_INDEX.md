@@ -52,6 +52,7 @@ implementation approval.
 | P84 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [ZH](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | policy RFC | storage-boundary policy | Defines what a future trace may summarize and what must never be stored. | hidden chain-of-thought capture or trace storage |
 | P85 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [ZH](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | future RFC | harness boundary | Defines preview-only interaction surfaces before any harness implementation. | product, adapter, UI, or mutation path |
 | P86 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [ZH](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | contract RFC | intake envelope boundary | Defines future conversation intake preview fields without adapter ingest or writes. | conversation runtime, adapter ingest, or event write |
+| P87 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | future RFC | context preview boundary | Defines selected and omitted context reference explanations for future harness previews. | retrieval as continuity or activation trace writes |
 
 ## Exploration And Subject Boundary
 
@@ -118,6 +119,9 @@ The current dependency order is:
 19. [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md)
     defines the future intake envelope for harness previews without adapter
     ingestion, conversation runtime, context building, or event writes.
+20. [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md)
+    defines future selected/omitted context reference explanations without
+    retrieval execution, context mutation, or activation trace writes.
 
 ## Runtime-Blocked Topics
 
@@ -133,6 +137,8 @@ The indexed documents do not approve:
 - conversation intake runtime;
 - adapter ingestion for harness work;
 - context builder execution;
+- retrieval execution as continuity;
+- activation trace writes for harness previews;
 - review queue execution;
 - recall event writes;
 - growth lifecycle execution;

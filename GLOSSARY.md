@@ -293,6 +293,24 @@ privacy, sensitivity, context request, boundary flags, and storage stance.
 Boundary: an intake envelope is not an implemented schema, not a full payload
 capture mechanism, and not a memory record.
 
+## Context Package Preview
+
+A possible future harness surface that explains selected context references,
+omitted references, attribution, token budget, privacy suppression, risk flags,
+and context gaps.
+
+Boundary: context package preview is not retrieval as continuity, not context
+mutation, not prompt construction, and not activation trace persistence.
+
+## Omitted Reference
+
+A reference that a future context preview intentionally leaves out, with a
+reason such as privacy, archived status, weak evidence, token budget, or
+forbidden boundary.
+
+Boundary: omitted does not mean deleted, forgotten, irrelevant forever, or
+rewritten.
+
 ## Temporal Coherence
 
 A review idea for whether later state still fits earlier state, current

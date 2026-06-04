@@ -50,6 +50,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P84 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [ZH](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | policy RFC | storage-boundary policy | 定义未来 trace 可以摘要什么，以及哪些内容绝不能被存储。 | hidden chain-of-thought capture 或 trace storage |
 | P85 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [ZH](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | future RFC | harness boundary | 在任何 harness implementation 前，定义 preview-only interaction surfaces。 | product、adapter、UI 或 mutation path |
 | P86 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [ZH](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | contract RFC | intake envelope boundary | 定义未来 conversation intake preview fields，但不做 adapter ingest 或 writes。 | conversation runtime、adapter ingest 或 event write |
+| P87 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | future RFC | context preview boundary | 为 future harness previews 定义 selected 与 omitted context reference explanations。 | retrieval as continuity 或 activation trace writes |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -114,6 +115,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 19. [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md)
     为 harness previews 定义 future intake envelope，但不做 adapter ingestion、conversation
     runtime、context building 或 event writes。
+20. [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md)
+    定义 future selected/omitted context reference explanations，但不执行 retrieval、context
+    mutation 或 activation trace writes。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -129,6 +133,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - conversation intake runtime；
 - adapter ingestion for harness work；
 - context builder execution；
+- retrieval execution as continuity；
+- activation trace writes for harness previews；
 - review queue execution；
 - recall event writes；
 - growth lifecycle execution；

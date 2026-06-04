@@ -35,6 +35,7 @@ current documents carry it, and what is still only long-term vision?"
 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | Storage-boundary RFC | Defines what future trace candidates may summarize without storing hidden chain-of-thought or private reasoning. |
 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [THIN_INTERACTION_HARNESS_RFC_ZH.md](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | Harness-boundary RFC | Defines a preview-only local harness boundary before any interaction implementation. |
 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | Intake contract RFC | Defines a future preview envelope without adapter ingest, context building, or event writes. |
+| [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | Context preview RFC | Defines selected and omitted context reference explanations without retrieval execution or activation trace writes. |
 
 ## Original Idea Chains
 
@@ -73,6 +74,7 @@ current documents carry it, and what is still only long-term vision?"
 | Thought Trace Storage Policy | Trace language needs a hard boundary against hidden reasoning capture. | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md), [GLOSSARY.md](./GLOSSARY.md) | `storage-boundary`, `RFC-only`, not runtime |
 | Thin Interaction Harness | Foundation needs a narrow bridge toward interaction without product or runtime. | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md), [RFC_INDEX.md](./RFC_INDEX.md) | `harness-boundary`, `RFC-only`, not runtime |
 | Conversation Intake Contract | Input needs source, actor, session, privacy, and boundary vocabulary before context preview. | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md), [ADAPTER_PROTOCOL.md](./ADAPTER_PROTOCOL.md) | `contract-rfc`, `preview-only`, not adapter ingest |
+| Context Package Preview | Context selection needs explainability before any thin harness can be safe. | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md), [API.md](./API.md) | `preview-rfc`, not retrieval execution |
 
 ## Second Chain Map: Artificial Life History
 
@@ -138,6 +140,9 @@ For origin tracing:
 11. Read [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md)
     only as an intake envelope contract, not as adapter ingest, API, CLI,
     context building, or event write behavior.
+12. Read [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md)
+    only as context-selection explanation vocabulary, not as retrieval,
+    prompt construction, activation trace persistence, or context mutation.
 
 ## P78 Non-Execution Statement
 
