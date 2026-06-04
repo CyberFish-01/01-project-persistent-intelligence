@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P115. It is not a release log. It records how the system
+This index covers P0-P116. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -123,3 +123,4 @@ foundation evolved.
 | P113 | Added Harness Source Inventory. | A state-backed read-only harness needs an explicit Markdown whitelist and pressure mapping before loader implementation. | Harness Source Backing |
 | P114 | Added Read-Only Source Loader Plan. | The source loader needs a deterministic no-write API, record shape, whitelist rule, and test boundary before code. | Harness Source Backing |
 | P115 | Added minimal read-only source loader. | The harness needs a deterministic source-ID based loader for whitelisted Markdown before CLI or harness integration. | Harness Source Backing |
+| P116 | Hardened source loader safety. | The source loader whitelist needs validation of IDs, paths, classes, research lines, mappings, and missing files before CLI exposure. | Harness Source Backing |

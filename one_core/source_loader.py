@@ -10,6 +10,30 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 LANGUAGES = ("en", "zh")
 OUTPUT_FORMATS = ("markdown", "json")
+SOURCE_CLASSES = (
+    "foundation_status",
+    "governance_boundary",
+    "harness_boundary",
+    "temporal_ctm_boundary",
+    "capability_boundary",
+    "reconstruction_boundary",
+    "founder_readability",
+)
+RESEARCH_LINES = (
+    "both",
+    "CTM-inspired Temporal Dynamics",
+    "Tool-First In-Situ Self-Evolution",
+)
+PRESSURE_TYPES = (
+    "observability_pressure",
+    "growth_review_pressure",
+    "adapter_boundary_pressure",
+    "product_layer_pressure",
+    "capability_evolution_pressure",
+    "temporal_pressure",
+    "reconstruction_pressure",
+    "unknown_pressure",
+)
 
 NON_EXECUTION_INVARIANTS = {
     "read_only_source_backing": True,
@@ -119,12 +143,15 @@ def source_refs_for_pressure(pressure_type: str, lang: str = "en") -> list[dict[
 def build_source_inventory_report(lang: str = "en") -> dict[str, Any]:
     _validate_lang(lang)
     records = load_source_inventory(lang=lang)
+    safety = validate_source_whitelist()
     return {
         "report_id": "harness_source_inventory_v0.1",
         "generated_by": "source_loader",
         "lang": lang,
         "scope": "read_only_whitelisted_markdown",
         "source_count": len(records),
+        "safety_status": safety["status"],
+        "safety_issues": safety["issues"],
         "sources": records,
         "pressure_mappings": {
             pressure: [record["source_id"] for record in source_refs_for_pressure(pressure, lang=lang)]
@@ -148,6 +175,61 @@ def build_source_inventory_report(lang: str = "en") -> dict[str, Any]:
     }
 
 
+def validate_source_whitelist() -> dict[str, Any]:
+    issues = []
+    seen_ids = set()
+    for spec in SOURCE_WHITELIST:
+        if spec.source_id in seen_ids:
+            issues.append({"source_id": spec.source_id, "issue": "duplicate_source_id"})
+        seen_ids.add(spec.source_id)
+        if spec.source_class not in SOURCE_CLASSES:
+            issues.append({"source_id": spec.source_id, "issue": "unknown_source_class"})
+        if spec.research_line not in RESEARCH_LINES:
+            issues.append({"source_id": spec.source_id, "issue": "unknown_research_line"})
+        if not spec.pressure_types:
+            issues.append({"source_id": spec.source_id, "issue": "missing_pressure_types"})
+        for pressure_type in spec.pressure_types:
+            if pressure_type != "all" and pressure_type not in PRESSURE_TYPES:
+                issues.append(
+                    {
+                        "source_id": spec.source_id,
+                        "pressure_type": pressure_type,
+                        "issue": "unknown_pressure_type",
+                    }
+                )
+        for path in (spec.en_path, spec.zh_path):
+            try:
+                full_path = _safe_repo_markdown_path(path)
+            except ValueError as exc:
+                issues.append({"source_id": spec.source_id, "path": path, "issue": str(exc)})
+                continue
+            if not full_path.exists():
+                issues.append({"source_id": spec.source_id, "path": path, "issue": "missing_whitelisted_file"})
+    for pressure_type, source_ids in PRESSURE_SOURCE_IDS.items():
+        if pressure_type not in PRESSURE_TYPES:
+            issues.append({"pressure_type": pressure_type, "issue": "unknown_pressure_mapping"})
+        if not source_ids:
+            issues.append({"pressure_type": pressure_type, "issue": "empty_pressure_mapping"})
+        for source_id in source_ids:
+            if source_id not in SOURCE_BY_ID:
+                issues.append(
+                    {
+                        "pressure_type": pressure_type,
+                        "source_id": source_id,
+                        "issue": "pressure_mapping_unknown_source_id",
+                    }
+                )
+    return {
+        "status": "pass" if not issues else "fail",
+        "issues": issues,
+        "checked_source_count": len(SOURCE_WHITELIST),
+        "checked_pressure_count": len(PRESSURE_SOURCE_IDS),
+        "read_mode": "metadata_validation_only",
+        "writes_performed": False,
+        "external_io_performed": False,
+    }
+
+
 def render_source_inventory_report(report: dict[str, Any], output_format: str) -> str:
     if output_format not in OUTPUT_FORMATS:
         raise ValueError("output_format must be 'markdown' or 'json'")
@@ -161,6 +243,7 @@ def render_source_inventory_report(report: dict[str, Any], output_format: str) -
         f"`report_id`: `{report['report_id']}`",
         f"`scope`: `{report['scope']}`",
         f"`source_count`: `{report['source_count']}`",
+        f"`safety_status`: `{report['safety_status']}`",
         "",
         "## Sources" if not zh else "## Sources / 来源",
         "",
@@ -188,6 +271,11 @@ def render_source_inventory_report(report: dict[str, Any], output_format: str) -
     for pressure, source_ids in report["pressure_mappings"].items():
         lines.append(f"| `{pressure}` | {', '.join(source_ids)} |")
     lines.extend([
+        "",
+        "## Safety" if not zh else "## Safety / 安全检查",
+        "",
+        f"- status: {report['safety_status']}",
+        f"- issue_count: {len(report['safety_issues'])}",
         "",
         "## Non-Execution Invariants" if not zh else "## Non-Execution Invariants / 非执行边界",
         "",

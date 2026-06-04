@@ -17,9 +17,9 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P115 Minimal Read-Only Source Loader 已完成。`one_core/source_loader.py` 现在只能按
-source ID 和 pressure type 读取 P113 显式 Markdown 白名单。它还没有接 CLI 或 harness integration，
-也不读取 state logs、adapters、memory dumps、network sources 或任意路径。
+当前工作状态：P116 Source Loader Safety Hardening 已完成。`one_core/source_loader.py` 现在会在任何
+CLI 或 harness integration 前验证 whitelist safety、pressure mappings、source classes、research lines
+和 missing files。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -33,7 +33,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P115 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P116 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -57,6 +57,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [STATE_BACKED_READ_ONLY_HARNESS_RFC.md](./STATE_BACKED_READ_ONLY_HARNESS_RFC.md) / [STATE_BACKED_READ_ONLY_HARNESS_RFC_ZH.md](./STATE_BACKED_READ_ONLY_HARNESS_RFC_ZH.md)：P112 boundary RFC，在任何 state-backed harness implementation 前定义 read-only local source backing。
 - [HARNESS_SOURCE_INVENTORY.md](./HARNESS_SOURCE_INVENTORY.md) / [HARNESS_SOURCE_INVENTORY_ZH.md](./HARNESS_SOURCE_INVENTORY_ZH.md)：P113 explicit local Markdown source whitelist 和 pressure mapping，用于 future read-only source backing。
 - [READ_ONLY_SOURCE_LOADER_PLAN.md](./READ_ONLY_SOURCE_LOADER_PLAN.md) / [READ_ONLY_SOURCE_LOADER_PLAN_ZH.md](./READ_ONLY_SOURCE_LOADER_PLAN_ZH.md)：P114 implementation plan，定义基于 P113 whitelist 的 deterministic no-write source loader。
+- [SOURCE_LOADER_SAFETY_HARDENING.md](./SOURCE_LOADER_SAFETY_HARDENING.md) / [SOURCE_LOADER_SAFETY_HARDENING_ZH.md](./SOURCE_LOADER_SAFETY_HARDENING_ZH.md)：P116 source loader whitelist safety validation，位于 CLI 或 harness integration 前。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 

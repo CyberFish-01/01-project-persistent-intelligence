@@ -12,6 +12,7 @@ from one_core.source_loader import (
     load_source_record,
     render_source_inventory_report,
     source_refs_for_pressure,
+    validate_source_whitelist,
 )
 
 
@@ -65,9 +66,21 @@ class SourceLoaderTests(unittest.TestCase):
         self.assertEqual(report["report_id"], "harness_source_inventory_v0.1")
         self.assertEqual(report["scope"], "read_only_whitelisted_markdown")
         self.assertEqual(report["source_count"], len(SOURCE_WHITELIST))
+        self.assertEqual(report["safety_status"], "pass")
+        self.assertEqual(report["safety_issues"], [])
         self.assertIn("work_01_state", report["disallowed_sources"])
         for key, expected in NON_EXECUTION_INVARIANTS.items():
             self.assertEqual(report["non_execution_invariants"][key], expected)
+
+    def test_validate_source_whitelist_passes_without_io_or_writes(self):
+        safety = validate_source_whitelist()
+
+        self.assertEqual(safety["status"], "pass")
+        self.assertEqual(safety["issues"], [])
+        self.assertEqual(safety["checked_source_count"], len(SOURCE_WHITELIST))
+        self.assertEqual(safety["read_mode"], "metadata_validation_only")
+        self.assertFalse(safety["writes_performed"])
+        self.assertFalse(safety["external_io_performed"])
 
     def test_render_source_inventory_markdown_and_json(self):
         report = build_source_inventory_report(lang="zh")
@@ -76,8 +89,11 @@ class SourceLoaderTests(unittest.TestCase):
 
         self.assertIn("Harness Source Inventory", markdown)
         self.assertIn("Pressure Mappings", markdown)
+        self.assertIn("safety_status", markdown)
+        self.assertIn("issue_count: 0", markdown)
         self.assertIn("source_loader_write_enabled: false", markdown)
         self.assertIn('"report_id": "harness_source_inventory_v0.1"', json_output)
+        self.assertIn('"safety_status": "pass"', json_output)
 
     def test_invalid_lang_and_format_rejected(self):
         with self.assertRaises(ValueError):

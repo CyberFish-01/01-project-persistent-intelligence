@@ -19,11 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P115 Minimal Read-Only Source Loader is complete.
-`one_core/source_loader.py` can read only the explicit P113 Markdown whitelist
-by source ID and pressure type. It does not add CLI or harness integration yet,
-and it does not read state logs, adapters, memory dumps, network sources, or
-arbitrary paths.
+Current work status: P116 Source Loader Safety Hardening is complete.
+`one_core/source_loader.py` now validates whitelist safety, pressure mappings,
+source classes, research lines, and missing files before any CLI or harness
+integration.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -39,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P115 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P116 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -63,6 +62,7 @@ Read these first when joining the project or handing it to another agent:
 - [STATE_BACKED_READ_ONLY_HARNESS_RFC.md](./STATE_BACKED_READ_ONLY_HARNESS_RFC.md) / [STATE_BACKED_READ_ONLY_HARNESS_RFC_ZH.md](./STATE_BACKED_READ_ONLY_HARNESS_RFC_ZH.md): P112 boundary RFC for read-only local source backing before any state-backed harness implementation.
 - [HARNESS_SOURCE_INVENTORY.md](./HARNESS_SOURCE_INVENTORY.md) / [HARNESS_SOURCE_INVENTORY_ZH.md](./HARNESS_SOURCE_INVENTORY_ZH.md): P113 explicit local Markdown source whitelist and pressure mapping for future read-only source backing.
 - [READ_ONLY_SOURCE_LOADER_PLAN.md](./READ_ONLY_SOURCE_LOADER_PLAN.md) / [READ_ONLY_SOURCE_LOADER_PLAN_ZH.md](./READ_ONLY_SOURCE_LOADER_PLAN_ZH.md): P114 implementation plan for a deterministic no-write source loader over the P113 whitelist.
+- [SOURCE_LOADER_SAFETY_HARDENING.md](./SOURCE_LOADER_SAFETY_HARDENING.md) / [SOURCE_LOADER_SAFETY_HARDENING_ZH.md](./SOURCE_LOADER_SAFETY_HARDENING_ZH.md): P116 safety validation for the source loader whitelist before CLI or harness integration.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 
