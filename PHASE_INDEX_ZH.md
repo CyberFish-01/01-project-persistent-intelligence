@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P107。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P108。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -114,3 +114,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P105 | 强化 harness boundary monitor。 | dry-run boundary monitor 应明确显示 disabled capabilities、unchanged state 和零 active violations。 | Harness Boundary |
 | P106 | 专门化 harness candidate previews。 | candidate rows 应解释 intent、selection reason、blocked promotion 和 required manual review，同时保持 preview-only。 | Harness Preview |
 | P107 | 专门化 harness review queue previews。 | review gate rows 应解释 queue intent、gate routing、blocked lifecycle 和 manual-review-only next action，同时不创建 lifecycle。 | Harness Preview |
+| P108 | 加入 harness usability re-review。 | routing 和 preview specialization 之后，应先复评 harness，再规划下一步只读工作。 | Harness Review |

@@ -17,9 +17,9 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P107 Harness Review Queue Preview Specialization 已完成。本地只读 `harness-dry-run`
-现在为每个 review gate 提供 queue intent、gate-selection reason、blocked-lifecycle reason 和
-manual-review-only next action；仍保持 preview-only。
+当前工作状态：P108 Harness Usability Re-Review 已完成。本地只读 `harness-dry-run`
+在 pressure routing、specialized candidates、specialized review gates 和 boundary visibility
+强化后，从 P101 的 6.5/10 可用性基线提升到 8.0/10。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -33,7 +33,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P107 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P108 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -50,6 +50,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md)：P97 founder-facing usability review，推动 P98 可读性改进。
 - [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md)：P99 document-only implementation plan，规划 P100 no-write `harness-dry-run` 压力测试命令。
 - [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md)：P101 review，审查 P100 dry-run 是否能帮助 founder 看懂一条输入在 01 Core 中的处理路径。
+- [HARNESS_USABILITY_REVIEW_P108.md](./HARNESS_USABILITY_REVIEW_P108.md) / [HARNESS_USABILITY_REVIEW_P108_ZH.md](./HARNESS_USABILITY_REVIEW_P108_ZH.md)：P108 re-review，复查 pressure routing、specialized candidates、review gate specialization 和 boundary hardening 之后的 harness 可用性。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 
