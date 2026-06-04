@@ -74,6 +74,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P123 | [SHADOW_ADAPTER_MODE_RFC.md](./SHADOW_ADAPTER_MODE_RFC.md) / [ZH](./SHADOW_ADAPTER_MODE_RFC_ZH.md) | shadow boundary RFC | RFC-only adapter boundary | 定义 future adapter-shaped input 如何作为 shadow evidence 被观察，同时不 live integration、不 ingest、不写 event、不写 memory、不让平台拥有 identity。 | adapter code、AstrBot integration、network access、adapter ingest、event write、memory write、model call 或 rebuild |
 | P124 | [CONTAMINATION_SCAN_RFC.md](./CONTAMINATION_SCAN_RFC.md) / [ZH](./CONTAMINATION_SCAN_RFC_ZH.md) | scan RFC | RFC-only contamination boundary | 定义 future contamination candidate types、scan inputs、output preview、routing rules 和 false-positive policy。 | scanner runtime、validation enforcement、import processing、model call、adapter integration、write path 或 rebuild |
 | P125 | [LOCKDOWN_INTEGRATION_READINESS.md](./LOCKDOWN_INTEGRATION_READINESS.md) / [ZH](./LOCKDOWN_INTEGRATION_READINESS_ZH.md) | review | readiness review | 复盘 P121-P124 是否形成一致的 lockdown stack，能否继续 fixture 或 validator planning。 | validator implementation、runtime enforcement、adapter integration、import processing、model call、write path 或 rebuild |
+| P126 | [LOCKDOWN_FIXTURE_MATRIX.md](./LOCKDOWN_FIXTURE_MATRIX.md) / [ZH](./LOCKDOWN_FIXTURE_MATRIX_ZH.md) | fixture matrix | document-only examples | 定义 synthetic no-write fixtures，用于污染类别和边界路由复盘，早于任何 future validator 或 scanner。 | real imports、validator implementation、scanner runtime、adapter integration、model call、write path 或 rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 

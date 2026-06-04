@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P125。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P126。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -132,3 +132,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P123 | 加入 Shadow Adapter Mode RFC。 | future adapter-shaped input 只能作为 shadow evidence 被观察，不能变成 ingested state 或 platform-owned identity。 | Core Lockdown |
 | P124 | 加入 Contamination Scan RFC。 | future scans 可以识别 contamination candidates，但 detection 不是真相、enforcement 或 state mutation。 | Core Lockdown |
 | P125 | 加入 Lockdown Integration Readiness。 | 继续 fixture 或 validator planning 前，必须先复盘 lockdown stack 是否一致。 | Core Lockdown |
+| P126 | 加入 Lockdown Fixture Matrix。 | 考虑任何 future validator 或 scanner 前，lockdown risks 需要 synthetic、no-write 样例。 | Core Lockdown |
