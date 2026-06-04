@@ -8,7 +8,11 @@ from typing import List
 from .api import OneCoreAPI, state_summary
 from .dream import DreamEngine
 from .state import StateStore
-from .validation import validate_growth_semantics_artifact, validate_state
+from .validation import (
+    validate_growth_candidate_review_artifact,
+    validate_growth_semantics_artifact,
+    validate_state,
+)
 
 
 @dataclass(frozen=True)
@@ -76,6 +80,7 @@ def run_scenario_evaluation() -> dict:
             check_dream_artifact_package(root / "dream_artifact_package"),
             check_context_builder_policy_trace(root / "context_builder_policy_trace"),
             check_growth_semantics(root / "growth_semantics"),
+            check_growth_candidate_review(root / "growth_candidate_review"),
         ]
     passed = [scenario for scenario in scenarios if scenario.passed]
     failed = [scenario for scenario in scenarios if not scenario.passed]
@@ -3103,6 +3108,269 @@ def check_growth_semantics(state_dir: Path) -> EvaluationCheck:
     )
 
 
+def check_growth_candidate_review(state_dir: Path) -> EvaluationCheck:
+    store = StateStore(state_dir)
+    state = store.init()
+    memory = store.record_episode(
+        "P51 tests whether growth candidates become review objects, not growth."
+    )
+    before_report_state = store.load()
+    before_report_event_ids = [event.get("event_id") for event in store.list_events()]
+    encoding_state = {
+        "timestamp": memory.get("timestamp"),
+        "source_event_id": memory.get("id"),
+        "active_task_id": "task_p51_growth_candidate_review",
+        "active_claim_ids": ["claim_growth_candidate_review"],
+        "identity_anchor_refs": list(
+            state.get("working_state", {}).get("context_anchors", {}).keys()
+        ),
+        "relationship_scope": "local_user",
+        "confidence": 0.84,
+        "salience": 0.76,
+        "privacy_scope": "normal",
+        "state_version": state.get("state_version"),
+    }
+    samples = [
+        {
+            "sample_id": "evidence_backed_evolution_review_candidate",
+            "memory_id": memory.get("id"),
+            "source_event_ids": [memory.get("id")],
+            "related_memory_ids": [memory.get("id")],
+            "related_claim_ids": ["claim_growth_candidate_review"],
+            "related_task_ids": ["task_p51_growth_candidate_review"],
+            "description": "Evidence-backed reinterpretation becomes a review candidate.",
+            "encoding_state": encoding_state,
+            "recall_state": {
+                "active_task_id": "task_resume",
+                "retrieval_reason": "continue_work",
+            },
+            "meaning_shift": {"shift_type": "reinterpreted"},
+            "evidence_refs": [memory.get("id"), "claim:growth_candidate_review"],
+        },
+        {
+            "sample_id": "random_drift_rejected_by_anti_growth_filter",
+            "memory_id": memory.get("id"),
+            "description": "Random unsupported drift is rejected.",
+            "encoding_state": encoding_state,
+            "recall_state": {"retrieval_reason": "unsupported_change"},
+            "meaning_shift": {"shift_type": "reinterpreted"},
+            "evidence_refs": [],
+            "unsupported_personality_change": True,
+        },
+        {
+            "sample_id": "exploration_drift_recorded_not_promoted",
+            "memory_id": memory.get("id"),
+            "description": "Exploration drift is recorded without promotion.",
+            "encoding_state": encoding_state,
+            "recall_state": {"retrieval_reason": "exploration"},
+            "meaning_shift": {"shift_type": "reinterpreted"},
+            "exploration": True,
+            "evidence_refs": [memory.get("id")],
+        },
+        {
+            "sample_id": "identity_threatening_drift_high_gate",
+            "memory_id": memory.get("id"),
+            "description": "Identity-threatening drift routes to high gate.",
+            "encoding_state": encoding_state,
+            "recall_state": {"retrieval_reason": "identity_overwrite"},
+            "meaning_shift": {"shift_type": "reinterpreted"},
+            "identity_threatening": True,
+            "evidence_refs": [memory.get("id")],
+        },
+        {
+            "sample_id": "meaning_shift_without_evidence_insufficient_context",
+            "memory_id": memory.get("id"),
+            "description": "Meaning shift without evidence is insufficient context.",
+            "encoding_state": encoding_state,
+            "recall_state": {"retrieval_reason": "unsupported_reinterpretation"},
+            "meaning_shift": {"shift_type": "reinforced"},
+            "evidence_refs": [],
+        },
+        {
+            "sample_id": "model_tone_drift_rejected",
+            "memory_id": memory.get("id"),
+            "description": "Tone drift is not growth.",
+            "encoding_state": encoding_state,
+            "recall_state": {"retrieval_reason": "tone_change"},
+            "meaning_shift": {"shift_type": "reinterpreted"},
+            "evidence_refs": [],
+            "model_tone_drift": True,
+        },
+        {
+            "sample_id": "prompt_contamination_rejected",
+            "memory_id": memory.get("id"),
+            "description": "Prompt contamination is rejected as non-growth.",
+            "encoding_state": encoding_state,
+            "recall_state": {"retrieval_reason": "prompt_injection"},
+            "meaning_shift": {"shift_type": "reinterpreted"},
+            "evidence_refs": [],
+            "prompt_contamination": True,
+        },
+        {
+            "sample_id": "temporal_delay_future_question_only",
+            "memory_id": memory.get("id"),
+            "description": "Delayed realization is only a P52/P53 future question.",
+            "encoding_state": encoding_state,
+            "recall_state": {
+                "retrieval_reason": "delayed_realization",
+                "elapsed_time_since_encoding": "future_field_only",
+            },
+            "meaning_shift": {"shift_type": "reinterpreted"},
+            "evidence_refs": [memory.get("id"), "time:future_question"],
+            "temporal_future_only": True,
+        },
+    ]
+    rfc = store.growth_candidate_review_rfc()
+    report = store.growth_candidate_review_report(analysis_samples=samples)
+    after_report_state = store.load()
+    after_report_event_ids = [event.get("event_id") for event in store.list_events()]
+    rfc_validation = validate_growth_candidate_review_artifact(rfc)
+    report_validation = validate_growth_candidate_review_artifact(report)
+    reviews = {
+        item.get("sample_id"): item
+        for item in report.get("growth_candidate_reviews", [])
+        if isinstance(item, dict)
+    }
+    checks = {
+        "growth_candidate_review_rfc_available": rfc.get("mode")
+        == "growth_candidate_review_rfc_v0.1",
+        "growth_candidate_review_report_available": report.get("mode")
+        == "growth_candidate_review_report_v0.1",
+        "placement_recommends_governance_surface": rfc.get("placement_rfc", {}).get(
+            "recommendation"
+        )
+        == "separate_governance_surface",
+        "schema_is_growth_candidate_review_v01": rfc.get("schema", {}).get(
+            "schema_name"
+        )
+        == "growth_candidate_review_v0.1",
+        "evidence_backed_evolution_review_candidate": reviews.get(
+            "evidence_backed_evolution_review_candidate",
+            {},
+        ).get("review_status")
+        == "review_candidate",
+        "random_drift_rejected": reviews.get(
+            "random_drift_rejected_by_anti_growth_filter",
+            {},
+        ).get("review_status")
+        == "rejected_by_anti_growth_filter",
+        "exploration_drift_not_promoted": reviews.get(
+            "exploration_drift_recorded_not_promoted",
+            {},
+        ).get("recommended_review_gate")
+        == "record_only"
+        and reviews.get(
+            "exploration_drift_recorded_not_promoted",
+            {},
+        ).get("promoted")
+        is False,
+        "identity_threatening_drift_high_gate": reviews.get(
+            "identity_threatening_drift_high_gate",
+            {},
+        ).get("recommended_review_gate")
+        == "identity_high_gate",
+        "meaning_shift_without_evidence_insufficient_context": reviews.get(
+            "meaning_shift_without_evidence_insufficient_context",
+            {},
+        ).get("review_status")
+        == "insufficient_context",
+        "model_tone_drift_rejected": "model_tone_drift"
+        in reviews.get("model_tone_drift_rejected", {}).get(
+            "rejection_reasons",
+            [],
+        ),
+        "prompt_contamination_rejected": "prompt_contamination"
+        in reviews.get("prompt_contamination_rejected", {}).get(
+            "rejection_reasons",
+            [],
+        ),
+        "temporal_delay_future_question_only": reviews.get(
+            "temporal_delay_future_question_only",
+            {},
+        ).get("review_status")
+        == "future_question_only"
+        and reviews.get(
+            "temporal_delay_future_question_only",
+            {},
+        ).get("recommended_review_gate")
+        == "future_temporal_review",
+        "growth_candidate_review_non_executing": report.get("review_only") is True
+        and report.get("execution_prohibited") is True
+        and report.get("promoted") is False
+        and report.get("automatic_identity_mutation_allowed") is False
+        and report.get("automatic_memory_promotion_allowed") is False
+        and report.get("memory_rewrite_executed") is False
+        and report.get("recall_mutation_executed") is False
+        and report.get("growth_engine_executed") is False
+        and report.get("identity_core_mutated") is False,
+        "growth_candidate_review_read_only": report.get("would_modify_state") is False
+        and report.get("state_unchanged") is True
+        and after_report_state == before_report_state
+        and after_report_event_ids == before_report_event_ids,
+        "growth_candidate_review_validation_passed": rfc_validation.get("status")
+        == "passed"
+        and report_validation.get("status") == "passed",
+    }
+    metrics = {
+        "growth_candidate_review_report_count": 1
+        if report.get("mode") == "growth_candidate_review_report_v0.1"
+        else 0,
+        "growth_candidate_review_rfc_count": 1
+        if rfc.get("mode") == "growth_candidate_review_rfc_v0.1"
+        else 0,
+        "growth_candidate_review_object_count": report.get(
+            "review_object_count",
+            0,
+        ),
+        "growth_candidate_review_candidate_count": report.get(
+            "review_candidate_count",
+            0,
+        ),
+        "growth_candidate_review_rejected_count": report.get("rejected_count", 0),
+        "growth_candidate_review_insufficient_context_count": report.get(
+            "insufficient_context_count",
+            0,
+        ),
+        "growth_candidate_review_record_only_count": report.get(
+            "record_only_count",
+            0,
+        ),
+        "growth_candidate_review_high_gate_count": report.get("high_gate_count", 0),
+        "growth_candidate_review_temporal_future_question_count": report.get(
+            "temporal_future_question_count",
+            0,
+        ),
+        "growth_candidate_review_identity_mutation_count": 1
+        if report.get("identity_core_mutated") is True
+        else 0,
+        "growth_candidate_review_memory_promotion_count": 1
+        if report.get("automatic_memory_promotion_allowed") is True
+        else 0,
+        "growth_candidate_review_memory_rewrite_count": 1
+        if report.get("memory_rewrite_executed") is True
+        else 0,
+        "growth_candidate_review_recall_mutation_count": 1
+        if report.get("recall_mutation_executed") is True
+        else 0,
+        "growth_candidate_review_growth_engine_execution_count": 1
+        if report.get("growth_engine_executed") is True
+        else 0,
+        "growth_candidate_review_state_mutation_count": 0
+        if after_report_state == before_report_state
+        and after_report_event_ids == before_report_event_ids
+        else 1,
+    }
+    return EvaluationCheck(
+        name="growth_candidate_review",
+        passed=all(checks.values()),
+        details={
+            "scenario": "P51 Growth Candidate Review Design",
+            "checks": checks,
+            "metrics": metrics,
+        },
+    )
+
+
 def check_dream_artifact_package(state_dir: Path) -> EvaluationCheck:
     store = StateStore(state_dir)
     before_identity = store.init()["identity_core"]
@@ -4730,6 +4998,65 @@ def summarize_scenario_metrics(scenarios: List[EvaluationCheck]) -> dict:
         ),
         "growth_semantics_state_mutation_count": sum(
             int(item.get("growth_semantics_state_mutation_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_report_count": sum(
+            int(item.get("growth_candidate_review_report_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_rfc_count": sum(
+            int(item.get("growth_candidate_review_rfc_count", 0)) for item in metrics
+        ),
+        "growth_candidate_review_object_count": sum(
+            int(item.get("growth_candidate_review_object_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_candidate_count": sum(
+            int(item.get("growth_candidate_review_candidate_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_rejected_count": sum(
+            int(item.get("growth_candidate_review_rejected_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_insufficient_context_count": sum(
+            int(item.get("growth_candidate_review_insufficient_context_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_record_only_count": sum(
+            int(item.get("growth_candidate_review_record_only_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_high_gate_count": sum(
+            int(item.get("growth_candidate_review_high_gate_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_temporal_future_question_count": sum(
+            int(item.get("growth_candidate_review_temporal_future_question_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_identity_mutation_count": sum(
+            int(item.get("growth_candidate_review_identity_mutation_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_memory_promotion_count": sum(
+            int(item.get("growth_candidate_review_memory_promotion_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_memory_rewrite_count": sum(
+            int(item.get("growth_candidate_review_memory_rewrite_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_recall_mutation_count": sum(
+            int(item.get("growth_candidate_review_recall_mutation_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_growth_engine_execution_count": sum(
+            int(item.get("growth_candidate_review_growth_engine_execution_count", 0))
+            for item in metrics
+        ),
+        "growth_candidate_review_state_mutation_count": sum(
+            int(item.get("growth_candidate_review_state_mutation_count", 0))
             for item in metrics
         ),
         "event_payload_capture_policy_proposal_count": sum(

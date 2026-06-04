@@ -478,6 +478,14 @@ def main() -> None:
         "growth-semantics-report",
         help="Report review-only growth semantics signals without mutating state.",
     )
+    subparsers.add_parser(
+        "growth-candidate-review-rfc",
+        help="Print the P51 growth candidate review RFC without mutating state.",
+    )
+    subparsers.add_parser(
+        "growth-candidate-review-report",
+        help="Report review-only growth candidate review objects without mutating state.",
+    )
     evidence_request_lifecycle_parser = subparsers.add_parser(
         "reconstruction-schema-evidence-request-lifecycle",
         help="Apply a review-only lifecycle action to a reconstruction schema evidence request.",
@@ -886,6 +894,10 @@ def main() -> None:
         print_json(store.growth_semantics_rfc())
     elif args.command == "growth-semantics-report":
         print_json(store.growth_semantics_report())
+    elif args.command == "growth-candidate-review-rfc":
+        print_json(store.growth_candidate_review_rfc())
+    elif args.command == "growth-candidate-review-report":
+        print_json(store.growth_candidate_review_report())
     elif args.command == "reconstruction-schema-evidence-request-lifecycle":
         print_json(
             store.apply_reconstruction_schema_evidence_request_lifecycle_action(

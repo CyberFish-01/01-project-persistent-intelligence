@@ -66,6 +66,18 @@ GROWTH_SEMANTICS_REQUIRED_INVARIANTS = {
     "growth_engine_executed": False,
 }
 
+GROWTH_CANDIDATE_REVIEW_REQUIRED_INVARIANTS = {
+    "review_only": True,
+    "execution_prohibited": True,
+    "promoted": False,
+    "automatic_identity_mutation_allowed": False,
+    "automatic_memory_promotion_allowed": False,
+    "memory_rewrite_executed": False,
+    "recall_mutation_executed": False,
+    "growth_engine_executed": False,
+    "identity_core_mutated": False,
+}
+
 
 @dataclass(frozen=True)
 class ValidationIssue:
@@ -172,6 +184,142 @@ def validate_growth_semantics_artifact(artifact: dict[str, Any]) -> dict:
                     ValidationIssue(
                         path + f".interpreted_changes[{index}].review_required",
                         "Growth candidates must require review.",
+                    )
+                )
+    return {
+        "status": "passed" if not issues else "failed",
+        "issues": [issue_to_dict(issue) for issue in issues],
+        "issue_count": len(issues),
+    }
+
+
+def validate_growth_candidate_review_artifact(artifact: dict[str, Any]) -> dict:
+    issues: list[ValidationIssue] = []
+    path = "growth_candidate_review_artifact"
+    if artifact.get("mode") not in {
+        "growth_candidate_review_rfc_v0.1",
+        "growth_candidate_review_report_v0.1",
+    }:
+        issues.append(
+            ValidationIssue(
+                path + ".mode",
+                "Growth candidate review artifact mode is invalid.",
+            )
+        )
+    for key, expected in GROWTH_CANDIDATE_REVIEW_REQUIRED_INVARIANTS.items():
+        if artifact.get(key) is not expected:
+            issues.append(
+                ValidationIssue(
+                    path + f".{key}",
+                    "Growth candidate review artifact must preserve review-only invariants.",
+                )
+            )
+    if artifact.get("mode") == "growth_candidate_review_rfc_v0.1":
+        schema = artifact.get("schema", {})
+        if not isinstance(schema, dict):
+            issues.append(ValidationIssue(path + ".schema", "Schema must be an object."))
+        elif schema.get("schema_name") != "growth_candidate_review_v0.1":
+            issues.append(
+                ValidationIssue(
+                    path + ".schema.schema_name",
+                    "Growth candidate review schema name is invalid.",
+                )
+            )
+        if artifact.get("placement_rfc", {}).get("recommendation") != (
+            "separate_governance_surface"
+        ):
+            issues.append(
+                ValidationIssue(
+                    path + ".placement_rfc.recommendation",
+                    "Growth candidate review must be a separate governance object.",
+                )
+            )
+    if artifact.get("mode") == "growth_candidate_review_report_v0.1":
+        for bucket_key in (
+            "growth_candidate_reviews",
+            "review_candidates",
+            "rejected_by_anti_growth_filter",
+            "insufficient_context_reviews",
+            "record_only_reviews",
+            "high_gate_reviews",
+            "temporal_awareness_future_questions",
+        ):
+            if not isinstance(artifact.get(bucket_key), list):
+                issues.append(
+                    ValidationIssue(
+                        path + f".{bucket_key}",
+                        "Growth candidate review report buckets must be lists.",
+                    )
+                )
+        for index, item in enumerate(artifact.get("growth_candidate_reviews", [])):
+            item_path = path + f".growth_candidate_reviews[{index}]"
+            if not isinstance(item, dict):
+                issues.append(
+                    ValidationIssue(
+                        item_path,
+                        "Growth candidate review object must be an object.",
+                    )
+                )
+                continue
+            for key in (
+                "candidate_id",
+                "drift_type",
+                "source_event_ids",
+                "related_memory_ids",
+                "related_claim_ids",
+                "related_task_ids",
+                "encoding_state_ref",
+                "recall_state_ref",
+                "meaning_shift",
+                "evidence_refs",
+                "rejection_reasons",
+                "risk_level",
+                "review_required",
+                "recommended_review_gate",
+                "promoted",
+                "execution_prohibited",
+                "review_only",
+            ):
+                if key not in item:
+                    issues.append(
+                        ValidationIssue(
+                            item_path + f".{key}",
+                            "Growth candidate review schema key is missing.",
+                        )
+                    )
+            for key, expected in GROWTH_CANDIDATE_REVIEW_REQUIRED_INVARIANTS.items():
+                if item.get(key) is not expected:
+                    issues.append(
+                        ValidationIssue(
+                            item_path + f".{key}",
+                            "Growth candidate review object must not execute mutations.",
+                        )
+                    )
+            if item.get("review_status") == "review_candidate" and not item.get(
+                "evidence_refs"
+            ):
+                issues.append(
+                    ValidationIssue(
+                        item_path + ".evidence_refs",
+                        "Review candidate requires evidence refs.",
+                    )
+                )
+            if item.get("meaning_shift_evidence_status") == (
+                "missing_evidence_refs"
+            ) and item.get("review_status") == "review_candidate":
+                issues.append(
+                    ValidationIssue(
+                        item_path + ".meaning_shift_evidence_status",
+                        "Meaning shift without evidence cannot enter growth review.",
+                    )
+                )
+            if item.get("temporal_awareness_future_question_only") is True and item.get(
+                "review_status"
+            ) != "future_question_only":
+                issues.append(
+                    ValidationIssue(
+                        item_path + ".temporal_awareness_future_question_only",
+                        "Temporal awareness must remain a future question in P51.",
                     )
                 )
     return {

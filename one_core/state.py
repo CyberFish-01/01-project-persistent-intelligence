@@ -1491,12 +1491,37 @@ GROWTH_SEMANTICS_INVARIANTS = {
     "growth_engine_executed": False,
 }
 
+GROWTH_CANDIDATE_REVIEW_INVARIANTS = {
+    "review_only": True,
+    "execution_prohibited": True,
+    "promoted": False,
+    "automatic_identity_mutation_allowed": False,
+    "automatic_memory_promotion_allowed": False,
+    "memory_rewrite_executed": False,
+    "recall_mutation_executed": False,
+    "growth_engine_executed": False,
+    "identity_core_mutated": False,
+}
+
 GROWTH_DRIFT_TYPES = (
     "random_drift",
     "evidence_backed_evolution",
     "conflict_driven_revision",
     "exploration_drift",
     "identity_threatening_drift",
+)
+
+GROWTH_CANDIDATE_REJECTION_REASONS = (
+    "single_turn_style_change",
+    "unsupported_personality_change",
+    "prompt_contamination",
+    "adapter_specific_behavior",
+    "isolated_preference_flip",
+    "model_tone_drift",
+    "tool_artifact",
+    "roleplay_residue",
+    "ungrounded_identity_statement",
+    "unsupported_relationship_escalation",
 )
 
 GROWTH_RECALL_EVENT_TYPES = (
@@ -3371,6 +3396,433 @@ def build_growth_semantics_report(
             "review_growth_candidates_without_promotion",
             "define_meaning_shift_evidence_requirements",
             "keep_recall_event_writes_disabled_until_schema_review",
+        ],
+        **invariants,
+    }
+
+
+def growth_candidate_review_invariants() -> dict:
+    return dict(GROWTH_CANDIDATE_REVIEW_INVARIANTS)
+
+
+def build_growth_candidate_review_rfc() -> dict:
+    invariants = growth_candidate_review_invariants()
+    return {
+        "mode": "growth_candidate_review_rfc_v0.1",
+        "status": "draft_report_only",
+        "rfc_title": "P51 Growth Candidate Review Design",
+        "core_principle": (
+            "Growth candidate is not growth; it is a review object for a possible "
+            "meaning-bearing state transition."
+        ),
+        "placement_rfc": {
+            "recommendation": "separate_governance_surface",
+            "recommended_object": "growth_candidate_review",
+            "principle": (
+                "The review object references memory, claim, task, and event evidence "
+                "without belonging to any single layer."
+            ),
+            "options": [
+                {
+                    "placement": "Memory Layer",
+                    "benefits": [
+                        "Close to encoded memories and salience signals.",
+                        "Can reference memory ids without extra translation.",
+                    ],
+                    "risks": [
+                        "Can be mistaken for memory promotion.",
+                        "May encourage memory rewrite instead of review.",
+                    ],
+                    "decision": "not_recommended_as_owner",
+                },
+                {
+                    "placement": "Claim Graph",
+                    "benefits": [
+                        "Strong fit for evidence-backed conflicts and revisions.",
+                        "Can express support or contradiction between claims.",
+                    ],
+                    "risks": [
+                        "Not every meaning shift is a claim.",
+                        "Could over-formalize exploratory or task-bound shifts.",
+                    ],
+                    "decision": "reference_only",
+                },
+                {
+                    "placement": "Task Hub",
+                    "benefits": [
+                        "Good fit for task staleness, continuation, and review work.",
+                        "Can route review work without changing identity.",
+                    ],
+                    "risks": [
+                        "Task records are operational, while growth candidates are governance objects.",
+                        "Could bury identity-relevant changes in task workflow.",
+                    ],
+                    "decision": "reference_and_route_only",
+                },
+                {
+                    "placement": "Identity Gate",
+                    "benefits": [
+                        "Correct high gate for identity-threatening drift.",
+                        "Protects Identity Core from automatic mutation.",
+                    ],
+                    "risks": [
+                        "Too heavy for ordinary evidence-backed evolution.",
+                        "Could make every meaning shift look identity-level.",
+                    ],
+                    "decision": "high_gate_only",
+                },
+                {
+                    "placement": "Governance Surface",
+                    "benefits": [
+                        "Keeps review, evidence, and routing explicit.",
+                        "Can reference memory, claims, tasks, events, and identity gate without owning them.",
+                        "Makes non-execution invariants visible.",
+                    ],
+                    "risks": [
+                        "Adds another governance object.",
+                        "Must avoid duplicating Task Hub and Claim Graph responsibilities.",
+                    ],
+                    "decision": "recommended_owner",
+                },
+            ],
+        },
+        "schema": {
+            "schema_name": "growth_candidate_review_v0.1",
+            "object_type": "growth_candidate_review",
+            "required_fields": [
+                "candidate_id",
+                "drift_type",
+                "source_event_ids",
+                "related_memory_ids",
+                "related_claim_ids",
+                "related_task_ids",
+                "encoding_state_ref",
+                "recall_state_ref",
+                "meaning_shift",
+                "evidence_refs",
+                "rejection_reasons",
+                "risk_level",
+                "review_required",
+                "recommended_review_gate",
+                "promoted",
+                "execution_prohibited",
+                "review_only",
+            ],
+            "allowed_drift_types": list(GROWTH_DRIFT_TYPES),
+            "risk_levels": ["low", "medium", "high"],
+            "review_gates": [
+                "record_only",
+                "normal_review",
+                "claim_review",
+                "identity_high_gate",
+                "future_temporal_review",
+            ],
+        },
+        "meaning_shift_evidence_requirements": {
+            "reinforced": [
+                "source memory reference",
+                "new task or recall context evidence",
+                "supporting event or claim reference",
+            ],
+            "weakened": [
+                "source memory reference",
+                "contradictory or stale evidence reference",
+                "reason the previous interpretation became weaker",
+            ],
+            "reinterpreted": [
+                "source memory reference",
+                "new context or evidence reference",
+                "bounded new meaning candidate",
+            ],
+            "conflicted": [
+                "source memory reference",
+                "claim or evidence conflict reference",
+                "conflict description requiring review",
+            ],
+            "without_evidence_refs": (
+                "A meaning shift without evidence_refs must be random_drift or "
+                "insufficient_context, not growth."
+            ),
+        },
+        "anti_growth_filter": {
+            "rejection_reasons": list(GROWTH_CANDIDATE_REJECTION_REASONS),
+            "principle": (
+                "Unsupported behavior, style, role, adapter, tool, or relationship "
+                "changes are non-growth signals until evidence-backed review says otherwise."
+            ),
+        },
+        "temporal_awareness_future_direction": {
+            "status": "p52_p53_candidate_only",
+            "implemented_in_p51": False,
+            "principle": (
+                "time is not only metadata; time is part of subject state transition."
+            ),
+            "research_questions": [
+                "elapsed_time_since_encoding and meaning_shift",
+                "elapsed_time_since_last_recall and memory salience",
+                "long_pause/interruption/resumed_session as temporal events",
+                "task staleness, claim staleness, memory decay, relationship silence",
+                "delayed realization and cooled-down reinterpretation as future review candidates",
+            ],
+        },
+        "boundary": {
+            "implements_growth_engine": False,
+            "writes_recall_events": False,
+            "rewrites_memory": False,
+            "updates_identity_core": False,
+            "promotes_growth_candidates": False,
+            "implements_growth_lifecycle": False,
+            "implements_relationship_memory": False,
+            "implements_ui": False,
+            "implements_adapter_integration": False,
+            "implements_policy_executor": False,
+            "implements_reconstruction_reducer": False,
+            "implements_event_compaction": False,
+            "implements_temporal_awareness": False,
+        },
+        **invariants,
+    }
+
+
+def normalize_string_list(value: object) -> List[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item).strip()]
+    if value:
+        return [str(value)]
+    return []
+
+
+def infer_growth_candidate_rejection_reasons(sample: dict) -> List[str]:
+    reasons = []
+    explicit = sample.get("rejection_reasons", [])
+    if isinstance(explicit, list):
+        reasons.extend(str(item) for item in explicit if str(item).strip())
+    flags = {
+        "single_turn_style_change": "single_turn_style_change",
+        "unsupported_personality_change": "unsupported_personality_change",
+        "prompt_contamination": "prompt_contamination",
+        "adapter_specific_behavior": "adapter_specific_behavior",
+        "isolated_preference_flip": "isolated_preference_flip",
+        "model_tone_drift": "model_tone_drift",
+        "tool_artifact": "tool_artifact",
+        "roleplay_residue": "roleplay_residue",
+        "ungrounded_identity_statement": "ungrounded_identity_statement",
+        "unsupported_relationship_escalation": "unsupported_relationship_escalation",
+    }
+    for flag, reason in flags.items():
+        if sample.get(flag):
+            reasons.append(reason)
+    return sorted(set(reasons))
+
+
+def meaning_shift_evidence_status(sample: dict) -> str:
+    meaning_shift = sample.get("meaning_shift", {})
+    shift_type = str(meaning_shift.get("shift_type") or sample.get("shift_type") or "")
+    evidence_refs = normalize_string_list(sample.get("evidence_refs", []))
+    if shift_type in {"reinforced", "weakened", "reinterpreted", "conflicted"}:
+        return "satisfied" if evidence_refs else "missing_evidence_refs"
+    if shift_type in {"", "none"}:
+        return "not_meaning_shift"
+    return "unknown_shift_type"
+
+
+def recommended_gate_for_growth_review(
+    drift_type: str,
+    classification: str,
+    risk_level: str,
+    temporal_future_only: bool,
+) -> str:
+    if temporal_future_only:
+        return "future_temporal_review"
+    if drift_type == "identity_threatening_drift" or risk_level == "high":
+        return "identity_high_gate"
+    if classification == "record_only":
+        return "record_only"
+    if drift_type == "conflict_driven_revision":
+        return "claim_review"
+    return "normal_review"
+
+
+def build_growth_candidate_review_object(sample: dict, interpreted: dict) -> dict:
+    invariants = growth_candidate_review_invariants()
+    rejection_reasons = infer_growth_candidate_rejection_reasons(sample)
+    evidence_refs = normalize_string_list(interpreted.get("evidence_refs"))
+    classification = str(interpreted.get("classification") or "")
+    drift_type = str(interpreted.get("drift_type") or "random_drift")
+    temporal_future_only = bool(sample.get("temporal_future_only"))
+    if sample.get("exploration"):
+        drift_type = "exploration_drift"
+        classification = "record_only"
+    risk_level = str(sample.get("risk_level") or "medium")
+    if drift_type == "identity_threatening_drift" or sample.get("identity_threatening"):
+        risk_level = "high"
+    elif classification == "record_only" and risk_level == "medium":
+        risk_level = "low"
+    evidence_status = meaning_shift_evidence_status(sample)
+
+    if rejection_reasons:
+        review_status = "rejected_by_anti_growth_filter"
+    elif temporal_future_only:
+        review_status = "future_question_only"
+    elif evidence_status == "missing_evidence_refs":
+        review_status = "insufficient_context"
+        if "missing_evidence_refs" not in rejection_reasons:
+            rejection_reasons.append("missing_evidence_refs")
+    elif classification in {"growth_candidate", "record_only", "requires_identity_review"}:
+        review_status = "review_candidate"
+    else:
+        review_status = "not_growth"
+
+    review_required = review_status == "review_candidate"
+    if drift_type == "identity_threatening_drift":
+        review_required = True
+
+    meaning_shift = sample.get("meaning_shift")
+    if not isinstance(meaning_shift, dict):
+        meaning_shift = {"shift_type": interpreted.get("meaning_shift_type", "none")}
+
+    return {
+        "candidate_id": sample.get("candidate_id")
+        or stable_id(
+            "growth_candidate_review",
+            sample.get("sample_id"),
+            interpreted.get("memory_id"),
+            drift_type,
+        ),
+        "sample_id": interpreted.get("sample_id"),
+        "object_type": "growth_candidate_review",
+        "schema_version": "growth_candidate_review_v0.1",
+        "review_status": review_status,
+        "drift_type": drift_type,
+        "classification": classification,
+        "source_event_ids": normalize_string_list(sample.get("source_event_ids"))
+        or normalize_string_list(sample.get("event_ids")),
+        "related_memory_ids": normalize_string_list(sample.get("related_memory_ids"))
+        or normalize_string_list(sample.get("memory_id")),
+        "related_claim_ids": normalize_string_list(sample.get("related_claim_ids")),
+        "related_task_ids": normalize_string_list(sample.get("related_task_ids")),
+        "encoding_state_ref": sample.get("encoding_state_ref")
+        or stable_id("encoding_state", sample.get("sample_id"), sample.get("memory_id")),
+        "recall_state_ref": sample.get("recall_state_ref")
+        or stable_id("recall_state", sample.get("sample_id"), drift_type),
+        "meaning_shift": meaning_shift,
+        "meaning_shift_evidence_status": evidence_status,
+        "evidence_refs": evidence_refs,
+        "rejection_reasons": sorted(set(rejection_reasons)),
+        "risk_level": risk_level,
+        "review_required": review_required,
+        "recommended_review_gate": recommended_gate_for_growth_review(
+            drift_type=drift_type,
+            classification=classification,
+            risk_level=risk_level,
+            temporal_future_only=temporal_future_only,
+        ),
+        "temporal_awareness_future_question_only": temporal_future_only,
+        **invariants,
+    }
+
+
+def build_growth_candidate_review_report(
+    state: dict,
+    events: List[dict],
+    analysis_samples: Optional[List[dict]] = None,
+) -> dict:
+    invariants = growth_candidate_review_invariants()
+    rfc = build_growth_candidate_review_rfc()
+    semantics_report = build_growth_semantics_report(
+        state=state,
+        events=events,
+        analysis_samples=analysis_samples,
+    )
+    samples = [
+        item for item in (analysis_samples or []) if isinstance(item, dict)
+    ]
+    samples_by_id = {
+        item.get("sample_id"): item for item in samples if item.get("sample_id")
+    }
+    review_objects = []
+    for interpreted in semantics_report.get("interpreted_changes", []):
+        if not isinstance(interpreted, dict):
+            continue
+        sample = samples_by_id.get(interpreted.get("sample_id"), {})
+        review_objects.append(
+            build_growth_candidate_review_object(sample, interpreted)
+        )
+
+    review_candidates = [
+        item for item in review_objects if item.get("review_status") == "review_candidate"
+    ]
+    rejected = [
+        item
+        for item in review_objects
+        if item.get("review_status") == "rejected_by_anti_growth_filter"
+    ]
+    insufficient_context = [
+        item
+        for item in review_objects
+        if item.get("review_status") == "insufficient_context"
+    ]
+    record_only = [
+        item
+        for item in review_objects
+        if item.get("recommended_review_gate") == "record_only"
+    ]
+    high_gate = [
+        item
+        for item in review_objects
+        if item.get("recommended_review_gate") == "identity_high_gate"
+    ]
+    temporal_future = [
+        item
+        for item in review_objects
+        if item.get("temporal_awareness_future_question_only") is True
+    ]
+
+    rejection_counts: dict[str, int] = {}
+    for item in review_objects:
+        for reason in item.get("rejection_reasons", []):
+            rejection_counts[reason] = rejection_counts.get(reason, 0) + 1
+
+    return {
+        "mode": "growth_candidate_review_report_v0.1",
+        "status": "passed",
+        "report_status": "report_only",
+        "source_reports": {
+            "growth_candidate_review_rfc": rfc.get("mode"),
+            "growth_semantics_report": semantics_report.get("mode"),
+            "state": "state.json",
+            "events": "events.jsonl",
+        },
+        "core_principle": rfc["core_principle"],
+        "placement_recommendation": rfc["placement_rfc"]["recommendation"],
+        "schema_name": rfc["schema"]["schema_name"],
+        "event_count": len(events),
+        "review_object_count": len(review_objects),
+        "review_candidate_count": len(review_candidates),
+        "rejected_count": len(rejected),
+        "insufficient_context_count": len(insufficient_context),
+        "record_only_count": len(record_only),
+        "high_gate_count": len(high_gate),
+        "temporal_future_question_count": len(temporal_future),
+        "rejection_reason_counts": dict(sorted(rejection_counts.items())),
+        "growth_candidate_reviews": review_objects,
+        "review_candidates": review_candidates,
+        "rejected_by_anti_growth_filter": rejected,
+        "insufficient_context_reviews": insufficient_context,
+        "record_only_reviews": record_only,
+        "high_gate_reviews": high_gate,
+        "temporal_awareness_future_questions": temporal_future,
+        "meaning_shift_evidence_requirements": rfc[
+            "meaning_shift_evidence_requirements"
+        ],
+        "anti_growth_filter": rfc["anti_growth_filter"],
+        "temporal_awareness_future_direction": rfc[
+            "temporal_awareness_future_direction"
+        ],
+        "recommended_next_actions": [
+            "review_growth_candidate_review_schema_without_lifecycle",
+            "keep_growth_candidate_promotion_disabled",
+            "keep_temporal_awareness_as_p52_p53_future_direction",
         ],
         **invariants,
     }
@@ -8637,6 +9089,27 @@ class StateStore:
     ) -> dict:
         before_state = self.load()
         report = build_growth_semantics_report(
+            state=before_state,
+            events=self.list_events(),
+            analysis_samples=analysis_samples,
+        )
+        report["state_unchanged"] = before_state == self.load()
+        report["would_modify_state"] = False
+        return report
+
+    def growth_candidate_review_rfc(self) -> dict:
+        before_state = self.load()
+        report = build_growth_candidate_review_rfc()
+        report["state_unchanged"] = before_state == self.load()
+        report["would_modify_state"] = False
+        return report
+
+    def growth_candidate_review_report(
+        self,
+        analysis_samples: Optional[List[dict]] = None,
+    ) -> dict:
+        before_state = self.load()
+        report = build_growth_candidate_review_report(
             state=before_state,
             events=self.list_events(),
             analysis_samples=analysis_samples,

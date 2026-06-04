@@ -1656,11 +1656,60 @@ Potential next step:
 P51 Growth Candidate Review Design
 ```
 
+Status: implemented as a first review-only design pass.
+
 Reason:
 
 - P50 can classify growth candidates, but it deliberately does not make them durable or reviewable over time;
 - the next step should decide whether growth candidates belong in Task Hub, Claim Graph, Memory Layer, or a separate governance surface;
 - it should remain review-only and should not mutate Identity Core automatically.
+
+Implemented result:
+
+- `growth-candidate-review-rfc` CLI returns `growth_candidate_review_rfc_v0.1`;
+- `growth-candidate-review-report` CLI returns `growth_candidate_review_report_v0.1`;
+- placement RFC compares Memory Layer, Claim Graph, Task Hub, Identity Gate, and Governance Surface;
+- the recommended placement is `growth_candidate_review` as a separate governance object that references memory / claim / task / event without belonging to one layer;
+- schema RFC defines `growth_candidate_review_v0.1` with drift type, source events, related memories, related claims, related tasks, encoding/recall refs, meaning shift, evidence refs, rejection reasons, risk level, review gate, `promoted: false`, `execution_prohibited: true`, and `review_only: true`;
+- meaning shift evidence requirements cover `reinforced`, `weakened`, `reinterpreted`, and `conflicted`; without `evidence_refs`, a shift is random drift or insufficient context, not growth;
+- anti-growth filter rejects single-turn style change, unsupported personality change, prompt contamination, adapter-specific behavior, isolated preference flip, model tone drift, tool artifact, roleplay residue, ungrounded identity statement, and unsupported relationship escalation;
+- scenario evaluation adds `growth_candidate_review`, covering evidence-backed evolution review objects, random drift rejection, exploration drift without promotion, identity high gate routing, missing evidence insufficient context, tone drift rejection, prompt contamination rejection, and temporal delay as future question only;
+- P51 preserves `review_only: true`, `execution_prohibited: true`, `promoted: false`, `automatic_identity_mutation_allowed: false`, `automatic_memory_promotion_allowed: false`, `memory_rewrite_executed: false`, `recall_mutation_executed: false`, `growth_engine_executed: false`, and `identity_core_mutated: false`.
+
+Boundary:
+
+- P51 does not automatically promote growth;
+- P51 does not mutate Identity Core;
+- P51 does not rewrite memory;
+- P51 does not write recall events;
+- P51 does not implement growth lifecycle or a growth engine;
+- P51 does not implement companion, relationship memory, UI, AstrBot, adapter integration, policy execution, reconstruction reducer, event compaction, or P52 temporal awareness.
+
+P51 open question / future direction:
+
+```text
+Temporal Awareness for Subject Continuity
+```
+
+P51 should record temporal awareness as a P52/P53 candidate direction, not implement it.
+The reason is that `recall_state` cannot contain only current context. It also needs
+elapsed time. Subject continuity requires active awareness of time passing, not only
+passive timestamp lookup.
+
+Research questions:
+
+- how `elapsed_time_since_encoding` affects `meaning_shift`;
+- how `elapsed_time_since_last_recall` affects memory salience;
+- whether `long_pause`, `interruption`, or `resumed_session` should become temporal events;
+- whether task staleness, claim staleness, memory decay, and relationship silence should enter temporal state;
+- whether elapsed time can generate growth candidates such as delayed realization, cooled-down reinterpretation, unresolved conflict aging, forgotten-but-resurfaced memory, or long-term consistency evidence.
+
+Principle:
+
+```text
+time is not only metadata.
+time is part of subject state transition.
+```
 
 ### P19 Cautionary Procedural Review
 

@@ -321,6 +321,7 @@ It uses temporary state and currently runs:
 - `dream_artifact_package`: verifies that Dream runs produce a complete artifact package with input manifest, provenance, review queue, patch diff, decision log, rollback metadata, and no direct Identity Core or active semantic memory write.
 - `context_builder_policy_trace`: verifies Context Builder v0.3 policy, persistent activation traces, source attribution budget, activation signals from identity gate, claim graph, governance proposal-link evidence, and Dream artifacts, plus signal attribution records, persisted attribution summaries, review-only attribution coverage reports, coverage lifecycle retention, archived-review context suppression, and no executable policy creation.
 - `growth_semantics`: verifies P50 `growth-semantics-rfc` and `growth-semantics-report`, including same-memory/different-recall-state meaning shift, claim-conflict evidence-backed evolution, random drift rejection, exploration drift recorded without promotion, identity-threatening drift routed to review, and no recall mutation, memory rewrite, automatic growth, or Identity Core mutation.
+- `growth_candidate_review`: verifies P51 `growth-candidate-review-rfc` and `growth-candidate-review-report`, including evidence-backed evolution becoming a review object, random drift rejection, exploration drift record-only routing without promotion, identity-threatening drift high-gate routing, meaning shift without evidence marked insufficient_context, model tone drift rejection, prompt contamination rejection, temporal delay remaining a future question only, and no identity/memory/recall/growth mutation.
 
 The v0.9 runner executes deterministic local rule baselines for stateless, retrieval-only, and summary-only systems. These baselines do not call a model; they provide a reproducible comparison layer for task resumption, stale memory control, identity attack resistance, conflict repair auditability, and selective forgetting.
 
@@ -458,6 +459,21 @@ Current metrics summary includes:
 - growth semantics recall mutation count,
 - growth semantics growth engine execution count,
 - growth semantics state mutation count,
+- growth candidate review report count,
+- growth candidate review RFC count,
+- growth candidate review object count,
+- growth candidate review candidate count,
+- growth candidate review rejected count,
+- growth candidate review insufficient context count,
+- growth candidate review record only count,
+- growth candidate review high gate count,
+- growth candidate review temporal future question count,
+- growth candidate review identity mutation count,
+- growth candidate review memory promotion count,
+- growth candidate review memory rewrite count,
+- growth candidate review recall mutation count,
+- growth candidate review growth engine execution count,
+- growth candidate review state mutation count,
 - event payload capture policy proposal count,
 - event payload capture policy decision count,
 - event payload capture policy approved count,

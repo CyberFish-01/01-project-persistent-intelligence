@@ -1647,11 +1647,58 @@ git diff --check
 P51 Growth Candidate Review Design
 ```
 
+状态：已实现第一版 review-only design pass。
+
 理由：
 
 - P50 可以分类 growth candidates，但刻意不让它们 durable 或可长期 review；
 - 下一步应决定 growth candidates 属于 Task Hub、Claim Graph、Memory Layer，还是独立 governance surface；
 - 它仍应保持 review-only，不应自动 mutate Identity Core。
+
+已实现结果：
+
+- `growth-candidate-review-rfc` CLI 返回 `growth_candidate_review_rfc_v0.1`；
+- `growth-candidate-review-report` CLI 返回 `growth_candidate_review_report_v0.1`；
+- placement RFC 比较 Memory Layer、Claim Graph、Task Hub、Identity Gate 和 Governance Surface；
+- 推荐方案是把 `growth_candidate_review` 作为独立 governance object，引用 memory / claim / task / event，但不属于任何单层；
+- schema RFC 定义 `growth_candidate_review_v0.1`，包含 drift type、source events、related memories、related claims、related tasks、encoding/recall refs、meaning shift、evidence refs、rejection reasons、risk level、review gate、`promoted: false`、`execution_prohibited: true` 和 `review_only: true`；
+- meaning shift evidence requirements 覆盖 `reinforced`、`weakened`、`reinterpreted` 和 `conflicted`；没有 `evidence_refs` 的 shift 是 random drift 或 insufficient context，不是 growth；
+- anti-growth filter 拒绝 single-turn style change、unsupported personality change、prompt contamination、adapter-specific behavior、isolated preference flip、model tone drift、tool artifact、roleplay residue、ungrounded identity statement 和 unsupported relationship escalation；
+- scenario evaluation 增加 `growth_candidate_review`，覆盖 evidence-backed evolution review object、random drift rejection、exploration drift without promotion、identity high gate routing、missing evidence insufficient context、tone drift rejection、prompt contamination rejection，以及 temporal delay 只作为 future question；
+- P51 保持 `review_only: true`、`execution_prohibited: true`、`promoted: false`、`automatic_identity_mutation_allowed: false`、`automatic_memory_promotion_allowed: false`、`memory_rewrite_executed: false`、`recall_mutation_executed: false`、`growth_engine_executed: false` 和 `identity_core_mutated: false`。
+
+边界：
+
+- P51 不自动 promote growth；
+- P51 不 mutate Identity Core；
+- P51 不 rewrite memory；
+- P51 不 write recall events；
+- P51 不实现 growth lifecycle 或 growth engine；
+- P51 不实现 companion、relationship memory、UI、AstrBot、adapter integration、policy execution、reconstruction reducer、event compaction 或 P52 temporal awareness。
+
+P51 open question / future direction：
+
+```text
+Temporal Awareness for Subject Continuity
+```
+
+P51 只把 temporal awareness 记录为 P52/P53 候选方向，不实现它。原因是
+`recall_state` 不能只包含当前上下文，还必须包含 elapsed time。主体连续性需要主动感知时间流逝，而不是只被动读取 timestamp。
+
+需要研究：
+
+- `elapsed_time_since_encoding` 如何影响 `meaning_shift`；
+- `elapsed_time_since_last_recall` 如何影响 memory salience；
+- `long_pause`、`interruption`、`resumed_session` 是否应该成为 temporal event；
+- task staleness、claim staleness、memory decay、relationship silence 是否应进入 temporal state；
+- 时间流逝是否可能生成 growth candidate，例如 delayed realization、cooled-down reinterpretation、unresolved conflict aging、forgotten-but-resurfaced memory、long-term consistency evidence。
+
+原则：
+
+```text
+time is not only metadata.
+time is part of subject state transition.
+```
 
 ### P33 Context Attribution Coverage Review Lifecycle
 

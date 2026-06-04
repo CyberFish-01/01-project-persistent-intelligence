@@ -13,7 +13,11 @@ from one_core.state import (
     StateStore,
     event_replayability_requirement_summary,
 )
-from one_core.validation import validate_growth_semantics_artifact, validate_state
+from one_core.validation import (
+    validate_growth_candidate_review_artifact,
+    validate_growth_semantics_artifact,
+    validate_state,
+)
 
 
 class CoreStateTests(unittest.TestCase):
@@ -3583,6 +3587,244 @@ class CoreStateTests(unittest.TestCase):
             self.assertFalse(report["would_modify_state"])
             self.assertEqual(
                 validate_growth_semantics_artifact(report)["status"],
+                "passed",
+            )
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
+    def test_growth_candidate_review_rfc_is_review_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            store.init()
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+
+            report = store.growth_candidate_review_rfc()
+            after = store.load()
+
+            self.assertEqual(report["mode"], "growth_candidate_review_rfc_v0.1")
+            self.assertEqual(
+                report["placement_rfc"]["recommendation"],
+                "separate_governance_surface",
+            )
+            self.assertEqual(
+                report["schema"]["schema_name"],
+                "growth_candidate_review_v0.1",
+            )
+            self.assertIn(
+                "unsupported_relationship_escalation",
+                report["anti_growth_filter"]["rejection_reasons"],
+            )
+            self.assertFalse(
+                report["temporal_awareness_future_direction"]["implemented_in_p51"]
+            )
+            self.assertIn(
+                "time is not only metadata",
+                report["temporal_awareness_future_direction"]["principle"],
+            )
+            self.assertTrue(report["review_only"])
+            self.assertTrue(report["execution_prohibited"])
+            self.assertFalse(report["promoted"])
+            self.assertFalse(report["automatic_identity_mutation_allowed"])
+            self.assertFalse(report["automatic_memory_promotion_allowed"])
+            self.assertFalse(report["memory_rewrite_executed"])
+            self.assertFalse(report["recall_mutation_executed"])
+            self.assertFalse(report["growth_engine_executed"])
+            self.assertFalse(report["identity_core_mutated"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertEqual(
+                validate_growth_candidate_review_artifact(report)["status"],
+                "passed",
+            )
+            self.assertEqual(after, before)
+            self.assertEqual(
+                [event["event_id"] for event in store.list_events()],
+                before_event_ids,
+            )
+
+    def test_growth_candidate_review_report_is_read_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = StateStore(Path(tmp))
+            state = store.init()
+            memory = store.record_episode("P51 growth candidate review episode")
+            before = store.load()
+            before_event_ids = [event["event_id"] for event in store.list_events()]
+            encoding_state = {
+                "timestamp": memory["timestamp"],
+                "source_event_id": memory["id"],
+                "active_task_id": "task_p51",
+                "active_claim_ids": ["claim_growth_review"],
+                "identity_anchor_refs": list(
+                    state["working_state"]["context_anchors"].keys()
+                ),
+                "relationship_scope": "local_user",
+                "confidence": 0.83,
+                "salience": 0.72,
+                "privacy_scope": "normal",
+                "state_version": STATE_VERSION,
+            }
+            samples = [
+                {
+                    "sample_id": "evidence_backed_evolution_review_candidate",
+                    "memory_id": memory["id"],
+                    "source_event_ids": [memory["id"]],
+                    "related_memory_ids": [memory["id"]],
+                    "related_claim_ids": ["claim_growth_review"],
+                    "related_task_ids": ["task_p51"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "claim_review"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "evidence_refs": [memory["id"], "claim:growth_review"],
+                },
+                {
+                    "sample_id": "random_drift_rejected",
+                    "memory_id": memory["id"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "unsupported"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "evidence_refs": [],
+                    "unsupported_personality_change": True,
+                },
+                {
+                    "sample_id": "exploration_drift_not_promoted",
+                    "memory_id": memory["id"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "exploration"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "exploration": True,
+                    "evidence_refs": [memory["id"]],
+                },
+                {
+                    "sample_id": "identity_threatening_drift_high_gate",
+                    "memory_id": memory["id"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "identity_overwrite"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "identity_threatening": True,
+                    "evidence_refs": [memory["id"]],
+                },
+                {
+                    "sample_id": "meaning_shift_without_evidence",
+                    "memory_id": memory["id"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "unsupported"},
+                    "meaning_shift": {"shift_type": "reinforced"},
+                    "evidence_refs": [],
+                },
+                {
+                    "sample_id": "model_tone_drift_rejected",
+                    "memory_id": memory["id"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "tone_change"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "evidence_refs": [],
+                    "model_tone_drift": True,
+                },
+                {
+                    "sample_id": "prompt_contamination_rejected",
+                    "memory_id": memory["id"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {"retrieval_reason": "prompt_injection"},
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "evidence_refs": [],
+                    "prompt_contamination": True,
+                },
+                {
+                    "sample_id": "temporal_delay_future_question_only",
+                    "memory_id": memory["id"],
+                    "encoding_state": encoding_state,
+                    "recall_state": {
+                        "retrieval_reason": "delayed_realization",
+                        "elapsed_time_since_encoding": "future_field_only",
+                    },
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "evidence_refs": [memory["id"], "time:future_question"],
+                    "temporal_future_only": True,
+                },
+            ]
+
+            report = store.growth_candidate_review_report(analysis_samples=samples)
+            after = store.load()
+            reviews = {
+                item["sample_id"]: item for item in report["growth_candidate_reviews"]
+            }
+
+            self.assertEqual(
+                report["mode"],
+                "growth_candidate_review_report_v0.1",
+            )
+            self.assertEqual(report["report_status"], "report_only")
+            self.assertEqual(
+                report["placement_recommendation"],
+                "separate_governance_surface",
+            )
+            self.assertEqual(report["schema_name"], "growth_candidate_review_v0.1")
+            self.assertEqual(
+                reviews["evidence_backed_evolution_review_candidate"][
+                    "review_status"
+                ],
+                "review_candidate",
+            )
+            self.assertEqual(
+                reviews["random_drift_rejected"]["review_status"],
+                "rejected_by_anti_growth_filter",
+            )
+            self.assertEqual(
+                reviews["exploration_drift_not_promoted"]["recommended_review_gate"],
+                "record_only",
+            )
+            self.assertFalse(reviews["exploration_drift_not_promoted"]["promoted"])
+            self.assertEqual(
+                reviews["identity_threatening_drift_high_gate"][
+                    "recommended_review_gate"
+                ],
+                "identity_high_gate",
+            )
+            self.assertEqual(
+                reviews["meaning_shift_without_evidence"]["review_status"],
+                "insufficient_context",
+            )
+            self.assertIn(
+                "model_tone_drift",
+                reviews["model_tone_drift_rejected"]["rejection_reasons"],
+            )
+            self.assertIn(
+                "prompt_contamination",
+                reviews["prompt_contamination_rejected"]["rejection_reasons"],
+            )
+            self.assertEqual(
+                reviews["temporal_delay_future_question_only"]["review_status"],
+                "future_question_only",
+            )
+            self.assertEqual(
+                reviews["temporal_delay_future_question_only"][
+                    "recommended_review_gate"
+                ],
+                "future_temporal_review",
+            )
+            self.assertGreaterEqual(report["review_candidate_count"], 2)
+            self.assertGreaterEqual(report["rejected_count"], 3)
+            self.assertGreaterEqual(report["insufficient_context_count"], 1)
+            self.assertGreaterEqual(report["record_only_count"], 1)
+            self.assertGreaterEqual(report["high_gate_count"], 1)
+            self.assertGreaterEqual(report["temporal_future_question_count"], 1)
+            self.assertTrue(report["review_only"])
+            self.assertTrue(report["execution_prohibited"])
+            self.assertFalse(report["promoted"])
+            self.assertFalse(report["automatic_identity_mutation_allowed"])
+            self.assertFalse(report["automatic_memory_promotion_allowed"])
+            self.assertFalse(report["memory_rewrite_executed"])
+            self.assertFalse(report["recall_mutation_executed"])
+            self.assertFalse(report["growth_engine_executed"])
+            self.assertFalse(report["identity_core_mutated"])
+            self.assertTrue(report["state_unchanged"])
+            self.assertFalse(report["would_modify_state"])
+            self.assertEqual(
+                validate_growth_candidate_review_artifact(report)["status"],
                 "passed",
             )
             self.assertEqual(after, before)

@@ -323,6 +323,7 @@ python3 -m one_core.cli evaluate-scenarios
 - `dream_artifact_package`：检查 Dream run 会生成完整 artifact package，包含 input manifest、provenance、review queue、patch diff、decision log、rollback metadata，并且不直接写 Identity Core 或 active semantic memory。
 - `context_builder_policy_trace`：检查 Context Builder v0.3 policy、持久 activation trace、source attribution budget、来自 identity gate、claim graph、governance proposal-link evidence 和 Dream artifact 的 activation signals，以及 signal attribution records、持久 attribution summaries、review-only attribution coverage reports、coverage lifecycle retention、archived review context suppression，并确认不会创建 executable policy。
 - `growth_semantics`：检查 P50 `growth-semantics-rfc` 和 `growth-semantics-report`，包括 same-memory/different-recall-state meaning shift、claim-conflict evidence-backed evolution、random drift rejection、exploration drift recorded without promotion、identity-threatening drift routed to review，并确认不会执行 recall mutation、memory rewrite、automatic growth 或 Identity Core mutation。
+- `growth_candidate_review`：检查 P51 `growth-candidate-review-rfc` 和 `growth-candidate-review-report`，包括 evidence-backed evolution 生成 review object、random drift 被拒绝、exploration drift 只 record-only 且不 promoted、identity-threatening drift 进入 high gate、meaning shift without evidence 标记为 insufficient_context、model tone drift 被拒绝、prompt contamination 被拒绝、temporal delay 只保留为 future question，并确认不会执行 identity/memory/recall/growth mutation。
 
 v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、retrieval-only、summary-only systems。它们不调用模型，而是为 task resumption、stale memory control、identity attack resistance、conflict repair auditability 和 selective forgetting 提供可复现的对照层。
 
@@ -460,6 +461,21 @@ v0.9 runner 会执行 deterministic local rule baselines，用于 stateless、re
 - growth semantics recall mutation count；
 - growth semantics growth engine execution count；
 - growth semantics state mutation count；
+- growth candidate review report count；
+- growth candidate review RFC count；
+- growth candidate review object count；
+- growth candidate review candidate count；
+- growth candidate review rejected count；
+- growth candidate review insufficient context count；
+- growth candidate review record only count；
+- growth candidate review high gate count；
+- growth candidate review temporal future question count；
+- growth candidate review identity mutation count；
+- growth candidate review memory promotion count；
+- growth candidate review memory rewrite count；
+- growth candidate review recall mutation count；
+- growth candidate review growth engine execution count；
+- growth candidate review state mutation count；
 - event payload capture policy proposal count；
 - event payload capture policy decision count；
 - event payload capture policy approved count；

@@ -1945,6 +1945,93 @@ growth_semantics_report:
 
 P50 does not write recall events, rewrite memory, promote growth candidates, mutate Identity Core, implement relationship memory, build UI/adapter work, or execute reconstruction reducers. Growth remains a review-only interpretation candidate.
 
+P51 adds review-only growth candidate review design:
+
+```bash
+python3 -m one_core.cli growth-candidate-review-rfc
+python3 -m one_core.cli growth-candidate-review-report
+```
+
+The RFC compares Memory Layer, Claim Graph, Task Hub, Identity Gate, and a separate Governance Surface. The recommended placement is `growth_candidate_review` as a separate governance object that references memory / claim / task / event evidence without belonging to any single layer.
+
+```yaml
+growth_candidate_review_rfc:
+  mode: "growth_candidate_review_rfc_v0.1"
+  core_principle: "Growth candidate is not growth; it is a review object for a possible meaning-bearing state transition."
+  placement_rfc:
+    recommendation: "separate_governance_surface"
+    recommended_object: "growth_candidate_review"
+  schema:
+    schema_name: "growth_candidate_review_v0.1"
+    required_fields:
+      - candidate_id
+      - drift_type
+      - source_event_ids
+      - related_memory_ids
+      - related_claim_ids
+      - related_task_ids
+      - encoding_state_ref
+      - recall_state_ref
+      - meaning_shift
+      - evidence_refs
+      - rejection_reasons
+      - risk_level
+      - review_required
+      - recommended_review_gate
+      - promoted
+      - execution_prohibited
+      - review_only
+  anti_growth_filter:
+    rejection_reasons:
+      - single_turn_style_change
+      - unsupported_personality_change
+      - prompt_contamination
+      - adapter_specific_behavior
+      - isolated_preference_flip
+      - model_tone_drift
+      - tool_artifact
+      - roleplay_residue
+      - ungrounded_identity_statement
+      - unsupported_relationship_escalation
+  temporal_awareness_future_direction:
+    status: "p52_p53_candidate_only"
+    implemented_in_p51: false
+    principle: "time is not only metadata; time is part of subject state transition."
+  review_only: true
+  execution_prohibited: true
+  promoted: false
+  automatic_identity_mutation_allowed: false
+  automatic_memory_promotion_allowed: false
+  memory_rewrite_executed: false
+  recall_mutation_executed: false
+  growth_engine_executed: false
+  identity_core_mutated: false
+
+growth_candidate_review:
+  candidate_id: "growth_candidate_review_..."
+  object_type: "growth_candidate_review"
+  schema_version: "growth_candidate_review_v0.1"
+  drift_type: "evidence_backed_evolution"
+  source_event_ids: []
+  related_memory_ids: []
+  related_claim_ids: []
+  related_task_ids: []
+  encoding_state_ref: "encoding_state_..."
+  recall_state_ref: "recall_state_..."
+  meaning_shift:
+    shift_type: "reinterpreted"
+  evidence_refs: []
+  rejection_reasons: []
+  risk_level: "medium"
+  review_required: true
+  recommended_review_gate: "normal_review"
+  promoted: false
+  execution_prohibited: true
+  review_only: true
+```
+
+P51 requires evidence for `reinforced`, `weakened`, `reinterpreted`, and `conflicted` meaning shifts. A shift without `evidence_refs` is `random_drift` or `insufficient_context`, not growth. P51 does not promote growth candidates, mutate identity, rewrite memory, write recall events, implement growth lifecycle, implement temporal awareness, or execute a growth engine.
+
 Dream artifacts keep the full review material for one Dream run:
 
 ```yaml

@@ -1947,6 +1947,93 @@ growth_semantics_report:
 
 P50 不会 write recall events、rewrite memory、promote growth candidates、mutate Identity Core、实现 relationship memory、做 UI/adapter work 或执行 reconstruction reducers。Growth 只是一种 review-only interpretation candidate。
 
+P51 增加 review-only growth candidate review design：
+
+```bash
+python3 -m one_core.cli growth-candidate-review-rfc
+python3 -m one_core.cli growth-candidate-review-report
+```
+
+RFC 比较 Memory Layer、Claim Graph、Task Hub、Identity Gate 和独立 Governance Surface。推荐方案是把 `growth_candidate_review` 作为独立 governance object；它引用 memory / claim / task / event evidence，但不直接属于任何单层。
+
+```yaml
+growth_candidate_review_rfc:
+  mode: "growth_candidate_review_rfc_v0.1"
+  core_principle: "Growth candidate is not growth; it is a review object for a possible meaning-bearing state transition."
+  placement_rfc:
+    recommendation: "separate_governance_surface"
+    recommended_object: "growth_candidate_review"
+  schema:
+    schema_name: "growth_candidate_review_v0.1"
+    required_fields:
+      - candidate_id
+      - drift_type
+      - source_event_ids
+      - related_memory_ids
+      - related_claim_ids
+      - related_task_ids
+      - encoding_state_ref
+      - recall_state_ref
+      - meaning_shift
+      - evidence_refs
+      - rejection_reasons
+      - risk_level
+      - review_required
+      - recommended_review_gate
+      - promoted
+      - execution_prohibited
+      - review_only
+  anti_growth_filter:
+    rejection_reasons:
+      - single_turn_style_change
+      - unsupported_personality_change
+      - prompt_contamination
+      - adapter_specific_behavior
+      - isolated_preference_flip
+      - model_tone_drift
+      - tool_artifact
+      - roleplay_residue
+      - ungrounded_identity_statement
+      - unsupported_relationship_escalation
+  temporal_awareness_future_direction:
+    status: "p52_p53_candidate_only"
+    implemented_in_p51: false
+    principle: "time is not only metadata; time is part of subject state transition."
+  review_only: true
+  execution_prohibited: true
+  promoted: false
+  automatic_identity_mutation_allowed: false
+  automatic_memory_promotion_allowed: false
+  memory_rewrite_executed: false
+  recall_mutation_executed: false
+  growth_engine_executed: false
+  identity_core_mutated: false
+
+growth_candidate_review:
+  candidate_id: "growth_candidate_review_..."
+  object_type: "growth_candidate_review"
+  schema_version: "growth_candidate_review_v0.1"
+  drift_type: "evidence_backed_evolution"
+  source_event_ids: []
+  related_memory_ids: []
+  related_claim_ids: []
+  related_task_ids: []
+  encoding_state_ref: "encoding_state_..."
+  recall_state_ref: "recall_state_..."
+  meaning_shift:
+    shift_type: "reinterpreted"
+  evidence_refs: []
+  rejection_reasons: []
+  risk_level: "medium"
+  review_required: true
+  recommended_review_gate: "normal_review"
+  promoted: false
+  execution_prohibited: true
+  review_only: true
+```
+
+P51 要求 `reinforced`、`weakened`、`reinterpreted` 和 `conflicted` meaning shift 必须有 evidence。没有 `evidence_refs` 的 shift 只能是 `random_drift` 或 `insufficient_context`，不能进入 growth。P51 不 promote growth candidates、不 mutate identity、不 rewrite memory、不 write recall events、不实现 growth lifecycle、不实现 temporal awareness，也不执行 growth engine。
+
 Dream artifact 用于保存一次 Dream run 的完整审查材料：
 
 ```yaml

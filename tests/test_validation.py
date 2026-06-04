@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 from one_core.state import StateStore, write_json
-from one_core.validation import validate_state
+from one_core.validation import validate_growth_candidate_review_artifact, validate_state
 
 
 class StateValidationTests(unittest.TestCase):
@@ -1380,6 +1380,76 @@ class StateValidationTests(unittest.TestCase):
                 "dream_artifacts[0].package_completeness.has_review_queue",
                 paths,
             )
+
+    def test_growth_candidate_review_artifact_rejects_mutating_flags(self):
+        artifact = {
+            "mode": "growth_candidate_review_report_v0.1",
+            "review_only": True,
+            "execution_prohibited": True,
+            "promoted": False,
+            "automatic_identity_mutation_allowed": False,
+            "automatic_memory_promotion_allowed": False,
+            "memory_rewrite_executed": False,
+            "recall_mutation_executed": False,
+            "growth_engine_executed": False,
+            "identity_core_mutated": False,
+            "growth_candidate_reviews": [
+                {
+                    "candidate_id": "growth_candidate_review_bad",
+                    "drift_type": "evidence_backed_evolution",
+                    "source_event_ids": [],
+                    "related_memory_ids": [],
+                    "related_claim_ids": [],
+                    "related_task_ids": [],
+                    "encoding_state_ref": "encoding_state_bad",
+                    "recall_state_ref": "recall_state_bad",
+                    "meaning_shift": {"shift_type": "reinterpreted"},
+                    "meaning_shift_evidence_status": "missing_evidence_refs",
+                    "evidence_refs": [],
+                    "rejection_reasons": [],
+                    "risk_level": "medium",
+                    "review_required": True,
+                    "review_status": "review_candidate",
+                    "recommended_review_gate": "normal_review",
+                    "review_only": False,
+                    "execution_prohibited": False,
+                    "promoted": True,
+                    "automatic_identity_mutation_allowed": True,
+                    "automatic_memory_promotion_allowed": True,
+                    "memory_rewrite_executed": True,
+                    "recall_mutation_executed": True,
+                    "growth_engine_executed": True,
+                    "identity_core_mutated": True,
+                }
+            ],
+            "review_candidates": [],
+            "rejected_by_anti_growth_filter": [],
+            "insufficient_context_reviews": [],
+            "record_only_reviews": [],
+            "high_gate_reviews": [],
+            "temporal_awareness_future_questions": [],
+        }
+
+        report = validate_growth_candidate_review_artifact(artifact)
+
+        self.assertEqual(report["status"], "failed")
+        paths = {issue["path"] for issue in report["issues"]}
+        self.assertIn(
+            "growth_candidate_review_artifact.growth_candidate_reviews[0].promoted",
+            paths,
+        )
+        self.assertIn(
+            "growth_candidate_review_artifact.growth_candidate_reviews[0].identity_core_mutated",
+            paths,
+        )
+        self.assertIn(
+            "growth_candidate_review_artifact.growth_candidate_reviews[0].evidence_refs",
+            paths,
+        )
+        self.assertIn(
+            "growth_candidate_review_artifact.growth_candidate_reviews[0].meaning_shift_evidence_status",
+            paths,
+        )
 
 
 if __name__ == "__main__":

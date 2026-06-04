@@ -33,7 +33,7 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertEqual(report["state_mode"], "temporary")
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["failed"], 0)
-        self.assertEqual(report["passed"], 17)
+        self.assertEqual(report["passed"], 18)
         self.assertEqual(
             report["baselines"]["system_under_test"],
             "state_transfer_system",
@@ -82,9 +82,10 @@ class FoundationEvaluationTests(unittest.TestCase):
         self.assertIn("dream_artifact_package", scenario_names)
         self.assertIn("context_builder_policy_trace", scenario_names)
         self.assertIn("growth_semantics", scenario_names)
+        self.assertIn("growth_candidate_review", scenario_names)
 
         metrics = report["metrics_summary"]
-        self.assertEqual(metrics["total_scenarios"], 17)
+        self.assertEqual(metrics["total_scenarios"], 18)
         self.assertEqual(metrics["failed_scenarios"], 0)
         self.assertEqual(metrics["boundary_violation_count"], 0)
         self.assertEqual(metrics["archived_memory_retrieval_count"], 0)
@@ -576,6 +577,36 @@ class FoundationEvaluationTests(unittest.TestCase):
             0,
         )
         self.assertEqual(metrics["growth_semantics_state_mutation_count"], 0)
+        self.assertEqual(metrics["growth_candidate_review_report_count"], 1)
+        self.assertEqual(metrics["growth_candidate_review_rfc_count"], 1)
+        self.assertGreaterEqual(metrics["growth_candidate_review_object_count"], 8)
+        self.assertGreaterEqual(metrics["growth_candidate_review_candidate_count"], 2)
+        self.assertGreaterEqual(metrics["growth_candidate_review_rejected_count"], 3)
+        self.assertGreaterEqual(
+            metrics["growth_candidate_review_insufficient_context_count"],
+            1,
+        )
+        self.assertGreaterEqual(
+            metrics["growth_candidate_review_record_only_count"],
+            1,
+        )
+        self.assertGreaterEqual(metrics["growth_candidate_review_high_gate_count"], 1)
+        self.assertGreaterEqual(
+            metrics["growth_candidate_review_temporal_future_question_count"],
+            1,
+        )
+        self.assertEqual(metrics["growth_candidate_review_identity_mutation_count"], 0)
+        self.assertEqual(
+            metrics["growth_candidate_review_memory_promotion_count"],
+            0,
+        )
+        self.assertEqual(metrics["growth_candidate_review_memory_rewrite_count"], 0)
+        self.assertEqual(metrics["growth_candidate_review_recall_mutation_count"], 0)
+        self.assertEqual(
+            metrics["growth_candidate_review_growth_engine_execution_count"],
+            0,
+        )
+        self.assertEqual(metrics["growth_candidate_review_state_mutation_count"], 0)
         self.assertGreaterEqual(
             metrics["event_payload_capture_policy_proposal_count"],
             1,
