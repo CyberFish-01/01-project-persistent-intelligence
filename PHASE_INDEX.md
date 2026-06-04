@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P128. It is not a release log. It records how the system
+This index covers P0-P129. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -136,3 +136,4 @@ foundation evolved.
 | P126 | Added Lockdown Fixture Matrix. | Lockdown risks need synthetic, no-write examples before any future validator or scanner is considered. | Core Lockdown |
 | P127 | Added Quarantine Review Gate Plan. | Quarantine needs manual gates and rejection paths before any candidate can be considered. | Core Lockdown |
 | P128 | Added Shadow Adapter Example Shapes. | Adapter pressure must be visible as synthetic shadow shapes before any platform connection is considered. | Core Lockdown |
+| P129 | Added Contamination False Positive Review. | Detection must remain suspicion and include false-positive review before any future enforcement is discussed. | Core Lockdown |
