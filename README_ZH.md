@@ -17,7 +17,7 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P148 Rebuild Entry Gate Checklist 已完成。项目现在区分 ready-for-verification 和 ready-for-rebuild，并列出考虑本地 01 rebuild 前所需 evidence；rebuild 仍保持 blocked。
+当前工作状态：P149 Pre-Rebuild System Review 已完成。系统已经准备好进入 final read-only pre-rebuild verification，但还不能进入 rebuild 本身；仍需要 verification plan、suite、report 和 founder checkpoint。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -31,7 +31,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P148 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P149 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -85,6 +85,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [MANUAL_REVIEW_GATE_RFC.md](./MANUAL_REVIEW_GATE_RFC.md) / [MANUAL_REVIEW_GATE_RFC_ZH.md](./MANUAL_REVIEW_GATE_RFC_ZH.md)：P146 RFC-only manual review gate，位于任何 future durable change 之前。
 - [REBUILD_MIGRATION_PROTOCOL_RFC.md](./REBUILD_MIGRATION_PROTOCOL_RFC.md) / [REBUILD_MIGRATION_PROTOCOL_RFC_ZH.md](./REBUILD_MIGRATION_PROTOCOL_RFC_ZH.md)：P147 RFC-only rebuild migration protocol，定义 future local rebuild entry gates 和 stop conditions。
 - [REBUILD_ENTRY_GATE_CHECKLIST.md](./REBUILD_ENTRY_GATE_CHECKLIST.md) / [REBUILD_ENTRY_GATE_CHECKLIST_ZH.md](./REBUILD_ENTRY_GATE_CHECKLIST_ZH.md)：P148 checklist，区分 ready-for-verification 和 ready-for-rebuild。
+- [PRE_REBUILD_SYSTEM_REVIEW.md](./PRE_REBUILD_SYSTEM_REVIEW.md) / [PRE_REBUILD_SYSTEM_REVIEW_ZH.md](./PRE_REBUILD_SYSTEM_REVIEW_ZH.md)：P149 system review，判断项目可以进入 final read-only verification，但不能 rebuild。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 
