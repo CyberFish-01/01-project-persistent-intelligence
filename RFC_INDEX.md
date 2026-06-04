@@ -82,6 +82,12 @@ implementation approval.
 | P129 | [CONTAMINATION_FALSE_POSITIVE_REVIEW.md](./CONTAMINATION_FALSE_POSITIVE_REVIEW.md) / [ZH](./CONTAMINATION_FALSE_POSITIVE_REVIEW_ZH.md) | review | false-positive review | Reviews how future contamination signals can be useful without becoming truth, punishment, or enforcement. | scanner runtime, classifier implementation, enforcement engine, quarantine storage, write path, model call, adapter integration, or rebuild |
 | P130 | [CORE_LOCKDOWN_CYCLE_REVIEW.md](./CORE_LOCKDOWN_CYCLE_REVIEW.md) / [ZH](./CORE_LOCKDOWN_CYCLE_REVIEW_ZH.md) | cycle review | block closure | Closes P121-P130 with readiness, missing prerequisites, boundary audit, risks, and next safe planning boundary. | validator implementation, scanner runtime, import pipeline, adapter integration, write path, model call, or rebuild |
 
+## Thin Founder Console
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P131 | [FOUNDER_CONSOLE_BOUNDARY_RFC.md](./FOUNDER_CONSOLE_BOUNDARY_RFC.md) / [ZH](./FOUNDER_CONSOLE_BOUNDARY_RFC_ZH.md) | boundary RFC | RFC-only console boundary | Defines the future Thin Founder Console as local, founder-only, no-write visibility rather than product behavior. | console implementation, Web UI, Companion, adapter integration, model call, tool execution, write path, policy executor, or rebuild |
+
 ## Founder-Facing Vocabulary And Visual Naming
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |

@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P130. It is not a release log. It records how the system
+This index covers P0-P131. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -138,3 +138,4 @@ foundation evolved.
 | P128 | Added Shadow Adapter Example Shapes. | Adapter pressure must be visible as synthetic shadow shapes before any platform connection is considered. | Core Lockdown |
 | P129 | Added Contamination False Positive Review. | Detection must remain suspicion and include false-positive review before any future enforcement is discussed. | Core Lockdown |
 | P130 | Added Core Lockdown Cycle Review. | The lockdown block must close with readiness, gaps, risks, and the next safe planning boundary. | Core Lockdown |
+| P131 | Added Founder Console Boundary RFC. | The first application-adjacent surface must be local, founder-only, no-write visibility, not product behavior. | Founder Console |

@@ -80,6 +80,12 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P129 | [CONTAMINATION_FALSE_POSITIVE_REVIEW.md](./CONTAMINATION_FALSE_POSITIVE_REVIEW.md) / [ZH](./CONTAMINATION_FALSE_POSITIVE_REVIEW_ZH.md) | review | false-positive review | 复盘 future contamination signals 如何保持有用，同时不变成 truth、punishment 或 enforcement。 | scanner runtime、classifier implementation、enforcement engine、quarantine storage、write path、model call、adapter integration 或 rebuild |
 | P130 | [CORE_LOCKDOWN_CYCLE_REVIEW.md](./CORE_LOCKDOWN_CYCLE_REVIEW.md) / [ZH](./CORE_LOCKDOWN_CYCLE_REVIEW_ZH.md) | cycle review | block closure | 用 readiness、missing prerequisites、boundary audit、risks 和下一条安全 planning boundary 收口 P121-P130。 | validator implementation、scanner runtime、import pipeline、adapter integration、write path、model call 或 rebuild |
 
+## Thin Founder Console / 轻量创始人控制台
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P131 | [FOUNDER_CONSOLE_BOUNDARY_RFC.md](./FOUNDER_CONSOLE_BOUNDARY_RFC.md) / [ZH](./FOUNDER_CONSOLE_BOUNDARY_RFC_ZH.md) | boundary RFC | RFC-only console boundary | 把 future Thin Founder Console 定义为 local、founder-only、no-write visibility，而不是 product behavior。 | console implementation、Web UI、Companion、adapter integration、model call、tool execution、write path、policy executor 或 rebuild |
+
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
