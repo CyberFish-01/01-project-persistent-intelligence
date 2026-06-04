@@ -288,16 +288,16 @@ behavior、adapter integration 或 UI。
 
 ## Minimal CLI Harness Implementation Plan / 最小 CLI 试验台实现计划
 
-P99 document-only plan，用于规划 future `harness-dry-run` command。它定义 dry-run scope、
-input fields、output sections、candidate preview types、boundary rules 和 future tests plan。
+P99 document-only plan，用于规划 P100 `harness-dry-run` command。它定义 dry-run scope、
+input fields、output sections、candidate preview types、boundary rules 和 initial tests plan。
 
-边界：它不是 implementation approval。它不新增 command、parser、schema、tests、model calls、
-external API calls、state writes、adapter integration、product behavior 或 P100。
+边界：该 plan 不批准 model calls、external API calls、state writes、adapter integration、product
+behavior 或 P101。
 
 ## Harness Dry-Run / 试验台 Dry-Run
 
-未来可能存在的本地 CLI pressure test，用于 preview 一条 user message 如何经过 intake、context
-preview、candidate preview、review queue preview、boundary monitor 和 observatory snapshot。
+P100 本地 CLI pressure test，用于 preview 一条 user message 如何经过 intake、context preview、
+candidate preview、review queue preview、boundary monitor 和 observatory snapshot。
 
 边界：dry-run means no writes、no model call、no external API call、no adapter ownership、no
 identity mutation、no memory rewrite、no recall event write、no growth execution、no tool execution。
@@ -552,15 +552,17 @@ risk explanations 和 next-step candidates 输出 Markdown 或 JSON founder-faci
 边界：它只 read and render。它不修改 state、不执行 policy、不推进 roadmap work、不创建 phase，
 也不是 dashboard runtime。
 
-## Harness Dry-Run Candidate Command / 试验台 Dry-Run 候选命令
+## Harness Dry-Run Command / 试验台 Dry-Run 命令
 
-规划中的未来命令名：
+P100 命令：
 
 ```bash
 python3 -m one_core.cli harness-dry-run
 ```
 
-边界：P99 只记录这个 command name。它没有实现、没有注册、没有测试，也没有被批准执行。
+边界：该命令只实现为 read-only local preview。它不是聊天应用、model caller、adapter
+integration、state writer、memory writer、recall writer、growth lifecycle、product surface 或
+automatic next-step executor。
 
 ## Observatory CLI Report / 观察台 CLI 报告
 

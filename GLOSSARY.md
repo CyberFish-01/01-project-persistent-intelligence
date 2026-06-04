@@ -353,19 +353,18 @@ commands, schemas, tests, runtime behavior, adapter integration, or UI.
 
 ## Minimal CLI Harness Implementation Plan
 
-The P99 document-only plan for a possible future `harness-dry-run` command. It
-defines dry-run scope, input fields, output sections, candidate preview types,
-boundary rules, and a future tests plan.
+The P99 document-only plan for the P100 `harness-dry-run` command. It defines
+dry-run scope, input fields, output sections, candidate preview types, boundary
+rules, and the initial tests plan.
 
-Boundary: it is not implementation approval. It does not add the command,
-parser, schema, tests, model calls, external API calls, state writes, adapter
-integration, product behavior, or P100.
+Boundary: the plan does not approve model calls, external API calls, state
+writes, adapter integration, product behavior, or P101.
 
 ## Harness Dry-Run
 
-A possible future local CLI pressure test that previews how one user message
-would move through intake, context preview, candidate preview, review queue
-preview, boundary monitor, and observatory snapshot.
+A P100 local CLI pressure test that previews how one user message moves through
+intake, context preview, candidate preview, review queue preview, boundary
+monitor, and observatory snapshot.
 
 Boundary: dry-run means no writes, no model call, no external API call, no
 adapter ownership, no identity mutation, no memory rewrite, no recall event
@@ -664,16 +663,18 @@ risk explanations, and next-step candidates.
 Boundary: it reads and renders. It does not mutate state, execute policy,
 promote roadmap work, create phases, or become a dashboard runtime.
 
-## Harness Dry-Run Candidate Command
+## Harness Dry-Run Command
 
-The planned future command name:
+The P100 command:
 
 ```bash
 python3 -m one_core.cli harness-dry-run
 ```
 
-Boundary: P99 documents this command name only. It is not implemented, not
-registered, not tested, and not approved for execution.
+Boundary: the command is implemented only as a read-only local preview. It is
+not a chat application, model caller, adapter integration, state writer, memory
+writer, recall writer, growth lifecycle, product surface, or automatic next-step
+executor.
 
 ## Observatory CLI Report
 

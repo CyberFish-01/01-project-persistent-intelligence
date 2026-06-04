@@ -55,7 +55,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P89 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [ZH](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | scenario plan | resume simulation plan | 使用 simulated elapsed time 定义 deterministic session resume scenarios。 | Temporal Awareness runtime 或 temporal event writes |
 | P90 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [ZH](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | roadmap | harness readiness roadmap | 评估未来 minimal CLI harness readiness 和 gates。 | harness implementation 或 approval |
 | P82-P90 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [ZH](./HARNESS_TRANSITION_SUMMARY_ZH.md) | summary | transition closure | 总结从 temporal concept safety 到 future harness readiness 的 planning bridge。 | P91 implementation approval |
-| P99 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [ZH](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | implementation plan | RFC-only plan | 定义 future no-write `harness-dry-run` pressure-test boundary、flow、inputs、outputs、candidates、boundaries 和 tests plan。 | command implementation、parser changes、tests、model calls、external APIs、state writes、adapter integration、product layer 或 P100 execution |
+| P99 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [ZH](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | implementation plan | RFC-only plan | 定义 no-write `harness-dry-run` pressure-test boundary、flow、inputs、outputs、candidates、boundaries 和 tests plan，之后在 P100 中窄范围实现。 | model calls、external APIs、state writes、adapter integration、product layer 或 P101 execution |
+| P100 | `python3 -m one_core.cli harness-dry-run` | read-only CLI | implemented dry-run preview | 生成本地 Markdown 或 JSON preview，覆盖 intake、context package、candidates、review queue、boundary monitor、observatory snapshot 和 non-execution invariants。 | model calls、external APIs、state writes、memory writes、recall writes、identity mutation、adapter integration、Companion、product layer 或 automatic next-step execution |
 
 ## Capability Evolution And Tool Boundary / 能力演化与工具边界
 
@@ -166,8 +167,10 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     规划 future read-only observatory CLI report，但不实现 CLI commands、parsers、
     generators、dashboard runtime、Web UI、product UI、status API 或 observability executor。
 30. [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
-    规划 possible future no-write `harness-dry-run` command，但不实现 command、parser、
-    tests、model calls、external APIs、state writes、adapter integration、product behavior 或 P100。
+    规划 no-write `harness-dry-run` command，之后在 P100 中窄范围实现；仍不做
+    model calls、external APIs、state writes、adapter integration、product behavior 或 P101。
+31. `python3 -m one_core.cli harness-dry-run` 实现 P100 local dry-run preview command，
+    不写 state、不调用模型、不调用外部 API、不接 adapter、不进入产品层，也不自动执行下一步。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -209,8 +212,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
-- harness implementation；
-- `harness-dry-run` command implementation；
+- 超出 P100 read-only dry-run command 的 harness implementation；
+- 超出 P100 read-only dry-run command 的 harness runtime；
 - fixture schema；
 - output schema；
 - model calls from harness work；

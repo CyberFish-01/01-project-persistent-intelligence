@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P99。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P100。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -106,3 +106,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P97 | 加入 Observatory Usability Review。 | read-only report 在进入 harness work 前仍需要 founder-facing readability。 | Foundation Observatory |
 | P98 | 改进 observatory readability。 | 观察台应更像状态仪表盘，而不是论文目录，同时保持 read-only。 | Foundation Observatory |
 | P99 | 加入 Minimal CLI Harness Implementation Plan。 | future interaction pressure test 在 implementation 前需要 no-write dry-run plan。 | Harness Planning |
+| P100 | 加入 Minimal CLI Harness Dry-Run implementation。 | founder-facing interaction pressure 可以本地 preview，同时不写入、不调用模型、不接 adapter、不进入产品层。 | Harness Preview |

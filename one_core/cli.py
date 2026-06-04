@@ -15,6 +15,7 @@ from .client import (
 from .cleaner import clean_memory_files, write_cleaned_text
 from .dream import DreamEngine
 from .evaluation import run_foundation_evaluation, run_scenario_evaluation
+from .harness import build_harness_dry_run_report, render_harness_dry_run_report
 from .importer import import_text_file
 from .observatory import build_observatory_report, render_observatory_report
 from .state import DEFAULT_STATE_DIR, StateStore
@@ -416,6 +417,44 @@ def main() -> None:
     observatory_parser.add_argument(
         "--output",
         help="Optional path to write the generated report.",
+    )
+    harness_parser = subparsers.add_parser(
+        "harness-dry-run",
+        help="Preview a local interaction path without writing state.",
+    )
+    harness_parser.add_argument(
+        "--input",
+        required=True,
+        help="User message or fixture text to preview.",
+    )
+    harness_parser.add_argument("--session-id", default="demo-session")
+    harness_parser.add_argument("--actor-id", default="founder")
+    harness_parser.add_argument(
+        "--lang",
+        choices=["en", "zh"],
+        default="en",
+        help="Report language. Defaults to en.",
+    )
+    harness_parser.add_argument(
+        "--format",
+        choices=["markdown", "json"],
+        default="markdown",
+        help="Output format. Defaults to markdown.",
+    )
+    harness_parser.add_argument(
+        "--output",
+        help="Optional path to write the generated dry-run report.",
+    )
+    harness_parser.add_argument(
+        "--privacy-scope",
+        choices=["local", "private", "public"],
+        default="local",
+    )
+    harness_parser.add_argument(
+        "--no-write",
+        action="store_true",
+        default=True,
+        help="Required dry-run no-write mode. Defaults to true.",
     )
     subparsers.add_parser(
         "replay-events",
@@ -883,6 +922,22 @@ def main() -> None:
     elif args.command == "foundation-observatory-report":
         report = build_observatory_report(lang=args.lang)
         output = render_observatory_report(report, args.format)
+        if args.output:
+            output_path = Path(args.output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(output + "\n", encoding="utf-8")
+        else:
+            print(output)
+    elif args.command == "harness-dry-run":
+        report = build_harness_dry_run_report(
+            user_message=args.input,
+            session_id=args.session_id,
+            actor_id=args.actor_id,
+            lang=args.lang,
+            privacy_scope=args.privacy_scope,
+            no_write=args.no_write,
+        )
+        output = render_harness_dry_run_report(report, args.format)
         if args.output:
             output_path = Path(args.output)
             output_path.parent.mkdir(parents=True, exist_ok=True)

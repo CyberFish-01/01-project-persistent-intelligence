@@ -19,15 +19,16 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P99 Minimal CLI Harness Implementation Plan is complete.
-The repository now has a document-only plan for a future local
-`harness-dry-run` pressure-test command. It is a no-write dry-run plan only, not
-an implementation.
+Current work status: P100 Minimal CLI Harness Dry-Run Implementation is
+complete. The repository now includes a local read-only
+`harness-dry-run` command that shows an interaction preview path without model
+calls, adapter calls, state writes, memory writes, recall writes, or identity
+mutation.
 
 The runtime and adapter references below are historical/engineering references;
-they are not approval to enter P100, implement a harness, build dashboard
-runtime, Web UI, observability executor, status API, expand into the application
-layer, UI, AstrBot, product, Temporal Awareness runtime, tool execution,
+they are not approval to enter P101, build dashboard runtime, Web UI,
+observability executor, status API, expand into the application layer, UI,
+AstrBot, product, Companion, Temporal Awareness runtime, tool execution,
 automatic tool generation, automatic tool promotion, growth execution, memory
 rewrite, or reconstruction reducers.
 
@@ -38,7 +39,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P99 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P100 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -53,7 +54,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [FOUNDATION_OBSERVATORY_REPORT_ZH.md](./FOUNDATION_OBSERVATORY_REPORT_ZH.md): P94 Markdown founder-facing snapshot, readiness matrix, boundary status, risk heatmap, and next-step recommendation.
 - [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md): P95 RFC-only plan for a future read-only observatory CLI report boundary.
 - [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md): P97 founder-facing usability review that led to the P98 readability improvements.
-- [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md): P99 document-only implementation plan for a future no-write `harness-dry-run` pressure-test command.
+- [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md): P99 document-only implementation plan for the P100 no-write `harness-dry-run` pressure-test command.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 
 ## Foundation Review Artifacts
@@ -125,9 +126,10 @@ The central claim:
 ## Prototype Reference
 
 This repository includes a minimal local prototype. The observatory CLI remains
-read-only after P98 readability improvements. P99 adds only a plan for a future
-no-write harness dry-run command; it does not add the command. The existing
-commands remain verification and orientation references only:
+read-only after P98 readability improvements. P100 adds a minimal local
+`harness-dry-run` command, but it is still a dry-run preview surface, not a chat
+application, product layer, Companion, adapter, model caller, or memory writer.
+The other commands remain verification and orientation references only:
 
 ```bash
 python3 -m one_core.cli init
@@ -153,14 +155,17 @@ This command reads approved foundation documents and emits a static report. It
 does not mutate state, execute policy, create roadmap phases, implement a
 harness, or become a dashboard runtime.
 
-Future harness planning reference only:
+Read-only harness dry-run:
 
-```text
-python3 -m one_core.cli harness-dry-run
+```bash
+python3 -m one_core.cli harness-dry-run --input "Preview this without writing state."
+python3 -m one_core.cli harness-dry-run --input "只做预览，不写 state。" --lang zh
+python3 -m one_core.cli harness-dry-run --input "Preview this." --format json
 ```
 
-This command is not implemented in P99. It is only a planned no-write dry-run
-candidate that would require explicit future founder approval.
+This command emits intake, context package, candidate, review queue, boundary,
+observatory, and non-execution previews. It does not write state, call a model,
+call external APIs, integrate adapters, or execute the next step.
 
 Local API reference:
 

@@ -57,7 +57,8 @@ implementation approval.
 | P89 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [ZH](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | scenario plan | resume simulation plan | Defines deterministic session resume scenarios using simulated elapsed time. | Temporal Awareness runtime or temporal event writes |
 | P90 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [ZH](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | roadmap | harness readiness roadmap | Assesses future minimal CLI harness readiness and gates. | harness implementation or approval |
 | P82-P90 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [ZH](./HARNESS_TRANSITION_SUMMARY_ZH.md) | summary | transition closure | Summarizes the planning bridge from temporal concept safety to future harness readiness. | P91 implementation approval |
-| P99 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [ZH](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | implementation plan | RFC-only plan | Defines a future no-write `harness-dry-run` pressure-test boundary, flow, inputs, outputs, candidates, boundaries, and tests plan. | command implementation, parser changes, tests, model calls, external APIs, state writes, adapter integration, product layer, or P100 execution |
+| P99 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [ZH](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | implementation plan | RFC-only plan | Defines the no-write `harness-dry-run` pressure-test boundary, flow, inputs, outputs, candidates, boundaries, and tests plan later implemented narrowly in P100. | model calls, external APIs, state writes, adapter integration, product layer, or P101 execution |
+| P100 | `python3 -m one_core.cli harness-dry-run` | read-only CLI | implemented dry-run preview | Generates local Markdown or JSON previews for intake, context package, candidates, review queue, boundary monitor, observatory snapshot, and non-execution invariants. | model calls, external APIs, state writes, memory writes, recall writes, identity mutation, adapter integration, Companion, product layer, or automatic next-step execution |
 
 ## Capability Evolution And Tool Boundary
 
@@ -175,9 +176,12 @@ The current dependency order is:
     commands, parsers, generators, dashboard runtime, Web UI, product UI,
     status API, or observability executor.
 30. [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
-    plans a possible future no-write `harness-dry-run` command without
-    implementing the command, parser, tests, model calls, external APIs, state
-    writes, adapter integration, product behavior, or P100.
+    plans the no-write `harness-dry-run` command later implemented narrowly in
+    P100 without model calls, external APIs, state writes, adapter integration,
+    product behavior, or P101.
+31. `python3 -m one_core.cli harness-dry-run` implements the P100 local dry-run
+    preview command without state writes, model calls, external APIs, adapter
+    integration, product behavior, or automatic next-step execution.
 
 ## Runtime-Blocked Topics
 
@@ -219,8 +223,8 @@ The indexed documents do not approve:
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
-- harness implementation;
-- `harness-dry-run` command implementation;
+- harness implementation beyond the P100 read-only dry-run command;
+- harness runtime beyond the P100 read-only dry-run command;
 - fixture schema;
 - output schema;
 - model calls from harness work;
