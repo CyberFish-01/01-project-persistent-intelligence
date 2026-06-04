@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P140。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P141。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -147,3 +147,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P138 | 加入 Context Package Preview CLI Plan。 | future context package CLI 在实现前必须 local、deterministic、read-only、report-only。 | Context Package |
 | P139 | 加入 Source Selection Matrix。 | future context packages 必须让 selected 和 omitted sources、trust levels 与 risks 可见。 | Context Package |
 | P140 | 加入 Boundary Injection RFC。 | future context packages 必须在 package 内携带 boundary reminders，但 reminders 不能变成 enforcement。 | Context Package |
+| P141 | 加入 CTM Temporal Context Pack RFC。 | CTM-inspired temporal dynamics 在 context packages 中只能作为 symbolic review cues。 | Context Package |
