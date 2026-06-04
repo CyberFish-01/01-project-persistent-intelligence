@@ -143,6 +143,10 @@ P79 已由 [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
 及其中文配对文档满足。该 review 记录 paired-document consistency 和 boundary
 alignment；它不自动执行 translation checks，也不批准 runtime work。
 
+P80 已由 [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md)
+及其中文配对文档满足。该 review 关闭 P54-P80 maintenance cycle；它不批准 runtime
+implementation 或 product work。
+
 ## Completion Definition For Foundation Layer / 基础层完成定义
 
 基础层不是因为所有想法都被实现才算完成。一个周期足够完成，指的是：

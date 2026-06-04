@@ -146,6 +146,11 @@ P79 is satisfied by
 Chinese pair. The review records paired-document consistency and boundary
 alignment; it does not automate translation checks or approve runtime work.
 
+P80 is satisfied by
+[FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) and its
+Chinese pair. The review closes the P54-P80 maintenance cycle; it does not
+approve runtime implementation or product work.
+
 ## Completion Definition For Foundation Layer
 
 The foundation layer is not complete because all ideas are implemented. It is

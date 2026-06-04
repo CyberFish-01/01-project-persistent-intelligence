@@ -46,7 +46,7 @@ low-risk consolidation.
 | R14 | Governance Surface becomes too broad | medium | every task, claim, or memory review is routed to governance | use ownership boundaries: Task Hub owns work, Claim Graph owns claims, Memory Layer owns records | centralizing all review semantics |
 | R15 | Bilingual drift | medium | Chinese and English docs diverge on status or blocked actions | use [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md), run consistency passes, and prefer paired edits | treating one language as authoritative when contradictory |
 | R16 | README entrance overload | medium | new readers cannot find stable foundation vs future-only work | optimize README entrance and index docs without adding features | productizing the README |
-| R17 | P80 pressure | medium | phases are opened just to advance numbering | skip, merge, or stop if a phase does not add clarity | opening empty phases |
+| R17 | P80 pressure | medium | phases are opened just to advance numbering | use [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) as the stop condition; skip, merge, or stop if a phase does not add clarity | opening empty phases |
 | R18 | Cloud/AstrBot deployment pressure | medium | local foundation docs are treated as a reason to update cloud or AstrBot now | keep cloud and AstrBot pushed back until foundation loop ends | cloud runtime rollout, AstrBot specialization |
 
 ## Risk Clusters

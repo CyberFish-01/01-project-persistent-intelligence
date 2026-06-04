@@ -33,6 +33,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P67 | [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [ZH](./FOUNDATION_ROADMAP_ZH.md) | roadmap | active guidance | 综合 stable foundation、blocked runtime work、future dependencies 和 low-risk backlog。 | runtime authorization |
 | P76 | [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [ZH](./FOUNDATION_REVIEW_CHECKLIST_ZH.md) | manual checklist | phase review gate | 把 boundary、risk、RFC、bilingual、verification 和 commit checks 转成 human review gate。 | automated executor |
 | P79 | [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) / [ZH](./BILINGUAL_CONSISTENCY_REVIEW_ZH.md) | review | manual consistency record | 记录 paired-document、status、link、summary 和 blocked-boundary alignment。 | automated translation checker |
+| P80 | [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) / [ZH](./FOUNDATION_MAINTENANCE_REVIEW_ZH.md) | review | cycle closure | 记录 P54-P80 的 maintained artifacts、residual gaps、residual risks 和 stop condition。 | implementation approval |
 
 ## Stateful Memory And Growth Semantics / 状态化记忆与成长语义
 
@@ -87,6 +88,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     document-only phases 提供 manual gate，但不批准执行。
 12. [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
     记录最新 manual bilingual consistency baseline，但不自动执行 review。
+13. [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md)
+    关闭 P54-P80 maintenance cycle，但不批准 runtime work。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 

@@ -35,6 +35,7 @@ implementation approval.
 | P67 | [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [ZH](./FOUNDATION_ROADMAP_ZH.md) | roadmap | active guidance | Synthesizes stable foundation, blocked runtime work, future dependencies, and low-risk backlog. | runtime authorization |
 | P76 | [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [ZH](./FOUNDATION_REVIEW_CHECKLIST_ZH.md) | manual checklist | phase review gate | Converts boundary, risk, RFC, bilingual, verification, and commit checks into a human review gate. | automated executor |
 | P79 | [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) / [ZH](./BILINGUAL_CONSISTENCY_REVIEW_ZH.md) | review | manual consistency record | Records paired-document, status, link, summary, and blocked-boundary alignment. | automated translation checker |
+| P80 | [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) / [ZH](./FOUNDATION_MAINTENANCE_REVIEW_ZH.md) | review | cycle closure | Records maintained artifacts, residual gaps, residual risks, and stop condition for P54-P80. | implementation approval |
 
 ## Stateful Memory And Growth Semantics
 
@@ -90,6 +91,8 @@ The current dependency order is:
 12. [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
     records the latest manual bilingual consistency baseline without automating
     review.
+13. [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md)
+    closes the P54-P80 maintenance cycle without approving runtime work.
 
 ## Runtime-Blocked Topics
 

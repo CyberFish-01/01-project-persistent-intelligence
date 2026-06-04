@@ -34,6 +34,7 @@
 - [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [FOUNDATION_REVIEW_CHECKLIST_ZH.md](./FOUNDATION_REVIEW_CHECKLIST_ZH.md)：P76 manual review checklist，用于后续 document-only foundation phases。
 - [DECISIONS.md](./DECISIONS.md) / [DECISIONS_ZH.md](./DECISIONS_ZH.md)：P77 document-only log，记录 accepted、deferred、blocked 和 watch foundation decisions。
 - [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) / [BILINGUAL_CONSISTENCY_REVIEW_ZH.md](./BILINGUAL_CONSISTENCY_REVIEW_ZH.md)：P79 manual bilingual consistency pass，检查 paired foundation documents 和 blocked-boundary alignment。
+- [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) / [FOUNDATION_MAINTENANCE_REVIEW_ZH.md](./FOUNDATION_MAINTENANCE_REVIEW_ZH.md)：P80 final foundation maintenance review，记录 P54-P80 cycle 的 stop condition。
 - [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) / [OPEN_QUESTIONS_ZH.md](./OPEN_QUESTIONS_ZH.md)：当前 open foundation questions 和状态。
 - [RFC_INDEX.md](./RFC_INDEX.md) / [RFC_INDEX_ZH.md](./RFC_INDEX_ZH.md)：foundation RFC、policy、review、audit 和 matrix artifacts 索引。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
@@ -48,6 +49,7 @@
 - [OPEN_QUESTIONS_TRIAGE.md](./OPEN_QUESTIONS_TRIAGE.md) / [OPEN_QUESTIONS_TRIAGE_ZH.md](./OPEN_QUESTIONS_TRIAGE_ZH.md)：P57 open questions 分诊，排序 safe RFC 和 blocked runtime work。
 - [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [FOUNDATION_REVIEW_CHECKLIST_ZH.md](./FOUNDATION_REVIEW_CHECKLIST_ZH.md)：P76 human review gate，覆盖 phase scope、invariants、risks、bilingual consistency、verification 和 commit review。
 - [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) / [BILINGUAL_CONSISTENCY_REVIEW_ZH.md](./BILINGUAL_CONSISTENCY_REVIEW_ZH.md)：P79 记录 pair presence、reciprocal links、status alignment 和 bilingual blocked-boundary checks。
+- [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) / [FOUNDATION_MAINTENANCE_REVIEW_ZH.md](./FOUNDATION_MAINTENANCE_REVIEW_ZH.md)：P80 closure review，记录 maintained artifacts、residual gaps、residual risks 和 future options。
 
 ## Future RFC And Policy Artifacts / 未来 RFC 与策略文档
 
