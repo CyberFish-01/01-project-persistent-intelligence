@@ -33,6 +33,7 @@ capabilities 被关闭。
 | Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary 已存在，但没有 harness preview、retrieval execution、activation trace write 或 storage policy | retrieval as continuity、context mutation、activation trace writes |
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview 和 ordering vocabulary 已存在，但没有 queue runtime、storage、lifecycle execution 或 approval path | queue execution、lifecycle execution、candidate approval |
 | Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios 已存在，但没有 harness、tests、temporal runtime、temporal events 或 salience policy | session runtime、temporal event write、memory decay |
+| Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness 已评估，但缺 fixture contract、output contract、boundary test plan 和 explicit implementation approval | harness implementation、CLI commands、runtime work |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -186,6 +187,21 @@ temporal events、memory decay、salience mutation 或 resume automation。
 - stale task pressure 与 stale claim pressure 应如何区分；
 - resume scenarios 是否应在 harness implementation 前变成 deterministic tests。
 
+### Core Interaction Harness Roadmap / Core 交互试验台路线图
+
+已由 [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) 澄清，但没有
+实现。它仍然 open，因为 P90 只是 roadmap，不批准 CLI commands、schemas、tests、runtime work 或
+harness implementation。
+
+仍开放：
+
+- fixture input contract；
+- preview output contract；
+- no-write validation invariants；
+- forbidden-output test plan；
+- privacy 和 redaction policy；
+- 任何 future implementation phase 都需要 explicit founder approval。
+
 ### Recall Event Write Policy / 回忆事件写入策略
 
 已由 [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) 澄清。Ordinary
@@ -319,6 +335,9 @@ policy 仍与 payload capture 分离。
 - scenario tests for harness work；
 - memory decay；
 - salience mutation；
+- harness implementation；
+- fixture schema；
+- output schema；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 

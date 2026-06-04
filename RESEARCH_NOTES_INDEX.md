@@ -38,6 +38,7 @@ current documents carry it, and what is still only long-term vision?"
 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | Context preview RFC | Defines selected and omitted context reference explanations without retrieval execution or activation trace writes. |
 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [REVIEW_QUEUE_PREVIEW_RFC_ZH.md](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | Queue preview RFC | Defines candidate queue preview vocabulary without lifecycle execution or approval. |
 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [SESSION_RESUME_SCENARIO_PLAN_ZH.md](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | Resume scenario plan | Defines deterministic resume scenarios without temporal events or resume runtime. |
+| [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [CORE_INTERACTION_HARNESS_ROADMAP_ZH.md](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | Harness roadmap | Assesses future minimal CLI harness readiness without approving implementation. |
 
 ## Original Idea Chains
 
@@ -79,6 +80,7 @@ current documents carry it, and what is still only long-term vision?"
 | Context Package Preview | Context selection needs explainability before any thin harness can be safe. | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md), [API.md](./API.md) | `preview-rfc`, not retrieval execution |
 | Review Queue Preview | Candidate pressure needs ordering vocabulary before any review queue can be discussed. | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md), [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | `preview-rfc`, not lifecycle execution |
 | Session Resume Scenario Plan | Resume needs deterministic elapsed-time scenarios before any harness runtime. | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md), [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | `scenario-plan`, not temporal runtime |
+| Core Interaction Harness Roadmap | The foundation can now discuss a future fixture-first CLI harness, but implementation remains blocked. | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `roadmap`, not implementation approval |
 
 ## Second Chain Map: Artificial Life History
 
@@ -153,6 +155,9 @@ For origin tracing:
 14. Read [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md)
     only as deterministic scenario planning, not as Temporal Awareness runtime,
     temporal event writes, memory decay, salience mutation, or resume automation.
+15. Read [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md)
+    only as readiness planning, not as harness implementation approval, CLI
+    commands, schemas, tests, adapters, UI, or runtime work.
 
 ## P78 Non-Execution Statement
 

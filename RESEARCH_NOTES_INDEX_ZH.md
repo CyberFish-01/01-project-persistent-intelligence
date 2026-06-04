@@ -36,6 +36,7 @@ origin ideas are not implementation approval.
 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | Context preview RFC | 定义 selected 和 omitted context reference explanations，不执行 retrieval 或 activation trace writes。 |
 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [REVIEW_QUEUE_PREVIEW_RFC_ZH.md](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | Queue preview RFC | 定义 candidate queue preview vocabulary，不执行 lifecycle 或 approval。 |
 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [SESSION_RESUME_SCENARIO_PLAN_ZH.md](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | Resume scenario plan | 定义 deterministic resume scenarios，不写 temporal events，也不做 resume runtime。 |
+| [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [CORE_INTERACTION_HARNESS_ROADMAP_ZH.md](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | Harness roadmap | 评估 future minimal CLI harness readiness，但不批准 implementation。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -77,6 +78,7 @@ origin ideas are not implementation approval.
 | Context Package Preview | thin harness 变得安全前，context selection 需要 explainability。 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md), [API.md](./API.md) | `preview-rfc`, not retrieval execution |
 | Review Queue Preview | 讨论 review queue 前，candidate pressure 需要 ordering vocabulary。 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md), [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | `preview-rfc`, not lifecycle execution |
 | Session Resume Scenario Plan | 任何 harness runtime 前，resume 需要 deterministic elapsed-time scenarios。 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md), [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | `scenario-plan`, not temporal runtime |
+| Core Interaction Harness Roadmap | foundation 现在可以讨论 future fixture-first CLI harness，但 implementation 仍 blocked。 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `roadmap`, not implementation approval |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -145,6 +147,9 @@ Research notes 是 source material，不是当前 implementation plan。
 14. 阅读 [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md)
     时，只把它当作 deterministic scenario planning，不要当作 Temporal Awareness runtime、
     temporal event writes、memory decay、salience mutation 或 resume automation。
+15. 阅读 [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md)
+    时，只把它当作 readiness planning，不要当作 harness implementation approval、CLI commands、
+    schemas、tests、adapters、UI 或 runtime work。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 

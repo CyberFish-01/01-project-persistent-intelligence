@@ -343,6 +343,22 @@ preview.
 Boundary: context gap must not be repaired by fabricated memory, memory rewrite,
 claim revision, or identity update.
 
+## Core Interaction Harness Roadmap
+
+A roadmap for deciding whether and how a future minimal local CLI harness could
+be considered after fixture, output, boundary, privacy, and no-write contracts.
+
+Boundary: the roadmap is not implementation approval and does not create CLI
+commands, schemas, tests, runtime behavior, adapter integration, or UI.
+
+## Fixture-First Harness
+
+A possible future harness approach that uses local deterministic fixture inputs
+before any live input, adapter, cloud, or product surface.
+
+Boundary: fixture-first still does not approve state writes, mutation, model
+prompting, or runtime integration.
+
 ## Temporal Coherence
 
 A review idea for whether later state still fits earlier state, current

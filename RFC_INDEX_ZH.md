@@ -53,6 +53,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P87 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | future RFC | context preview boundary | 为 future harness previews 定义 selected 与 omitted context reference explanations。 | retrieval as continuity 或 activation trace writes |
 | P88 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [ZH](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | future RFC | review queue preview | 定义 candidate preview types、ordering signals、review depth 和 blocked items。 | lifecycle execution、approval 或 mutation |
 | P89 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [ZH](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | scenario plan | resume simulation plan | 使用 simulated elapsed time 定义 deterministic session resume scenarios。 | Temporal Awareness runtime 或 temporal event writes |
+| P90 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [ZH](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | roadmap | harness readiness roadmap | 评估未来 minimal CLI harness readiness 和 gates。 | harness implementation 或 approval |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -126,6 +127,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 22. [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md)
     定义 deterministic resume scenario inputs 和 expected previews，但不做 temporal runtime、
     temporal event writes、memory decay 或 salience mutation。
+23. [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md)
+    评估 future minimal CLI harness readiness，但不批准 harness implementation、commands、
+    schemas、tests、adapters、UI 或 runtime work。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -150,6 +154,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - scenario tests for harness work；
 - memory decay；
 - salience mutation；
+- harness implementation；
+- fixture schema；
+- output schema；
 - recall event writes；
 - growth lifecycle execution；
 - automatic growth classification；

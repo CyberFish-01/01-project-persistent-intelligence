@@ -33,6 +33,7 @@ not implemented, and not closed as runtime capabilities.
 | Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary exists, but no harness preview, retrieval execution, activation trace write, or storage policy exists | retrieval as continuity, context mutation, activation trace writes |
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview and ordering vocabulary exists, but no queue runtime, storage, lifecycle execution, or approval path exists | queue execution, lifecycle execution, candidate approval |
 | Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios exist, but no harness, tests, temporal runtime, temporal events, or salience policy exists | session runtime, temporal event write, memory decay |
+| Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness is assessed, but fixture contract, output contract, boundary test plan, and explicit implementation approval are missing | harness implementation, CLI commands, runtime work |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -213,6 +214,22 @@ Still open:
 - whether resume scenarios should become deterministic tests before harness
   implementation.
 
+### Core Interaction Harness Roadmap
+
+Clarified by
+[CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md),
+but not implemented. It remains open because P90 is a roadmap only and does not
+approve CLI commands, schemas, tests, runtime work, or harness implementation.
+
+Still open:
+
+- fixture input contract;
+- preview output contract;
+- no-write validation invariants;
+- forbidden-output test plan;
+- privacy and redaction policy;
+- explicit founder approval for any future implementation phase.
+
 ### Recall Event Write Policy
 
 Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
@@ -347,6 +364,9 @@ The following remain blocked until a future explicit implementation phase:
 - scenario tests for harness work;
 - memory decay;
 - salience mutation;
+- harness implementation;
+- fixture schema;
+- output schema;
 - policy executor;
 - companion, relationship memory, UI, AstrBot, adapter, or product layer.
 
