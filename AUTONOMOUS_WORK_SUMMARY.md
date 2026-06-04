@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `041ab1e Add exploration serendipity RFC`
+- End commit before this summary: `438e52e Add subject kernel world seed RFC`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -23,6 +23,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P61 Growth Candidate Lifecycle RFC | `0031564` | `GROWTH_CANDIDATE_LIFECYCLE_RFC.md`, `GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md` | No |
 | P62 Productive Drift vs Collapse RFC | `cfa706a` | `PRODUCTIVE_DRIFT_VS_COLLAPSE.md`, `PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md` | No |
 | P63 Exploration / Serendipity Engine RFC | `041ab1e` | `EXPLORATION_SERENDIPITY_RFC.md`, `EXPLORATION_SERENDIPITY_RFC_ZH.md` | No |
+| P64 Subject Kernel / World Seed RFC | `438e52e` | `SUBJECT_KERNEL_WORLD_SEED_RFC.md`, `SUBJECT_KERNEL_WORLD_SEED_RFC_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -47,7 +48,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P63, each phase ran:
+For P54-P64, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -82,7 +83,6 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P64 Subject Kernel / World Seed RFC.
 - P65 Reconstruction Reducer Contract RFC before reducer execution.
 
 ## Suggested Next Direction
@@ -90,8 +90,8 @@ was not itself a git repository.
 Next safe phase:
 
 ```text
-P64 Subject Kernel / World Seed RFC
+P65 Reconstruction Reducer Contract RFC
 ```
 
-Constraint: document-only boundary RFC. Do not rewrite Identity Core, split
-identity in runtime, mutate identity, create world-state runtime, or productize.
+Constraint: document-only contract RFC. Do not execute reducers, rebuild state,
+capture payloads, mutate schema, rewrite events, or compact events.
