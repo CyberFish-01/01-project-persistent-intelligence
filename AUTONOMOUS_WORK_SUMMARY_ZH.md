@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`613723a Add reconstruction reducer contract RFC`
+- 本 summary 前的结束 commit：`92c5135 Add payload diff capture policy RFC`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -25,6 +25,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P63 Exploration / Serendipity Engine RFC | `041ab1e` | `EXPLORATION_SERENDIPITY_RFC.md`, `EXPLORATION_SERENDIPITY_RFC_ZH.md` | No |
 | P64 Subject Kernel / World Seed RFC | `438e52e` | `SUBJECT_KERNEL_WORLD_SEED_RFC.md`, `SUBJECT_KERNEL_WORLD_SEED_RFC_ZH.md` | No |
 | P65 Reconstruction Reducer Contract RFC | `613723a` | `RECONSTRUCTION_REDUCER_CONTRACT_RFC.md`, `RECONSTRUCTION_REDUCER_CONTRACT_RFC_ZH.md` | No |
+| P66 Payload / Diff Capture Policy RFC | `92c5135` | `PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md`, `PAYLOAD_DIFF_CAPTURE_POLICY_RFC_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -49,7 +50,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P65 每个 phase 都执行：
+P54-P66 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -83,15 +84,15 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P66 Payload / Diff Capture Policy RFC，在 P65 draft 之后。
+- P67 Foundation Roadmap Synthesis。
 
 ## Suggested Next Direction / 明天建议方向
 
 下一步安全 phase：
 
 ```text
-P66 Payload / Diff Capture Policy RFC
+P67 Foundation Roadmap Synthesis
 ```
 
-约束：document-only policy RFC。不要 capture payloads，不 mutate event schema，不
-rewrite events，不 compact events，不执行 reducers，也不 rebuild state。
+约束：document-only synthesis。不要新增 runtime behavior、新 mechanisms、adapter/product
+work 或 implementation commitments。

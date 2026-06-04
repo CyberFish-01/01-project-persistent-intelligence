@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `613723a Add reconstruction reducer contract RFC`
+- End commit before this summary: `92c5135 Add payload diff capture policy RFC`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -25,6 +25,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P63 Exploration / Serendipity Engine RFC | `041ab1e` | `EXPLORATION_SERENDIPITY_RFC.md`, `EXPLORATION_SERENDIPITY_RFC_ZH.md` | No |
 | P64 Subject Kernel / World Seed RFC | `438e52e` | `SUBJECT_KERNEL_WORLD_SEED_RFC.md`, `SUBJECT_KERNEL_WORLD_SEED_RFC_ZH.md` | No |
 | P65 Reconstruction Reducer Contract RFC | `613723a` | `RECONSTRUCTION_REDUCER_CONTRACT_RFC.md`, `RECONSTRUCTION_REDUCER_CONTRACT_RFC_ZH.md` | No |
+| P66 Payload / Diff Capture Policy RFC | `92c5135` | `PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md`, `PAYLOAD_DIFF_CAPTURE_POLICY_RFC_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -49,7 +50,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P65, each phase ran:
+For P54-P66, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -84,15 +85,15 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P66 Payload / Diff Capture Policy RFC after P65 draft.
+- P67 Foundation Roadmap Synthesis.
 
 ## Suggested Next Direction
 
 Next safe phase:
 
 ```text
-P66 Payload / Diff Capture Policy RFC
+P67 Foundation Roadmap Synthesis
 ```
 
-Constraint: document-only policy RFC. Do not capture payloads, mutate event
-schema, rewrite events, compact events, execute reducers, or rebuild state.
+Constraint: document-only synthesis. Do not add runtime behavior, new
+mechanisms, adapter/product work, or implementation commitments.
