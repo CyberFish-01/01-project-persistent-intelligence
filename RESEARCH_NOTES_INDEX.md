@@ -49,6 +49,7 @@ current documents carry it, and what is still only long-term vision?"
 | [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md) | Usability review | Reviews founder-facing readability and keeps harness implementation blocked. |
 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | Plans the no-write dry-run CLI pressure test later implemented narrowly in P100. |
 | `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | Implements P100 local interaction-path preview without state writes, model calls, external APIs, adapters, or product behavior. |
+| [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | Reviews whether the P100 dry-run helps the founder understand input flow and keeps real routing, retrieval, adapters, and product work blocked. |
 
 ## Original Idea Chains
 

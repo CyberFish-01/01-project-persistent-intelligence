@@ -47,6 +47,7 @@ origin ideas are not implementation approval.
 | [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md) | Usability review | 审查 founder-facing readability，并继续阻塞 harness implementation。 |
 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | 规划 no-write dry-run CLI pressure test，之后在 P100 中窄范围实现。 |
 | `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | 实现 P100 local interaction-path preview，不写 state、不调用模型、不调用外部 API、不接 adapter、不进入产品层。 |
+| [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | 审查 P100 dry-run 是否帮助 founder 看懂 input flow，并继续阻塞 real routing、retrieval、adapters 和 product work。 |
 
 ## Original Idea Chains / 原始思想链
 
