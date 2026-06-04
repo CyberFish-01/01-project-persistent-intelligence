@@ -29,6 +29,7 @@ capabilities 被关闭。
 | Deliberation Tick / Review Depth | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) | tick 和 review-depth vocabulary 已存在，但没有 tick runtime、thought loop 或 review policy executor | tick runtime、thought loop execution、policy execution |
 | Thought Trace Storage Policy | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) | storage boundaries 已定义，但没有 trace schema、storage backend、redaction policy 或 approval gate | trace storage、hidden chain-of-thought capture、private reasoning persistence |
 | Thin Interaction Harness | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) | preview surfaces 已命名，但没有 CLI、runtime、context builder、review queue 或 boundary monitor | harness runtime、UI、adapter integration、mutation path |
+| Conversation Intake Contract | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) | envelope fields 已命名，但没有 intake runtime、API、CLI、adapter ingest、privacy validation 或 storage policy | conversation runtime、adapter ingest、event write |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -125,6 +126,20 @@ review queue、boundary monitor、UI 或 adapter integration。
 - 哪些 preview output 可以被存储，同时不变成 trace storage 或 event writes；
 - context preview 如何避免把 continuity 降成 retrieval；
 - review queue preview 如何避免 lifecycle execution。
+
+### Conversation Intake Contract / 对话输入合同
+
+已由 [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) 澄清，
+但没有实现。它仍然 open，因为 P86 只定义 envelope boundary，没有创建 runtime intake、
+adapter ingestion、event writes、privacy validation 或 context building。
+
+仍开放：
+
+- `content_ref` 应指向 fixture text、redacted text，还是 source metadata；
+- `privacy_scope` 是否应在 harness work 前固定；
+- 多少 timestamp information 是安全的，同时不会制造 Temporal Awareness runtime pressure；
+- `context_request` 应 explicit、inferred，还是 absent；
+- interaction work 前需要什么 minimal cross-user privacy test。
 
 ### Recall Event Write Policy / 回忆事件写入策略
 
@@ -247,6 +262,8 @@ policy 仍与 payload capture 分离。
 - private model reasoning persistence；
 - thought trace storage；
 - thin harness runtime；
+- conversation intake runtime；
+- adapter ingestion for harness work；
 - context builder execution；
 - review queue execution；
 - policy executor；

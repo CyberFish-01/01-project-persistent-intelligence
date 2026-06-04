@@ -218,6 +218,22 @@ surface。
 边界：boundary monitor preview 不是 runtime enforcement、policy execution 或 product safety
 automation。
 
+## Conversation Intake / 对话输入
+
+未来可能存在的 harness preview step，用于把 user、system、process 或 fixture input 规范化成
+audit-safe envelope。
+
+边界：conversation intake 不是 adapter ingest、不是 event write、不是 context building，也不是
+actor、session、source 或 platform 对 identity 的 ownership。
+
+## Intake Envelope / 输入信封
+
+未来 preview shape，用于表示 actor、session、source、timestamp、content reference、privacy、
+sensitivity、context request、boundary flags 和 storage stance。
+
+边界：intake envelope 不是 implemented schema、不是 full payload capture mechanism，也不是
+memory record。
+
 ## Temporal Coherence / 时间一致性
 
 用于 review later state 是否仍能与 earlier state、current evidence 和 continuity anchors 相容的概念。

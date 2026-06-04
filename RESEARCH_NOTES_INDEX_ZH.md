@@ -32,6 +32,7 @@ origin ideas are not implementation approval.
 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | Review-planning RFC | 定义 tick 和 review-depth vocabulary，不执行 thought loop。 |
 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | Storage-boundary RFC | 定义未来 trace candidates 可以摘要什么，同时不存储 hidden chain-of-thought 或 private reasoning。 |
 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [THIN_INTERACTION_HARNESS_RFC_ZH.md](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | Harness-boundary RFC | 在任何 interaction implementation 前，定义 preview-only local harness boundary。 |
+| [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | Intake contract RFC | 定义 future preview envelope，不做 adapter ingest、context building 或 event writes。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -69,6 +70,7 @@ origin ideas are not implementation approval.
 | Deliberation Tick / Review Depth | harness preview 前，review effort 需要 risk calibration。 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `review-planning`, `RFC-only`, not runtime |
 | Thought Trace Storage Policy | trace language 需要 hard boundary，防止 hidden reasoning capture。 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md), [GLOSSARY.md](./GLOSSARY.md) | `storage-boundary`, `RFC-only`, not runtime |
 | Thin Interaction Harness | foundation 需要一个通向 interaction 的窄桥，但不能进入 product 或 runtime。 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md), [RFC_INDEX.md](./RFC_INDEX.md) | `harness-boundary`, `RFC-only`, not runtime |
+| Conversation Intake Contract | context preview 前，input 需要 source、actor、session、privacy 和 boundary vocabulary。 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md), [ADAPTER_PROTOCOL.md](./ADAPTER_PROTOCOL.md) | `contract-rfc`, `preview-only`, not adapter ingest |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -125,6 +127,9 @@ Research notes 是 source material，不是当前 implementation plan。
    时，只把它当作 storage-boundary policy，不要当作 trace storage 或 hidden reasoning capture。
 10. 阅读 [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md)
     时，只把它当作 future harness boundary，不要当作 CLI、UI、adapter 或 runtime implementation。
+11. 阅读 [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md)
+    时，只把它当作 intake envelope contract，不要当作 adapter ingest、API、CLI、context
+    building 或 event write behavior。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 

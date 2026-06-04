@@ -49,6 +49,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P83 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [ZH](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | future RFC | review-depth policy vocabulary | 定义 deliberation tick、review depth 和 risk-level planning boundaries。 | tick runtime 或 thought loop execution |
 | P84 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [ZH](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | policy RFC | storage-boundary policy | 定义未来 trace 可以摘要什么，以及哪些内容绝不能被存储。 | hidden chain-of-thought capture 或 trace storage |
 | P85 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [ZH](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | future RFC | harness boundary | 在任何 harness implementation 前，定义 preview-only interaction surfaces。 | product、adapter、UI 或 mutation path |
+| P86 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [ZH](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | contract RFC | intake envelope boundary | 定义未来 conversation intake preview fields，但不做 adapter ingest 或 writes。 | conversation runtime、adapter ingest 或 event write |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -110,6 +111,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 18. [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md)
     把 future harness 定义为 preview-only local testing surface，而不是 product、adapter、UI、
     runtime executor 或 mutation path。
+19. [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md)
+    为 harness previews 定义 future intake envelope，但不做 adapter ingestion、conversation
+    runtime、context building 或 event writes。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -122,6 +126,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - private model reasoning persistence；
 - thought trace storage；
 - thin harness runtime；
+- conversation intake runtime；
+- adapter ingestion for harness work；
 - context builder execution；
 - review queue execution；
 - recall event writes；

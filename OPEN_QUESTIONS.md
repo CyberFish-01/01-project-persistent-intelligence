@@ -29,6 +29,7 @@ not implemented, and not closed as runtime capabilities.
 | Deliberation Tick / Review Depth | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) | tick and review-depth vocabulary exists, but no tick runtime, thought loop, or review policy executor exists | tick runtime, thought loop execution, policy execution |
 | Thought Trace Storage Policy | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) | storage boundaries are defined, but no trace schema, storage backend, redaction policy, or approval gate exists | trace storage, hidden chain-of-thought capture, private reasoning persistence |
 | Thin Interaction Harness | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) | preview surfaces are named, but no CLI, runtime, context builder, review queue, or boundary monitor exists | harness runtime, UI, adapter integration, mutation path |
+| Conversation Intake Contract | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) | envelope fields are named, but no intake runtime, API, CLI, adapter ingest, privacy validation, or storage policy exists | conversation runtime, adapter ingest, event write |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -140,6 +141,24 @@ Still open:
   writes;
 - how context preview avoids reducing continuity to retrieval;
 - how review queue preview avoids lifecycle execution.
+
+### Conversation Intake Contract
+
+Clarified by
+[CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md),
+but not implemented. It remains open because P86 defines an envelope boundary
+only and does not create runtime intake, adapter ingestion, event writes,
+privacy validation, or context building.
+
+Still open:
+
+- whether `content_ref` should point to fixture text, redacted text, or source
+  metadata;
+- whether `privacy_scope` should be fixed before harness work;
+- how much timestamp information is safe without Temporal Awareness runtime
+  pressure;
+- whether `context_request` should be explicit, inferred, or absent;
+- what minimal cross-user privacy test should precede interaction work.
 
 ### Recall Event Write Policy
 
@@ -263,6 +282,8 @@ The following remain blocked until a future explicit implementation phase:
 - private model reasoning persistence;
 - thought trace storage;
 - thin harness runtime;
+- conversation intake runtime;
+- adapter ingestion for harness work;
 - context builder execution;
 - review queue execution;
 - policy executor;

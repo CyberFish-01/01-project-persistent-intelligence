@@ -276,6 +276,23 @@ blocked, deferred, or needs review.
 Boundary: boundary monitor preview is not runtime enforcement, policy
 execution, or product safety automation.
 
+## Conversation Intake
+
+A possible future harness preview step that normalizes a user, system, process,
+or fixture input into an audit-safe envelope.
+
+Boundary: conversation intake is not adapter ingest, not an event write, not
+context building, and not identity ownership by actor, session, source, or
+platform.
+
+## Intake Envelope
+
+A future preview shape for actor, session, source, timestamp, content reference,
+privacy, sensitivity, context request, boundary flags, and storage stance.
+
+Boundary: an intake envelope is not an implemented schema, not a full payload
+capture mechanism, and not a memory record.
+
 ## Temporal Coherence
 
 A review idea for whether later state still fits earlier state, current
