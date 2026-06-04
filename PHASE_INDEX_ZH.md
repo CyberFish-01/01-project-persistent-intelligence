@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P129。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P130。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -136,3 +136,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P127 | 加入 Quarantine Review Gate Plan。 | quarantine 在任何 candidate 被考虑前，需要 manual gates 和 rejection paths。 | Core Lockdown |
 | P128 | 加入 Shadow Adapter Example Shapes。 | 考虑任何平台连接前，adapter pressure 必须先以 synthetic shadow shapes 变得可见。 | Core Lockdown |
 | P129 | 加入 Contamination False Positive Review。 | detection 必须保持 suspicion，并在讨论任何 future enforcement 前包含 false-positive review。 | Core Lockdown |
+| P130 | 加入 Core Lockdown Cycle Review。 | lockdown block 必须用 readiness、gaps、risks 和下一条安全 planning boundary 收口。 | Core Lockdown |
