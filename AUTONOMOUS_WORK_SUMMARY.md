@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `17fc3e6 Add risk register`
+- End commit before this summary: `6fa347d Refresh architecture boundaries`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -32,6 +32,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P70 Concept Map Update | `323ea60` | `CONCEPT_MAP.md`, `CONCEPT_MAP_ZH.md` | No |
 | P71 Open Questions Status Update | `66f7af8` | `OPEN_QUESTIONS.md`, `OPEN_QUESTIONS_ZH.md` | No |
 | P72 Risk Register | `17fc3e6` | `RISK_REGISTER.md`, `RISK_REGISTER_ZH.md` | No |
+| P73 Architecture Boundary Refresh | `6fa347d` | `ARCHITECTURE_BOUNDARIES.md`, `ARCHITECTURE_BOUNDARIES_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -56,7 +57,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P72, each phase ran:
+For P54-P73, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -91,15 +92,15 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P73-P80 low-risk consolidation remains.
-- Next item is P73 Architecture Boundary Refresh.
+- P74-P80 low-risk consolidation remains.
+- Next item is P74 Glossary Deduplication.
 
 ## Suggested Next Direction
 
 Next safe phase:
 
 ```text
-P73 Architecture Boundary Refresh
+P74 Glossary Deduplication
 ```
 
 Constraint: low-risk document consolidation only. Do not add runtime behavior,
