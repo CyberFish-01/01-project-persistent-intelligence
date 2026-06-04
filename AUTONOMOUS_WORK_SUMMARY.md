@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `eec695c Add stateful memory encoding policy`
+- End commit before this summary: `0031564 Add growth candidate lifecycle RFC`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -20,6 +20,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P58 Temporal Awareness RFC v0.1 | `61def0f` | `TEMPORAL_AWARENESS_RFC.md`, `TEMPORAL_AWARENESS_RFC_ZH.md` | No |
 | P59 Recall Event Write Policy RFC | `bf260f5` | `RECALL_EVENT_WRITE_POLICY_RFC.md`, `RECALL_EVENT_WRITE_POLICY_RFC_ZH.md` | No |
 | P60 Stateful Memory Minimal Encoding Policy | `eec695c` | `STATEFUL_MEMORY_ENCODING_POLICY.md`, `STATEFUL_MEMORY_ENCODING_POLICY_ZH.md` | No |
+| P61 Growth Candidate Lifecycle RFC | `0031564` | `GROWTH_CANDIDATE_LIFECYCLE_RFC.md`, `GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -44,7 +45,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P60, each phase ran:
+For P54-P61, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -79,7 +80,6 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P61 Growth Candidate Lifecycle RFC, document-only.
 - P62 Productive Drift vs Collapse RFC.
 - P65 Reconstruction Reducer Contract RFC before reducer execution.
 
@@ -88,8 +88,8 @@ was not itself a git repository.
 Next safe phase:
 
 ```text
-P61 Growth Candidate Lifecycle RFC
+P62 Productive Drift vs Collapse RFC
 ```
 
-Constraint: document-only. Do not execute lifecycle decisions, promote growth,
-rewrite memory, mutate identity, or create policy/runtime executors.
+Constraint: document-only boundary RFC. Do not create automatic growth
+classification, mutate identity, rewrite memory, or execute a growth engine.
