@@ -172,6 +172,19 @@ temporal event writes 或 neural synchronization claims。
 未来可能用于表示 conclusion 前 internal review progression 的单位。
 
 边界：deliberation tick 当前不被 persist，不是 event，也不是 runtime step，除非未来 policy 明确定义。
+P83 把它视为 review-planning vocabulary，不是 thought loop。
+
+## Review Depth / 审查深度
+
+一种 risk-calibrated review requirement，例如 `shallow`、`normal`、`deep` 或 `blocked`。
+
+边界：review depth 不批准 execution、不 mutate state，也不运行 policy。
+
+## Risk Level / 风险等级
+
+candidate 在 review 前制造多少 boundary pressure 的分类。
+
+边界：risk level 不是 automatic decision，也不能替代 high-risk cases 的 human 或 gate review。
 
 ## Thought Trace / 思考轨迹
 

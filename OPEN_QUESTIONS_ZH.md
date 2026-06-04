@@ -26,6 +26,7 @@ capabilities 被关闭。
 | Temporal Awareness | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | elapsed-time evidence rules、temporal review placement 和 write policy 不是 accepted runtime contracts | Temporal Awareness runtime、temporal event execution |
 | CTM-inspired Temporal Dynamics | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) | CTM concepts 只被翻译成 symbolic foundation vocabulary；storage policy、evaluation 和 runtime contracts 缺失 | CTM runtime、model training、temporal event writes |
 | Temporal Coherence Evaluation | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) | deterministic scenarios 和 future signals 已规划，但还没有 tests 或 runtime metrics | temporal runtime、thought loop execution、event writes |
+| Deliberation Tick / Review Depth | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) | tick 和 review-depth vocabulary 已存在，但没有 tick runtime、thought loop 或 review policy executor | tick runtime、thought loop execution、policy execution |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -81,6 +82,19 @@ evaluation signals。
 - 如何 simulate deliberation ticks，同时不执行 thought loop；
 - 如何在没有 storage policy 时测试 thought traces；
 - 如何把 coherence evaluation 接到 reconstruction evidence，同时不执行 reducer。
+
+### Deliberation Tick / Review Depth / 审议 Tick 与审查深度
+
+已由 [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md)
+澄清，但没有实现。它仍然 open，因为 P83 只定义 review-planning vocabulary。
+
+仍开放：
+
+- review depth 应手动指定，还是由 future evaluation 计算；
+- `blocked` 是 review depth，还是 separate boundary outcome；
+- preview ticks 多少才有用，超过多少会让 review 过重；
+- review depth 应如何与 future thought trace storage policy 互动；
+- thin harness 如何 preview review depth，同时不执行 thought loop。
 
 ### Recall Event Write Policy / 回忆事件写入策略
 
@@ -198,6 +212,7 @@ policy 仍与 payload capture 分离。
 - event compaction；
 - CTM runtime 或 model training；
 - thought loop execution；
+- tick runtime execution；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 

@@ -225,7 +225,22 @@ runtime, model training, temporal event writes, or neural synchronization claims
 A possible future unit of internal review progression before a conclusion.
 
 Boundary: a deliberation tick is not currently persisted, not an event, and not
-a runtime step until a future policy explicitly defines it.
+a runtime step until a future policy explicitly defines it. P83 treats it as
+review-planning vocabulary, not as a thought loop.
+
+## Review Depth
+
+A risk-calibrated review requirement such as `shallow`, `normal`, `deep`, or
+`blocked`.
+
+Boundary: review depth does not approve execution, mutate state, or run policy.
+
+## Risk Level
+
+A pre-review classification of how much boundary pressure a candidate creates.
+
+Boundary: risk level is not an automatic decision and does not replace human or
+gate review for high-risk cases.
 
 ## Thought Trace
 

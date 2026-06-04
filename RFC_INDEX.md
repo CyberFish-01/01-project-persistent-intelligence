@@ -48,6 +48,7 @@ implementation approval.
 | P62 | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) / [ZH](./PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md) | boundary RFC | review vocabulary | Separates productive drift, random drift, identity-threatening drift, and collapse. | automatic drift classifier |
 | P81 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [ZH](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | future RFC | RFC-only mapping | Translates CTM-inspired temporal dynamics into symbolic foundation vocabulary. | CTM runtime or temporal event execution |
 | P82 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [ZH](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | evaluation plan | RFC-only evaluation design | Defines deterministic scenarios and future signals for temporal coherence vocabulary. | temporal runtime or thought loop execution |
+| P83 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [ZH](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | future RFC | review-depth policy vocabulary | Defines deliberation tick, review depth, and risk-level planning boundaries. | tick runtime or thought loop execution |
 
 ## Exploration And Subject Boundary
 
@@ -101,6 +102,9 @@ The current dependency order is:
 15. [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
     turns P81 vocabulary into evaluation scenarios without implementing tests,
     temporal runtime, thought loops, or event writes.
+16. [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md)
+    defines tick and review-depth preview vocabulary without executing ticks,
+    thought loops, policy, or mutations.
 
 ## Runtime-Blocked Topics
 

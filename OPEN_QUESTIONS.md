@@ -26,6 +26,7 @@ not implemented, and not closed as runtime capabilities.
 | Temporal Awareness | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | elapsed-time evidence rules, temporal review placement, and write policy are not accepted runtime contracts | Temporal Awareness runtime, temporal event execution |
 | CTM-inspired Temporal Dynamics | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) | CTM concepts are translated only as symbolic foundation vocabulary; storage policy, evaluation, and runtime contracts are missing | CTM runtime, model training, temporal event writes |
 | Temporal Coherence Evaluation | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) | deterministic scenarios and future signals are planned, but no tests or runtime metrics exist | temporal runtime, thought loop execution, event writes |
+| Deliberation Tick / Review Depth | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) | tick and review-depth vocabulary exists, but no tick runtime, thought loop, or review policy executor exists | tick runtime, thought loop execution, policy execution |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -87,6 +88,22 @@ Still open:
 - how to test thought traces without storage policy;
 - how to connect coherence evaluation to reconstruction evidence without
   reducer execution.
+
+### Deliberation Tick / Review Depth
+
+Clarified by
+[DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md),
+but not implemented. It remains open because P83 defines review-planning
+vocabulary only.
+
+Still open:
+
+- whether review depth should be manually assigned or computed by future
+  evaluation;
+- whether `blocked` is a review depth or a separate boundary outcome;
+- how many preview ticks are useful before review becomes too heavy;
+- how review depth should interact with future thought trace storage policy;
+- how a thin harness can preview review depth without executing a thought loop.
 
 ### Recall Event Write Policy
 
@@ -205,6 +222,7 @@ The following remain blocked until a future explicit implementation phase:
 - event compaction;
 - CTM runtime or model training;
 - thought loop execution;
+- tick runtime execution;
 - policy executor;
 - companion, relationship memory, UI, AstrBot, adapter, or product layer.
 

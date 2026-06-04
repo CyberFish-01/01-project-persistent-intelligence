@@ -29,6 +29,7 @@ origin ideas are not implementation approval.
 | [THEORY_SYNTHESIS_AND_NEXT_PLAN.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN.md) / [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md) | later synthesis and phase planning | 把早期理论接到 implementation-phase planning。 |
 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [CTM_TEMPORAL_DYNAMICS_RFC_ZH.md](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | External inspiration RFC | 把 Continuous Thought Machines 启发映射为未来 temporal-dynamics vocabulary，不实现 CTM。 |
 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | External inspiration evaluation plan | 把 CTM-inspired temporal vocabulary 转成 deterministic evaluation scenarios，不实现 metrics 或 runtime。 |
+| [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | Review-planning RFC | 定义 tick 和 review-depth vocabulary，不执行 thought loop。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -63,6 +64,7 @@ origin ideas are not implementation approval.
 |---|---|---|---|
 | CTM-inspired Temporal Dynamics | time-varying internal state 可能启发未来 continuity review。 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not runtime |
 | Temporal Coherence Evaluation | CTM-inspired vocabulary 需要 deterministic scenarios，之后才能讨论 runtime。 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md), [GLOSSARY.md](./GLOSSARY.md) | `evaluation-plan`, `RFC-only`, not runtime |
+| Deliberation Tick / Review Depth | harness preview 前，review effort 需要 risk calibration。 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `review-planning`, `RFC-only`, not runtime |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -113,6 +115,8 @@ Research notes 是 source material，不是当前 implementation plan。
    approval。
 7. 阅读 [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
    时，只把它当作 future evaluation plan，不要当作 implemented tests 或 runtime metrics。
+8. 阅读 [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md)
+   时，只把它当作 review-depth vocabulary，不要当作 thought-loop execution。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 

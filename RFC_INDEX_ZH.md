@@ -46,6 +46,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P62 | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) / [ZH](./PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md) | boundary RFC | review vocabulary | 区分 productive drift、random drift、identity-threatening drift 和 collapse。 | automatic drift classifier |
 | P81 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [ZH](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | future RFC | RFC-only mapping | 把 CTM-inspired temporal dynamics 翻译成 symbolic foundation vocabulary。 | CTM runtime 或 temporal event execution |
 | P82 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [ZH](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | evaluation plan | RFC-only evaluation design | 为 temporal coherence vocabulary 定义 deterministic scenarios 和 future signals。 | temporal runtime 或 thought loop execution |
+| P83 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [ZH](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | future RFC | review-depth policy vocabulary | 定义 deliberation tick、review depth 和 risk-level planning boundaries。 | tick runtime 或 thought loop execution |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -98,6 +99,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 15. [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
     把 P81 vocabulary 转为 evaluation scenarios，但不实现 tests、temporal runtime、thought
     loops 或 event writes。
+16. [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md)
+    定义 tick 和 review-depth preview vocabulary，但不执行 ticks、thought loops、policy 或
+    mutations。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
