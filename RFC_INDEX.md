@@ -53,6 +53,7 @@ implementation approval.
 | P85 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [ZH](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | future RFC | harness boundary | Defines preview-only interaction surfaces before any harness implementation. | product, adapter, UI, or mutation path |
 | P86 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [ZH](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | contract RFC | intake envelope boundary | Defines future conversation intake preview fields without adapter ingest or writes. | conversation runtime, adapter ingest, or event write |
 | P87 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | future RFC | context preview boundary | Defines selected and omitted context reference explanations for future harness previews. | retrieval as continuity or activation trace writes |
+| P88 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [ZH](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | future RFC | review queue preview | Defines candidate preview types, ordering signals, review depth, and blocked items. | lifecycle execution, approval, or mutation |
 
 ## Exploration And Subject Boundary
 
@@ -122,6 +123,9 @@ The current dependency order is:
 20. [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md)
     defines future selected/omitted context reference explanations without
     retrieval execution, context mutation, or activation trace writes.
+21. [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md)
+    defines future candidate queue preview vocabulary without lifecycle
+    execution, automatic approval, policy execution, or mutation.
 
 ## Runtime-Blocked Topics
 
@@ -140,6 +144,8 @@ The indexed documents do not approve:
 - retrieval execution as continuity;
 - activation trace writes for harness previews;
 - review queue execution;
+- queue storage;
+- candidate approval;
 - recall event writes;
 - growth lifecycle execution;
 - automatic growth classification;

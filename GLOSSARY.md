@@ -311,6 +311,22 @@ forbidden boundary.
 Boundary: omitted does not mean deleted, forgotten, irrelevant forever, or
 rewritten.
 
+## Review Queue Preview
+
+A possible future harness surface that organizes candidate previews by type,
+risk, evidence, review depth, blocked boundary, and suggested owner route.
+
+Boundary: review queue preview is not queue runtime, not lifecycle execution,
+not approval, not policy execution, and not mutation.
+
+## Candidate Preview
+
+A future preview record for a possible memory, claim, growth, meaning-shift,
+recall, task, governance, identity, temporal, or trace review object.
+
+Boundary: candidate preview is not a durable candidate, not approval, and not a
+state transition.
+
 ## Temporal Coherence
 
 A review idea for whether later state still fits earlier state, current

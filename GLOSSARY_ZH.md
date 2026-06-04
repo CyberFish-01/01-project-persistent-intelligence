@@ -249,6 +249,21 @@ budget 或 forbidden boundary 等原因。
 
 边界：omitted 不表示 deleted、forgotten、永久无关或 rewritten。
 
+## Review Queue Preview / 审查队列预览
+
+未来可能存在的 harness surface，用 candidate type、risk、evidence、review depth、blocked
+boundary 和 suggested owner route 来组织 candidate previews。
+
+边界：review queue preview 不是 queue runtime、不是 lifecycle execution、不是 approval、不是
+policy execution，也不是 mutation。
+
+## Candidate Preview / 候选预览
+
+未来用于表示 memory、claim、growth、meaning-shift、recall、task、governance、identity、temporal
+或 trace review object 的 preview record。
+
+边界：candidate preview 不是 durable candidate、不是 approval，也不是 state transition。
+
 ## Temporal Coherence / 时间一致性
 
 用于 review later state 是否仍能与 earlier state、current evidence 和 continuity anchors 相容的概念。

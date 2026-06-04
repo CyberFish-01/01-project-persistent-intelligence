@@ -51,6 +51,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P85 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [ZH](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | future RFC | harness boundary | 在任何 harness implementation 前，定义 preview-only interaction surfaces。 | product、adapter、UI 或 mutation path |
 | P86 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [ZH](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | contract RFC | intake envelope boundary | 定义未来 conversation intake preview fields，但不做 adapter ingest 或 writes。 | conversation runtime、adapter ingest 或 event write |
 | P87 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [ZH](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | future RFC | context preview boundary | 为 future harness previews 定义 selected 与 omitted context reference explanations。 | retrieval as continuity 或 activation trace writes |
+| P88 | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [ZH](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | future RFC | review queue preview | 定义 candidate preview types、ordering signals、review depth 和 blocked items。 | lifecycle execution、approval 或 mutation |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -118,6 +119,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 20. [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md)
     定义 future selected/omitted context reference explanations，但不执行 retrieval、context
     mutation 或 activation trace writes。
+21. [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md)
+    定义 future candidate queue preview vocabulary，但不执行 lifecycle、automatic approval、
+    policy execution 或 mutation。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -136,6 +140,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - retrieval execution as continuity；
 - activation trace writes for harness previews；
 - review queue execution；
+- queue storage；
+- candidate approval；
 - recall event writes；
 - growth lifecycle execution；
 - automatic growth classification；

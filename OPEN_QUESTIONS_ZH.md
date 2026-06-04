@@ -31,6 +31,7 @@ capabilities 被关闭。
 | Thin Interaction Harness | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) | preview surfaces 已命名，但没有 CLI、runtime、context builder、review queue 或 boundary monitor | harness runtime、UI、adapter integration、mutation path |
 | Conversation Intake Contract | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) | envelope fields 已命名，但没有 intake runtime、API、CLI、adapter ingest、privacy validation 或 storage policy | conversation runtime、adapter ingest、event write |
 | Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary 已存在，但没有 harness preview、retrieval execution、activation trace write 或 storage policy | retrieval as continuity、context mutation、activation trace writes |
+| Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview 和 ordering vocabulary 已存在，但没有 queue runtime、storage、lifecycle execution 或 approval path | queue execution、lifecycle execution、candidate approval |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -155,6 +156,20 @@ context、persist activation traces 或 build prompts。
 - privacy-suppressed omitted references 是否可见；
 - governance refs 如何出现，同时不变成 policy execution；
 - context gaps 应创建 review candidates，还是保持 preview-only。
+
+### Review Queue Preview / 审查队列预览
+
+已由 [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) 澄清，但没有实现。它仍然
+open，因为 P88 只定义 candidate preview 和 ordering vocabulary，没有创建 queue runtime、storage、
+lifecycle execution 或 approval paths。
+
+仍开放：
+
+- queue previews 应按 risk、age、evidence strength，还是 owner boundary 排序；
+- blocked candidates 应保持可见，还是移到 separate blocked view；
+- queue preview reports 能否被存储，同时不变成 lifecycle history；
+- future harness 中 context gaps 能否创建 review candidates；
+- low-risk items 如何避免 review overload。
 
 ### Recall Event Write Policy / 回忆事件写入策略
 
@@ -283,6 +298,8 @@ policy 仍与 payload capture 分离。
 - retrieval execution as continuity；
 - activation trace writes for harness previews；
 - review queue execution；
+- queue storage；
+- candidate approval；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 

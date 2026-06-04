@@ -36,6 +36,7 @@ current documents carry it, and what is still only long-term vision?"
 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [THIN_INTERACTION_HARNESS_RFC_ZH.md](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | Harness-boundary RFC | Defines a preview-only local harness boundary before any interaction implementation. |
 | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md) / [CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md](./CONVERSATION_INTAKE_CONTRACT_RFC_ZH.md) | Intake contract RFC | Defines a future preview envelope without adapter ingest, context building, or event writes. |
 | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) / [CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md](./CONTEXT_PACKAGE_PREVIEW_RFC_ZH.md) | Context preview RFC | Defines selected and omitted context reference explanations without retrieval execution or activation trace writes. |
+| [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) / [REVIEW_QUEUE_PREVIEW_RFC_ZH.md](./REVIEW_QUEUE_PREVIEW_RFC_ZH.md) | Queue preview RFC | Defines candidate queue preview vocabulary without lifecycle execution or approval. |
 
 ## Original Idea Chains
 
@@ -75,6 +76,7 @@ current documents carry it, and what is still only long-term vision?"
 | Thin Interaction Harness | Foundation needs a narrow bridge toward interaction without product or runtime. | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md), [RFC_INDEX.md](./RFC_INDEX.md) | `harness-boundary`, `RFC-only`, not runtime |
 | Conversation Intake Contract | Input needs source, actor, session, privacy, and boundary vocabulary before context preview. | [CONVERSATION_INTAKE_CONTRACT_RFC.md](./CONVERSATION_INTAKE_CONTRACT_RFC.md), [ADAPTER_PROTOCOL.md](./ADAPTER_PROTOCOL.md) | `contract-rfc`, `preview-only`, not adapter ingest |
 | Context Package Preview | Context selection needs explainability before any thin harness can be safe. | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md), [API.md](./API.md) | `preview-rfc`, not retrieval execution |
+| Review Queue Preview | Candidate pressure needs ordering vocabulary before any review queue can be discussed. | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md), [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | `preview-rfc`, not lifecycle execution |
 
 ## Second Chain Map: Artificial Life History
 
@@ -143,6 +145,9 @@ For origin tracing:
 12. Read [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md)
     only as context-selection explanation vocabulary, not as retrieval,
     prompt construction, activation trace persistence, or context mutation.
+13. Read [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md)
+    only as candidate preview and ordering vocabulary, not as queue runtime,
+    lifecycle execution, approval, or mutation.
 
 ## P78 Non-Execution Statement
 
