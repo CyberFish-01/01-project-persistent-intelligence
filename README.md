@@ -19,10 +19,10 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P127 Quarantine Review Gate Plan is complete. The project
-now has manual quarantine gate stages, review gates, evidence rules, and safe
-outcomes before any candidate consideration, import, scanner, write path,
-adapter, model call, or rebuild.
+Current work status: P128 Shadow Adapter Example Shapes is complete. The
+project now has synthetic adapter-shaped examples for future shadow review
+without platform connection, AstrBot integration, adapter ingest, event writes,
+model calls, or rebuild.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -38,7 +38,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P127 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P128 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -71,6 +71,7 @@ Read these first when joining the project or handing it to another agent:
 - [LOCKDOWN_INTEGRATION_READINESS.md](./LOCKDOWN_INTEGRATION_READINESS.md) / [LOCKDOWN_INTEGRATION_READINESS_ZH.md](./LOCKDOWN_INTEGRATION_READINESS_ZH.md): P125 review of whether P121-P124 are coherent enough to continue Core Lockdown / Quarantine planning.
 - [LOCKDOWN_FIXTURE_MATRIX.md](./LOCKDOWN_FIXTURE_MATRIX.md) / [LOCKDOWN_FIXTURE_MATRIX_ZH.md](./LOCKDOWN_FIXTURE_MATRIX_ZH.md): P126 synthetic no-write fixture matrix for contamination classes, expected routes, review gates, and forbidden actions.
 - [QUARANTINE_REVIEW_GATE_PLAN.md](./QUARANTINE_REVIEW_GATE_PLAN.md) / [QUARANTINE_REVIEW_GATE_PLAN_ZH.md](./QUARANTINE_REVIEW_GATE_PLAN_ZH.md): P127 document-only quarantine gate plan for manual review, evidence rules, and safe outcomes before candidate consideration.
+- [SHADOW_ADAPTER_EXAMPLE_SHAPES.md](./SHADOW_ADAPTER_EXAMPLE_SHAPES.md) / [SHADOW_ADAPTER_EXAMPLE_SHAPES_ZH.md](./SHADOW_ADAPTER_EXAMPLE_SHAPES_ZH.md): P128 synthetic adapter-shaped examples for future shadow review without platform connection or ingest.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 

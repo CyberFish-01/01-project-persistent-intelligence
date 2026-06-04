@@ -17,7 +17,7 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P127 Quarantine Review Gate Plan 已完成。项目现在有 manual quarantine gate stages、review gates、evidence rules 和 safe outcomes，并且仍早于任何 candidate consideration、import、scanner、write path、adapter、model call 或 rebuild。
+当前工作状态：P128 Shadow Adapter Example Shapes 已完成。项目现在有 synthetic adapter-shaped examples，用于 future shadow review，但仍不连接平台、不接 AstrBot、不做 adapter ingest、不写 event、不调用模型、不 rebuild。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -31,7 +31,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P127 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P128 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -64,6 +64,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [LOCKDOWN_INTEGRATION_READINESS.md](./LOCKDOWN_INTEGRATION_READINESS.md) / [LOCKDOWN_INTEGRATION_READINESS_ZH.md](./LOCKDOWN_INTEGRATION_READINESS_ZH.md)：P125 复盘 P121-P124 是否足够一致，能否继续 Core Lockdown / Quarantine planning。
 - [LOCKDOWN_FIXTURE_MATRIX.md](./LOCKDOWN_FIXTURE_MATRIX.md) / [LOCKDOWN_FIXTURE_MATRIX_ZH.md](./LOCKDOWN_FIXTURE_MATRIX_ZH.md)：P126 synthetic no-write fixture matrix，覆盖 contamination classes、expected routes、review gates 和 forbidden actions。
 - [QUARANTINE_REVIEW_GATE_PLAN.md](./QUARANTINE_REVIEW_GATE_PLAN.md) / [QUARANTINE_REVIEW_GATE_PLAN_ZH.md](./QUARANTINE_REVIEW_GATE_PLAN_ZH.md)：P127 document-only quarantine gate plan，定义 candidate consideration 前的人工审查、evidence rules 和 safe outcomes。
+- [SHADOW_ADAPTER_EXAMPLE_SHAPES.md](./SHADOW_ADAPTER_EXAMPLE_SHAPES.md) / [SHADOW_ADAPTER_EXAMPLE_SHAPES_ZH.md](./SHADOW_ADAPTER_EXAMPLE_SHAPES_ZH.md)：P128 synthetic adapter-shaped examples，用于 future shadow review，但不连接平台或 ingest。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 

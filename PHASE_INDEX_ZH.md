@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P127。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P128。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -134,3 +134,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P125 | 加入 Lockdown Integration Readiness。 | 继续 fixture 或 validator planning 前，必须先复盘 lockdown stack 是否一致。 | Core Lockdown |
 | P126 | 加入 Lockdown Fixture Matrix。 | 考虑任何 future validator 或 scanner 前，lockdown risks 需要 synthetic、no-write 样例。 | Core Lockdown |
 | P127 | 加入 Quarantine Review Gate Plan。 | quarantine 在任何 candidate 被考虑前，需要 manual gates 和 rejection paths。 | Core Lockdown |
+| P128 | 加入 Shadow Adapter Example Shapes。 | 考虑任何平台连接前，adapter pressure 必须先以 synthetic shadow shapes 变得可见。 | Core Lockdown |
