@@ -48,6 +48,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P82 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [ZH](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | evaluation plan | RFC-only evaluation design | 为 temporal coherence vocabulary 定义 deterministic scenarios 和 future signals。 | temporal runtime 或 thought loop execution |
 | P83 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [ZH](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | future RFC | review-depth policy vocabulary | 定义 deliberation tick、review depth 和 risk-level planning boundaries。 | tick runtime 或 thought loop execution |
 | P84 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [ZH](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | policy RFC | storage-boundary policy | 定义未来 trace 可以摘要什么，以及哪些内容绝不能被存储。 | hidden chain-of-thought capture 或 trace storage |
+| P85 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [ZH](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | future RFC | harness boundary | 在任何 harness implementation 前，定义 preview-only interaction surfaces。 | product、adapter、UI 或 mutation path |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -106,6 +107,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 17. [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md)
     定义 future trace storage boundaries，但不存储 hidden chain-of-thought、private model
     reasoning、model internals 或 runtime traces。
+18. [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md)
+    把 future harness 定义为 preview-only local testing surface，而不是 product、adapter、UI、
+    runtime executor 或 mutation path。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -117,6 +121,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - hidden chain-of-thought capture；
 - private model reasoning persistence；
 - thought trace storage；
+- thin harness runtime；
+- context builder execution；
+- review queue execution；
 - recall event writes；
 - growth lifecycle execution；
 - automatic growth classification；

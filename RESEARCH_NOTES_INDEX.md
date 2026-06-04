@@ -33,6 +33,7 @@ current documents carry it, and what is still only long-term vision?"
 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | External inspiration evaluation plan | Turns CTM-inspired temporal vocabulary into deterministic evaluation scenarios without implementing metrics or runtime. |
 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | Review-planning RFC | Defines tick and review-depth vocabulary without thought-loop execution. |
 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | Storage-boundary RFC | Defines what future trace candidates may summarize without storing hidden chain-of-thought or private reasoning. |
+| [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [THIN_INTERACTION_HARNESS_RFC_ZH.md](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | Harness-boundary RFC | Defines a preview-only local harness boundary before any interaction implementation. |
 
 ## Original Idea Chains
 
@@ -69,6 +70,7 @@ current documents carry it, and what is still only long-term vision?"
 | Temporal Coherence Evaluation | CTM-inspired vocabulary needs deterministic scenarios before runtime discussion. | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md), [GLOSSARY.md](./GLOSSARY.md) | `evaluation-plan`, `RFC-only`, not runtime |
 | Deliberation Tick / Review Depth | Review effort needs risk calibration before any harness preview. | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `review-planning`, `RFC-only`, not runtime |
 | Thought Trace Storage Policy | Trace language needs a hard boundary against hidden reasoning capture. | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md), [GLOSSARY.md](./GLOSSARY.md) | `storage-boundary`, `RFC-only`, not runtime |
+| Thin Interaction Harness | Foundation needs a narrow bridge toward interaction without product or runtime. | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md), [RFC_INDEX.md](./RFC_INDEX.md) | `harness-boundary`, `RFC-only`, not runtime |
 
 ## Second Chain Map: Artificial Life History
 
@@ -128,6 +130,9 @@ For origin tracing:
 9. Read [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md)
    only as a storage-boundary policy, not as trace storage or hidden reasoning
    capture.
+10. Read [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md)
+    only as a future harness boundary, not as CLI, UI, adapter, or runtime
+    implementation.
 
 ## P78 Non-Execution Statement
 

@@ -28,6 +28,7 @@ capabilities 被关闭。
 | Temporal Coherence Evaluation | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) | deterministic scenarios 和 future signals 已规划，但还没有 tests 或 runtime metrics | temporal runtime、thought loop execution、event writes |
 | Deliberation Tick / Review Depth | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) | tick 和 review-depth vocabulary 已存在，但没有 tick runtime、thought loop 或 review policy executor | tick runtime、thought loop execution、policy execution |
 | Thought Trace Storage Policy | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) | storage boundaries 已定义，但没有 trace schema、storage backend、redaction policy 或 approval gate | trace storage、hidden chain-of-thought capture、private reasoning persistence |
+| Thin Interaction Harness | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) | preview surfaces 已命名，但没有 CLI、runtime、context builder、review queue 或 boundary monitor | harness runtime、UI、adapter integration、mutation path |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -110,6 +111,20 @@ storage、schemas、redaction rules 或 approval gates。
 - sensitive user content 需要什么 redaction policy；
 - reconstruction 如何使用 trace summaries，同时不依赖 private reasoning；
 - 谁或什么 gate 可以批准 future trace storage decision。
+
+### Thin Interaction Harness / 薄交互试验台
+
+已由 [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) 澄清，但没有实现。
+它仍然 open，因为 P85 只定义 preview-only surfaces，没有创建 CLI、runtime、context builder、
+review queue、boundary monitor、UI 或 adapter integration。
+
+仍开放：
+
+- 第一个 harness 应该是 CLI-only、report-only，还是 fixture-only；
+- 什么 minimal conversation envelope 能证明 platform does not own identity；
+- 哪些 preview output 可以被存储，同时不变成 trace storage 或 event writes；
+- context preview 如何避免把 continuity 降成 retrieval；
+- review queue preview 如何避免 lifecycle execution。
 
 ### Recall Event Write Policy / 回忆事件写入策略
 
@@ -231,6 +246,9 @@ policy 仍与 payload capture 分离。
 - hidden chain-of-thought capture；
 - private model reasoning persistence；
 - thought trace storage；
+- thin harness runtime；
+- context builder execution；
+- review queue execution；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 

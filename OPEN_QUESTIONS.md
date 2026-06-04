@@ -28,6 +28,7 @@ not implemented, and not closed as runtime capabilities.
 | Temporal Coherence Evaluation | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) | deterministic scenarios and future signals are planned, but no tests or runtime metrics exist | temporal runtime, thought loop execution, event writes |
 | Deliberation Tick / Review Depth | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) | tick and review-depth vocabulary exists, but no tick runtime, thought loop, or review policy executor exists | tick runtime, thought loop execution, policy execution |
 | Thought Trace Storage Policy | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) | storage boundaries are defined, but no trace schema, storage backend, redaction policy, or approval gate exists | trace storage, hidden chain-of-thought capture, private reasoning persistence |
+| Thin Interaction Harness | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) | preview surfaces are named, but no CLI, runtime, context builder, review queue, or boundary monitor exists | harness runtime, UI, adapter integration, mutation path |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -122,6 +123,23 @@ Still open:
 - what redaction policy is required for sensitive user content;
 - how reconstruction can use trace summaries without private reasoning;
 - who or what can approve a future trace storage decision.
+
+### Thin Interaction Harness
+
+Clarified by
+[THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md), but not
+implemented. It remains open because P85 defines preview-only surfaces and does
+not create a CLI, runtime, context builder, review queue, boundary monitor, UI,
+or adapter integration.
+
+Still open:
+
+- whether the first harness should be CLI-only, report-only, or fixture-only;
+- what minimal conversation envelope proves platform does not own identity;
+- what preview output can be stored without becoming trace storage or event
+  writes;
+- how context preview avoids reducing continuity to retrieval;
+- how review queue preview avoids lifecycle execution.
 
 ### Recall Event Write Policy
 
@@ -244,6 +262,9 @@ The following remain blocked until a future explicit implementation phase:
 - hidden chain-of-thought capture;
 - private model reasoning persistence;
 - thought trace storage;
+- thin harness runtime;
+- context builder execution;
+- review queue execution;
 - policy executor;
 - companion, relationship memory, UI, AstrBot, adapter, or product layer.
 

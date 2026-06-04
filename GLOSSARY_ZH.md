@@ -202,6 +202,22 @@ storage decision 的 review artifact。
 边界：trace candidate 不是 trace storage、不是 thought loop、不是 deliberation tick execution
 log，也不是 hidden chain-of-thought。
 
+## Thin Interaction Harness / 薄交互试验台
+
+未来可能用于 preview conversation intake、context package selection、candidate review、review
+queue ordering、resume scenarios 和 boundary flags 的本地 testing surface。
+
+边界：thin harness 不是 product、UI、adapter、companion layer、runtime executor、context
+mutation path 或 identity owner。
+
+## Boundary Monitor Preview / 边界监视预览
+
+未来可能用于解释 candidate 或 action 为什么被 blocked、deferred 或 needs review 的 harness
+surface。
+
+边界：boundary monitor preview 不是 runtime enforcement、policy execution 或 product safety
+automation。
+
 ## Temporal Coherence / 时间一致性
 
 用于 review later state 是否仍能与 earlier state、current evidence 和 continuity anchors 相容的概念。

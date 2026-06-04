@@ -259,6 +259,23 @@ flags, review depth, unresolved questions, and storage decision.
 Boundary: a trace candidate is not trace storage, not a thought loop, not a
 deliberation tick execution log, and not hidden chain-of-thought.
 
+## Thin Interaction Harness
+
+A possible future local testing surface for previewing conversation intake,
+context package selection, candidate review, review queue ordering, resume
+scenarios, and boundary flags.
+
+Boundary: a thin harness is not a product, UI, adapter, companion layer, runtime
+executor, context mutation path, or identity owner.
+
+## Boundary Monitor Preview
+
+A possible future harness surface that explains why a candidate or action is
+blocked, deferred, or needs review.
+
+Boundary: boundary monitor preview is not runtime enforcement, policy
+execution, or product safety automation.
+
 ## Temporal Coherence
 
 A review idea for whether later state still fits earlier state, current

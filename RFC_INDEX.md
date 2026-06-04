@@ -50,6 +50,7 @@ implementation approval.
 | P82 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [ZH](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | evaluation plan | RFC-only evaluation design | Defines deterministic scenarios and future signals for temporal coherence vocabulary. | temporal runtime or thought loop execution |
 | P83 | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) / [ZH](./DELIBERATION_TICK_REVIEW_DEPTH_RFC_ZH.md) | future RFC | review-depth policy vocabulary | Defines deliberation tick, review depth, and risk-level planning boundaries. | tick runtime or thought loop execution |
 | P84 | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) / [ZH](./THOUGHT_TRACE_STORAGE_POLICY_RFC_ZH.md) | policy RFC | storage-boundary policy | Defines what a future trace may summarize and what must never be stored. | hidden chain-of-thought capture or trace storage |
+| P85 | [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md) / [ZH](./THIN_INTERACTION_HARNESS_RFC_ZH.md) | future RFC | harness boundary | Defines preview-only interaction surfaces before any harness implementation. | product, adapter, UI, or mutation path |
 
 ## Exploration And Subject Boundary
 
@@ -110,6 +111,9 @@ The current dependency order is:
     defines future trace storage boundaries without storing hidden
     chain-of-thought, private model reasoning, model internals, or runtime
     traces.
+18. [THIN_INTERACTION_HARNESS_RFC.md](./THIN_INTERACTION_HARNESS_RFC.md)
+    defines the future harness as a preview-only local testing surface, not a
+    product, adapter, UI, runtime executor, or mutation path.
 
 ## Runtime-Blocked Topics
 
@@ -121,6 +125,9 @@ The indexed documents do not approve:
 - hidden chain-of-thought capture;
 - private model reasoning persistence;
 - thought trace storage;
+- thin harness runtime;
+- context builder execution;
+- review queue execution;
 - recall event writes;
 - growth lifecycle execution;
 - automatic growth classification;
