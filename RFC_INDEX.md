@@ -63,6 +63,7 @@ implementation approval.
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P91 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [ZH](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | future RFC | capability evolution boundary | Translates Yunjue / zero-start tool-first self-evolution into review-only capability evolution vocabulary. | tool execution, auto tool generation, auto promotion, policy executor, or identity growth |
+| P92 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [ZH](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | boundary RFC | capability boundary | Defines allowed and forbidden scopes for capability evolution before any tool runtime or promotion policy. | automatic tool execution, automatic tool promotion, policy executor, identity mutation, memory rewrite |
 
 ## Exploration And Subject Boundary
 
@@ -148,6 +149,9 @@ The current dependency order is:
     translates zero-start, tool-first self-evolution into capability review
     vocabulary without approving tool execution, tool generation, tool
     promotion, policy execution, or Identity Core mutation.
+26. [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
+    defines the allowed proposal/evidence/review scope and the forbidden
+    execution/promotion/policy/identity boundaries for capability evolution.
 
 ## Runtime-Blocked Topics
 
@@ -176,6 +180,10 @@ The indexed documents do not approve:
 - automatic tool generation;
 - automatic tool promotion;
 - tool library mutation;
+- tool authorization without human review;
+- self-modifying runtime;
+- unreviewed dependency installation;
+- uncontrolled filesystem or network access;
 - harness implementation;
 - fixture schema;
 - output schema;

@@ -477,6 +477,28 @@ durable capability improvement.
 Boundary: capability growth candidate is not subject growth, tool promotion,
 memory rewrite, or identity mutation.
 
+## Capability Evidence
+
+Review material from task results, verification results, failures,
+reproducibility, safety checks, dependency checks, or rollback notes.
+
+Boundary: capability evidence supports review; it does not authorize action,
+promote tools, or mutate identity.
+
+## Tool Authorization
+
+A possible future explicit permission gate for executing or promoting a tool
+under defined scope, inputs, outputs, dependencies, and rollback conditions.
+
+Boundary: tool authorization cannot be inferred from verification alone.
+
+## Tool Verification
+
+A possible future evidence process for checking whether a candidate worked,
+failed, reproduced, stayed within boundaries, and remained task-relevant.
+
+Boundary: tool verification is not tool authorization.
+
 ## Tool Candidate Review
 
 A future review surface for checking whether a proposed tool is safe, relevant,
@@ -493,3 +515,12 @@ before subject or identity evolution.
 Boundary: tool-first self-evolution does not approve tool execution, automatic
 tool generation, automatic tool promotion, policy execution, or Identity Core
 mutation.
+
+## Capability Evolution Boundary
+
+The P92 RFC boundary that separates allowed capability proposal, evidence, and
+review from forbidden execution, promotion, policy execution, identity mutation,
+memory rewrite, uncontrolled access, dependency installation, and self-modifying
+runtime.
+
+Boundary: it is a document-only boundary, not enforcement code.

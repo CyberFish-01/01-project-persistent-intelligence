@@ -19,15 +19,15 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P91 Tool-First Self-Evolution RFC is complete as
+Current work status: P92 Capability Evolution Boundary RFC is complete as
 document-only planning. The next direction must be confirmed by the founder.
-Candidate directions include Capability Evolution Boundary RFC, Tool
-Verification Evidence Model, Tool Candidate Review Schema, Safe Tool Library
-Policy, Capability Growth Evaluation Plan, Minimal CLI Harness Implementation
-Plan, or founder / CTO review.
+Candidate directions include Tool Verification Evidence Model, Tool Candidate
+Review Schema, Procedural Memory Alignment, Safe Tool Library Policy,
+Capability Growth Evaluation Plan, Minimal CLI Harness Implementation Plan, or
+founder / CTO review.
 
 The runtime and adapter references below are historical/engineering references;
-they are not approval to enter P92, implement a harness, expand into the
+they are not approval to enter P93, implement a harness, expand into the
 application layer, UI, AstrBot, product, Temporal Awareness runtime, tool
 execution, automatic tool generation, automatic tool promotion, growth
 execution, memory rewrite, or reconstruction reducers.
@@ -39,7 +39,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P91 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P92 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -120,8 +120,8 @@ The central claim:
 
 ## Prototype Reference
 
-This repository includes a minimal local prototype. After P91 RFC-only
-tool-first capability planning, these commands remain verification and
+This repository includes a minimal local prototype. After P92 RFC-only
+capability boundary planning, these commands remain verification and
 orientation references only:
 
 ```bash

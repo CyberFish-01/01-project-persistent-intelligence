@@ -388,6 +388,27 @@ improvement。
 边界：capability growth candidate 不是 subject growth、tool promotion、memory rewrite 或 identity
 mutation。
 
+## Capability Evidence / 能力证据
+
+来自 task results、verification results、failures、reproducibility、safety checks、dependency checks
+或 rollback notes 的 review material。
+
+边界：capability evidence 支持 review；它不授权 action、不 promote tools，也不 mutate identity。
+
+## Tool Authorization / 工具授权
+
+未来可能存在的 explicit permission gate，用于在明确 scope、inputs、outputs、dependencies 和 rollback
+conditions 下执行或 promote 工具。
+
+边界：tool authorization 不能只从 verification 推导出来。
+
+## Tool Verification / 工具验证
+
+未来可能存在的 evidence process，用于检查 candidate 是否 worked、failed、reproduced、stayed within
+boundaries，并保持 task-relevant。
+
+边界：tool verification 不是 tool authorization。
+
 ## Tool Candidate Review / 工具候选审查
 
 未来 review surface，用于检查 proposed tool 是否 safe、relevant、testable、reproducible、bounded
@@ -402,3 +423,11 @@ evolution 之前。
 
 边界：tool-first self-evolution 不批准 tool execution、automatic tool generation、automatic tool
 promotion、policy execution 或 Identity Core mutation。
+
+## Capability Evolution Boundary / 能力演化边界
+
+P92 RFC boundary，用于区分允许的 capability proposal、evidence、review，以及禁止的 execution、
+promotion、policy execution、identity mutation、memory rewrite、uncontrolled access、dependency
+installation 和 self-modifying runtime。
+
+边界：它是 document-only boundary，不是 enforcement code。

@@ -35,6 +35,7 @@ capabilities 被关闭。
 | Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios 已存在，但没有 harness、tests、temporal runtime、temporal events 或 salience policy | session runtime、temporal event write、memory decay |
 | Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness 已评估，但缺 fixture contract、output contract、boundary test plan 和 explicit implementation approval | harness implementation、CLI commands、runtime work |
 | Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary 已存在，但没有 tool execution、verification schema、review schema、safe tool library policy 或 promotion gate | tool execution、auto tool generation、auto tool promotion、policy executor |
+| Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed / forbidden scope 已定义，但缺 verification evidence model、candidate review schema、safe tool library policy 和 implementation gates | automatic tool execution、automatic promotion、policy executor、identity mutation |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -220,6 +221,22 @@ identity mutation。
   filesystem risk；
 - capability evidence 是否只能通过 reference 进入 Event Log，以及需要哪种 future event policy。
 
+### Capability Evolution Boundary / 能力演化边界
+
+已由 [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) 澄清，但没有实现。
+它仍然 open，因为 P92 只定义 allowed / forbidden scope，没有定义 verification evidence model、tool
+candidate review schema、safe tool library policy、procedural memory alignment contract 或 capability
+growth evaluation plan。
+
+仍开放：
+
+- future tool verification evidence 应包含哪些确切字段；
+- tool candidate review 如何区分 proposal、verification、authorization 和 promotion；
+- reusable procedure candidates 如何与 Procedural Memory 对齐，同时不变成 trusted tools；
+- safe tool library policy 如何阻止 contamination 和 unsafe reuse；
+- 哪些 evaluation cases 能证明 capability candidates 不 mutate identity；
+- future tool authorization 前需要什么 human / founder review gate。
+
 ### Recall Event Write Policy / 回忆事件写入策略
 
 已由 [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) 澄清。Ordinary
@@ -357,6 +374,9 @@ policy 仍与 payload capture 分离。
 - automatic tool generation；
 - automatic tool promotion；
 - tool library mutation；
+- self-modifying runtime；
+- unreviewed dependency installation；
+- uncontrolled filesystem 或 network access；
 - harness implementation；
 - fixture schema；
 - output schema；
@@ -365,6 +385,6 @@ policy 仍与 payload capture 分离。
 
 ## Current Recommendation / 当前建议
 
-继续 RFC-only capability planning，除非项目创始人明确批准 implementation phase。可用的 P92
-候选包括 Tool Verification Evidence Model、Tool Candidate Review Schema、Safe Tool Library Policy
-或 Capability Growth Evaluation Plan。
+继续 RFC-only capability planning，除非项目创始人明确批准 implementation phase。可用的 P93
+候选包括 Tool Verification Evidence Model、Tool Candidate Review Schema、Procedural Memory
+Alignment、Safe Tool Library Policy 或 Capability Growth Evaluation Plan。

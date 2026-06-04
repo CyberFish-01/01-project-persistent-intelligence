@@ -47,11 +47,13 @@ foundation layer 保持清醒，同时不批准 runtime work。
 | R16 | README entrance overload | medium | 新读者无法区分 stable foundation 与 future-only work | 优化 README entrance 和 indexes，不新增 features | productizing the README |
 | R17 | P80 pressure | medium | 为了推进编号而打开 phase | 使用 [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) 作为 stop condition；如果不能增加清晰度，就 skip、merge 或 stop | opening empty phases |
 | R18 | Cloud/AstrBot deployment pressure | medium | local foundation docs 被当成现在更新 cloud 或 AstrBot 的理由 | foundation loop 结束前继续后推 cloud 和 AstrBot | cloud runtime rollout、AstrBot specialization |
-| R19 | Tool evolution becomes uncontrolled autonomy | high | tool candidates、verification 和 reuse 被接成 action loop | 保持 [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) review-only，直到 tool verification、safe library 和 human review gates 存在 | tool execution runtime、automatic tool generation |
-| R20 | Verification mistaken for authorization | high | passing tool check 被当成 promote 或 reuse 的许可 | 要求独立的 tool candidate review、procedure review、capability growth review 和 founder gate | automatic tool promotion、policy executor |
-| R21 | Tool library pollution | high | one-off 或 unsafe candidates 积累成 reusable capability | 要求 reproducibility、dependency checks、safety boundary checks、rollback notes 和 quarantine path | tool library mutation |
-| R22 | Capability growth mistaken for identity growth | high | 更强 task performance 被描述成 subject growth | 保持 capability evolution 和 subject evolution 分层；identity pressure 路由到 Identity Gate | 由 capability evidence 触发 Identity Core mutation |
-| R23 | Dependency / network / filesystem risk | high | tool candidates 需要 packages、APIs、files、credentials 或 network access | future execution 前要求 dependency check、safety boundary check 和 human review | dependency installation、network calls、filesystem mutation |
+| R19 | Tool evolution becomes uncontrolled autonomy | high | tool candidates、verification 和 reuse 被接成 action loop | 保持 [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) 和 [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) review-only，直到 verification、safe library 和 human review gates 存在 | tool execution runtime、automatic tool generation |
+| R20 | Verification mistaken for authorization | high | passing tool check 被当成 promote 或 reuse 的许可 | 使用 P92 规则：verification does not imply authorization；要求 separate review 和 founder gate | automatic tool promotion、policy executor |
+| R21 | Tool library pollution | high | one-off 或 unsafe candidates 积累成 reusable capability | 要求 reproducibility、dependency checks、safety boundary checks、rollback notes、quarantine path 和未来 safe library policy | tool library mutation |
+| R22 | Capability growth mistaken for identity growth | high | 更强 task performance 被描述成 subject growth | 使用 P92 规则：capability improvement does not imply identity growth；identity pressure 路由到 Identity Gate | 由 capability evidence 触发 Identity Core mutation |
+| R23 | Dependency / network / filesystem risk | high | tool candidates 需要 packages、APIs、files、credentials 或 network access | future execution 前要求 dependency check、safety boundary check、human review 和 explicit authorization | dependency installation、network calls、filesystem mutation |
+| R24 | Reusable procedure mistaken for trusted tool | high | repeatable workflow 被当成 safe executable capability | 使用 P92 规则：reusable procedure does not imply trusted tool | trusted tool promotion without review |
+| R25 | Self-modifying runtime pressure | high | capability work 提议修改 runtime、prompts、code、memory 或 identity | self-modifying runtime 保持 forbidden，直到 explicit future architecture 和 founder approval 存在 | self-modifying runtime |
 
 ## Risk Clusters / 风险簇
 
@@ -93,7 +95,7 @@ Platforms and adapters translate; they do not own identity.
 
 ### Capability Evolution And Tools / 能力演化与工具
 
-风险：R19、R20、R21、R22、R23。
+风险：R19、R20、R21、R22、R23、R24、R25。
 
 主要控制：tool-first self-evolution 保持 review-only capability boundary。Tool improvement 不是
 identity growth。Verification evidence 不是 authorization。Candidate review 不是 promotion。
@@ -105,12 +107,13 @@ identity growth。Verification evidence 不是 authorization。Candidate review 
 主要控制：保持 bilingual docs 同步，降低 README overload，并通过 indexes 让 stable/future/blocked
 status 可见。
 
-## Immediate Watch Items For P91-P92 / P91-P92 近期观察项
+## Immediate Watch Items For P92-P93 / P92-P93 近期观察项
 
-- P91 Tool-First Self-Evolution RFC 必须保持 RFC-only，不能创建 tool execution、automatic tool
-  generation、automatic tool promotion 或 policy executor。
-- P92 只有在选择窄的 document-only direction 后才应继续，例如 Tool Verification Evidence Model、
-  Tool Candidate Review Schema、Safe Tool Library Policy 或 Capability Growth Evaluation Plan。
+- P92 Capability Evolution Boundary RFC 必须保持 RFC-only，不能创建 tool execution、automatic tool
+  generation、automatic tool promotion、policy execution 或 Identity Core mutation。
+- P93 只有在选择窄的 document-only direction 后才应继续，例如 Tool Verification Evidence Model、
+  Tool Candidate Review Schema、Procedural Memory Alignment、Safe Tool Library Policy 或
+  Capability Growth Evaluation Plan。
 - 任何 future implementation phase 都需要 explicit founder approval，以及独立的 no-write、
   no-identity-mutation validation gate。
 
@@ -127,6 +130,9 @@ P72 不实现：
 - automatic tool generation；
 - automatic tool promotion；
 - tool library mutation；
+- self-modifying runtime；
+- unreviewed dependency installation；
+- uncontrolled filesystem 或 network access；
 - identity mutation；
 - memory rewrite；
 - payload capture；

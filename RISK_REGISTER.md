@@ -48,11 +48,13 @@ planning phases discuss capability evolution without approving runtime work.
 | R16 | README entrance overload | medium | new readers cannot find stable foundation vs future-only work | optimize README entrance and index docs without adding features | productizing the README |
 | R17 | P80 pressure | medium | phases are opened just to advance numbering | use [FOUNDATION_MAINTENANCE_REVIEW.md](./FOUNDATION_MAINTENANCE_REVIEW.md) as the stop condition; skip, merge, or stop if a phase does not add clarity | opening empty phases |
 | R18 | Cloud/AstrBot deployment pressure | medium | local foundation docs are treated as a reason to update cloud or AstrBot now | keep cloud and AstrBot pushed back until foundation loop ends | cloud runtime rollout, AstrBot specialization |
-| R19 | Tool evolution becomes uncontrolled autonomy | high | tool candidates, verification, and reuse are connected into an action loop | keep [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) review-only until tool verification, safe library, and human review gates exist | tool execution runtime, automatic tool generation |
-| R20 | Verification mistaken for authorization | high | a passing tool check is treated as permission to promote or reuse | require separate tool candidate review, procedure review, capability growth review, and founder gate | automatic tool promotion, policy executor |
-| R21 | Tool library pollution | high | one-off or unsafe candidates accumulate as reusable capability | require reproducibility, dependency checks, safety boundary checks, rollback notes, and quarantine path | tool library mutation |
-| R22 | Capability growth mistaken for identity growth | high | better task performance is described as subject growth | keep capability evolution and subject evolution layered; route identity pressure to Identity Gate | Identity Core mutation from capability evidence |
-| R23 | Dependency / network / filesystem risk | high | tool candidates require packages, APIs, files, credentials, or network access | require dependency check, safety boundary check, and human review before any future execution | dependency installation, network calls, filesystem mutation |
+| R19 | Tool evolution becomes uncontrolled autonomy | high | tool candidates, verification, and reuse are connected into an action loop | keep [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) and [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) review-only until verification, safe library, and human review gates exist | tool execution runtime, automatic tool generation |
+| R20 | Verification mistaken for authorization | high | a passing tool check is treated as permission to promote or reuse | use the P92 rule: verification does not imply authorization; require separate review and founder gate | automatic tool promotion, policy executor |
+| R21 | Tool library pollution | high | one-off or unsafe candidates accumulate as reusable capability | require reproducibility, dependency checks, safety boundary checks, rollback notes, quarantine path, and later safe library policy | tool library mutation |
+| R22 | Capability growth mistaken for identity growth | high | better task performance is described as subject growth | use the P92 rule: capability improvement does not imply identity growth; route identity pressure to Identity Gate | Identity Core mutation from capability evidence |
+| R23 | Dependency / network / filesystem risk | high | tool candidates require packages, APIs, files, credentials, or network access | require dependency check, safety boundary check, human review, and explicit authorization before any future execution | dependency installation, network calls, filesystem mutation |
+| R24 | Reusable procedure mistaken for trusted tool | high | a repeatable workflow is treated as safe executable capability | use the P92 rule: reusable procedure does not imply trusted tool | trusted tool promotion without review |
+| R25 | Self-modifying runtime pressure | high | capability work proposes changing runtime, prompts, code, memory, or identity | keep self-modifying runtime forbidden until explicit future architecture and founder approval exist | self-modifying runtime |
 
 ## Risk Clusters
 
@@ -98,7 +100,7 @@ remain conceptual. Platforms and adapters translate; they do not own identity.
 
 ### Capability Evolution And Tools
 
-Risks: R19, R20, R21, R22, R23.
+Risks: R19, R20, R21, R22, R23, R24, R25.
 
 Primary control: tool-first self-evolution remains a review-only capability
 boundary. Tool improvement is not identity growth. Verification evidence is not
@@ -111,14 +113,15 @@ Risks: R15, R16.
 Primary control: keep bilingual docs synchronized, reduce README overload, and
 make stable/future/blocked status visible through indexes.
 
-## Immediate Watch Items For P91-P92
+## Immediate Watch Items For P92-P93
 
-- P91 Tool-First Self-Evolution RFC must remain RFC-only and must not create
-  tool execution, automatic tool generation, automatic tool promotion, or a
-  policy executor.
-- P92 should only proceed after choosing a narrow document-only direction such
-  as Tool Verification Evidence Model, Tool Candidate Review Schema, Safe Tool
-  Library Policy, or Capability Growth Evaluation Plan.
+- P92 Capability Evolution Boundary RFC must remain RFC-only and must not create
+  tool execution, automatic tool generation, automatic tool promotion, policy
+  execution, or Identity Core mutation.
+- P93 should only proceed after choosing a narrow document-only direction such
+  as Tool Verification Evidence Model, Tool Candidate Review Schema, Procedural
+  Memory Alignment, Safe Tool Library Policy, or Capability Growth Evaluation
+  Plan.
 - Any future implementation phase needs explicit founder approval and a
   separate no-write, no-identity-mutation validation gate.
 
@@ -135,6 +138,9 @@ P72 does not implement:
 - automatic tool generation;
 - automatic tool promotion;
 - tool library mutation;
+- self-modifying runtime;
+- unreviewed dependency installation;
+- uncontrolled filesystem or network access;
 - identity mutation;
 - memory rewrite;
 - payload capture;

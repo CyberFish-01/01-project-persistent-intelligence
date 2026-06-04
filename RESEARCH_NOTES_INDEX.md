@@ -41,6 +41,7 @@ current documents carry it, and what is still only long-term vision?"
 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [CORE_INTERACTION_HARNESS_ROADMAP_ZH.md](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | Harness roadmap | Assesses future minimal CLI harness readiness without approving implementation. |
 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [HARNESS_TRANSITION_SUMMARY_ZH.md](./HARNESS_TRANSITION_SUMMARY_ZH.md) | Harness transition summary | Closes P82-P90 planning and keeps implementation blocked until explicit approval. |
 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | External inspiration RFC | Translates Yunjue / zero-start in-situ self-evolving agent ideas into review-only capability evolution vocabulary without tool execution. |
+| [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | Boundary RFC | Defines capability evolution allowed and forbidden scope without implementing tool runtime or promotion. |
 
 ## Original Idea Chains
 
@@ -85,6 +86,7 @@ current documents carry it, and what is still only long-term vision?"
 | Core Interaction Harness Roadmap | The foundation can now discuss a future fixture-first CLI harness, but implementation remains blocked. | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `roadmap`, not implementation approval |
 | Harness Transition Summary | P82-P90 need a compact closeout before any future P91 contract work. | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md), [RFC_INDEX.md](./RFC_INDEX.md) | `summary`, not implementation approval |
 | Tool-First Self-Evolution | Yunjue-style zero-start tool evolution suggests capability should evolve first where feedback is verifiable. | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not tool runtime |
+| Capability Evolution Boundary | Tool-first capability evolution needs explicit allowed and forbidden scopes before any verification or library policy work. | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
 
 ## Second Chain Map: Artificial Life History
 
@@ -120,6 +122,7 @@ Still future or blocked:
 - thought loop execution;
 - tool execution or automatic tool generation;
 - automatic tool promotion or tool library mutation;
+- self-modifying runtime or unreviewed dependency installation;
 - identity mutation, memory rewrite, payload capture, reducer execution.
 
 ## Reading Order
@@ -170,6 +173,9 @@ For origin tracing:
 17. Read [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md)
     only as a tool-first capability evolution RFC, not as tool execution, tool
     generation, tool promotion, policy execution, or identity mutation approval.
+18. Read [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
+    only as capability boundary vocabulary, not as tool authorization,
+    verification implementation, safe library policy, or runtime approval.
 
 ## P78 Non-Execution Statement
 
@@ -188,6 +194,8 @@ P78 does not implement:
 - automatic tool generation;
 - automatic tool promotion;
 - policy executor;
+- self-modifying runtime;
+- unreviewed dependency installation;
 - identity mutation;
 - memory rewrite;
 - payload capture;

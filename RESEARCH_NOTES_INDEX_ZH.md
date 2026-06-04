@@ -39,6 +39,7 @@ origin ideas are not implementation approval.
 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [CORE_INTERACTION_HARNESS_ROADMAP_ZH.md](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | Harness roadmap | 评估 future minimal CLI harness readiness，但不批准 implementation。 |
 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [HARNESS_TRANSITION_SUMMARY_ZH.md](./HARNESS_TRANSITION_SUMMARY_ZH.md) | Harness transition summary | 收束 P82-P90 planning，并在 explicit approval 前继续阻塞 implementation。 |
 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | External inspiration RFC | 把 Yunjue / zero-start in-situ self-evolving agent 思想翻译成 review-only capability evolution vocabulary，不执行工具。 |
+| [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | Boundary RFC | 定义 capability evolution 的 allowed / forbidden scope，不实现 tool runtime 或 promotion。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -83,6 +84,7 @@ origin ideas are not implementation approval.
 | Core Interaction Harness Roadmap | foundation 现在可以讨论 future fixture-first CLI harness，但 implementation 仍 blocked。 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `roadmap`, not implementation approval |
 | Harness Transition Summary | future P91 contract work 前，P82-P90 需要 compact closeout。 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md), [RFC_INDEX.md](./RFC_INDEX.md) | `summary`, not implementation approval |
 | Tool-First Self-Evolution | Yunjue-style zero-start tool evolution 提示应先在 feedback 可验证的能力层演化。 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not tool runtime |
+| Capability Evolution Boundary | tool-first capability evolution 在任何 verification 或 library policy work 前需要明确 allowed / forbidden scope。 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -118,6 +120,7 @@ Research notes 是 source material，不是当前 implementation plan。
 - thought loop execution；
 - tool execution 或 automatic tool generation；
 - automatic tool promotion 或 tool library mutation；
+- self-modifying runtime 或 unreviewed dependency installation；
 - identity mutation、memory rewrite、payload capture、reducer execution。
 
 ## Reading Order / 阅读顺序
@@ -161,6 +164,9 @@ Research notes 是 source material，不是当前 implementation plan。
 17. 阅读 [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md)
     时，只把它当作 tool-first capability evolution RFC，不要当作 tool execution、tool generation、
     tool promotion、policy execution 或 identity mutation approval。
+18. 阅读 [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
+    时，只把它当作 capability boundary vocabulary，不要当作 tool authorization、verification
+    implementation、safe library policy 或 runtime approval。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 
@@ -179,6 +185,8 @@ P78 不实现：
 - automatic tool generation；
 - automatic tool promotion；
 - policy executor；
+- self-modifying runtime；
+- unreviewed dependency installation；
 - identity mutation；
 - memory rewrite；
 - payload capture；

@@ -61,6 +61,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P91 | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) / [ZH](./TOOL_FIRST_SELF_EVOLUTION_RFC_ZH.md) | future RFC | capability evolution boundary | 把 Yunjue / zero-start tool-first self-evolution 翻译成 review-only capability evolution vocabulary。 | tool execution、auto tool generation、auto promotion、policy executor 或 identity growth |
+| P92 | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) / [ZH](./CAPABILITY_EVOLUTION_BOUNDARY_RFC_ZH.md) | boundary RFC | capability boundary | 定义 capability evolution 在任何 tool runtime 或 promotion policy 前的 allowed / forbidden scope。 | automatic tool execution、automatic tool promotion、policy executor、identity mutation、memory rewrite |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -142,6 +143,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 25. [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md)
     把 zero-start、tool-first self-evolution 翻译成 capability review vocabulary，但不批准 tool
     execution、tool generation、tool promotion、policy execution 或 Identity Core mutation。
+26. [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md)
+    定义 capability evolution 的 proposal/evidence/review 允许范围，以及
+    execution/promotion/policy/identity 禁止边界。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -170,6 +174,10 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - automatic tool generation；
 - automatic tool promotion；
 - tool library mutation；
+- tool authorization without human review；
+- self-modifying runtime；
+- unreviewed dependency installation；
+- uncontrolled filesystem 或 network access；
 - harness implementation；
 - fixture schema；
 - output schema；
