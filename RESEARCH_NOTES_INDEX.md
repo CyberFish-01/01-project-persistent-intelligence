@@ -30,6 +30,7 @@ current documents carry it, and what is still only long-term vision?"
 | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md) | Life-history synthesis | Turns the second idea chain into the Identity Seed boundary. |
 | [THEORY_SYNTHESIS_AND_NEXT_PLAN.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN.md) / [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md) | Later synthesis and phase planning | Connects the early theory to implementation-phase planning. |
 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [CTM_TEMPORAL_DYNAMICS_RFC_ZH.md](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | External inspiration RFC | Maps Continuous Thought Machines inspiration into future temporal-dynamics vocabulary without implementing CTM. |
+| [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | External inspiration evaluation plan | Turns CTM-inspired temporal vocabulary into deterministic evaluation scenarios without implementing metrics or runtime. |
 
 ## Original Idea Chains
 
@@ -63,6 +64,7 @@ current documents carry it, and what is still only long-term vision?"
 | External Theme | Current Use | Current Foundation Artifact | Current Status |
 |---|---|---|---|
 | CTM-inspired Temporal Dynamics | Time-varying internal state may inform future continuity review. | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not runtime |
+| Temporal Coherence Evaluation | CTM-inspired vocabulary needs deterministic scenarios before runtime discussion. | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md), [GLOSSARY.md](./GLOSSARY.md) | `evaluation-plan`, `RFC-only`, not runtime |
 
 ## Second Chain Map: Artificial Life History
 
@@ -95,6 +97,7 @@ Still future or blocked:
 - Temporal Awareness runtime;
 - automatic growth or drift classification;
 - CTM runtime or model training;
+- thought loop execution;
 - identity mutation, memory rewrite, payload capture, reducer execution.
 
 ## Reading Order
@@ -113,6 +116,9 @@ For origin tracing:
 6. Read [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) only as
    an external-inspiration RFC for temporal dynamics vocabulary, not as CTM
    implementation approval.
+7. Read [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
+   only as a future evaluation plan, not as implemented tests or runtime
+   metrics.
 
 ## P78 Non-Execution Statement
 

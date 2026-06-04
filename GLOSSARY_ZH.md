@@ -209,3 +209,28 @@ identity changes 或 pseudo-consciousness claims。
 未来可能表示 current state 已不能安全地从 prior state 和 evidence 推导出来。
 
 边界：coherence break 是 review concern，不是 automatic collapse classification 或 reconstruction。
+
+## Temporal Coherence Evaluation / 时间一致性评估
+
+一个 document-only plan，用 deterministic scenarios 和 future signals 来测试 CTM-inspired
+temporal coherence vocabulary。
+
+边界：它不是 runtime evaluator、不是 report implementation，也不是 truth engine。
+
+## Temporal Coherence Score / 时间一致性分数
+
+未来可能用于表示 later interpretation 与 prior state 和 evidence 的匹配程度。
+
+边界：该 score 不是真理、consciousness、growth、identity validity 或 runtime authority。
+
+## Evidence Alignment Score / 证据对齐分数
+
+未来可能用于表示 event、claim、task、memory references 对 candidate 的支持强度。
+
+边界：evidence alignment 不批准 candidate，也不 mutate 任何 referenced object。
+
+## Review Depth Required / 所需审查深度
+
+未来可能用于表示需要 shallow、normal 还是 deep review。
+
+边界：它不是 adaptive compute runtime、不是 thought loop，也不是 policy execution。

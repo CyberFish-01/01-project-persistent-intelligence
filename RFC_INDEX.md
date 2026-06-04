@@ -47,6 +47,7 @@ implementation approval.
 | P61 | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) / [ZH](./GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md) | lifecycle RFC | future review-object policy | Defines future review-object states such as deferred, archived, or quarantined. | growth lifecycle execution |
 | P62 | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) / [ZH](./PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md) | boundary RFC | review vocabulary | Separates productive drift, random drift, identity-threatening drift, and collapse. | automatic drift classifier |
 | P81 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [ZH](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | future RFC | RFC-only mapping | Translates CTM-inspired temporal dynamics into symbolic foundation vocabulary. | CTM runtime or temporal event execution |
+| P82 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [ZH](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | evaluation plan | RFC-only evaluation design | Defines deterministic scenarios and future signals for temporal coherence vocabulary. | temporal runtime or thought loop execution |
 
 ## Exploration And Subject Boundary
 
@@ -97,6 +98,9 @@ The current dependency order is:
 14. [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) maps
     CTM-inspired temporal concepts into foundation vocabulary without approving
     CTM runtime, temporal event writes, or model training.
+15. [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
+    turns P81 vocabulary into evaluation scenarios without implementing tests,
+    temporal runtime, thought loops, or event writes.
 
 ## Runtime-Blocked Topics
 
@@ -104,6 +108,7 @@ The indexed documents do not approve:
 
 - Temporal Awareness runtime;
 - CTM runtime or model training;
+- thought loop execution;
 - recall event writes;
 - growth lifecycle execution;
 - automatic growth classification;

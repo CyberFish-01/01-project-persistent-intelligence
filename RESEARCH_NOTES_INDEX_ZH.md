@@ -28,6 +28,7 @@ origin ideas are not implementation approval.
 | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md) / [IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md](./IDENTITY_SEED_AND_LIFE_HISTORY_ZH.md) | Life-history synthesis | 把第二条思想链整理成 Identity Seed 边界。 |
 | [THEORY_SYNTHESIS_AND_NEXT_PLAN.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN.md) / [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md) | later synthesis and phase planning | 把早期理论接到 implementation-phase planning。 |
 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [CTM_TEMPORAL_DYNAMICS_RFC_ZH.md](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | External inspiration RFC | 把 Continuous Thought Machines 启发映射为未来 temporal-dynamics vocabulary，不实现 CTM。 |
+| [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | External inspiration evaluation plan | 把 CTM-inspired temporal vocabulary 转成 deterministic evaluation scenarios，不实现 metrics 或 runtime。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -61,6 +62,7 @@ origin ideas are not implementation approval.
 | External Theme | Current Use | Current Foundation Artifact | Current Status |
 |---|---|---|---|
 | CTM-inspired Temporal Dynamics | time-varying internal state 可能启发未来 continuity review。 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `external-inspiration`, `RFC-only`, not runtime |
+| Temporal Coherence Evaluation | CTM-inspired vocabulary 需要 deterministic scenarios，之后才能讨论 runtime。 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md), [GLOSSARY.md](./GLOSSARY.md) | `evaluation-plan`, `RFC-only`, not runtime |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -93,6 +95,7 @@ Research notes 是 source material，不是当前 implementation plan。
 - Temporal Awareness runtime；
 - automatic growth or drift classification；
 - CTM runtime 或 model training；
+- thought loop execution；
 - identity mutation、memory rewrite、payload capture、reducer execution。
 
 ## Reading Order / 阅读顺序
@@ -108,6 +111,8 @@ Research notes 是 source material，不是当前 implementation plan。
 6. 阅读 [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) 时，只把它当作
    temporal dynamics vocabulary 的 external-inspiration RFC，不要当作 CTM implementation
    approval。
+7. 阅读 [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
+   时，只把它当作 future evaluation plan，不要当作 implemented tests 或 runtime metrics。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 

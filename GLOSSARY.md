@@ -272,3 +272,35 @@ state and evidence.
 
 Boundary: coherence break is a review concern, not automatic collapse
 classification or reconstruction.
+
+## Temporal Coherence Evaluation
+
+A document-only plan for deterministic scenarios and future signals that could
+test CTM-inspired temporal coherence vocabulary.
+
+Boundary: it is not a runtime evaluator, not a report implementation, and not a
+truth engine.
+
+## Temporal Coherence Score
+
+A future evaluation signal for how well later interpretation fits prior state
+and evidence.
+
+Boundary: the score is not truth, consciousness, growth, identity validity, or
+runtime authority.
+
+## Evidence Alignment Score
+
+A future evaluation signal for how strongly event, claim, task, and memory
+references support a candidate.
+
+Boundary: evidence alignment does not approve the candidate or mutate any
+referenced object.
+
+## Review Depth Required
+
+A future evaluation signal for whether shallow, normal, or deep review is
+needed.
+
+Boundary: it is not adaptive compute runtime, not a thought loop, and not policy
+execution.

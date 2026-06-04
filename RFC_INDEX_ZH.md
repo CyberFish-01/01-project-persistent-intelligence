@@ -45,6 +45,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P61 | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) / [ZH](./GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md) | lifecycle RFC | future review-object policy | 定义 future review-object states，例如 deferred、archived、quarantined。 | growth lifecycle execution |
 | P62 | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) / [ZH](./PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md) | boundary RFC | review vocabulary | 区分 productive drift、random drift、identity-threatening drift 和 collapse。 | automatic drift classifier |
 | P81 | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) / [ZH](./CTM_TEMPORAL_DYNAMICS_RFC_ZH.md) | future RFC | RFC-only mapping | 把 CTM-inspired temporal dynamics 翻译成 symbolic foundation vocabulary。 | CTM runtime 或 temporal event execution |
+| P82 | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) / [ZH](./TEMPORAL_COHERENCE_EVALUATION_PLAN_ZH.md) | evaluation plan | RFC-only evaluation design | 为 temporal coherence vocabulary 定义 deterministic scenarios 和 future signals。 | temporal runtime 或 thought loop execution |
 
 ## Exploration And Subject Boundary / 探索与主体边界
 
@@ -94,6 +95,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 14. [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md)
     把 CTM-inspired temporal concepts 映射到 foundation vocabulary，但不批准 CTM
     runtime、temporal event writes 或 model training。
+15. [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
+    把 P81 vocabulary 转为 evaluation scenarios，但不实现 tests、temporal runtime、thought
+    loops 或 event writes。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -101,6 +105,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 
 - Temporal Awareness runtime；
 - CTM runtime 或 model training；
+- thought loop execution；
 - recall event writes；
 - growth lifecycle execution；
 - automatic growth classification；

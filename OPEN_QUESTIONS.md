@@ -25,6 +25,7 @@ not implemented, and not closed as runtime capabilities.
 |---|---|---|---|---|
 | Temporal Awareness | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | elapsed-time evidence rules, temporal review placement, and write policy are not accepted runtime contracts | Temporal Awareness runtime, temporal event execution |
 | CTM-inspired Temporal Dynamics | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) | CTM concepts are translated only as symbolic foundation vocabulary; storage policy, evaluation, and runtime contracts are missing | CTM runtime, model training, temporal event writes |
+| Temporal Coherence Evaluation | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) | deterministic scenarios and future signals are planned, but no tests or runtime metrics exist | temporal runtime, thought loop execution, event writes |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -50,7 +51,7 @@ Still open:
 - whether `long_pause`, `interruption`, or `resumed_session` should ever become
   temporal events;
 - how task staleness, claim staleness, memory decay, and relationship silence
-  can be represented without companion or social-layer behavior.
+  can be represented without companion or social-layer behavior;
 - whether CTM-inspired temporal dynamics should remain review vocabulary or
   later split into smaller RFCs such as deliberation ticks, thought traces, and
   temporal coherence evaluation.
@@ -69,6 +70,23 @@ Still open:
 - how review depth budget should relate to risk level;
 - how unresolved tension or delayed alignment could become review evidence;
 - how CTM-inspired dynamics should relate to reconstruction evidence.
+
+### Temporal Coherence Evaluation
+
+Clarified by
+[TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md),
+but not implemented. It remains open because P82 defines deterministic scenario
+ideas and future evaluation signals only.
+
+Still open:
+
+- whether temporal coherence should become a report, validator, or manual review
+  checklist later;
+- how to score evidence alignment without turning scores into runtime truth;
+- how to simulate deliberation ticks without executing a thought loop;
+- how to test thought traces without storage policy;
+- how to connect coherence evaluation to reconstruction evidence without
+  reducer execution.
 
 ### Recall Event Write Policy
 
@@ -186,6 +204,7 @@ The following remain blocked until a future explicit implementation phase:
 - reconstruction reducer execution;
 - event compaction;
 - CTM runtime or model training;
+- thought loop execution;
 - policy executor;
 - companion, relationship memory, UI, AstrBot, adapter, or product layer.
 

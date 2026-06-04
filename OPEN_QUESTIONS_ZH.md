@@ -25,6 +25,7 @@ capabilities 被关闭。
 |---|---|---|---|---|
 | Temporal Awareness | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | elapsed-time evidence rules、temporal review placement 和 write policy 不是 accepted runtime contracts | Temporal Awareness runtime、temporal event execution |
 | CTM-inspired Temporal Dynamics | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) | CTM concepts 只被翻译成 symbolic foundation vocabulary；storage policy、evaluation 和 runtime contracts 缺失 | CTM runtime、model training、temporal event writes |
+| Temporal Coherence Evaluation | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) | deterministic scenarios 和 future signals 已规划，但还没有 tests 或 runtime metrics | temporal runtime、thought loop execution、event writes |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -49,7 +50,7 @@ routing 或 validation。
 - elapsed time 如何成为 evidence，而不是单独作为 evidence；
 - `long_pause`、`interruption`、`resumed_session` 是否未来可能成为 temporal events；
 - 如何表示 task staleness、claim staleness、memory decay、relationship silence，同时不引入
-  companion 或 social-layer behavior。
+  companion 或 social-layer behavior；
 - CTM-inspired temporal dynamics 应保持 review vocabulary，还是未来拆成 deliberation ticks、
   thought traces 和 temporal coherence evaluation 等更小 RFC。
 
@@ -66,6 +67,20 @@ routing 或 validation。
 - review depth budget 应如何关联 risk level；
 - unresolved tension 或 delayed alignment 如何成为 review evidence；
 - CTM-inspired dynamics 如何与 reconstruction evidence 关联。
+
+### Temporal Coherence Evaluation / 时间一致性评估
+
+已由 [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md)
+澄清，但没有实现。它仍然 open，因为 P82 只定义 deterministic scenario ideas 和 future
+evaluation signals。
+
+仍开放：
+
+- temporal coherence 未来应成为 report、validator，还是 manual review checklist；
+- 如何 score evidence alignment，同时不把 score 变成 runtime truth；
+- 如何 simulate deliberation ticks，同时不执行 thought loop；
+- 如何在没有 storage policy 时测试 thought traces；
+- 如何把 coherence evaluation 接到 reconstruction evidence，同时不执行 reducer。
 
 ### Recall Event Write Policy / 回忆事件写入策略
 
@@ -182,6 +197,7 @@ policy 仍与 payload capture 分离。
 - reconstruction reducer execution；
 - event compaction；
 - CTM runtime 或 model training；
+- thought loop execution；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 
