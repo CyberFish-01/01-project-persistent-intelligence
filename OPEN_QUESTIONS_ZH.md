@@ -33,7 +33,8 @@ capabilities 被关闭。
 | Context Package Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CONTEXT_PACKAGE_PREVIEW_RFC.md](./CONTEXT_PACKAGE_PREVIEW_RFC.md) | selected/omitted reference vocabulary 已存在，但没有 harness preview、retrieval execution、activation trace write 或 storage policy | retrieval as continuity、context mutation、activation trace writes |
 | Review Queue Preview | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [REVIEW_QUEUE_PREVIEW_RFC.md](./REVIEW_QUEUE_PREVIEW_RFC.md) | candidate preview 和 ordering vocabulary 已存在，但没有 queue runtime、storage、lifecycle execution 或 approval path | queue execution、lifecycle execution、candidate approval |
 | Session Resume Scenario Plan | `planned`, `indexed`, `future-contract-needed`, `blocked-runtime` | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) | deterministic scenarios 已存在，但没有 harness、tests、temporal runtime、temporal events 或 salience policy | session runtime、temporal event write、memory decay |
-| Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness 已评估，但缺 fixture contract、output contract、boundary test plan 和 explicit implementation approval | harness implementation、CLI commands、runtime work |
+| Core Interaction Harness Roadmap | `roadmap-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) | readiness 已评估，P99 也规划了 dry-run boundary，但仍缺 implementation approval | harness implementation、CLI commands、runtime work |
+| Minimal CLI Harness Implementation Plan | `implementation-plan-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) | future `harness-dry-run` scope、flow、inputs、outputs、candidates 和 tests 已规划，但没有 command、parser、output schema、tests、model-call proof 或 no-write validator | `harness-dry-run` implementation、model calls、external APIs、state writes、adapter integration |
 | Tool-First Self-Evolution | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TOOL_FIRST_SELF_EVOLUTION_RFC.md](./TOOL_FIRST_SELF_EVOLUTION_RFC.md) | capability evolution vocabulary 已存在，但没有 tool execution、verification schema、review schema、safe tool library policy 或 promotion gate | tool execution、auto tool generation、auto tool promotion、policy executor |
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed / forbidden scope 已定义，但缺 verification evidence model、candidate review schema、safe tool library policy 和 implementation gates | automatic tool execution、automatic promotion、policy executor、identity mutation |
 | Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys 已映射为中文显示名，但仍缺 visual surface contract、status assignment policy 和 dashboard approval | Web UI、dashboard runtime、observability CLI、product layer |
@@ -194,18 +195,33 @@ temporal events、memory decay、salience mutation 或 resume automation。
 
 ### Core Interaction Harness Roadmap / Core 交互试验台路线图
 
-已由 [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) 澄清，但没有
-实现。它仍然 open，因为 P90 只是 roadmap，不批准 CLI commands、schemas、tests、runtime work 或
-harness implementation。
+已由 [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) 澄清，并由
+[MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
+进一步细化，但没有实现。它仍然 open，因为 P90 只是 roadmap，P99 也只是 implementation plan。
+两者都不批准 CLI commands、parsers、schemas、tests、runtime work 或 harness implementation。
 
 仍开放：
 
-- fixture input contract；
-- preview output contract；
+- accepted fixture input contract；
+- accepted preview output contract；
 - no-write validation invariants；
 - forbidden-output test plan；
 - privacy 和 redaction policy；
+- 如何证明没有 model、network、adapter 或 external API call；
 - 任何 future implementation phase 都需要 explicit founder approval。
+
+### Minimal CLI Harness Implementation Plan / 最小 CLI 试验台实现计划
+
+已由 [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
+澄清，但没有实现。它仍然 open，因为 P99 只定义 possible `harness-dry-run` flow 和 test plan。
+
+仍开放：
+
+- P100 应直接实现 dry-run command，还是先创建更严格的 output schema；
+- 如何证明 command 在 state dirs、output paths 和 error paths 下都 no-write；
+- context preview 能在不执行 retrieval 的情况下从 static references 生成多少；
+- candidate previews 应只作为 ephemeral stdout，还是允许写成 report files；
+- 如何测试不会发生 model call、external API call、adapter integration 或 companion behavior。
 
 ### Tool-First Self-Evolution / 工具优先自进化
 
@@ -436,13 +452,17 @@ policy 仍与 payload capture 分离。
 - automatic next phase creation；
 - product-layer visual surface；
 - harness implementation；
+- `harness-dry-run` command implementation；
 - fixture schema；
 - output schema；
+- model calls from harness work；
+- external API calls from harness work；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 
 ## Current Recommendation / 当前建议
 
-先暂停做 founder / CTO review，再选择 P99。P98 只在 read-only observatory 内提升可读性；它不是
-dashboard runtime、harness implementation、policy execution、product UI 或 automatic roadmap
-execution 的授权。
+先暂停做 founder / CTO review，再选择 P100。P99 是 future no-write harness dry-run 的
+document-only implementation plan；它不是 command implementation、dashboard runtime、harness
+runtime、policy execution、product UI、model calls、external API calls、adapter integration 或
+automatic roadmap execution 的授权。

@@ -57,6 +57,7 @@ implementation approval.
 | P89 | [SESSION_RESUME_SCENARIO_PLAN.md](./SESSION_RESUME_SCENARIO_PLAN.md) / [ZH](./SESSION_RESUME_SCENARIO_PLAN_ZH.md) | scenario plan | resume simulation plan | Defines deterministic session resume scenarios using simulated elapsed time. | Temporal Awareness runtime or temporal event writes |
 | P90 | [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md) / [ZH](./CORE_INTERACTION_HARNESS_ROADMAP_ZH.md) | roadmap | harness readiness roadmap | Assesses future minimal CLI harness readiness and gates. | harness implementation or approval |
 | P82-P90 | [HARNESS_TRANSITION_SUMMARY.md](./HARNESS_TRANSITION_SUMMARY.md) / [ZH](./HARNESS_TRANSITION_SUMMARY_ZH.md) | summary | transition closure | Summarizes the planning bridge from temporal concept safety to future harness readiness. | P91 implementation approval |
+| P99 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [ZH](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | implementation plan | RFC-only plan | Defines a future no-write `harness-dry-run` pressure-test boundary, flow, inputs, outputs, candidates, boundaries, and tests plan. | command implementation, parser changes, tests, model calls, external APIs, state writes, adapter integration, product layer, or P100 execution |
 
 ## Capability Evolution And Tool Boundary
 
@@ -173,6 +174,10 @@ The current dependency order is:
     plans a future read-only observatory CLI report without implementing CLI
     commands, parsers, generators, dashboard runtime, Web UI, product UI,
     status API, or observability executor.
+30. [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
+    plans a possible future no-write `harness-dry-run` command without
+    implementing the command, parser, tests, model calls, external APIs, state
+    writes, adapter integration, product behavior, or P100.
 
 ## Runtime-Blocked Topics
 
@@ -215,8 +220,11 @@ The indexed documents do not approve:
 - automatic roadmap execution;
 - automatic next phase creation;
 - harness implementation;
+- `harness-dry-run` command implementation;
 - fixture schema;
 - output schema;
+- model calls from harness work;
+- external API calls from harness work;
 - recall event writes;
 - growth lifecycle execution;
 - automatic growth classification;

@@ -351,6 +351,26 @@ be considered after fixture, output, boundary, privacy, and no-write contracts.
 Boundary: the roadmap is not implementation approval and does not create CLI
 commands, schemas, tests, runtime behavior, adapter integration, or UI.
 
+## Minimal CLI Harness Implementation Plan
+
+The P99 document-only plan for a possible future `harness-dry-run` command. It
+defines dry-run scope, input fields, output sections, candidate preview types,
+boundary rules, and a future tests plan.
+
+Boundary: it is not implementation approval. It does not add the command,
+parser, schema, tests, model calls, external API calls, state writes, adapter
+integration, product behavior, or P100.
+
+## Harness Dry-Run
+
+A possible future local CLI pressure test that previews how one user message
+would move through intake, context preview, candidate preview, review queue
+preview, boundary monitor, and observatory snapshot.
+
+Boundary: dry-run means no writes, no model call, no external API call, no
+adapter ownership, no identity mutation, no memory rewrite, no recall event
+write, no growth execution, and no tool execution.
+
 ## Fixture-First Harness
 
 A possible future harness approach that uses local deterministic fixture inputs
@@ -358,6 +378,33 @@ before any live input, adapter, cloud, or product surface.
 
 Boundary: fixture-first still does not approve state writes, mutation, model
 prompting, or runtime integration.
+
+## Observatory Snapshot
+
+A possible future compact summary appended to a harness dry-run report so the
+founder can compare interaction pressure against Foundation Observatory status
+vocabulary.
+
+Boundary: observatory snapshot is not a decision, authorization, status API,
+dashboard runtime, or automatic next-step executor.
+
+## Non-Execution Invariants
+
+Explicit report flags that state the dry-run did not execute forbidden actions,
+such as state mutation, identity mutation, memory rewrite, recall writes, growth
+execution, model calls, external API calls, adapter integration, or tool
+execution.
+
+Boundary: invariants are audit/report assertions. They are not proof of a
+runtime capability unless future tests validate them.
+
+## No-Write Harness
+
+A future harness stance where the command must fail closed if it cannot prove no
+state files, memory files, event files, recall files, or identity files changed.
+
+Boundary: no-write does not mean low-risk by itself; it still needs privacy,
+output path, invalid input, and forbidden-output tests.
 
 ## Temporal Coherence
 
@@ -616,6 +663,17 @@ risk explanations, and next-step candidates.
 
 Boundary: it reads and renders. It does not mutate state, execute policy,
 promote roadmap work, create phases, or become a dashboard runtime.
+
+## Harness Dry-Run Candidate Command
+
+The planned future command name:
+
+```bash
+python3 -m one_core.cli harness-dry-run
+```
+
+Boundary: P99 documents this command name only. It is not implemented, not
+registered, not tested, and not approved for execution.
 
 ## Observatory CLI Report
 

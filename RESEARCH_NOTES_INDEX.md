@@ -47,6 +47,7 @@ current documents carry it, and what is still only long-term vision?"
 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI planning RFC | Defines the read-only observatory CLI report boundary later implemented narrowly in P96. |
 | `python3 -m one_core.cli foundation-observatory-report` | Read-only observatory CLI | Implements the P96 static founder-facing report generator without dashboard runtime, policy execution, state mutation, or phase creation. |
 | [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md) | Usability review | Reviews founder-facing readability and keeps harness implementation blocked. |
+| [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | Plans a future no-write dry-run CLI pressure test without implementing the command. |
 
 ## Original Idea Chains
 
@@ -95,6 +96,7 @@ current documents carry it, and what is still only long-term vision?"
 | Visual Naming Guide | Founder-facing views need plain Chinese labels without losing precise internal English keys. | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 | Foundation Observatory Report | The founder needs a readable Markdown snapshot before any dashboard or CLI plan. | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
 | Minimal Observatory CLI | A generated observatory report now needs to stay read-only and founder-facing. | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
+| Minimal CLI Harness Implementation Plan | Interaction pressure needs a no-write dry-run plan before any real harness command exists. | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implementation-plan`, not command implementation |
 
 ## Second Chain Map: Artificial Life History
 
@@ -193,6 +195,10 @@ For origin tracing:
 21. Read [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md)
     as the boundary plan behind the P96 read-only command, not as approval for
     observability executor, dashboard runtime, status API, or phase automation.
+22. Read [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
+    as a future no-write harness dry-run plan, not as an implemented command,
+    parser, schema, tests, model call, external API call, adapter integration,
+    product layer, or P100 approval.
 
 ## P78 Non-Execution Statement
 
@@ -222,6 +228,10 @@ P78 does not implement:
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
+- harness implementation;
+- `harness-dry-run` command implementation;
+- model calls from harness work;
+- external API calls from harness work;
 - identity mutation;
 - memory rewrite;
 - payload capture;

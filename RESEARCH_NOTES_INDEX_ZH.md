@@ -45,6 +45,7 @@ origin ideas are not implementation approval.
 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI planning RFC | 定义 read-only observatory CLI report boundary，之后在 P96 中窄范围实现。 |
 | `python3 -m one_core.cli foundation-observatory-report` | Read-only observatory CLI | 实现 P96 static founder-facing report generator，不做 dashboard runtime、policy execution、state mutation 或 phase creation。 |
 | [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md) | Usability review | 审查 founder-facing readability，并继续阻塞 harness implementation。 |
+| [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | 规划 future no-write dry-run CLI pressure test，但不实现 command。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -93,6 +94,7 @@ origin ideas are not implementation approval.
 | Visual Naming Guide | founder-facing views 需要朴素中文标签，同时不能丢失精确的内部英文键。 | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 | Foundation Observatory Report | 任何 dashboard 或 CLI plan 前，创始人需要一份可读 Markdown snapshot。 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
 | Minimal Observatory CLI | generated observatory report 现在需要保持 read-only 和 founder-facing。 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
+| Minimal CLI Harness Implementation Plan | interaction pressure 在任何 real harness command 前需要 no-write dry-run plan。 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implementation-plan`, not command implementation |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -184,6 +186,9 @@ Research notes 是 source material，不是当前 implementation plan。
 21. 阅读 [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md)
     时，把它当作 P96 read-only command 背后的 boundary plan，不要当作 observability executor、
     dashboard runtime、status API 或 phase automation 的许可。
+22. 阅读 [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
+    时，把它当作 future no-write harness dry-run plan，不要当作 implemented command、parser、
+    schema、tests、model call、external API call、adapter integration、product layer 或 P100 approval。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 
@@ -213,6 +218,10 @@ P78 不实现：
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
+- harness implementation；
+- `harness-dry-run` command implementation；
+- model calls from harness work；
+- external API calls from harness work；
 - identity mutation；
 - memory rewrite；
 - payload capture；

@@ -286,12 +286,53 @@ contracts 之后被考虑的 roadmap。
 边界：roadmap 不是 implementation approval，也不创建 CLI commands、schemas、tests、runtime
 behavior、adapter integration 或 UI。
 
+## Minimal CLI Harness Implementation Plan / 最小 CLI 试验台实现计划
+
+P99 document-only plan，用于规划 future `harness-dry-run` command。它定义 dry-run scope、
+input fields、output sections、candidate preview types、boundary rules 和 future tests plan。
+
+边界：它不是 implementation approval。它不新增 command、parser、schema、tests、model calls、
+external API calls、state writes、adapter integration、product behavior 或 P100。
+
+## Harness Dry-Run / 试验台 Dry-Run
+
+未来可能存在的本地 CLI pressure test，用于 preview 一条 user message 如何经过 intake、context
+preview、candidate preview、review queue preview、boundary monitor 和 observatory snapshot。
+
+边界：dry-run means no writes、no model call、no external API call、no adapter ownership、no
+identity mutation、no memory rewrite、no recall event write、no growth execution、no tool execution。
+
 ## Fixture-First Harness / Fixture 优先试验台
 
 一种可能的 future harness approach：在任何 live input、adapter、cloud 或 product surface 前，先使用
 local deterministic fixture inputs。
 
 边界：fixture-first 仍不批准 state writes、mutation、model prompting 或 runtime integration。
+
+## Observatory Snapshot / 观察台快照
+
+未来可能附在 harness dry-run report 末尾的 compact summary，让 founder 能把 interaction pressure
+和 Foundation Observatory status vocabulary 对齐。
+
+边界：observatory snapshot 不是 decision、authorization、status API、dashboard runtime 或 automatic
+next-step executor。
+
+## Non-Execution Invariants / 非执行不变量
+
+报告中显式声明 dry-run 没有执行 forbidden actions 的 flags，例如 state mutation、identity mutation、
+memory rewrite、recall writes、growth execution、model calls、external API calls、adapter integration
+或 tool execution。
+
+边界：invariants 是 audit/report assertions。除非 future tests 验证，否则它们不是 runtime
+capability proof。
+
+## No-Write Harness / 不写入试验台
+
+未来 harness stance：如果 command 不能证明没有 state files、memory files、event files、recall
+files 或 identity files 被改变，就必须 fail closed。
+
+边界：no-write 本身不代表 low-risk；它仍需要 privacy、output path、invalid input 和
+forbidden-output tests。
 
 ## Temporal Coherence / 时间一致性
 
@@ -510,6 +551,16 @@ risk explanations 和 next-step candidates 输出 Markdown 或 JSON founder-faci
 
 边界：它只 read and render。它不修改 state、不执行 policy、不推进 roadmap work、不创建 phase，
 也不是 dashboard runtime。
+
+## Harness Dry-Run Candidate Command / 试验台 Dry-Run 候选命令
+
+规划中的未来命令名：
+
+```bash
+python3 -m one_core.cli harness-dry-run
+```
+
+边界：P99 只记录这个 command name。它没有实现、没有注册、没有测试，也没有被批准执行。
 
 ## Observatory CLI Report / 观察台 CLI 报告
 
