@@ -2,99 +2,174 @@
 
 Chinese version: [OPEN_QUESTIONS_ZH.md](./OPEN_QUESTIONS_ZH.md)
 
-P53 records open foundation questions after P51. These are future directions,
-not active implementation instructions.
+Status: `document-only`, `status-update`, `non-runtime`.
 
-## Temporal Awareness
+P71 updates the P53 open questions after P58-P70. Several questions now have
+RFC, policy, roadmap, or concept-map artifacts. That means they are clarified,
+not implemented, and not closed as runtime capabilities.
 
-Question: how should elapsed time become part of subject state transition?
+## Status Legend
 
-Subquestions:
+- `rfc-drafted`: a document-only RFC exists.
+- `policy-drafted`: a document-only policy exists.
+- `indexed`: the question is listed in [RFC_INDEX.md](./RFC_INDEX.md).
+- `mapped`: the concept appears in [CONCEPT_MAP.md](./CONCEPT_MAP.md).
+- `blocked-runtime`: implementation remains forbidden in the foundation loop.
+- `future-contract-needed`: more contract, validation, privacy, or review gates
+  are required before implementation can be considered.
+- `watch`: important, but not ready for implementation.
 
-- How should `elapsed_time_since_encoding` affect meaning shift?
-- How should `elapsed_time_since_last_recall` affect salience?
-- Should `long_pause`, `interruption`, and `resumed_session` become temporal events?
-- Should task staleness, claim staleness, memory decay, and relationship silence
-  enter temporal state?
+## Status Table
 
-Do not implement in P53.
+| Question | Current Status | Main Artifact | Still Open Because | Forbidden Now |
+|---|---|---|---|---|
+| Temporal Awareness | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) | elapsed-time evidence rules, temporal review placement, and write policy are not accepted runtime contracts | Temporal Awareness runtime, temporal event execution |
+| Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
+| Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
+| Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
+| Productive Drift vs Collapse | `rfc-drafted`, `indexed`, `mapped`, `future-contract-needed` | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) | evidence thresholds exist as vocabulary, not classifier or evaluation engine | automatic drift or growth classification |
+| Exploration / Serendipity Engine | `rfc-drafted`, `indexed`, `mapped`, `watch` | [EXPLORATION_SERENDIPITY_RFC.md](./EXPLORATION_SERENDIPITY_RFC.md) | future signal schema, quarantine rules, and anti-companion evaluation are missing | exploration engine, companion/product behavior |
+| Subject Kernel / World Seed Direction | `rfc-drafted`, `indexed`, `mapped`, `watch` | [SUBJECT_KERNEL_WORLD_SEED_RFC.md](./SUBJECT_KERNEL_WORLD_SEED_RFC.md) | identity boundary review and reconstruction path distinction remain future work | Identity Core rewrite, runtime split |
+| Reconstruction Reducer Contract | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md) | accepted reducer contract, deterministic validation, and target-path capture policy are not implemented | reducer execution, state rebuild |
+| Payload / Diff Capture Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md) | privacy/redaction, schema review, compatibility plan, and capture mechanics are missing | payload capture, event schema mutation |
+| Productive Drift vs Random Drift Evaluation | `watch`, `future-contract-needed` | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) | evaluation cases are not designed yet | growth engine execution |
 
-## Growth Candidate Lifecycle
+## Updated Open Items
 
-Question: should `growth_candidate_review` later support acknowledge, archive,
-quarantine, or defer decisions?
+### Temporal Awareness
 
-Risk: lifecycle can be mistaken for promotion. It must remain review-only unless
-a separate future phase explicitly defines promotion boundaries.
+Clarified by [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md), but not
+implemented. It remains open because elapsed time has not been given accepted
+runtime semantics, event representation, review routing, or validation.
 
-## Recall Event Write Policy
+Still open:
 
-Question: when is recall meaningful enough to become an event candidate?
+- whether elapsed time belongs in recall-state review;
+- how elapsed time can become evidence without being evidence by itself;
+- whether `long_pause`, `interruption`, or `resumed_session` should ever become
+  temporal events;
+- how task staleness, claim staleness, memory decay, and relationship silence
+  can be represented without companion or social-layer behavior.
 
-Boundary: ordinary retrieval should not write events. Only meaning-shifting
-recall may become a future candidate.
+### Recall Event Write Policy
 
-## Stateful Memory Minimal Encoding Policy
+Clarified by [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md).
+Ordinary retrieval is not an event, and ordinary recall is not a write.
 
-Question: what is the minimum safe `encoding_state` required for stateful memory?
+Still open:
 
-Candidate fields:
+- accepted event schema for future recall candidates;
+- payload and diff requirements;
+- validation proving no memory rewrite or identity mutation;
+- replay interpretation for future recall events;
+- privacy and sensitivity scope.
 
-- source event id;
-- timestamp;
-- active task ids;
-- active claim ids;
-- identity anchor refs;
-- privacy scope;
-- salience/confidence.
+### Stateful Memory Minimal Encoding Policy
 
-## Reconstruction Reducer Contract
+Clarified by [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md).
+It defines minimum references for review quality, not active schema.
 
-Question: what contract would allow event records to rebuild object-level state?
+Still open:
 
-Needed:
+- whether any future schema should carry these references;
+- how imported memories should expose weak provenance;
+- how missing encoding context should affect review UX or reports;
+- how encoding-state references interact with reconstruction evidence.
 
-- reducer input schema;
+### Growth Candidate Lifecycle
+
+Clarified by [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md).
+Lifecycle labels organize review objects only.
+
+Still open:
+
+- whether lifecycle decisions become durable review records;
+- what authority can acknowledge, defer, archive, quarantine, or reject;
+- how lifecycle history is audited without executing growth;
+- how Identity Gate escalation is represented.
+
+### Productive Drift vs Collapse
+
+Clarified by [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md).
+It provides evidence and risk vocabulary, not an automatic classifier.
+
+Still open:
+
+- evaluation cases for productive drift vs random drift;
+- thresholds for repeated evidence across time;
+- Temporal Awareness contribution to delayed realization or cooled-down
+  reinterpretation;
+- collapse recovery review boundaries.
+
+### Exploration / Serendipity Engine
+
+Clarified by [EXPLORATION_SERENDIPITY_RFC.md](./EXPLORATION_SERENDIPITY_RFC.md).
+Exploration remains future-only and review-only.
+
+Still open:
+
+- signal schema;
+- input scope;
+- quarantine rules;
+- anti-companion and anti-roleplay evaluation;
+- how exploration can request evidence without creating product behavior.
+
+### Subject Kernel / World Seed Direction
+
+Clarified by [SUBJECT_KERNEL_WORLD_SEED_RFC.md](./SUBJECT_KERNEL_WORLD_SEED_RFC.md).
+The split remains conceptual.
+
+Still open:
+
+- which Identity Seed fields belong to Subject Kernel;
+- which fields belong to World Seed;
+- how reconstruction preserves the distinction;
+- which world/context changes require Identity Gate.
+
+### Reconstruction Reducer Contract
+
+Clarified by [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md).
+Reducer contract remains separate from reducer execution.
+
+Still open:
+
+- accepted input envelope;
 - target path identity;
-- payload/diff requirements;
-- validation metadata;
-- rollback and seed/pre-event references.
+- operation semantics;
+- deterministic output validation;
+- failure modes for missing or ambiguous evidence.
 
-Do not execute reducers until the contract is reviewed.
+### Payload / Diff Capture Policy
 
-## Payload / Diff Capture Policy
+Clarified by [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md).
+Capture policy remains separate from payload capture.
 
-Question: which state paths require full payload, object diff, snapshot link, or
-reference-only treatment?
+Still open:
 
-Risk: capture policy can become accidental event schema mutation. Keep it
-review-only until explicitly implemented.
+- privacy and redaction policy;
+- schema compatibility plan;
+- hash and snapshot strategy;
+- target-path acceptance gates;
+- migration plan for future event compatibility.
 
-## Subject Kernel / World Seed Direction
+## Runtime-Blocked Items
 
-Question: should Identity Seed be split into a smaller subject kernel plus a
-world seed?
+The following remain blocked until a future explicit implementation phase:
 
-Purpose: keep Identity Core small while allowing world/context orientation to
-evolve without rewriting identity.
+- Temporal Awareness runtime;
+- recall event writes;
+- growth lifecycle execution;
+- automatic growth or drift classification;
+- identity mutation;
+- memory rewrite;
+- payload capture;
+- event schema mutation;
+- reconstruction reducer execution;
+- event compaction;
+- policy executor;
+- companion, relationship memory, UI, AstrBot, adapter, or product layer.
 
-## Exploration / Serendipity Engine
+## Current Recommendation
 
-Question: how can the system support exploration without creating collapse,
-roleplay residue, or ungrounded identity changes?
-
-Boundary: exploration should create record-only or review-only signals, not
-automatic growth.
-
-## Productive Drift vs Collapse
-
-Question: how should the system distinguish evidence-backed productive drift
-from random drift, identity-threatening drift, or collapse?
-
-Needed:
-
-- evidence threshold;
-- risk level;
-- review gate;
-- anti-growth rejection reasons;
-- temporal aging policy.
+Continue low-risk consolidation only. The next useful work is a risk register
+or architecture boundary refresh, not runtime capability.
