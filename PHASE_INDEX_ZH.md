@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P110。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P111。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -117,3 +117,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P108 | 加入 harness usability re-review。 | routing 和 preview specialization 之后，应先复评 harness，再规划下一步只读工作。 | Harness Review |
 | P109 | 加入 harness roadmap。 | 已实现 dry-run 需要清楚说明它现在能看见什么、看不见什么，以及下一步只能规划哪些只读工作。 | Harness Roadmap |
 | P110 | 加入 overnight harness work summary。 | P102-P110 harness cycle 应以 commits、tests、boundaries、usability change 和 stop-before-P111 condition 收口。 | Harness Audit |
+| P111 | 加入 post-harness founder review。 | 在考虑 state-backed read-only harness 边界前，founder 需要复盘 P102-P110 是否解决了 P101。 | Harness Review |
