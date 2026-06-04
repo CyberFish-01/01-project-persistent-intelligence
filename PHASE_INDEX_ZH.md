@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P142。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P143。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -149,3 +149,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P140 | 加入 Boundary Injection RFC。 | future context packages 必须在 package 内携带 boundary reminders，但 reminders 不能变成 enforcement。 | Context Package |
 | P141 | 加入 CTM Temporal Context Pack RFC。 | CTM-inspired temporal dynamics 在 context packages 中只能作为 symbolic review cues。 | Context Package |
 | P142 | 加入 Capability Context Pack RFC。 | Tool-First capability evidence 在 context packages 中只能作为 candidate/evidence/review material。 | Context Package |
+| P143 | 加入 Response Orchestration Preview RFC。 | response orchestration 必须先 preview 再 execution，且 model output 必须保持在 core state 之外。 | Response Boundary |

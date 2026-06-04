@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P142. It is not a release log. It records how the system
+This index covers P0-P143. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -150,3 +150,4 @@ foundation evolved.
 | P140 | Added Boundary Injection RFC. | Future context packages must carry boundary reminders inside the package without turning reminders into enforcement. | Context Package |
 | P141 | Added CTM Temporal Context Pack RFC. | CTM-inspired temporal dynamics belong in context packages only as symbolic review cues. | Context Package |
 | P142 | Added Capability Context Pack RFC. | Tool-First capability evidence belongs in context packages only as candidate/evidence/review material. | Context Package |
+| P143 | Added Response Orchestration Preview RFC. | Response orchestration must be previewed before execution, and model output must remain outside core state. | Response Boundary |

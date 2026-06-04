@@ -104,6 +104,12 @@ implementation approval.
 | P141 | [CTM_TEMPORAL_CONTEXT_PACK_RFC.md](./CTM_TEMPORAL_CONTEXT_PACK_RFC.md) / [ZH](./CTM_TEMPORAL_CONTEXT_PACK_RFC_ZH.md) | temporal pack RFC | RFC-only pack contract | Defines the future `temporal_pack` as symbolic CTM-inspired review context with explicit forbidden temporal actions. | temporal runtime, CTM runtime, thought loop, thought-trace storage, temporal event write, recall event write, model call, state mutation, or rebuild |
 | P142 | [CAPABILITY_CONTEXT_PACK_RFC.md](./CAPABILITY_CONTEXT_PACK_RFC.md) / [ZH](./CAPABILITY_CONTEXT_PACK_RFC_ZH.md) | capability pack RFC | RFC-only pack contract | Defines the future `capability_pack` as Tool-First candidate/evidence/review context with explicit forbidden tool actions. | tool execution, tool verification runtime, tool promotion, tool library mutation, dependency installation, policy executor, model call, state mutation, or rebuild |
 
+## Response And Model Boundary
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P143 | [RESPONSE_ORCHESTRATION_PREVIEW_RFC.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC.md) / [ZH](./RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md) | response RFC | RFC-only preview path | Defines a future response orchestration preview path from intake to context package to model-as-resource strategy to post-response candidate extraction. | orchestration implementation, prompt builder, model call, response generation, extraction runtime, state write, memory write, adapter integration, tool execution, or rebuild |
+
 ## Founder-Facing Vocabulary And Visual Naming
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |

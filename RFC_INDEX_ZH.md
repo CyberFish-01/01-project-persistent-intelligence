@@ -102,6 +102,12 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P141 | [CTM_TEMPORAL_CONTEXT_PACK_RFC.md](./CTM_TEMPORAL_CONTEXT_PACK_RFC.md) / [ZH](./CTM_TEMPORAL_CONTEXT_PACK_RFC_ZH.md) | temporal pack RFC | RFC-only pack contract | 把 future `temporal_pack` 定义为 symbolic CTM-inspired review context，并明确 forbidden temporal actions。 | temporal runtime、CTM runtime、thought loop、thought-trace storage、temporal event write、recall event write、model call、state mutation 或 rebuild |
 | P142 | [CAPABILITY_CONTEXT_PACK_RFC.md](./CAPABILITY_CONTEXT_PACK_RFC.md) / [ZH](./CAPABILITY_CONTEXT_PACK_RFC_ZH.md) | capability pack RFC | RFC-only pack contract | 把 future `capability_pack` 定义为 Tool-First candidate/evidence/review context，并明确 forbidden tool actions。 | tool execution、tool verification runtime、tool promotion、tool library mutation、dependency installation、policy executor、model call、state mutation 或 rebuild |
 
+## Response And Model Boundary / 回应与模型边界
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P143 | [RESPONSE_ORCHESTRATION_PREVIEW_RFC.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC.md) / [ZH](./RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md) | response RFC | RFC-only preview path | 定义 future response orchestration preview path，从 intake 到 context package、model-as-resource strategy，再到 post-response candidate extraction。 | orchestration implementation、prompt builder、model call、response generation、extraction runtime、state write、memory write、adapter integration、tool execution 或 rebuild |
+
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
