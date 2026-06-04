@@ -107,6 +107,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P143 | [RESPONSE_ORCHESTRATION_PREVIEW_RFC.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC.md) / [ZH](./RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md) | response RFC | RFC-only preview path | 定义 future response orchestration preview path，从 intake 到 context package、model-as-resource strategy，再到 post-response candidate extraction。 | orchestration implementation、prompt builder、model call、response generation、extraction runtime、state write、memory write、adapter integration、tool execution 或 rebuild |
+| P144 | [LLM_AS_RESOURCE_BOUNDARY_RFC.md](./LLM_AS_RESOURCE_BOUNDARY_RFC.md) / [ZH](./LLM_AS_RESOURCE_BOUNDARY_RFC_ZH.md) | boundary RFC | RFC-only model boundary | 把 future LLM calls 定义为 resource usage，且 output 默认 untrusted 并保持在 subject ownership 之外。 | model call、prompt engine、adapter integration、state write、memory write、recall write、identity mutation、tool execution、policy executor 或 rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 

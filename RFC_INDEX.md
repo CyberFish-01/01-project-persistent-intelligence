@@ -109,6 +109,7 @@ implementation approval.
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P143 | [RESPONSE_ORCHESTRATION_PREVIEW_RFC.md](./RESPONSE_ORCHESTRATION_PREVIEW_RFC.md) / [ZH](./RESPONSE_ORCHESTRATION_PREVIEW_RFC_ZH.md) | response RFC | RFC-only preview path | Defines a future response orchestration preview path from intake to context package to model-as-resource strategy to post-response candidate extraction. | orchestration implementation, prompt builder, model call, response generation, extraction runtime, state write, memory write, adapter integration, tool execution, or rebuild |
+| P144 | [LLM_AS_RESOURCE_BOUNDARY_RFC.md](./LLM_AS_RESOURCE_BOUNDARY_RFC.md) / [ZH](./LLM_AS_RESOURCE_BOUNDARY_RFC_ZH.md) | boundary RFC | RFC-only model boundary | Defines future LLM calls as resource usage, with output untrusted by default and outside subject ownership. | model call, prompt engine, adapter integration, state write, memory write, recall write, identity mutation, tool execution, policy executor, or rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
