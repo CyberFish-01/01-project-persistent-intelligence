@@ -121,6 +121,10 @@ implementation approval.
 | P148 | [REBUILD_ENTRY_GATE_CHECKLIST.md](./REBUILD_ENTRY_GATE_CHECKLIST.md) / [ZH](./REBUILD_ENTRY_GATE_CHECKLIST_ZH.md) | checklist | document-only gate checklist | Defines required gates and evidence before local 01 rebuild can be considered. | verification execution, rebuild start, old 01 read, state migration, memory write, adapter integration, model call, tool execution, reducer execution, or event compaction |
 | P149 | [PRE_REBUILD_SYSTEM_REVIEW.md](./PRE_REBUILD_SYSTEM_REVIEW.md) / [ZH](./PRE_REBUILD_SYSTEM_REVIEW_ZH.md) | system review | document-only review | Reviews whether P112-P148 prepared the system for final read-only pre-rebuild verification. | verification execution, rebuild start, old 01 read, state migration, memory write, adapter integration, model call, tool execution, reducer execution, or event compaction |
 | P150 | [FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md) / [ZH](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD_ZH.md) | verification plan | document-only plan | Defines final read-only verification areas, commands, forbidden patterns, pass criteria, and failure handling before rebuild. | verification execution, rebuild start, old 01 read, state migration, memory write, adapter integration, model call, tool execution, reducer execution, or event compaction |
+| P151 | [PRE_REBUILD_VERIFICATION_SUITE.md](./PRE_REBUILD_VERIFICATION_SUITE.md) / [ZH](./PRE_REBUILD_VERIFICATION_SUITE_ZH.md) | read-only verification CLI | implemented report-only suite | Checks required artifacts, links, forbidden flags, read-only builders, CTM boundaries, Tool-First boundaries, and rebuild boundaries. | rebuild execution, rebuild approval, old 01 read, state migration, adapter integration, model call, tool execution, or write authority |
+| P152 | [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) / [ZH](./VERIFICATION_REPORT_ZH.md) | verification report | read-only evidence report | Records final verification evidence and pass status for founder checkpoint. | rebuild approval, rebuild start, migration, import, write path, model call, adapter integration, or automatic next phase |
+| P153 | [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md) / [ZH](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md) | founder checkpoint | review-only checkpoint | Records that verification passed enough to ask the founder, while rebuild remains blocked without explicit approval. | founder approval fabrication, rebuild start, old 01 read, migration, model call, adapter integration, or automatic roadmap execution |
+| P154 | [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) / [ZH](./PUSH_READINESS_REPORT_ZH.md) | push audit | audit-only report | Audits local `main` for clean status, ahead commits, file types, sensitive information, forbidden boundaries, links, tests, and push recommendation. | push execution, rebuild approval, cloud/server update, AstrBot upload, old 01 read, model call, adapter integration, or automatic next phase |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
@@ -252,6 +256,11 @@ The current dependency order is:
     and [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md)
     record the P153 founder checkpoint: verification evidence is sufficient to
     ask the founder, but rebuild remains blocked until explicit approval.
+36. [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) and
+    [PUSH_READINESS_REPORT_ZH.md](./PUSH_READINESS_REPORT_ZH.md) record the P154
+    push readiness audit: local `main` is checked and push-ready after the
+    report commit, but push still requires human confirmation and rebuild
+    remains blocked.
 
 ## Runtime-Blocked Topics
 

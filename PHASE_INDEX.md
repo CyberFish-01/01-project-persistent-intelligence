@@ -161,3 +161,4 @@ foundation evolved.
 | P151 | Added Pre-Rebuild Verification Suite. | The final verification plan needs a deterministic read-only local suite before a verification report. | Pre-Rebuild Verification |
 | P152 | Added Verification Report. | Passing verification allows a founder checkpoint, not automatic rebuild. | Pre-Rebuild Verification |
 | P153 | Added Final Pre-Rebuild Founder Checkpoint. | Founder approval is the gate between verification pass and any future rebuild. | Pre-Rebuild Verification |
+| P154 | Updated Push Readiness Report. | Push readiness must be audited separately from rebuild approval, and push must remain a human-confirmed action. | Pre-Rebuild Verification |

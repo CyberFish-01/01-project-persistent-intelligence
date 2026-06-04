@@ -119,6 +119,10 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P148 | [REBUILD_ENTRY_GATE_CHECKLIST.md](./REBUILD_ENTRY_GATE_CHECKLIST.md) / [ZH](./REBUILD_ENTRY_GATE_CHECKLIST_ZH.md) | checklist | document-only gate checklist | 定义本地 01 rebuild 被考虑前所需 gates 和 evidence。 | verification execution、rebuild start、old 01 read、state migration、memory write、adapter integration、model call、tool execution、reducer execution 或 event compaction |
 | P149 | [PRE_REBUILD_SYSTEM_REVIEW.md](./PRE_REBUILD_SYSTEM_REVIEW.md) / [ZH](./PRE_REBUILD_SYSTEM_REVIEW_ZH.md) | system review | document-only review | 复盘 P112-P148 是否让系统准备好进入 final read-only pre-rebuild verification。 | verification execution、rebuild start、old 01 read、state migration、memory write、adapter integration、model call、tool execution、reducer execution 或 event compaction |
 | P150 | [FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD.md) / [ZH](./FULL_VERIFICATION_PLAN_BEFORE_REBUILD_ZH.md) | verification plan | document-only plan | 定义 rebuild 前 final read-only verification areas、commands、forbidden patterns、pass criteria 和 failure handling。 | verification execution、rebuild start、old 01 read、state migration、memory write、adapter integration、model call、tool execution、reducer execution 或 event compaction |
+| P151 | [PRE_REBUILD_VERIFICATION_SUITE.md](./PRE_REBUILD_VERIFICATION_SUITE.md) / [ZH](./PRE_REBUILD_VERIFICATION_SUITE_ZH.md) | read-only verification CLI | implemented report-only suite | 检查 required artifacts、links、forbidden flags、read-only builders、CTM boundaries、Tool-First boundaries 和 rebuild boundaries。 | rebuild execution、rebuild approval、old 01 read、state migration、adapter integration、model call、tool execution 或 write authority |
+| P152 | [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) / [ZH](./VERIFICATION_REPORT_ZH.md) | verification report | read-only evidence report | 记录 final verification evidence 和 pass status，用于 founder checkpoint。 | rebuild approval、rebuild start、migration、import、write path、model call、adapter integration 或 automatic next phase |
+| P153 | [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md) / [ZH](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md) | founder checkpoint | review-only checkpoint | 记录 verification 已足够向 founder 提问，但没有 explicit approval 时 rebuild 仍 blocked。 | founder approval fabrication、rebuild start、old 01 read、migration、model call、adapter integration 或 automatic roadmap execution |
+| P154 | [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) / [ZH](./PUSH_READINESS_REPORT_ZH.md) | push audit | audit-only report | 审计本地 `main` 的 clean status、ahead commits、file types、sensitive information、forbidden boundaries、links、tests 和 push recommendation。 | push execution、rebuild approval、cloud/server update、AstrBot upload、old 01 read、model call、adapter integration 或 automatic next phase |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
@@ -238,6 +242,10 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 35. [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md)
     和 [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md)
     记录 P153 founder checkpoint：verification evidence 足以向 founder 提问，但 rebuild 在明确批准前继续 blocked。
+36. [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) 和
+    [PUSH_READINESS_REPORT_ZH.md](./PUSH_READINESS_REPORT_ZH.md) 记录 P154 push
+    readiness audit：本地 `main` 在 report commit 后已检查且 push-ready，但 push 仍需要人类确认，
+    rebuild 仍 blocked。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 

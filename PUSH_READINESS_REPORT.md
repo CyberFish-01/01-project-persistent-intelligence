@@ -2,141 +2,149 @@
 
 Chinese version: [PUSH_READINESS_REPORT_ZH.md](./PUSH_READINESS_REPORT_ZH.md)
 
-Status: `audit-only`, `non-runtime`, `do-not-push-without-founder-confirmation`.
+Status: `P154`, `audit-only`, `non-runtime`, `do-not-push-in-this-mode`.
 
-Audit date: 2026-06-04
+Audit date: 2026-06-05
 
 ## Scope
 
-This report checks whether the local `main` branch is clean, safe, and ready to
-push after the P82-P90 foundation-to-harness planning cycle.
+P154 checks whether local `main` is clean, safe, and ready to push after the
+extended foundation, harness, lockdown, context-package, response-boundary, and
+pre-rebuild verification work through P153.
 
-This audit does not enter P91, implement runtime behavior, add dependencies,
-write temporal events, write recall events, execute a thought loop, execute a
-growth lifecycle, mutate Identity Core, or integrate companion, UI, AstrBot, or
-adapter surfaces.
+This audit does not push, start rebuild, read old 01, migrate state, write
+memory, write recall events, mutate Identity Core, execute growth, execute
+tools, run a policy executor, execute temporal or CTM runtime, connect
+Companion, UI, AstrBot, adapters, external IO, or model calls.
 
-The audited commit range is the pre-report range:
+The audited pre-report range is:
 
 ```text
 origin/main..HEAD
-2aa4cf36d72d80c5246f624af25edcb21c928ea2..b0fe1b06b17a2ce70390461a1e7e423690b87118
+2aa4cf36d72d80c5246f624af25edcb21c928ea2..4fb820552aa3838468ba2fefe3099385ab106066
 ```
 
-The later report commit is intentionally outside that audited range and should
-only add this report pair.
+The P154 report commit is intentionally outside that pre-report audited range
+and should contain only documentation/index updates for this audit.
 
 ## Git Status
 
 | Item | Result |
 |---|---|
 | Current branch | `main` |
+| Upstream | `origin/main` |
 | Remote base | `2aa4cf36d72d80c5246f624af25edcb21c928ea2` (`2aa4cf3`) |
-| Audited end commit | `b0fe1b06b17a2ce70390461a1e7e423690b87118` (`b0fe1b0`) |
-| Ahead commits before this report | 62 |
+| Audited end commit | `4fb820552aa3838468ba2fefe3099385ab106066` (`4fb8205`) |
+| Ahead commits before this report | 127 |
 | Worktree before this report | clean |
 | Merge commits in audited range | none |
 
 ## Commit Range Summary
 
-The 62 ahead commits are expected foundation, RFC, review, evaluation, planning,
-and summary commits.
+The 127 ahead commits are expected and coherent with the documented project
+evolution. They are foundation/RFC/review/evaluation/read-only CLI work, not a
+hidden product, adapter, model, rebuild, or write-runtime branch.
 
 Grouped interpretation:
 
-- P54-P57: foundation integrity audit, concept overlap review, boundary test
-  matrix, and open-question triage.
-- P58-P66: future-only RFCs and policies for temporal awareness, recall writes,
-  stateful memory encoding, growth candidate lifecycle, drift, exploration,
-  subject/world boundaries, reconstruction reducers, and payload/diff capture.
-- P67-P80: foundation roadmap, RFC index, phase/concept/glossary/risk/decision
-  maintenance, bilingual consistency review, and foundation maintenance closure.
-- P81-P90: CTM-inspired temporal dynamics RFC, temporal coherence evaluation
-  plan, deliberation/review-depth RFC, thought trace storage policy RFC, thin
-  interaction harness RFC, conversation intake contract RFC, context package
-  preview RFC, review queue preview RFC, session resume scenario plan, core
-  interaction harness roadmap, and harness transition summary.
-- Autonomous summary commits are present and expected.
-
-Representative audited commit list:
-
-```text
-b0fe1b0 Add harness transition summary
-9e9d9b1 Add core interaction harness roadmap
-f5c3a2f Add session resume scenario plan
-920d377 Add review queue preview RFC
-c4f14e2 Add context package preview RFC
-2993e1f Add conversation intake contract RFC
-fd57c6e Add thin interaction harness RFC
-37a1956 Add thought trace storage policy RFC
-7a2cb00 Add deliberation tick review depth RFC
-888dbd6 Add temporal coherence evaluation plan
-64a626e Add CTM temporal dynamics RFC
-f4b88ff Add foundation maintenance review
-540b393 Add bilingual consistency review
-6746259 Add research notes index
-3df077e Add foundation decisions log
-b8b0b5c Add foundation review checklist
-7c16ea2 Optimize README foundation entrance
-80e946d Deduplicate glossary terms
-6fa347d Refresh architecture boundaries
-17fc3e6 Add risk register
-66f7af8 Update open questions status
-323ea60 Update concept map
-88fbd5f Extend phase index
-b7f85d3 Add RFC index
-705070d Add foundation roadmap
-92c5135 Add payload diff capture policy RFC
-613723a Add reconstruction reducer contract RFC
-438e52e Add subject kernel world seed RFC
-041ab1e Add exploration serendipity RFC
-cfa706a Add productive drift collapse boundaries
-0031564 Add growth candidate lifecycle RFC
-eec695c Add stateful memory encoding policy
-bf260f5 Add recall event write policy RFC
-61def0f Add temporal awareness RFC
-70cc128 Add open questions triage
-175f577 Add boundary test matrix
-f3ed18a Add concept overlap review
-b2d8650 Add foundation integrity audit
-```
+- P54-P80: foundation integrity, concept overlap, boundary tests, open-question
+  triage, RFC/policy documents, indexes, glossary/risk/decision maintenance,
+  bilingual review, and foundation maintenance closure.
+- P81-P90: CTM-inspired temporal dynamics, temporal coherence evaluation
+  planning, deliberation/review-depth and thought-trace policies, thin harness
+  planning, intake/context/review-queue previews, session resume scenarios, and
+  harness roadmap/transition summary.
+- P91-P99: Tool-First capability boundaries, founder-facing visual naming,
+  observatory report/CLI/readability work, and minimal CLI harness planning.
+- P100-P111: read-only `harness-dry-run`, usability reviews, pressure routing,
+  candidate/review-queue specialization, boundary monitor hardening, harness
+  roadmap, overnight summary, and post-harness founder review.
+- P112-P120: state-backed read-only harness boundary, source inventory,
+  read-only source loader plan/loader/CLI, source-backed harness context refs,
+  source-backed risk/open-question mapping, and usability review.
+- P121-P130: Core Lockdown and Quarantine RFCs, fixture matrix, quarantine
+  gates, shadow adapter example shapes, contamination false-positive review,
+  and lockdown cycle review.
+- P131-P136: Thin Founder Console boundary, user flow, no-write contract,
+  acceptance criteria, risk review, and roadmap.
+- P137-P142: context package builder, preview CLI plan, source selection matrix,
+  boundary injection, CTM temporal context pack, and capability context pack.
+- P143-P147: response orchestration preview, LLM-as-resource boundary,
+  post-response candidate extraction, manual review gate, and rebuild migration
+  protocol.
+- P148-P153: rebuild entry checklist, pre-rebuild system review, full
+  verification plan, pre-rebuild verification suite, verification report, and
+  final founder checkpoint.
 
 No abnormal commit, merge commit, or conflict-resolution artifact was found in
 the audited range.
+
+Recent audited commits:
+
+```text
+4fb8205 Add final pre-rebuild founder checkpoint
+86530a1 Add pre-rebuild verification report
+3f9e46f Add pre-rebuild verification suite
+4cf65b8 Add full verification plan before rebuild
+0d9f65c Add pre-rebuild system review
+1185f15 Add rebuild entry gate checklist
+5056dd1 Add rebuild migration protocol RFC
+3077eb5 Add manual review gate RFC
+e46a995 Add post-response candidate extraction RFC
+bacf0d8 Add LLM-as-resource boundary RFC
+ae7f92d Add response orchestration preview RFC
+3edd931 Add capability context pack RFC
+c184b05 Add CTM temporal context pack RFC
+4c8be41 Add boundary injection RFC
+9407e93 Add source selection matrix
+```
 
 ## File Type Summary
 
 | Item | Result |
 |---|---|
-| Changed files in audited range | 78 |
-| Shortstat | `78 files changed, 12660 insertions(+), 289 deletions(-)` |
-| File types | Markdown only (`.md`) |
-| Runtime files changed | none |
-| `one_core/` changed | no |
-| `tests/` changed | no |
-| `adapters/` changed | no |
-| `deploy/` changed | no |
+| Changed files in audited range | 191 |
+| Shortstat | `191 files changed, 33944 insertions(+), 291 deletions(-)` |
+| Markdown files changed | 182 |
+| Python files changed | 9 |
+| JSON/YAML/service/other changed files | 0 |
 | Binary files | none detected |
-| Files larger than 1 MB | none detected |
-| Temp/cache/log/backup/env files | none detected |
+| Files larger than 1 MB | none detected outside ignored work/output/git areas |
+| Temp/cache/log/backup files | none detected |
 
-The changed files are documentation, RFC, review, index, roadmap, risk, glossary,
-and planning artifacts.
+The Python changes are limited to read-only report/preview surfaces and tests:
+
+- `one_core/cli.py`
+- `one_core/harness.py`
+- `one_core/observatory.py`
+- `one_core/pre_rebuild_verification.py`
+- `one_core/source_loader.py`
+- `tests/test_harness.py`
+- `tests/test_observatory.py`
+- `tests/test_pre_rebuild_verification.py`
+- `tests/test_source_loader.py`
+
+Assessment: no large-scale unexpected runtime change was found. The executable
+changes add or harden read-only local CLI/report surfaces and deterministic
+tests. They do not add rebuild execution, old 01 loading, adapter integration,
+model calls, tool execution, policy execution, state mutation, memory mutation,
+recall writes, growth execution, temporal runtime, reconstruction reducer
+execution, or event compaction.
 
 ## Sensitive Information Check
 
 Broad sensitive-keyword scanning was performed for API keys, tokens, passwords,
-secrets, private keys, credentials, cookies, sessions, webhooks, database
-passwords, Cloudflare tokens, OpenAI keys, and GitHub tokens.
+secrets, private keys, `.env` content, cookies, sessions, credentials, webhooks,
+database passwords, Cloudflare tokens, OpenAI keys, and GitHub tokens.
 
 Result:
 
 - No real secret material was found.
-- Narrow high-confidence key-pattern scan returned no matches.
-- Broad keyword hits were false positives, including token-budget language,
-  security warnings that say not to store passwords or tokens, importer filtering
-  rules, fake test values such as `secret-value`, and ordinary variable names
-  such as `token`.
+- High-confidence key/private-key pattern scan returned no matches.
+- Broad keyword hits were reviewed as false positives: session vocabulary,
+  token-budget language, warnings not to store passwords/tokens, quarantine
+  source-class text, importer filtering rules, variable names, and fake test
+  strings such as `secret-value` / `should-not-be-stored`.
 
 Push is not blocked by sensitive information.
 
@@ -144,22 +152,26 @@ Push is not blocked by sensitive information.
 
 The following active-true boundary markers were searched and returned no
 matches. The report lists field names separately from the boolean value so that
-future literal searches do not match this audit document itself:
+literal forbidden searches do not match this audit document itself:
 
 ```text
 identity_core_mutated -> true
-automatic_identity_mutation_allowed -> true
-automatic_memory_promotion_allowed -> true
 memory_rewrite_executed -> true
 recall_mutation_executed -> true
 growth_engine_executed -> true
 temporal_event_executed -> true
-thought_loop_executed -> true
-ctm_runtime_enabled -> true
+tool_execution_enabled -> true
+auto_tool_promotion_enabled -> true
+policy_executor_enabled -> true
 companion_feature_enabled -> true
 adapter_integration_required -> true
-reconstruction_reducer_executed -> true
-event_compaction_executed -> true
+harness_write_enabled -> true
+ctm_runtime_enabled -> true
+external_io_enabled -> true
+model_call_enabled -> true
+source_loader_write_enabled -> true
+app_write_enabled -> true
+rebuild_started -> true
 ```
 
 No forbidden boundary violation was found.
@@ -168,57 +180,72 @@ No forbidden boundary violation was found.
 
 | Check | Result |
 |---|---|
-| Markdown local link check | passed: `Markdown local links OK` |
-| `README.md` / `README_ZH.md` | present and usable as document entrances |
-| `RFC_INDEX.md` / `RFC_INDEX_ZH.md` | present and includes P81-P90 RFC/planning artifacts |
-| `RESEARCH_NOTES_INDEX.md` / `RESEARCH_NOTES_INDEX_ZH.md` | present and includes P81-P90 research/planning references |
-| `PHASE_INDEX.md` / `PHASE_INDEX_ZH.md` | present, but currently extends only through P68 |
+| Markdown local link check | passed: `217 files`, `1950 links`, 0 issues |
+| `README.md` / `README_ZH.md` | present as document entrances |
+| `RFC_INDEX.md` / `RFC_INDEX_ZH.md` | present and includes pre-rebuild verification artifacts through P153 before this P154 update |
+| `RESEARCH_NOTES_INDEX.md` / `RESEARCH_NOTES_INDEX_ZH.md` | present and usable for foundation source navigation |
+| `PHASE_INDEX.md` / `PHASE_INDEX_ZH.md` | present through P153 before this P154 update |
 
-Non-blocking documentation currency warnings:
-
-- `PHASE_INDEX.md` and `PHASE_INDEX_ZH.md` do not yet index P69-P90.
-- `README.md` and `README_ZH.md` still describe the current foundation work
-  status as P68-P80 even though P82-P90 planning artifacts now exist.
-
-These are navigation freshness warnings, not link failures, runtime changes, or
-push blockers.
+P154 updates this report pair plus README/phase/RFC index references so the
+navigation layer reflects the current audit.
 
 ## Formatting, Tests, Validation, And Evaluation
 
 | Command | Result |
 |---|---|
 | `git diff --check` | passed |
-| Markdown local link check | passed |
 | Forbidden active-pattern search | passed: no matches |
-| `env PYTHONDONTWRITEBYTECODE=1 python3 -m unittest` | passed: 120 tests |
-| `env PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli validate-state` | passed: issue count 0 |
-| `env PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli evaluate-foundation` | passed: 7 checks, 0 failed |
-| `env PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli evaluate-scenarios` | passed: 18 scenarios, 0 failed |
+| Temp/cache/log/backup scan | passed: no matches |
+| High-confidence secret scan | passed: no matches |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest` | passed: 175 tests |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli validate-state` | passed: issue count 0 |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli evaluate-foundation` | passed: 7 checks, 0 failed |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli evaluate-scenarios` | passed: 18 scenarios, 0 failed |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli pre-rebuild-verification --format json --lang en` | passed |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m one_core.cli pre-rebuild-verification --format markdown --lang zh` | passed |
+
+The pre-rebuild verification suite reported:
+
+- verification status: `pass`;
+- ready for final verification report: `true`;
+- ready for rebuild: `false`;
+- required artifacts P112-P151: present;
+- future artifacts P152-P154: present;
+- markdown links: pass;
+- forbidden active flags: absent;
+- read-only report builders: pass;
+- CTM temporal status: pass, symbolic/review-only;
+- Tool-First status: pass, candidate/evidence/review-only.
 
 ## Runtime Change Assessment
 
-No new runtime change was found in the audited ahead range. The ahead changes are
-Markdown-only foundation, RFC, review, evaluation-plan, roadmap, index, and
-summary artifacts.
+P54-P153 include some Python changes, but the audited Python changes are
+bounded to read-only local report/preview surfaces and tests:
 
-The existing prototype runtime remains in the repository, but it is unchanged by
-the audited ahead commits.
+- P96 observatory report CLI;
+- P100 harness dry-run;
+- P115/P117 read-only source loader and source inventory CLI;
+- P151 pre-rebuild verification suite.
+
+These changes are expected and tested. They do not grant write authority,
+rebuild authority, adapter authority, model authority, tool authority, product
+authority, or identity/memory/growth/temporal mutation authority.
 
 ## Push Recommendation
 
-Recommendation: push is allowed after founder confirmation.
+Recommendation: push-ready after the P154 report/index commit.
 
-There are no BLOCKED reasons.
+No BLOCKED reason was found.
 
-Known non-blocking warnings:
+Required human action before push: founder/operator confirms that pushing local
+`main` to `origin/main` is desired.
 
-- Phase index coverage is stale after P68.
-- README current-work wording is stale after P80.
-
-Recommended command after explicit confirmation:
+Recommended command after confirmation:
 
 ```bash
 git push origin main
 ```
 
-Do not run the push command until the founder confirms.
+Do not start rebuild, P155, old 01 import, cloud/server update, AstrBot upload,
+adapter integration, UI, Companion, model call, tool execution, or any automatic
+next phase as part of this push readiness state.

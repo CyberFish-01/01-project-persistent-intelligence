@@ -160,3 +160,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P151 | 加入 Pre-Rebuild Verification Suite。 | final verification plan 在 verification report 前需要 deterministic read-only local suite。 | Pre-Rebuild Verification |
 | P152 | 加入 Verification Report。 | verification 通过只允许进入 founder checkpoint，不自动批准 rebuild。 | Pre-Rebuild Verification |
 | P153 | 加入 Final Pre-Rebuild Founder Checkpoint。 | founder approval 是 verification pass 和任何 future rebuild 之间的 gate。 | Pre-Rebuild Verification |
+| P154 | 更新 Push Readiness Report。 | push readiness 必须与 rebuild approval 分开审计，并且 push 仍需要人类确认。 | Pre-Rebuild Verification |
