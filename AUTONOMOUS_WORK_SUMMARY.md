@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `61def0f Add temporal awareness RFC`
+- End commit before this summary: `bf260f5 Add recall event write policy RFC`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -18,6 +18,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P56 Boundary Test Matrix | `175f577` | `BOUNDARY_TEST_MATRIX.md`, `BOUNDARY_TEST_MATRIX_ZH.md` | No |
 | P57 Open Question Triage | `70cc128` | `OPEN_QUESTIONS_TRIAGE.md`, `OPEN_QUESTIONS_TRIAGE_ZH.md` | No |
 | P58 Temporal Awareness RFC v0.1 | `61def0f` | `TEMPORAL_AWARENESS_RFC.md`, `TEMPORAL_AWARENESS_RFC_ZH.md` | No |
+| P59 Recall Event Write Policy RFC | `bf260f5` | `RECALL_EVENT_WRITE_POLICY_RFC.md`, `RECALL_EVENT_WRITE_POLICY_RFC_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -42,7 +43,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P58, each phase ran:
+For P54-P59, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -77,7 +78,6 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P59 Recall Event Write Policy RFC, document-only.
 - P60 Stateful Memory Minimal Encoding Policy.
 - P61 Growth Candidate Lifecycle RFC, document-only.
 - P62 Productive Drift vs Collapse RFC.
@@ -88,8 +88,8 @@ was not itself a git repository.
 Next safe phase:
 
 ```text
-P59 Recall Event Write Policy RFC
+P60 Stateful Memory Minimal Encoding Policy
 ```
 
-Constraint: document-only. Do not write recall events, mutate memory, promote
-growth candidates, or introduce temporal event execution.
+Constraint: policy/document layer only. Do not create a new memory store,
+rewrite memory, write recall events, mutate identity, or promote growth.
