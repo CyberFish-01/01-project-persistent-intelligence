@@ -46,6 +46,7 @@ current documents carry it, and what is still only long-term vision?"
 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [FOUNDATION_OBSERVATORY_REPORT_ZH.md](./FOUNDATION_OBSERVATORY_REPORT_ZH.md) | Founder-facing observatory report | Summarizes foundation status as Markdown without implementing dashboard, CLI, status API, or product UI. |
 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md) | CLI planning RFC | Defines the read-only observatory CLI report boundary later implemented narrowly in P96. |
 | `python3 -m one_core.cli foundation-observatory-report` | Read-only observatory CLI | Implements the P96 static founder-facing report generator without dashboard runtime, policy execution, state mutation, or phase creation. |
+| [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md) | Usability review | Reviews founder-facing readability and keeps harness implementation blocked. |
 
 ## Original Idea Chains
 
@@ -93,7 +94,7 @@ current documents carry it, and what is still only long-term vision?"
 | Capability Evolution Boundary | Tool-first capability evolution needs explicit allowed and forbidden scopes before any verification or library policy work. | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `boundary-rfc`, not tool execution |
 | Visual Naming Guide | Founder-facing views need plain Chinese labels without losing precise internal English keys. | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md), [GLOSSARY.md](./GLOSSARY.md) | `naming-guide`, not UI or dashboard runtime |
 | Foundation Observatory Report | The founder needs a readable Markdown snapshot before any dashboard or CLI plan. | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
-| Minimal Observatory CLI | A generated observatory report now needs to stay read-only and founder-facing. | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, not dashboard runtime |
+| Minimal Observatory CLI | A generated observatory report now needs to stay read-only and founder-facing. | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
 
 ## Second Chain Map: Artificial Life History
 

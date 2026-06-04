@@ -17,12 +17,11 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P96 Minimal Observatory CLI Implementation 已完成。仓库现在包含只读
-`foundation-observatory-report` 命令，可从已批准的静态 foundation artifacts 生成面向
-founder 的 Markdown 或 JSON 报告。下一步方向必须由项目创始人确认；候选方向可以包括
-founder / CTO review、static readiness generator，或另一个有边界的 planning phase。
+当前工作状态：P98 Observatory Readability Improvement 已完成。只读
+`foundation-observatory-report` 命令现在能生成更面向 founder 的 Markdown 或 JSON：包含一屏摘要、
+更浅显的 readiness rows、更清楚的风险解释，以及更安全的下一步候选。
 
-下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P97、实现 harness、建设
+下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P99、实现 harness、建设
 dashboard runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、
 product、Temporal Awareness runtime、tool execution、automatic tool generation、
 automatic tool promotion、growth execution、memory rewrite 或 reconstruction reducers 的授权。
@@ -34,7 +33,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P96 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P98 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -48,6 +47,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) / [VISUAL_NAMING_GUIDE_ZH.md](./VISUAL_NAMING_GUIDE_ZH.md)：P93 founder-facing vocabulary 和未来视觉层中文显示名映射。
 - [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) / [FOUNDATION_OBSERVATORY_REPORT_ZH.md](./FOUNDATION_OBSERVATORY_REPORT_ZH.md)：P94 Markdown founder-facing snapshot、readiness matrix、boundary status、risk heatmap 和下一步建议。
 - [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) / [MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md](./MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md)：P95 future read-only observatory CLI report boundary 的 RFC-only plan。
+- [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md) / [OBSERVATORY_USABILITY_REVIEW_ZH.md](./OBSERVATORY_USABILITY_REVIEW_ZH.md)：P97 founder-facing usability review，推动 P98 可读性改进。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 
 ## Foundation Review Artifacts / 地基审查文档
@@ -120,8 +120,7 @@ Continuity = State Transfer
 
 ## Prototype Reference / 原型参考
 
-本仓库包含一个最小本地 01 Core。P95 planning/RFC-only Minimal Observatory CLI planning 完成后，
-P96 新增了一个只读 observatory report 命令。其他命令仍只作为验证和理解方向的参考：
+本仓库包含一个最小本地 01 Core。P98 可读性改进后，observatory CLI 仍保持只读。其他命令仍只作为验证和理解方向的参考：
 
 ```bash
 python3 -m one_core.cli init
@@ -144,7 +143,7 @@ python3 -m one_core.cli foundation-observatory-report --lang zh
 ```
 
 这个命令读取已批准的 foundation documents 并输出静态报告。它不修改 state、不执行 policy、
-不创建 roadmap phase，也不是 dashboard runtime。
+不创建 roadmap phase、不实现 harness，也不是 dashboard runtime。
 
 本地 API 参考：
 

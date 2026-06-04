@@ -38,7 +38,7 @@ capabilities 被关闭。
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed / forbidden scope 已定义，但缺 verification evidence model、candidate review schema、safe tool library policy 和 implementation gates | automatic tool execution、automatic promotion、policy executor、identity mutation |
 | Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys 已映射为中文显示名，但仍缺 visual surface contract、status assignment policy 和 dashboard approval | Web UI、dashboard runtime、observability CLI、product layer |
 | Foundation Observatory Report | `report-drafted`, `indexed`, `static-cli-implemented`, `blocked-runtime` | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) | 已有 Markdown founder-facing report 和 read-only static CLI，但没有 dashboard runtime、status API、product surface 或 live monitor | dashboard runtime、status API、product UI、observability executor |
-| Minimal Observatory CLI | `implemented-static-report`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) | P96 command 已存在，但 source freshness、status assignment policy、generated-report maintenance 和 false readiness risks 仍开放 | observability executor、automatic phase creation、dashboard runtime |
+| Minimal Observatory CLI | `implemented-static-report`, `readability-improved`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) | P98 command 更 founder-readable，但 source freshness、status assignment policy、generated-report maintenance 和 false readiness risks 仍开放 | observability executor、automatic phase creation、dashboard runtime |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -273,14 +273,16 @@ API、product surface、observability executor 或 runtime monitor。
 ### Minimal Observatory CLI / 最小观察台 CLI
 
 已由 [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) 澄清，并在 P96 中以
-`python3 -m one_core.cli foundation-observatory-report` 窄范围实现。它仍然 open，因为 P96 只实现
-read-only static report generator。
+`python3 -m one_core.cli foundation-observatory-report` 窄范围实现。P98 增加 one-screen summary、
+can/cannot readiness rows、更清楚的 risk explanations 和带 benefit/risk 的 next-step candidates。
+它仍然 open，因为这仍只是 read-only static report generator。
 
 仍开放：
 
 - future changes 如何证明 no mutation；
 - static local state summaries 是否允许作为 inputs；
 - source freshness 和 false readiness signals 应如何展示；
+- readiness labels 是否需要单独的 status-assignment policy；
 - 如何防止 observability 变成 automatic roadmap execution 或 automatic next phase creation。
 
 ### Recall Event Write Policy / 回忆事件写入策略
@@ -441,6 +443,6 @@ policy 仍与 payload capture 分离。
 
 ## Current Recommendation / 当前建议
 
-先暂停做 founder / CTO review，再选择 P97。P96 被严格限制为 read-only static observatory
-report；它不是 dashboard runtime、harness implementation、policy execution、product UI 或
-automatic roadmap execution 的授权。
+先暂停做 founder / CTO review，再选择 P99。P98 只在 read-only observatory 内提升可读性；它不是
+dashboard runtime、harness implementation、policy execution、product UI 或 automatic roadmap
+execution 的授权。

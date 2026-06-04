@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P96。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P98。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -103,3 +103,5 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P94 | 加入 Foundation Observatory Report。 | 任何 dashboard 或 CLI runtime 前，创始人需要一份可读 Markdown 视图。 | Foundation Observatory |
 | P95 | 加入 Minimal Observatory CLI Plan。 | future generated observatory report 在 implementation 前需要 read-only scope。 | Foundation Observatory |
 | P96 | 加入 Minimal Observatory CLI implementation。 | founder-facing observatory report 可以只读生成，且不发生 mutation。 | Foundation Observatory |
+| P97 | 加入 Observatory Usability Review。 | read-only report 在进入 harness work 前仍需要 founder-facing readability。 | Foundation Observatory |
+| P98 | 改进 observatory readability。 | 观察台应更像状态仪表盘，而不是论文目录，同时保持 read-only。 | Foundation Observatory |

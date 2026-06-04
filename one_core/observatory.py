@@ -18,6 +18,7 @@ SOURCE_DOCUMENTS = [
     ("VISUAL_NAMING_GUIDE.md", "VISUAL_NAMING_GUIDE_ZH.md"),
     ("FOUNDATION_OBSERVATORY_REPORT.md", "FOUNDATION_OBSERVATORY_REPORT_ZH.md"),
     ("MINIMAL_OBSERVATORY_CLI_PLAN.md", "MINIMAL_OBSERVATORY_CLI_PLAN_ZH.md"),
+    ("OBSERVATORY_USABILITY_REVIEW.md", "OBSERVATORY_USABILITY_REVIEW_ZH.md"),
 ]
 
 READINESS_CATEGORIES = [
@@ -52,12 +53,13 @@ def build_observatory_report(lang: str = "en") -> dict[str, Any]:
         raise ValueError("lang must be 'en' or 'zh'")
 
     report = {
-        "report_id": "foundation_observatory_report_v0.2",
+        "report_id": "foundation_observatory_report_v0.3",
         "generated_by": "foundation-observatory-report",
         "lang": lang,
         "observatory_scope": "read_only_static_report",
         "source_documents": [_source_document(en, zh, lang) for en, zh in SOURCE_DOCUMENTS],
         "readiness_categories": READINESS_CATEGORIES,
+        "founder_summary": _founder_summary(lang),
         "founder_snapshot": _founder_snapshot(lang),
         "main_axes_map": _main_axes_map(lang),
         "readiness_matrix": _readiness_matrix(lang),
@@ -97,29 +99,51 @@ def _source_document(en_path: str, zh_path: str, lang: str) -> dict[str, Any]:
     }
 
 
+def _founder_summary(lang: str) -> dict[str, Any]:
+    if lang == "zh":
+        return {
+            "display_name": "一屏摘要",
+            "internal_key": "founder_summary",
+            "headline": "01 Core 现在是可审查的连续性地基，不是自动行动系统。",
+            "current_focus": "先把状态、边界、风险和下一步看清楚，再决定是否进入交互试验。",
+            "safe_next_step": "继续打磨观察台，并由创始人 / CTO 审查 P98 输出。",
+            "do_not_do_yet": "不要进入 harness implementation、产品 UI、AstrBot 集成、自动成长或工具执行。",
+            "readiness_hint": "看到 RFC 层、评估层或未来方向时，只代表已有想法或计划，不代表已经实现。",
+        }
+    return {
+        "display_name": "One-Screen Summary",
+        "internal_key": "founder_summary",
+        "headline": "01 Core is now an auditable continuity foundation, not an automatic action system.",
+        "current_focus": "Make status, boundaries, risks, and next steps clear before interaction work.",
+        "safe_next_step": "Continue polishing the observatory and have the founder / CTO review P98 output.",
+        "do_not_do_yet": "Do not enter harness implementation, product UI, AstrBot integration, automatic growth, or tool execution.",
+        "readiness_hint": "RFC-only, evaluation-only, and future-direction items are plans or review surfaces, not implemented capabilities.",
+    }
+
+
 def _founder_snapshot(lang: str) -> dict[str, Any]:
     if lang == "zh":
         return {
             "display_name": "创始人快照",
             "internal_key": "founder_snapshot",
-            "summary": "01 Core 当前是 Persistent Intelligence 的连续性地基，不是产品层或自动执行系统。",
+            "summary": "01 Core 当前是在打地基：让一个 AI Core 的状态、身份、事件、风险和边界能被看见、审查和延续。",
             "current_state": [
-                "已有本地 01 Core prototype 和大量 foundation documents。",
-                "当前重点是可见性、边界和只读观察，不是增加能力。",
-                "P96 CLI 只生成报告，不修改 state。",
+                "已有本地 01 Core prototype、事件/状态相关工程参考，以及大量 foundation documents。",
+                "当前重点是可见性、边界和只读观察，不是增加行动能力。",
+                "P98 observatory 输出只生成报告，不修改 state，也不执行下一步。",
             ],
-            "why_observatory_next": "观察台让创始人一眼看清已实现、报告层、RFC 层、未来方向和 blocked 工作。",
+            "why_observatory_next": "观察台应该让创始人不用读完整论文式文档，也能看清已实现、计划中、禁止做和下一步该审查的内容。",
         }
     return {
         "display_name": "Founder Snapshot",
         "internal_key": "founder_snapshot",
-        "summary": "01 Core is currently a continuity foundation for Persistent Intelligence, not a product layer or automatic executor.",
+        "summary": "01 Core is currently foundation work: making state, identity, events, risks, and boundaries visible, reviewable, and continuous.",
         "current_state": [
-            "A local 01 Core prototype and a broad foundation document set exist.",
-            "The current focus is visibility, boundaries, and read-only observation, not more power.",
-            "The P96 CLI generates reports only and does not mutate state.",
+            "A local 01 Core prototype, event/state engineering references, and broad foundation documents exist.",
+            "The current focus is visibility, boundaries, and read-only observation, not more action power.",
+            "The P98 observatory output generates reports only and does not mutate state or execute next steps.",
         ],
-        "why_observatory_next": "The observatory lets the founder see what is implemented, report-only, RFC-only, future direction, and blocked.",
+        "why_observatory_next": "The observatory should let the founder understand implemented, planned, forbidden, and review-next work without reading the entire research corpus.",
     }
 
 
@@ -163,44 +187,327 @@ def _axis(
 
 def _readiness_matrix(lang: str) -> list[dict[str, Any]]:
     rows = [
-        ("身份核心", "Identity Core", "report_only", "high", "Keep protected behind Identity Gate.", "继续由 Identity Gate 保护。"),
-        ("状态传递", "State Transfer", "report_only", "medium", "Keep as continuity proposition, not retrieval.", "继续作为 continuity 命题，不降级为 retrieval。"),
-        ("事件日志", "Event Log", "implemented", "medium", "Keep auditable and append-only.", "继续保持可审计和 append-only。"),
-        ("回放检查", "Replay", "report_only", "medium", "Report readiness without rebuilding state.", "只报告 readiness，不重建 state。"),
-        ("状态重建", "Reconstruction", "rfc_only", "high", "Finish contracts before reducers.", "先完成 contracts，再讨论 reducers。"),
-        ("信念证据图", "Claim Graph", "report_only", "medium", "Do not absorb every meaning shift.", "不要吞掉所有 meaning shift。"),
-        ("任务中心", "Task Hub", "report_only", "medium", "Do not replace governance review.", "不要替代 governance review。"),
-        ("状态化记忆", "Stateful Memory", "rfc_only", "high", "Keep semantics separate from memory rewrite.", "保持 semantics 与 memory rewrite 分离。"),
-        ("成长候选审查", "Growth Candidate Review", "rfc_only", "high", "Candidate is not promoted growth.", "candidate 不是 promoted growth。"),
-        ("时间感知", "Temporal Awareness", "rfc_only", "high", "No temporal runtime or event writes.", "不做 temporal runtime 或 event writes。"),
-        ("时间一致性", "Temporal Coherence", "evaluation_only", "high", "Signal is not truth or identity proof.", "signal 不是 truth 或 identity proof。"),
-        ("能力进化", "Capability Evolution", "rfc_only", "high", "Capability growth is not subject growth.", "capability growth 不是 subject growth。"),
-        ("工具优先自进化", "Tool-First Self-Evolution", "rfc_only", "high", "Verification is not authorization.", "verification 不是 authorization。"),
-        ("轻量交互试验台", "Thin Interaction Harness", "rfc_only", "medium", "Keep preview-only until approved.", "未批准前保持 preview-only。"),
-        ("地基观察台", "Foundation Observatory", "implemented", "medium", "Use read-only CLI report only.", "只使用 read-only CLI report。"),
+        _readiness_row(
+            zh_display="身份核心",
+            display="Identity Core",
+            internal_key="Identity Core",
+            status="report_only",
+            status_label_zh="报告层",
+            status_label_en="report layer",
+            risk="high",
+            what_is_it_zh="01 关于“我是谁”的受保护答案。",
+            what_is_it_en="The protected answer to who 01 is.",
+            can_do_zh="可以被观察、审查和作为边界引用。",
+            can_do_en="Can be observed, reviewed, and referenced as a boundary.",
+            cannot_do_zh="不能被自动改写，也不能被聊天、工具或报告直接修改。",
+            cannot_do_en="Cannot be automatically rewritten or changed by chat, tools, or reports.",
+            next_action_zh="继续由 Identity Gate 保护，所有变化都保持 high-gate review。",
+            next_action_en="Keep it protected by Identity Gate and require high-gate review for changes.",
+        ),
+        _readiness_row(
+            zh_display="状态传递",
+            display="State Transfer",
+            internal_key="State Transfer",
+            status="report_only",
+            status_label_zh="报告层",
+            status_label_en="report layer",
+            risk="medium",
+            what_is_it_zh="把当前状态穿过时间传下去，而不是只检索旧记忆。",
+            what_is_it_en="Passing current state through time, not merely retrieving old memories.",
+            can_do_zh="可以作为整个项目的判断标准。",
+            can_do_en="Can be used as the core project criterion.",
+            cannot_do_zh="不能被简化成 summary、retrieval 或长上下文。",
+            cannot_do_en="Cannot be reduced to summary, retrieval, or long context.",
+            next_action_zh="继续用它校准 observatory 和未来 harness 计划。",
+            next_action_en="Use it to calibrate observatory output and future harness plans.",
+        ),
+        _readiness_row(
+            zh_display="事件日志",
+            display="Event Log",
+            internal_key="Event Log",
+            status="implemented",
+            status_label_zh="已实现",
+            status_label_en="implemented",
+            risk="medium",
+            what_is_it_zh="重要状态变化的账本。",
+            what_is_it_en="A ledger of important state changes.",
+            can_do_zh="可以记录和检查已有事件线索。",
+            can_do_en="Can record and inspect existing event evidence.",
+            cannot_do_zh="不能压缩历史，也不能替代完整重建。",
+            cannot_do_en="Cannot compact history or replace full reconstruction.",
+            next_action_zh="保持 append-only 和可审计。",
+            next_action_en="Keep it append-only and auditable.",
+        ),
+        _readiness_row(
+            zh_display="回放检查",
+            display="Replay",
+            internal_key="Replay",
+            status="report_only",
+            status_label_zh="报告层",
+            status_label_en="report layer",
+            risk="medium",
+            what_is_it_zh="检查历史线索能不能再走一遍。",
+            what_is_it_en="Checking whether historical evidence can be followed again.",
+            can_do_zh="可以报告 replay readiness。",
+            can_do_en="Can report replay readiness.",
+            cannot_do_zh="不能重建 state，也不能执行 rollback。",
+            cannot_do_en="Cannot rebuild state or execute rollback.",
+            next_action_zh="继续只报告 readiness，不执行 reducer。",
+            next_action_en="Continue reporting readiness without executing reducers.",
+        ),
+        _readiness_row(
+            zh_display="状态重建",
+            display="Reconstruction",
+            internal_key="Reconstruction",
+            status="rfc_only",
+            status_label_zh="RFC 层",
+            status_label_en="RFC layer",
+            risk="high",
+            what_is_it_zh="未来用证据重建过去状态的方向。",
+            what_is_it_en="The future direction for rebuilding past state from evidence.",
+            can_do_zh="可以讨论 contract、payload 和 diff 要求。",
+            can_do_en="Can discuss contracts, payload requirements, and diff requirements.",
+            cannot_do_zh="现在不能执行 reducer 或重建 state。",
+            cannot_do_en="Cannot execute reducers or rebuild state now.",
+            next_action_zh="先补清楚 reducer contract 和 evidence gaps。",
+            next_action_en="Clarify reducer contracts and evidence gaps first.",
+        ),
+        _readiness_row(
+            zh_display="说法证据图",
+            display="Claim Graph",
+            internal_key="Claim Graph",
+            status="report_only",
+            status_label_zh="报告层",
+            status_label_en="report layer",
+            risk="medium",
+            what_is_it_zh="记录哪些说法有证据、冲突或仍未解决。",
+            what_is_it_en="Tracks which claims are supported, conflicting, or unresolved.",
+            can_do_zh="可以帮助审查 claim 和 evidence。",
+            can_do_en="Can support claim and evidence review.",
+            cannot_do_zh="不能吞掉所有意义变化，也不能自动改信念。",
+            cannot_do_en="Cannot absorb every meaning shift or automatically change beliefs.",
+            next_action_zh="继续保持 claim review 和 meaning shift 分工。",
+            next_action_en="Keep claim review separate from meaning-shift review.",
+        ),
+        _readiness_row(
+            zh_display="任务中心",
+            display="Task Hub",
+            internal_key="Task Hub",
+            status="report_only",
+            status_label_zh="报告层",
+            status_label_en="report layer",
+            risk="medium",
+            what_is_it_zh="保存正在做什么、接下来要看什么的任务视图。",
+            what_is_it_en="A task view for what is active and what needs attention next.",
+            can_do_zh="可以辅助恢复任务上下文。",
+            can_do_en="Can help resume task context.",
+            cannot_do_zh="不能替代 governance review 或自动执行 roadmap。",
+            cannot_do_en="Cannot replace governance review or execute roadmaps automatically.",
+            next_action_zh="继续把任务状态和审查对象分开。",
+            next_action_en="Keep task state separate from review objects.",
+        ),
+        _readiness_row(
+            zh_display="带状态的记忆",
+            display="Stateful Memory",
+            internal_key="Stateful Memory",
+            status="rfc_only",
+            status_label_zh="RFC 层",
+            status_label_en="RFC layer",
+            risk="high",
+            what_is_it_zh="记忆加上形成和被回忆时的状态条件。",
+            what_is_it_en="Memory plus the conditions under which it was encoded and recalled.",
+            can_do_zh="可以作为解释 meaning shift 的语义框架。",
+            can_do_en="Can frame how meaning shifts should be interpreted.",
+            cannot_do_zh="不能改写 memory，也不能自动提升成 growth。",
+            cannot_do_en="Cannot rewrite memory or automatically promote growth.",
+            next_action_zh="先定义最小 encoding policy 和 review criteria。",
+            next_action_en="Clarify minimal encoding policy and review criteria first.",
+        ),
+        _readiness_row(
+            zh_display="成长提案审查",
+            display="Growth Candidate Review",
+            internal_key="Growth Candidate Review",
+            status="rfc_only",
+            status_label_zh="RFC 层",
+            status_label_en="RFC layer",
+            risk="high",
+            what_is_it_zh="把可能的成长先作为提案审查，而不是直接当成已经成长。",
+            what_is_it_en="Reviews possible growth as a proposal, not completed growth.",
+            can_do_zh="可以帮助区分 candidate 和 promoted result。",
+            can_do_en="Can separate candidates from promoted results.",
+            cannot_do_zh="不能执行 growth lifecycle，也不能修改身份。",
+            cannot_do_en="Cannot execute growth lifecycle or mutate identity.",
+            next_action_zh="继续保持 review-only，避免自动成长。",
+            next_action_en="Keep it review-only and avoid automatic growth.",
+        ),
+        _readiness_row(
+            zh_display="时间感知",
+            display="Temporal Awareness",
+            internal_key="Temporal Awareness",
+            status="rfc_only",
+            status_label_zh="RFC 层",
+            status_label_en="RFC layer",
+            risk="high",
+            what_is_it_zh="研究时间流逝如何影响状态理解。",
+            what_is_it_en="Studies how elapsed time may affect state interpretation.",
+            can_do_zh="可以作为 future direction 和 review question。",
+            can_do_en="Can remain a future direction and review question.",
+            cannot_do_zh="不能写 temporal event，也不能做 temporal runtime。",
+            cannot_do_en="Cannot write temporal events or implement temporal runtime.",
+            next_action_zh="继续放在 RFC / evaluation 层。",
+            next_action_en="Keep it in RFC and evaluation layers.",
+        ),
+        _readiness_row(
+            zh_display="时间线一致性检查",
+            display="Temporal Coherence",
+            internal_key="Temporal Coherence",
+            status="evaluation_only",
+            status_label_zh="评估层",
+            status_label_en="evaluation layer",
+            risk="high",
+            what_is_it_zh="检查一个变化是否仍符合时间线和证据。",
+            what_is_it_en="Checks whether a change still fits the timeline and evidence.",
+            can_do_zh="可以设计 deterministic scenario。",
+            can_do_en="Can design deterministic scenarios.",
+            cannot_do_zh="不能当成意识、思维或身份更新依据。",
+            cannot_do_en="Cannot be treated as consciousness, thought, or identity-update proof.",
+            next_action_zh="继续作为 evaluation signal，不变成 runtime truth。",
+            next_action_en="Keep it as an evaluation signal, not runtime truth.",
+        ),
+        _readiness_row(
+            zh_display="能力改进边界",
+            display="Capability Evolution",
+            internal_key="Capability Evolution",
+            status="rfc_only",
+            status_label_zh="RFC 层",
+            status_label_en="RFC layer",
+            risk="high",
+            what_is_it_zh="工具和流程可以改进，但不能等同于主体成长。",
+            what_is_it_en="Tools and procedures may improve, but that is not subject growth.",
+            can_do_zh="可以定义 evidence 和 authorization 边界。",
+            can_do_en="Can define evidence and authorization boundaries.",
+            cannot_do_zh="不能自动执行工具、提升工具或改变身份。",
+            cannot_do_en="Cannot execute tools, promote tools, or change identity automatically.",
+            next_action_zh="先做 Tool Verification Evidence Model，而不是 tool runtime。",
+            next_action_en="Consider a Tool Verification Evidence Model before any tool runtime.",
+        ),
+        _readiness_row(
+            zh_display="先改工具，不改身份",
+            display="Tool-First Self-Evolution",
+            internal_key="Tool-First Self-Evolution",
+            status="rfc_only",
+            status_label_zh="RFC 层",
+            status_label_en="RFC layer",
+            risk="high",
+            what_is_it_zh="先研究可验证的工具改进，不让它滑向身份成长。",
+            what_is_it_en="Studies verifiable tool improvement before any subject or identity change.",
+            can_do_zh="可以作为 capability RFC 方向。",
+            can_do_en="Can guide capability RFC work.",
+            cannot_do_zh="不能生成工具、执行工具或自动 promotion。",
+            cannot_do_en="Cannot generate tools, execute tools, or promote automatically.",
+            next_action_zh="继续保持 verification 不等于 authorization。",
+            next_action_en="Keep verification separate from authorization.",
+        ),
+        _readiness_row(
+            zh_display="本地交互预演",
+            display="Thin Interaction Harness",
+            internal_key="Thin Interaction Harness",
+            status="rfc_only",
+            status_label_zh="RFC 层",
+            status_label_en="RFC layer",
+            risk="medium",
+            what_is_it_zh="未来可能用于本地预演交互的窄入口，不是聊天产品。",
+            what_is_it_en="A possible narrow local interaction preview, not a chat product.",
+            can_do_zh="可以继续 planning 或写 implementation plan。",
+            can_do_en="Can continue planning or receive an implementation plan.",
+            cannot_do_zh="现在不能实现 harness、UI、adapter 或 mutation path。",
+            cannot_do_en="Cannot implement harness, UI, adapters, or mutation paths now.",
+            next_action_zh="先让 observatory 更清楚，再讨论 implementation plan。",
+            next_action_en="Clarify the observatory before discussing implementation plans.",
+        ),
+        _readiness_row(
+            zh_display="地基观察台",
+            display="Foundation Observatory",
+            internal_key="Foundation Observatory",
+            status="implemented",
+            status_label_zh="已实现",
+            status_label_en="implemented",
+            risk="medium",
+            what_is_it_zh="用只读报告展示地基状态、风险、边界和下一步候选。",
+            what_is_it_en="A read-only report showing foundation status, risks, boundaries, and candidate next steps.",
+            can_do_zh="可以生成 Markdown / JSON 报告。",
+            can_do_en="Can generate Markdown and JSON reports.",
+            cannot_do_zh="不能变成 dashboard runtime、policy executor 或自动路线图执行器。",
+            cannot_do_en="Cannot become dashboard runtime, policy executor, or automatic roadmap executor.",
+            next_action_zh="继续打磨可读性，不进入产品层。",
+            next_action_en="Continue improving readability without entering product work.",
+        ),
     ]
+    return [_localized_readiness_row(row, lang) for row in rows]
+
+
+def _readiness_row(
+    *,
+    zh_display: str,
+    display: str,
+    internal_key: str,
+    status: str,
+    status_label_zh: str,
+    status_label_en: str,
+    risk: str,
+    what_is_it_zh: str,
+    what_is_it_en: str,
+    can_do_zh: str,
+    can_do_en: str,
+    cannot_do_zh: str,
+    cannot_do_en: str,
+    next_action_zh: str,
+    next_action_en: str,
+) -> dict[str, Any]:
+    return {
+        "zh_display_name": zh_display,
+        "display_name": display,
+        "internal_key": internal_key,
+        "status": status,
+        "status_label_zh": status_label_zh,
+        "status_label_en": status_label_en,
+        "risk": risk,
+        "what_is_it_zh": what_is_it_zh,
+        "what_is_it_en": what_is_it_en,
+        "can_do_zh": can_do_zh,
+        "can_do_en": can_do_en,
+        "cannot_do_zh": cannot_do_zh,
+        "cannot_do_en": cannot_do_en,
+        "next_action_zh": next_action_zh,
+        "next_action_en": next_action_en,
+    }
+
+
+def _localized_readiness_row(row: dict[str, Any], lang: str) -> dict[str, Any]:
     if lang == "zh":
-        return [
-            {
-                "display_name": display,
-                "internal_key": key,
-                "status": status,
-                "risk": risk,
-                "next_action": zh_action,
-            }
-            for display, key, status, risk, _en_action, zh_action in rows
-        ]
-    return [
-        {
-            "display_name": key,
-            "internal_key": key,
-            "zh_display_name": display,
-            "status": status,
-            "risk": risk,
-            "next_action": en_action,
+        return {
+            "display_name": row["zh_display_name"],
+            "internal_key": row["internal_key"],
+            "status_label": row["status_label_zh"],
+            "status": row["status"],
+            "risk": row["risk"],
+            "what_is_it": row["what_is_it_zh"],
+            "can_do": row["can_do_zh"],
+            "cannot_do": row["cannot_do_zh"],
+            "next_action": row["next_action_zh"],
         }
-        for display, key, status, risk, en_action, _zh_action in rows
-    ]
+    return {
+        "display_name": row["display_name"],
+        "internal_key": row["internal_key"],
+        "zh_display_name": row["zh_display_name"],
+        "status_label": row["status_label_en"],
+        "status": row["status"],
+        "risk": row["risk"],
+        "what_is_it": row["what_is_it_en"],
+        "can_do": row["can_do_en"],
+        "cannot_do": row["cannot_do_en"],
+        "next_action": row["next_action_en"],
+    }
 
 
 def _boundary_status(lang: str) -> list[dict[str, Any]]:
@@ -266,52 +573,295 @@ def _boundary_status(lang: str) -> list[dict[str, Any]]:
 
 def _risk_heatmap(lang: str) -> list[dict[str, str]]:
     risks = [
-        ("概念膨胀", "concept inflation", "high", "Use phase index, glossary, and concept ownership."),
-        ("review 层套 review 层", "review layer stacking", "medium", "Keep review objects few and owned."),
-        ("过早 runtime", "premature runtime", "high", "Require founder approval for implementation."),
-        ("companion 污染", "companion contamination", "high", "Keep social/product behavior blocked."),
-        ("tool autonomy creep", "tool autonomy creep", "high", "Keep verification separate from authorization."),
-        ("temporal overreach", "temporal overreach", "high", "Keep temporal concepts symbolic/evaluation-only."),
-        ("identity drift", "identity drift", "high", "Keep identity changes high-gated."),
-        ("observability becoming product UI", "observability becoming product UI", "medium", "Keep CLI read-only and non-dashboard."),
-        ("fake cognition vocabulary", "fake cognition vocabulary", "high", "Keep anti-pseudocognition boundaries visible."),
+        _risk_row(
+            zh_display="概念太多看不清",
+            display="Concept overload",
+            internal_key="concept inflation",
+            risk_level="high",
+            plain_zh="概念越来越多，创始人很难判断哪个是真地基、哪个只是未来想法。",
+            plain_en="There are so many concepts that it becomes hard to tell foundation from future ideas.",
+            danger_zh="如果不收敛，后续开发会把 RFC、review object 或 candidate 误当成已实现能力。",
+            danger_en="If it is not controlled, later work may treat RFCs, review objects, or candidates as implemented capabilities.",
+            mitigation_zh="用 phase index、glossary 和 observatory status 明确每个概念的位置。",
+            mitigation_en="Use the phase index, glossary, and observatory status to place each concept clearly.",
+            next_zh="继续给每个抽象概念加一句浅显解释和 status label。",
+            next_en="Continue adding plain explanations and status labels to abstract concepts.",
+        ),
+        _risk_row(
+            zh_display="审查层叠太厚",
+            display="Review stacking",
+            internal_key="review layer stacking",
+            risk_level="medium",
+            plain_zh="审查对象越来越多，可能变成只审查审查本身。",
+            plain_en="Review objects can pile up until the system mostly reviews its own reviews.",
+            danger_zh="这会让真正的状态、风险和下一步被隐藏在流程里。",
+            danger_en="This can hide real state, risk, and next steps inside process layers.",
+            mitigation_zh="保留少量核心 review surface，并说明每个 review 管什么。",
+            mitigation_en="Keep only a small set of core review surfaces and state their ownership.",
+            next_zh="把重复 review 概念合并到跨层审查区或 open questions。",
+            next_en="Merge overlapping review concepts into governance surface or open questions.",
+        ),
+        _risk_row(
+            zh_display="过早做运行时",
+            display="Premature runtime",
+            internal_key="premature runtime",
+            risk_level="high",
+            plain_zh="还没看清边界就开始写能行动的功能。",
+            plain_en="Building action-capable runtime before boundaries are clear.",
+            danger_zh="一旦 runtime 写进去，review-only 可能被误读成自动执行。",
+            danger_en="Once runtime exists, review-only concepts may be mistaken for execution.",
+            mitigation_zh="所有 implementation 都必须有创始人明确批准，并通过 forbidden search。",
+            mitigation_en="Require explicit founder approval and forbidden-search checks for implementation.",
+            next_zh="P98 只改静态报告；不要进入 harness implementation。",
+            next_en="Keep P98 to static reporting; do not enter harness implementation.",
+        ),
+        _risk_row(
+            zh_display="陪伴层过早介入",
+            display="Companion contamination",
+            internal_key="companion contamination",
+            risk_level="high",
+            plain_zh="把连续性地基误做成陪伴产品或社交人格。",
+            plain_en="Mistaking the continuity foundation for a companion product or social persona.",
+            danger_zh="这会污染 Identity Core，并把 relationship behavior 误当成主体成长。",
+            danger_en="It can contaminate Identity Core and confuse relationship behavior with subject growth.",
+            mitigation_zh="继续阻塞 companion、relationship、UI 和 product layer。",
+            mitigation_en="Keep companion, relationship, UI, and product layers blocked.",
+            next_zh="所有 founder-facing 文案继续强调“地基，不是产品”。",
+            next_en="Keep founder-facing text clear: foundation, not product.",
+        ),
+        _risk_row(
+            zh_display="工具能力滑向自动执行",
+            display="Tool autonomy creep",
+            internal_key="tool autonomy creep",
+            risk_level="high",
+            plain_zh="工具验证、工具候选和工具执行混在一起。",
+            plain_en="Tool verification, tool candidates, and tool execution start blending together.",
+            danger_zh="验证成功可能被误当成授权，从而打开不受控执行。",
+            danger_en="A successful verification could be mistaken for authorization and enable uncontrolled execution.",
+            mitigation_zh="坚持 verification 不等于 authorization，candidate 不等于 promoted tool。",
+            mitigation_en="Keep verification separate from authorization and candidates separate from promoted tools.",
+            next_zh="如继续能力方向，先写 Tool Verification Evidence Model，不写 tool runtime。",
+            next_en="If capability work continues, write Tool Verification Evidence Model before any tool runtime.",
+        ),
+        _risk_row(
+            zh_display="时间概念过度解释",
+            display="Temporal overreach",
+            internal_key="temporal overreach",
+            risk_level="high",
+            plain_zh="把时间一致性、CTM 启发或 thought trace 说得像真实思维。",
+            plain_en="Treating temporal coherence, CTM inspiration, or traces as if they were real thought.",
+            danger_zh="这会越过 anti-pseudocognition boundary，并误导身份更新判断。",
+            danger_en="It crosses anti-pseudocognition boundaries and can mislead identity-update decisions.",
+            mitigation_zh="时间相关内容保持 symbolic、RFC-only 或 evaluation-only。",
+            mitigation_en="Keep temporal concepts symbolic, RFC-only, or evaluation-only.",
+            next_zh="不要实现 temporal runtime；只改报告里的解释清晰度。",
+            next_en="Do not implement temporal runtime; only clarify report wording.",
+        ),
+        _risk_row(
+            zh_display="身份漂移",
+            display="Identity drift",
+            internal_key="identity drift",
+            risk_level="high",
+            plain_zh="系统在没有高门槛审查的情况下改变“我是谁”。",
+            plain_en="The system changes who it is without high-gate review.",
+            danger_zh="这会破坏 continuity，把持续主体变成一组临时行为。",
+            danger_en="It breaks continuity and turns the subject into temporary behavior.",
+            mitigation_zh="Identity Core 保持 high-gated，observatory 只显示状态，不修改状态。",
+            mitigation_en="Keep Identity Core high-gated; observatory shows state and never changes it.",
+            next_zh="继续在 boundary status 中显式显示身份修改 blocked。",
+            next_en="Continue showing identity mutation as blocked in boundary status.",
+        ),
+        _risk_row(
+            zh_display="观察台变产品界面",
+            display="Observatory becoming product UI",
+            internal_key="observability becoming product UI",
+            risk_level="medium",
+            plain_zh="只读报告被误用成 dashboard runtime、状态 API 或产品入口。",
+            plain_en="A read-only report gets mistaken for dashboard runtime, status API, or product entry.",
+            danger_zh="观察层如果能执行决策，就会绕过 review-only 边界。",
+            danger_en="If the observability layer executes decisions, it bypasses review-only boundaries.",
+            mitigation_zh="CLI 只读输出 Markdown/JSON，不监听、不执行、不创建 phase。",
+            mitigation_en="The CLI only emits Markdown/JSON and does not monitor, execute, or create phases.",
+            next_zh="继续打磨静态输出，不做 Web UI 或 runtime monitor。",
+            next_en="Improve static output only; do not build Web UI or runtime monitoring.",
+        ),
+        _risk_row(
+            zh_display="伪认知词汇误导",
+            display="Pseudocognition wording",
+            internal_key="fake cognition vocabulary",
+            risk_level="high",
+            plain_zh="术语听起来像意识、真实思考或自动成长。",
+            plain_en="Vocabulary sounds like consciousness, real thought, or automatic growth.",
+            danger_zh="这会让 review signal 被误读成主体状态事实。",
+            danger_en="It can make review signals look like facts about subject state.",
+            mitigation_zh="所有 temporal、thought、growth 术语都标注为 review / RFC / evaluation。",
+            mitigation_en="Label temporal, thought, and growth terms as review, RFC, or evaluation surfaces.",
+            next_zh="继续用浅显中文解释：候选不是结果，审查不是执行。",
+            next_en="Keep using plain wording: candidates are not results, review is not execution.",
+        ),
     ]
+    return [_localized_risk_row(row, lang) for row in risks]
+
+
+def _risk_row(
+    *,
+    zh_display: str,
+    display: str,
+    internal_key: str,
+    risk_level: str,
+    plain_zh: str,
+    plain_en: str,
+    danger_zh: str,
+    danger_en: str,
+    mitigation_zh: str,
+    mitigation_en: str,
+    next_zh: str,
+    next_en: str,
+) -> dict[str, str]:
+    return {
+        "zh_display_name": zh_display,
+        "display_name": display,
+        "internal_key": internal_key,
+        "risk_level": risk_level,
+        "plain_explanation_zh": plain_zh,
+        "plain_explanation_en": plain_en,
+        "why_dangerous_zh": danger_zh,
+        "why_dangerous_en": danger_en,
+        "current_mitigation_zh": mitigation_zh,
+        "current_mitigation_en": mitigation_en,
+        "next_step_zh": next_zh,
+        "next_step_en": next_en,
+    }
+
+
+def _localized_risk_row(row: dict[str, str], lang: str) -> dict[str, str]:
     if lang == "zh":
-        return [
-            {
-                "display_name": display,
-                "internal_key": key,
-                "risk": risk,
-                "mitigation": mitigation,
-            }
-            for display, key, risk, mitigation in risks
-        ]
-    return [
-        {
-            "display_name": key,
-            "internal_key": key,
-            "zh_display_name": display,
-            "risk": risk,
-            "mitigation": mitigation,
+        return {
+            "display_name": row["zh_display_name"],
+            "internal_key": row["internal_key"],
+            "plain_explanation": row["plain_explanation_zh"],
+            "why_dangerous": row["why_dangerous_zh"],
+            "current_mitigation": row["current_mitigation_zh"],
+            "next_step": row["next_step_zh"],
+            "risk_level": row["risk_level"],
         }
-        for display, key, risk, mitigation in risks
-    ]
+    return {
+        "display_name": row["display_name"],
+        "internal_key": row["internal_key"],
+        "zh_display_name": row["zh_display_name"],
+        "plain_explanation": row["plain_explanation_en"],
+        "why_dangerous": row["why_dangerous_en"],
+        "current_mitigation": row["current_mitigation_en"],
+        "next_step": row["next_step_en"],
+        "risk_level": row["risk_level"],
+    }
 
 
 def _next_steps(lang: str) -> list[dict[str, Any]]:
-    if lang == "zh":
-        return [
-            {"priority": 1, "candidate": "创始人 / CTO 审查", "recommendation": "先审查 P96 输出，再决定是否继续。"},
-            {"priority": 2, "candidate": "就绪度矩阵静态生成器", "recommendation": "如果继续，只生成静态矩阵，不执行决策。"},
-            {"priority": 3, "candidate": "边界状态静态生成器", "recommendation": "只读生成边界状态，避免 policy executor。"},
-            {"priority": 4, "candidate": "创始人快照生成器", "recommendation": "可后续拆出单独 snapshot 生成器。"},
-        ]
-    return [
-        {"priority": 1, "candidate": "Pause for founder / CTO review", "recommendation": "Review P96 output before continuing."},
-        {"priority": 2, "candidate": "Readiness Matrix Static Generator", "recommendation": "Generate static matrix only, without decisions."},
-        {"priority": 3, "candidate": "Boundary Status Static Generator", "recommendation": "Generate boundary status without policy execution."},
-        {"priority": 4, "candidate": "Founder Snapshot Generator", "recommendation": "Split snapshot generation later if useful."},
+    rows = [
+        _next_step_row(
+            priority=1,
+            candidate_zh="继续打磨观察台",
+            candidate_en="Continue polishing the observatory",
+            why_zh="P97 发现可读性只有 7/10，风险和抽象术语还不够 founder-facing。",
+            why_en="P97 found readability at 7/10; risks and abstract terms are still not founder-facing enough.",
+            benefit_zh="收益是让创始人不用读完整文档，也能看懂状态、风险和边界。",
+            benefit_en="The benefit is making status, risks, and boundaries understandable without reading the full corpus.",
+            risk_zh="风险很低，只要保持 static、read-only、不执行下一步。",
+            risk_en="Risk is low if it stays static, read-only, and non-executing.",
+            not_zh="不要把观察台做成 dashboard runtime、status API 或自动路线图执行器。",
+            not_en="Do not turn the observatory into dashboard runtime, status API, or automatic roadmap executor.",
+        ),
+        _next_step_row(
+            priority=2,
+            candidate_zh="Founder / CTO Review",
+            candidate_en="Founder / CTO Review",
+            why_zh="现在最需要人工判断：哪些概念真正该保留，哪些需要后推。",
+            why_en="Human judgment is needed to decide which concepts stay and which should be deferred.",
+            benefit_zh="收益是避免工程继续堆概念，同时让下一阶段有明确批准。",
+            benefit_en="The benefit is avoiding concept buildup and giving the next phase explicit approval.",
+            risk_zh="风险很低，但可能会暂停实现节奏。",
+            risk_en="Risk is low, though it may slow implementation momentum.",
+            not_zh="不要把 review 结论自动转成执行任务。",
+            not_en="Do not automatically turn review conclusions into execution tasks.",
+        ),
+        _next_step_row(
+            priority=3,
+            candidate_zh="Minimal CLI Harness Implementation Plan",
+            candidate_en="Minimal CLI Harness Implementation Plan",
+            why_zh="如果创始人确认需要往交互试验推进，应先写 implementation plan，而不是直接实现 harness。",
+            why_en="If the founder wants interaction work, write an implementation plan before building the harness.",
+            benefit_zh="收益是提前定义输入、输出、fixture、no-write 边界和测试计划。",
+            benefit_en="The benefit is defining inputs, outputs, fixtures, no-write boundaries, and tests first.",
+            risk_zh="风险是计划语言可能被误读成已批准实现。",
+            risk_en="The risk is that planning language may be mistaken for implementation approval.",
+            not_zh="不要实现 harness、conversation runtime、adapter ingest 或 memory writes。",
+            not_en="Do not implement harness, conversation runtime, adapter ingest, or memory writes.",
+        ),
+        _next_step_row(
+            priority=4,
+            candidate_zh="Tool Verification Evidence Model",
+            candidate_en="Tool Verification Evidence Model",
+            why_zh="能力方向有价值，但必须先证明 verification 不等于 authorization。",
+            why_en="Capability work is valuable, but it must first prove verification is not authorization.",
+            benefit_zh="收益是为未来工具候选提供 evidence vocabulary，同时阻止 tool execution creep。",
+            benefit_en="The benefit is evidence vocabulary for future tool candidates while blocking tool execution creep.",
+            risk_zh="风险是 founder 可能误以为要开始自动工具执行。",
+            risk_en="The risk is that it may look like the start of automatic tool execution.",
+            not_zh="不要执行工具、安装依赖、提升工具或写 policy executor。",
+            not_en="Do not execute tools, install dependencies, promote tools, or write a policy executor.",
+        ),
     ]
+    return [_localized_next_step(row, lang) for row in rows]
+
+
+def _next_step_row(
+    *,
+    priority: int,
+    candidate_zh: str,
+    candidate_en: str,
+    why_zh: str,
+    why_en: str,
+    benefit_zh: str,
+    benefit_en: str,
+    risk_zh: str,
+    risk_en: str,
+    not_zh: str,
+    not_en: str,
+) -> dict[str, Any]:
+    return {
+        "priority": priority,
+        "candidate_zh": candidate_zh,
+        "candidate_en": candidate_en,
+        "why_recommended_zh": why_zh,
+        "why_recommended_en": why_en,
+        "benefit_zh": benefit_zh,
+        "benefit_en": benefit_en,
+        "risk_zh": risk_zh,
+        "risk_en": risk_en,
+        "not_recommended_zh": not_zh,
+        "not_recommended_en": not_en,
+    }
+
+
+def _localized_next_step(row: dict[str, Any], lang: str) -> dict[str, Any]:
+    if lang == "zh":
+        return {
+            "priority": row["priority"],
+            "candidate": row["candidate_zh"],
+            "why_recommended": row["why_recommended_zh"],
+            "benefit": row["benefit_zh"],
+            "risk": row["risk_zh"],
+            "not_recommended": row["not_recommended_zh"],
+        }
+    return {
+        "priority": row["priority"],
+        "candidate": row["candidate_en"],
+        "why_recommended": row["why_recommended_en"],
+        "benefit": row["benefit_en"],
+        "risk": row["risk_en"],
+        "not_recommended": row["not_recommended_en"],
+    }
 
 
 def _what_not_to_build_yet(lang: str) -> list[str]:
@@ -359,6 +909,7 @@ def _render_markdown(report: dict[str, Any]) -> str:
         f"`observatory_scope`: `{report['observatory_scope']}`",
         "",
     ]
+    lines.extend(_render_founder_summary(report["founder_summary"], zh))
     lines.extend(_render_snapshot(report["founder_snapshot"], zh))
     lines.extend(_render_table_section("main_axes_map", report["main_axes_map"], zh))
     lines.extend(_render_table_section("readiness_matrix", report["readiness_matrix"], zh))
@@ -368,6 +919,23 @@ def _render_markdown(report: dict[str, Any]) -> str:
     lines.extend(_render_list_section("what_not_to_build_yet", report["what_not_to_build_yet"], zh))
     lines.extend(_render_invariants(report["non_execution_invariants"], zh))
     return "\n".join(lines)
+
+
+def _render_founder_summary(summary: dict[str, Any], zh: bool) -> list[str]:
+    heading = "## founder_summary / 一屏摘要" if zh else "## founder_summary / One-Screen Summary"
+    lines = [
+        heading,
+        "",
+        f"**{summary['display_name']}** (`{summary['internal_key']}`)",
+        "",
+        f"- headline: {summary['headline']}",
+        f"- current_focus: {summary['current_focus']}",
+        f"- safe_next_step: {summary['safe_next_step']}",
+        f"- do_not_do_yet: {summary['do_not_do_yet']}",
+        f"- readiness_hint: {summary['readiness_hint']}",
+        "",
+    ]
+    return lines
 
 
 def _render_snapshot(snapshot: dict[str, Any], zh: bool) -> list[str]:
@@ -396,9 +964,10 @@ def _render_table_section(name: str, rows: list[dict[str, Any]], zh: bool) -> li
 
 def _render_next_steps(rows: list[dict[str, Any]], zh: bool) -> list[str]:
     heading = "## next_step_recommendations / 下一步建议" if zh else "## next_step_recommendations / Next-Step Recommendations"
-    lines = [heading, "", "| priority | candidate | recommendation |", "| --- | --- | --- |"]
+    keys = list(rows[0].keys())
+    lines = [heading, "", "| " + " | ".join(keys) + " |", "| " + " | ".join(["---"] * len(keys)) + " |"]
     for row in rows:
-        lines.append(f"| {row['priority']} | {row['candidate']} | {row['recommendation']} |")
+        lines.append("| " + " | ".join(_cell(row[key]) for key in keys) + " |")
     lines.append("")
     return lines
 

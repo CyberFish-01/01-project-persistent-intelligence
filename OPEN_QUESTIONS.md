@@ -38,7 +38,7 @@ not implemented, and not closed as runtime capabilities.
 | Capability Evolution Boundary | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CAPABILITY_EVOLUTION_BOUNDARY_RFC.md](./CAPABILITY_EVOLUTION_BOUNDARY_RFC.md) | allowed and forbidden scope is defined, but verification evidence model, candidate review schema, safe tool library policy, and implementation gates are missing | automatic tool execution, automatic promotion, policy executor, identity mutation |
 | Visual Naming / Founder-Facing Vocabulary | `guide-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [VISUAL_NAMING_GUIDE.md](./VISUAL_NAMING_GUIDE.md) | internal keys now map to Chinese display names, but no visual surface contract, status assignment policy, or dashboard approval exists | Web UI, dashboard runtime, observability CLI, product layer |
 | Foundation Observatory Report | `report-drafted`, `indexed`, `static-cli-implemented`, `blocked-runtime` | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md) | a Markdown founder-facing report and read-only static CLI exist, but no dashboard runtime, status API, product surface, or live monitor exists | dashboard runtime, status API, product UI, observability executor |
-| Minimal Observatory CLI | `implemented-static-report`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) | the P96 command exists, but source freshness, status assignment policy, generated-report maintenance, and false readiness risks remain open | observability executor, automatic phase creation, dashboard runtime |
+| Minimal Observatory CLI | `implemented-static-report`, `readability-improved`, `indexed`, `future-contract-needed`, `blocked-runtime` | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) | the P98 command is more founder-readable, but source freshness, status assignment policy, generated-report maintenance, and false readiness risks remain open | observability executor, automatic phase creation, dashboard runtime |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema, payload/diff rules, validation invariants, and review gates are missing | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | it defines review quality, but does not add schema fields or a memory store | memory rewrite, new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary remains review-object housekeeping only | lifecycle execution, promotion |
@@ -317,7 +317,9 @@ Still open:
 Clarified by
 [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md) and
 implemented narrowly in P96 as `python3 -m one_core.cli
-foundation-observatory-report`. It remains open because P96 only implements a
+foundation-observatory-report`. P98 improves the generated report with a
+one-screen summary, can/cannot readiness rows, clearer risk explanations, and
+benefit/risk next-step candidates. It remains open because this is still only a
 read-only static report generator.
 
 Still open:
@@ -325,6 +327,7 @@ Still open:
 - how future changes prove no mutation;
 - whether static local state summaries are allowed as inputs;
 - how source freshness and false readiness signals should be shown;
+- whether readiness labels need a separate status-assignment policy;
 - how to prevent observability from becoming automatic roadmap execution or
   automatic next phase creation.
 
@@ -487,7 +490,7 @@ The following remain blocked until a future explicit implementation phase:
 
 ## Current Recommendation
 
-Pause for founder / CTO review before selecting P97. P96 is intentionally
-limited to a read-only static observatory report; it is not approval for
-dashboard runtime, harness implementation, policy execution, product UI, or
-automatic roadmap execution.
+Pause for founder / CTO review before selecting P99. P98 improves readability
+inside the read-only observatory only; it is not approval for dashboard runtime,
+harness implementation, policy execution, product UI, or automatic roadmap
+execution.

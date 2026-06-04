@@ -561,10 +561,10 @@ founder-facing views to use paper-like titles.
 
 A possible future founder-facing surface for viewing foundation status, concept
 boundaries, readiness, risks, and open questions. P94 provides a Markdown report
-version of this observatory layer, and P96 provides a read-only static CLI
-report generator.
+version of this observatory layer, P96 provides a read-only static CLI report
+generator, and P98 improves the generated output for founder readability.
 
-Boundary: P96 is still only a static report generator. It does not implement
+Boundary: P98 is still only a static report generator. It does not implement
 dashboard runtime, Web UI, status API, observability executor, live monitor, or
 a product surface.
 
@@ -604,23 +604,26 @@ runtime monitors, policy execution, or executors.
 
 ## Minimal Observatory CLI
 
-The P96 read-only CLI command:
+The P96 read-only CLI command, improved in P98 for founder-facing readability:
 
 ```bash
 python3 -m one_core.cli foundation-observatory-report
 ```
 
 It emits Markdown or JSON founder-facing observatory output using static
-foundation artifacts and approved naming/status categories.
+foundation artifacts, approved naming/status categories, plain readiness rows,
+risk explanations, and next-step candidates.
 
 Boundary: it reads and renders. It does not mutate state, execute policy,
 promote roadmap work, create phases, or become a dashboard runtime.
 
 ## Observatory CLI Report
 
-A read-only P96 report emitted by the minimal observatory command, containing
-founder snapshot, axes map, readiness matrix, boundary status, risk heatmap,
-next-step recommendations, and blocked-work list.
+A read-only report emitted by the minimal observatory command. After P98 it
+contains a one-screen founder summary, founder snapshot, axes map, readiness
+matrix with can/cannot guidance, boundary status, risk heatmap with plain
+explanations, next-step recommendations with benefit/risk, and blocked-work
+list.
 
 Boundary: a report is not authorization, execution, mutation, or phase creation.
 
@@ -637,7 +640,7 @@ implement.
 A forbidden future risk where an observability surface starts executing
 roadmaps, creating phases, mutating status, or enforcing decisions.
 
-Boundary: P96 still blocks observability execution. Observatory work must remain
+Boundary: P98 still blocks observability execution. Observatory work must remain
 read-only unless a future founder-approved phase defines otherwise.
 
 ## Readiness Matrix

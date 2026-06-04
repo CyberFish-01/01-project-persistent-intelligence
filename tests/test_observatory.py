@@ -46,6 +46,7 @@ class ObservatoryReportTests(unittest.TestCase):
         self.assertIn("# Foundation Observatory Report", result.stdout)
         for section in (
             "founder_snapshot",
+            "founder_summary",
             "main_axes_map",
             "readiness_matrix",
             "boundary_status",
@@ -62,6 +63,7 @@ class ObservatoryReportTests(unittest.TestCase):
 
         for key in (
             "founder_snapshot",
+            "founder_summary",
             "main_axes_map",
             "readiness_matrix",
             "boundary_status",
@@ -82,6 +84,7 @@ class ObservatoryReportTests(unittest.TestCase):
 
         self.assertIn("地基观察台报告", markdown)
         self.assertIn("创始人快照", markdown)
+        self.assertIn("一屏摘要", markdown)
         self.assertIn("身份核心", markdown)
         self.assertIn("时间感知", markdown)
         self.assertIn("地基观察台", markdown)
@@ -100,6 +103,68 @@ class ObservatoryReportTests(unittest.TestCase):
         self.assertEqual(matrix["Temporal Coherence"]["status"], "evaluation_only")
         self.assertEqual(matrix["Event Log"]["status"], "implemented")
         self.assertEqual(matrix["Foundation Observatory"]["status"], "implemented")
+        self.assertEqual(matrix["Stateful Memory"]["status_label"], "RFC layer")
+        self.assertIn("Cannot rewrite memory", matrix["Stateful Memory"]["cannot_do"])
+
+    def test_readiness_matrix_contains_founder_facing_actions(self):
+        report = build_observatory_report(lang="zh")
+        matrix = {row["internal_key"]: row for row in report["readiness_matrix"]}
+
+        for row in matrix.values():
+            self.assertIn("what_is_it", row)
+            self.assertIn("can_do", row)
+            self.assertIn("cannot_do", row)
+            self.assertIn("next_action", row)
+
+        self.assertIn("记忆加上", matrix["Stateful Memory"]["what_is_it"])
+        self.assertIn("不能改写 memory", matrix["Stateful Memory"]["cannot_do"])
+        self.assertEqual(matrix["Temporal Awareness"]["status_label"], "RFC 层")
+        self.assertEqual(matrix["Foundation Observatory"]["status_label"], "已实现")
+
+    def test_risk_heatmap_contains_plain_explanations(self):
+        report = build_observatory_report(lang="zh")
+        risks = {row["internal_key"]: row for row in report["risk_heatmap"]}
+
+        for row in risks.values():
+            self.assertIn("plain_explanation", row)
+            self.assertIn("why_dangerous", row)
+            self.assertIn("current_mitigation", row)
+            self.assertIn("next_step", row)
+            self.assertIn("risk_level", row)
+
+        self.assertIn("概念越来越多", risks["concept inflation"]["plain_explanation"])
+        self.assertIn("误当成已实现能力", risks["concept inflation"]["why_dangerous"])
+        self.assertIn("只读报告", risks["observability becoming product UI"]["plain_explanation"])
+
+    def test_next_step_recommendations_include_benefit_and_risk(self):
+        report = build_observatory_report(lang="zh")
+        candidates = {row["candidate"]: row for row in report["next_step_recommendations"]}
+
+        for row in candidates.values():
+            self.assertIn("priority", row)
+            self.assertIn("why_recommended", row)
+            self.assertIn("benefit", row)
+            self.assertIn("risk", row)
+            self.assertIn("not_recommended", row)
+
+        self.assertIn("继续打磨观察台", candidates)
+        self.assertIn("Minimal CLI Harness Implementation Plan", candidates)
+        self.assertIn("Tool Verification Evidence Model", candidates)
+        self.assertIn("Founder / CTO Review", candidates)
+        self.assertIn("不要实现 harness", candidates["Minimal CLI Harness Implementation Plan"]["not_recommended"])
+
+    def test_json_output_contains_p98_readability_structure(self):
+        result = self.run_cli("--format", "json", "--lang", "zh")
+        report = json.loads(result.stdout)
+
+        self.assertIn("founder_summary", report)
+        self.assertIn("safe_next_step", report["founder_summary"])
+        self.assertIn("can_do", report["readiness_matrix"][0])
+        self.assertIn("cannot_do", report["readiness_matrix"][0])
+        self.assertIn("plain_explanation", report["risk_heatmap"][0])
+        self.assertIn("why_dangerous", report["risk_heatmap"][0])
+        self.assertIn("benefit", report["next_step_recommendations"][0])
+        self.assertIn("risk", report["next_step_recommendations"][0])
 
     def test_boundary_status_keeps_forbidden_items_disabled(self):
         report = build_observatory_report()
