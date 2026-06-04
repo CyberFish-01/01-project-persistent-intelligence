@@ -1,0 +1,111 @@
+# RFC Index
+
+Chinese version: [RFC_INDEX_ZH.md](./RFC_INDEX_ZH.md)
+
+Status: `document-only`, `index`, `non-runtime`.
+
+P68 indexes the foundation RFC, policy, review, audit, and matrix documents
+created during P54-P67. It does not add runtime behavior, schemas, CLI
+commands, validation rules, adapters, product surfaces, event writes, reducers,
+payload capture, identity mutation, memory rewrite, or growth execution.
+
+## Index Rule
+
+```text
+an RFC defines a review surface.
+an RFC does not approve execution.
+an index improves navigation.
+an index does not change architecture.
+```
+
+P68 exists because the foundation layer now has many review artifacts. Without a
+single index, later work can easily treat scattered RFC language as
+implementation approval.
+
+## Foundation Integrity And Governance
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P54 | [FOUNDATION_INTEGRITY_AUDIT.md](./FOUNDATION_INTEGRITY_AUDIT.md) / [ZH](./FOUNDATION_INTEGRITY_AUDIT_ZH.md) | audit | stable review | Checks whether foundation principles, boundaries, and risks still agree. | runtime enforcement |
+| P55 | [CONCEPT_OVERLAP_REVIEW.md](./CONCEPT_OVERLAP_REVIEW.md) / [ZH](./CONCEPT_OVERLAP_REVIEW_ZH.md) | review | stable boundary review | Assigns primary ownership where concepts overlap. | concept deletion or schema change |
+| P56 | [BOUNDARY_TEST_MATRIX.md](./BOUNDARY_TEST_MATRIX.md) / [ZH](./BOUNDARY_TEST_MATRIX_ZH.md) | matrix | stable doc gate | Lists allowed and forbidden foundation outputs. | runtime test expansion |
+| P57 | [OPEN_QUESTIONS_TRIAGE.md](./OPEN_QUESTIONS_TRIAGE.md) / [ZH](./OPEN_QUESTIONS_TRIAGE_ZH.md) | triage | active routing | Sorts open questions into safe RFCs, watch items, and blocked runtime work. | closing the questions |
+| P67 | [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [ZH](./FOUNDATION_ROADMAP_ZH.md) | roadmap | active guidance | Synthesizes stable foundation, blocked runtime work, future dependencies, and low-risk backlog. | runtime authorization |
+
+## Stateful Memory And Growth Semantics
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P58 | [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) / [ZH](./TEMPORAL_AWARENESS_RFC_ZH.md) | future RFC | future direction | Frames elapsed time as possible subject-state evidence. | Temporal Awareness runtime |
+| P59 | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) / [ZH](./RECALL_EVENT_WRITE_POLICY_RFC_ZH.md) | policy RFC | blocked write policy | Defines future recall event write thresholds. | recall event writes |
+| P60 | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) / [ZH](./STATEFUL_MEMORY_ENCODING_POLICY_ZH.md) | policy | review policy | Defines minimum encoding references for meaning-shift review. | new memory store |
+| P61 | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) / [ZH](./GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md) | lifecycle RFC | future review-object policy | Defines future review-object states such as deferred, archived, or quarantined. | growth lifecycle execution |
+| P62 | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) / [ZH](./PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md) | boundary RFC | review vocabulary | Separates productive drift, random drift, identity-threatening drift, and collapse. | automatic drift classifier |
+
+## Exploration And Subject Boundary
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P63 | [EXPLORATION_SERENDIPITY_RFC.md](./EXPLORATION_SERENDIPITY_RFC.md) / [ZH](./EXPLORATION_SERENDIPITY_RFC_ZH.md) | future RFC | future direction | Defines exploration and serendipity as record-only or review-only signals. | exploration engine or companion feature |
+| P64 | [SUBJECT_KERNEL_WORLD_SEED_RFC.md](./SUBJECT_KERNEL_WORLD_SEED_RFC.md) / [ZH](./SUBJECT_KERNEL_WORLD_SEED_RFC_ZH.md) | boundary RFC | future boundary | Distinguishes protected subject anchor from evolvable world orientation. | Identity Core rewrite |
+
+## Reconstruction Readiness
+
+| Phase | Artifact | Type | Status | Purpose | Explicitly Not |
+|---|---|---|---|---|---|
+| P65 | [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md) / [ZH](./RECONSTRUCTION_REDUCER_CONTRACT_RFC_ZH.md) | contract RFC | future contract | Defines what a future reconstruction reducer contract must specify. | reducer execution |
+| P66 | [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md) / [ZH](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC_ZH.md) | policy RFC | future policy | Defines target-path vocabulary for payload, diff, snapshot, and reference-only treatment. | payload capture or event schema mutation |
+
+## Dependency Order
+
+The current dependency order is:
+
+1. [OPEN_QUESTIONS_TRIAGE.md](./OPEN_QUESTIONS_TRIAGE.md) identifies safe
+   document-only questions and blocked runtime work.
+2. [TEMPORAL_AWARENESS_RFC.md](./TEMPORAL_AWARENESS_RFC.md) remains future-only
+   until recall write policy, payload/diff rules, and review placement exist.
+3. [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md)
+   blocks ordinary retrieval from becoming durable events.
+4. [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md)
+   defines what must be known before meaning-shift review can be trusted.
+5. [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md)
+   keeps lifecycle vocabulary separate from growth execution.
+6. [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md)
+   separates bounded change from random drift and collapse.
+7. [EXPLORATION_SERENDIPITY_RFC.md](./EXPLORATION_SERENDIPITY_RFC.md) and
+   [SUBJECT_KERNEL_WORLD_SEED_RFC.md](./SUBJECT_KERNEL_WORLD_SEED_RFC.md) keep
+   future exploration and subject/world boundaries outside product behavior.
+8. [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md)
+   must exist before reducer execution can even be discussed.
+9. [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md)
+   defines capture policy vocabulary but does not capture payloads.
+10. [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) keeps future work in
+    low-risk consolidation until implementation is explicitly approved.
+
+## Runtime-Blocked Topics
+
+The indexed documents do not approve:
+
+- Temporal Awareness runtime;
+- recall event writes;
+- growth lifecycle execution;
+- automatic growth classification;
+- automatic drift classification;
+- identity mutation;
+- memory rewrite;
+- payload capture;
+- event schema mutation;
+- reconstruction reducer execution;
+- event compaction;
+- policy executor;
+- companion, relationship memory, UI, AstrBot, adapter, or product layer.
+
+## Stable Interpretation
+
+Use this index to answer three questions:
+
+1. Which document owns the current vocabulary?
+2. Which future contract is missing before implementation?
+3. Which forbidden action must remain blocked?
+
+Do not use this index as approval to implement any future capability.
