@@ -5,7 +5,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 ## Range
 
 - Start commit: `2aa4cf3 Add foundation consolidation artifacts`
-- End commit before this summary: `66f7af8 Update open questions status`
+- End commit before this summary: `17fc3e6 Add risk register`
 - Working mode: extended autonomous foundation work
 - Scope: document-only foundation consolidation
 
@@ -31,6 +31,7 @@ Chinese version: [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md
 | P69 Phase Index Extension | `88fbd5f` | `PHASE_INDEX.md`, `PHASE_INDEX_ZH.md` | No |
 | P70 Concept Map Update | `323ea60` | `CONCEPT_MAP.md`, `CONCEPT_MAP_ZH.md` | No |
 | P71 Open Questions Status Update | `66f7af8` | `OPEN_QUESTIONS.md`, `OPEN_QUESTIONS_ZH.md` | No |
+| P72 Risk Register | `17fc3e6` | `RISK_REGISTER.md`, `RISK_REGISTER_ZH.md` | No |
 
 README links were updated for each phase.
 
@@ -55,7 +56,7 @@ Not implemented:
 
 ## Verification Performed
 
-For P54-P71, each phase ran:
+For P54-P72, each phase ran:
 
 - `git status`
 - `git diff --check`
@@ -90,15 +91,15 @@ was not itself a git repository.
 
 ## Unfinished Items
 
-- P72-P80 low-risk consolidation remains.
-- Next item is P72 Risk Register.
+- P73-P80 low-risk consolidation remains.
+- Next item is P73 Architecture Boundary Refresh.
 
 ## Suggested Next Direction
 
 Next safe phase:
 
 ```text
-P72 Risk Register
+P73 Architecture Boundary Refresh
 ```
 
 Constraint: low-risk document consolidation only. Do not add runtime behavior,

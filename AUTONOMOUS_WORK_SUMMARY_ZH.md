@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`66f7af8 Update open questions status`
+- 本 summary 前的结束 commit：`17fc3e6 Add risk register`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -31,6 +31,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P69 Phase Index Extension | `88fbd5f` | `PHASE_INDEX.md`, `PHASE_INDEX_ZH.md` | No |
 | P70 Concept Map Update | `323ea60` | `CONCEPT_MAP.md`, `CONCEPT_MAP_ZH.md` | No |
 | P71 Open Questions Status Update | `66f7af8` | `OPEN_QUESTIONS.md`, `OPEN_QUESTIONS_ZH.md` | No |
+| P72 Risk Register | `17fc3e6` | `RISK_REGISTER.md`, `RISK_REGISTER_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -55,7 +56,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P71 每个 phase 都执行：
+P54-P72 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -89,15 +90,15 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P72-P80 low-risk consolidation 仍未完成。
-- 下一项是 P72 Risk Register。
+- P73-P80 low-risk consolidation 仍未完成。
+- 下一项是 P73 Architecture Boundary Refresh。
 
 ## Suggested Next Direction / 明天建议方向
 
 下一步安全 phase：
 
 ```text
-P72 Risk Register
+P73 Architecture Boundary Refresh
 ```
 
 约束：只做低风险 document consolidation。不要新增 runtime behavior、新 mechanisms、
