@@ -5,7 +5,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 ## Range / 范围
 
 - 起始 commit：`2aa4cf3 Add foundation consolidation artifacts`
-- 本 summary 前的结束 commit：`cfa706a Add productive drift collapse boundaries`
+- 本 summary 前的结束 commit：`041ab1e Add exploration serendipity RFC`
 - 工作模式：extended autonomous foundation work
 - 范围：document-only foundation consolidation
 
@@ -22,6 +22,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 | P60 Stateful Memory Minimal Encoding Policy | `eec695c` | `STATEFUL_MEMORY_ENCODING_POLICY.md`, `STATEFUL_MEMORY_ENCODING_POLICY_ZH.md` | No |
 | P61 Growth Candidate Lifecycle RFC | `0031564` | `GROWTH_CANDIDATE_LIFECYCLE_RFC.md`, `GROWTH_CANDIDATE_LIFECYCLE_RFC_ZH.md` | No |
 | P62 Productive Drift vs Collapse RFC | `cfa706a` | `PRODUCTIVE_DRIFT_VS_COLLAPSE.md`, `PRODUCTIVE_DRIFT_VS_COLLAPSE_ZH.md` | No |
+| P63 Exploration / Serendipity Engine RFC | `041ab1e` | `EXPLORATION_SERENDIPITY_RFC.md`, `EXPLORATION_SERENDIPITY_RFC_ZH.md` | No |
 
 每个 phase 都同步更新了 README links。
 
@@ -46,7 +47,7 @@ English version: [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
 ## Verification Performed / 已执行验证
 
-P54-P62 每个 phase 都执行：
+P54-P63 每个 phase 都执行：
 
 - `git status`
 - `git diff --check`
@@ -80,7 +81,7 @@ No active forbidden pattern matches.
 
 ## Unfinished Items / 未完成事项
 
-- P63 Exploration / Serendipity Engine RFC，document-only。
+- P64 Subject Kernel / World Seed RFC。
 - P65 Reconstruction Reducer Contract RFC，在 reducer execution 之前。
 
 ## Suggested Next Direction / 明天建议方向
@@ -88,8 +89,8 @@ No active forbidden pattern matches.
 下一步安全 phase：
 
 ```text
-P63 Exploration / Serendipity Engine RFC
+P64 Subject Kernel / World Seed RFC
 ```
 
-约束：document-only。不要创建 productized exploration engine、companion behavior、
-relationship memory、automatic growth 或 identity mutation。
+约束：document-only boundary RFC。不要 rewrite Identity Core，不在 runtime split
+identity，不 mutate identity，不创建 world-state runtime，也不 productize。
