@@ -27,6 +27,7 @@ capabilities 被关闭。
 | CTM-inspired Temporal Dynamics | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [CTM_TEMPORAL_DYNAMICS_RFC.md](./CTM_TEMPORAL_DYNAMICS_RFC.md) | CTM concepts 只被翻译成 symbolic foundation vocabulary；storage policy、evaluation 和 runtime contracts 缺失 | CTM runtime、model training、temporal event writes |
 | Temporal Coherence Evaluation | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [TEMPORAL_COHERENCE_EVALUATION_PLAN.md](./TEMPORAL_COHERENCE_EVALUATION_PLAN.md) | deterministic scenarios 和 future signals 已规划，但还没有 tests 或 runtime metrics | temporal runtime、thought loop execution、event writes |
 | Deliberation Tick / Review Depth | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [DELIBERATION_TICK_REVIEW_DEPTH_RFC.md](./DELIBERATION_TICK_REVIEW_DEPTH_RFC.md) | tick 和 review-depth vocabulary 已存在，但没有 tick runtime、thought loop 或 review policy executor | tick runtime、thought loop execution、policy execution |
+| Thought Trace Storage Policy | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md) | storage boundaries 已定义，但没有 trace schema、storage backend、redaction policy 或 approval gate | trace storage、hidden chain-of-thought capture、private reasoning persistence |
 | Recall Event Write Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECALL_EVENT_WRITE_POLICY_RFC.md](./RECALL_EVENT_WRITE_POLICY_RFC.md) | event schema、payload/diff rules、validation invariants 和 review gates 缺失 | recall event writes |
 | Stateful Memory Minimal Encoding Policy | `policy-drafted`, `indexed`, `mapped` | [STATEFUL_MEMORY_ENCODING_POLICY.md](./STATEFUL_MEMORY_ENCODING_POLICY.md) | 它定义 review quality，但不添加 schema fields 或 memory store | memory rewrite、new memory store |
 | Growth Candidate Lifecycle | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [GROWTH_CANDIDATE_LIFECYCLE_RFC.md](./GROWTH_CANDIDATE_LIFECYCLE_RFC.md) | lifecycle vocabulary 仍只是 review-object housekeeping | lifecycle execution、promotion |
@@ -95,6 +96,20 @@ evaluation signals。
 - preview ticks 多少才有用，超过多少会让 review 过重；
 - review depth 应如何与 future thought trace storage policy 互动；
 - thin harness 如何 preview review depth，同时不执行 thought loop。
+
+### Thought Trace Storage Policy / 思考轨迹存储策略
+
+已由 [THOUGHT_TRACE_STORAGE_POLICY_RFC.md](./THOUGHT_TRACE_STORAGE_POLICY_RFC.md)
+澄清，但没有实现。它仍然 open，因为 P84 只定义 storage boundaries，没有创建 trace
+storage、schemas、redaction rules 或 approval gates。
+
+仍开放：
+
+- trace candidates 是否应该被存储；
+- 未来 traces 是 events、reports、governance records，还是 ephemeral preview output；
+- sensitive user content 需要什么 redaction policy；
+- reconstruction 如何使用 trace summaries，同时不依赖 private reasoning；
+- 谁或什么 gate 可以批准 future trace storage decision。
 
 ### Recall Event Write Policy / 回忆事件写入策略
 
@@ -213,6 +228,9 @@ policy 仍与 payload capture 分离。
 - CTM runtime 或 model training；
 - thought loop execution；
 - tick runtime execution；
+- hidden chain-of-thought capture；
+- private model reasoning persistence；
+- thought trace storage；
 - policy executor；
 - companion、relationship memory、UI、AstrBot、adapter 或 product layer。
 

@@ -246,8 +246,18 @@ gate review for high-risk cases.
 
 A possible future record of how review state evolved across deliberation.
 
-Boundary: thought trace has no storage policy in P81 and must not create event
-payloads, memory rewrites, identity changes, or pseudo-consciousness claims.
+Boundary: P84 treats any future thought trace as an auditable review artifact,
+not hidden chain-of-thought, private model reasoning, model internals, or proof
+of consciousness. It must not create event payloads, memory rewrites, identity
+changes, recall writes, or growth promotion.
+
+## Trace Candidate
+
+A possible future review artifact that summarizes review evidence, boundary
+flags, review depth, unresolved questions, and storage decision.
+
+Boundary: a trace candidate is not trace storage, not a thought loop, not a
+deliberation tick execution log, and not hidden chain-of-thought.
 
 ## Temporal Coherence
 

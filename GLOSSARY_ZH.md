@@ -190,8 +190,17 @@ candidate 在 review 前制造多少 boundary pressure 的分类。
 
 未来可能用于记录 review state 如何随 deliberation 演化。
 
-边界：thought trace 在 P81 没有 storage policy，不能创建 event payloads、memory rewrites、
-identity changes 或 pseudo-consciousness claims。
+边界：P84 把任何未来 thought trace 都视为 auditable review artifact，而不是 hidden
+chain-of-thought、private model reasoning、model internals 或 consciousness proof。它不能创建
+event payloads、memory rewrites、identity changes、recall writes 或 growth promotion。
+
+## Trace Candidate / 轨迹候选
+
+未来可能用于摘要 review evidence、boundary flags、review depth、unresolved questions 和
+storage decision 的 review artifact。
+
+边界：trace candidate 不是 trace storage、不是 thought loop、不是 deliberation tick execution
+log，也不是 hidden chain-of-thought。
 
 ## Temporal Coherence / 时间一致性
 
