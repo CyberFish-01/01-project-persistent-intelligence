@@ -2,8 +2,10 @@
 
 Chinese version: [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)
 
-P53 consolidates the foundation concepts that emerged from P0-P51. The map is
-descriptive: it does not define new runtime behavior.
+P70 updates the P53 foundation concept map with P58-P68 consolidation artifacts.
+The map is descriptive: it does not define new runtime behavior, schemas,
+execution paths, lifecycle engines, reducers, payload capture, adapters, UI, or
+product surfaces.
 
 ## Core Flow
 
@@ -36,6 +38,35 @@ Temporal Awareness
   future direction only
   time is not only metadata
   time is part of subject state transition
+```
+
+## P58-P68 Consolidation Flow
+
+```text
+Open Questions Triage -> RFC Index -> Foundation Roadmap
+  triage selects safe document-only work
+  RFC Index prevents review artifacts from becoming execution approval
+  Foundation Roadmap keeps runtime work blocked until explicit implementation
+
+Temporal Awareness -> Recall Event Write Policy -> Stateful Memory Encoding Policy
+  Temporal Awareness asks how elapsed time may become subject-state evidence
+  Recall Event Write Policy blocks ordinary retrieval from durable writes
+  Encoding Policy defines minimum provenance before meaning-shift review
+
+Productive Drift -> Growth Candidate Lifecycle -> Governance Surface
+  Productive Drift is evidence to review
+  Growth Candidate Lifecycle manages review-object state only
+  Governance Surface keeps cross-layer review separate from execution
+
+Exploration / Serendipity -> Subject Kernel / World Seed -> Identity Gate
+  Exploration may create weak questions or signals
+  Subject Kernel protects the subject anchor
+  World Seed orients the subject without becoming identity
+
+Reconstruction Evidence -> Reducer Contract -> Payload / Diff Capture Policy
+  Reconstruction Evidence names missing proof
+  Reducer Contract defines future execution requirements without executing
+  Capture Policy classifies target paths without capturing payloads
 ```
 
 ## Concept Roles
@@ -123,4 +154,98 @@ Layer, Claim Graph, Task Hub, or Identity Gate.
 ### Temporal Awareness
 
 A future direction. It asks how elapsed time affects recall, salience, staleness,
-resumed sessions, and meaning shift. P53 does not implement it.
+resumed sessions, and meaning shift. P58 records this as an RFC-level future
+direction. Temporal Awareness remains separate from ordinary event metadata
+until a later accepted contract says otherwise.
+
+### Recall Event Write Policy
+
+The future policy boundary for when meaning-shifting recall might become a
+durable event candidate. It blocks ordinary retrieval, ordinary recall, temporal
+gap alone, adapter requests, and vague salience from becoming writes.
+
+### Stateful Memory Encoding Policy
+
+The minimum provenance policy for reviewing stateful memory. It says missing
+encoding context weakens interpretation and produces insufficient context; it
+does not authorize repair by memory rewrite.
+
+### Growth Candidate Lifecycle
+
+A future review-object housekeeping vocabulary for `open`, `deferred`,
+`archived`, `quarantined`, and similar states. It manages review object state,
+not subject state, memory promotion, or growth execution.
+
+### Productive Drift vs Collapse
+
+The boundary vocabulary that separates bounded, evidence-backed drift from
+random drift, identity-threatening drift, and collapse. It is not an automatic
+classifier.
+
+### Exploration / Serendipity
+
+A future-only source of weak questions, adjacent connections, evidence gaps, or
+review prompts. It must remain record-only or review-only and must not become
+companion behavior, product engagement, or identity invention.
+
+### Subject Kernel / World Seed
+
+A future boundary inside Identity Seed. Subject Kernel names the protected
+minimal subject anchor. World Seed names the initial world and project
+orientation. Neither is a runtime mutation path.
+
+### Reconstruction Reducer Contract
+
+A future contract surface for possible reconstruction reducers. It defines what
+a reducer would need before execution can be considered, but it does not rebuild
+state or execute reducers.
+
+### Payload / Diff Capture Policy
+
+The target-path policy vocabulary for future payload, diff, snapshot, and
+reference-only treatment. It classifies what evidence may be needed; it does not
+capture payloads, mutate event schemas, or compact events.
+
+### RFC Index
+
+The navigation and boundary artifact for RFC, policy, review, audit, and matrix
+documents. It answers where vocabulary lives and which action remains blocked.
+It does not change architecture.
+
+## Ownership Boundaries
+
+| Concept | Owns | Must Not Absorb |
+|---|---|---|
+| Identity Core | protected continuity anchor | automatic mutation, platform identity, relationship persona |
+| State Transfer | continuity package across time | similarity retrieval as continuity |
+| Event Log | append-only transition audit | event compaction, state clone, memory store |
+| Replay | transition projection proof | full object reconstruction |
+| Reconstruction Evidence | missing proof vocabulary and gap visibility | reducer execution, payload capture |
+| Reducer Contract | future execution requirements | reducer implementation |
+| Payload / Diff Capture Policy | target-path evidence policy | schema mutation or payload capture |
+| Memory Layer | records, lifecycle, provenance | meaning-shift engine |
+| Stateful Memory | encoding/recall/meaning-shift interpretation | new memory store |
+| Recall Event Write Policy | future recall-write threshold | ordinary retrieval writes |
+| Claim Graph | claim-shaped belief revision | every meaning shift |
+| Task Hub | operational work state and queues | every governance object |
+| Growth Candidate Review | possible meaning-bearing transition review | growth execution |
+| Growth Candidate Lifecycle | review object housekeeping | subject-state transition |
+| Governance Surface | cross-layer review objects | executable policy |
+| Temporal Awareness | future subjective-time semantics | ordinary timestamp metadata |
+| Exploration / Serendipity | weak future signals and questions | companion/product behavior |
+| Subject Kernel | protected minimal subject anchor | mutable personality or full biography |
+| World Seed | initial project/world orientation | protected identity |
+| RFC Index | document navigation and boundary visibility | implementation approval |
+
+## Stable Non-Execution Reading
+
+The concept map should be read as a boundary map:
+
+- review vocabulary is not runtime capability;
+- lifecycle vocabulary is not lifecycle execution;
+- policy vocabulary is not policy executor;
+- reducer contract is not reducer execution;
+- capture policy is not payload capture;
+- temporal vocabulary is not Temporal Awareness runtime;
+- exploration vocabulary is not companion or product behavior;
+- subject/world boundary language is not identity mutation.
