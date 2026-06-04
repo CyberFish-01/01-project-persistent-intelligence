@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-P53 consolidates P0-P51 into a foundation map. This index is not a release log.
+P69 extends the foundation map from P0-P51 to P0-P68. This index is not a release log.
 It records how the system foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -59,3 +59,20 @@ It records how the system foundation evolved.
 | P49 | Added evidence request lifecycle. | Evidence requests can be satisfied/deferred/archived without approving schema changes. | Governance |
 | P50 | Added stateful memory and growth semantics. | Memory equals event plus encoding state plus recall state plus meaning shift. | Growth Semantics |
 | P51 | Added growth candidate review design. | Growth candidate is not growth; it is a review object. | Governance Surface |
+| P52 | Planned foundation consolidation. | Before adding power, compress the foundation into a maintainable map. | Foundation Consolidation |
+| P53 | Added foundation consolidation artifacts. | Concept maps and boundaries make future evolution safer. | Foundation Consolidation |
+| P54 | Audited foundation integrity. | Stable principles must remain visible before new mechanisms. | Foundation Integrity |
+| P55 | Reduced concept overlap. | Each major concept needs a primary owner. | Foundation Integrity |
+| P56 | Added boundary test matrix. | Allowed and forbidden outputs should be explicit before implementation. | Foundation Integrity |
+| P57 | Triaged open questions. | Open questions need safe order, blocked runtime flags, and future routing. | Open Question Governance |
+| P58 | Added Temporal Awareness RFC v0.1. | Time is not only metadata, but remains future-only. | Temporal Awareness |
+| P59 | Added Recall Event Write Policy RFC. | Ordinary retrieval is not an event and ordinary recall is not a write. | Stateful Memory |
+| P60 | Added Stateful Memory Encoding Policy. | Missing encoding context weakens interpretation and does not authorize rewrite. | Stateful Memory |
+| P61 | Added Growth Candidate Lifecycle RFC. | Lifecycle manages review object state, not subject state. | Growth Semantics |
+| P62 | Added Productive Drift vs Collapse RFC. | Drift is evidence to review, not growth. | Growth Semantics |
+| P63 | Added Exploration / Serendipity RFC. | Exploration may generate questions, but must not become growth or companion behavior. | Exploration |
+| P64 | Added Subject Kernel / World Seed RFC. | Subject anchor and world orientation should stay distinct. | Identity Boundary |
+| P65 | Added Reconstruction Reducer Contract RFC. | Reducer contract is not reducer execution. | Reconstruction Readiness |
+| P66 | Added Payload / Diff Capture Policy RFC. | Capture policy is not payload capture or schema mutation. | Reconstruction Readiness |
+| P67 | Added Foundation Roadmap. | Foundation work should reduce ambiguity before it adds power. | Foundation Consolidation |
+| P68 | Added RFC Index. | RFCs define review surfaces, not execution approval. | Foundation Consolidation |

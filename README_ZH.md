@@ -27,7 +27,7 @@
 - [EVALUATION.md](./EVALUATION.md) / [EVALUATION_ZH.md](./EVALUATION_ZH.md)：如何评估连续性、认知漂移、记忆生命周期和身份稳定性。
 - [LITERATURE_MAP.md](./LITERATURE_MAP.md) / [LITERATURE_MAP_ZH.md](./LITERATURE_MAP_ZH.md)：与 LLM Agent、认知架构、心理学、神经科学、持续学习相关的文献地图。
 - [THEORY_SYNTHESIS_AND_NEXT_PLAN.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN.md) / [THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md](./THEORY_SYNTHESIS_AND_NEXT_PLAN_ZH.md)：当前缺口、外部理论和 P7-P13 工程计划的综合。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P51 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P68 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_INTEGRITY_AUDIT.md](./FOUNDATION_INTEGRITY_AUDIT.md) / [FOUNDATION_INTEGRITY_AUDIT_ZH.md](./FOUNDATION_INTEGRITY_AUDIT_ZH.md)：P54 foundation principles、边界和重叠风险完整性审计。
