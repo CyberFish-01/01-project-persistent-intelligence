@@ -42,7 +42,7 @@ blocked runtime work remains blocked.
 | R12 | Adapter or platform owns identity | high | AstrBot、adapter metadata 或 platform sessions 暗示 identity updates | 保持 "01 Core owns state; adapters translate" | adapter integration required、platform-owned identity |
 | R13 | Event audit trail weakened | high | retention review、capture policy 或 reconstruction 暗示 compaction/rewrite | Event Log 保持 append-only；使用 reports 和 references | event compaction、event rewrite |
 | R14 | Governance Surface becomes too broad | medium | 每个 task、claim 或 memory review 都被路由到 governance | 使用 ownership boundaries：Task Hub 管 work，Claim Graph 管 claims，Memory Layer 管 records | centralizing all review semantics |
-| R15 | Bilingual drift | medium | 中英文 docs 对 status 或 blocked actions 表述分叉 | 做 bilingual consistency pass，并偏好 paired edits | 两种语言矛盾时只信一边 |
+| R15 | Bilingual drift | medium | 中英文 docs 对 status 或 blocked actions 表述分叉 | 使用 [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)，做 consistency pass，并偏好 paired edits | 两种语言矛盾时只信一边 |
 | R16 | README entrance overload | medium | 新读者无法区分 stable foundation 与 future-only work | 优化 README entrance 和 indexes，不新增 features | productizing the README |
 | R17 | P80 pressure | medium | 为了推进编号而打开 phase | 如果不能增加清晰度，就 skip、merge 或 stop | opening empty phases |
 | R18 | Cloud/AstrBot deployment pressure | medium | local foundation docs 被当成现在更新 cloud 或 AstrBot 的理由 | foundation loop 结束前继续后推 cloud 和 AstrBot | cloud runtime rollout、AstrBot specialization |

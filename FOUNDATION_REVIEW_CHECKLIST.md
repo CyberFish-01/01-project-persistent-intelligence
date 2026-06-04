@@ -38,6 +38,7 @@ Before review, inspect the current versions of:
 - [RISK_REGISTER.md](./RISK_REGISTER.md)
 - [DECISIONS.md](./DECISIONS.md)
 - [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md)
+- [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
 - [GLOSSARY.md](./GLOSSARY.md)
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
@@ -121,6 +122,8 @@ For each paired document touched:
 - Phase numbers and commit references match.
 - The Chinese version may preserve technical English terms, but must not change
   the boundary meaning.
+- Use [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) as
+  the latest recorded manual baseline, not as an automated checker.
 
 ## Verification Gate
 

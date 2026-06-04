@@ -37,6 +37,7 @@ review 前检查当前版本：
 - [RISK_REGISTER.md](./RISK_REGISTER.md)
 - [DECISIONS.md](./DECISIONS.md)
 - [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md)
+- [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
 - [GLOSSARY.md](./GLOSSARY.md)
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md)
 
@@ -118,6 +119,8 @@ review 前检查当前版本：
 - Runtime-blocked items 一致。
 - Phase numbers 和 commit references 一致。
 - 中文版本可以保留技术英文术语，但不能改变 boundary meaning。
+- 使用 [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
+  作为最新 manual baseline，而不是 automated checker。
 
 ## Verification Gate / 验证 Gate
 

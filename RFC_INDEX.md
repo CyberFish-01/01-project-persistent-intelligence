@@ -4,10 +4,12 @@ Chinese version: [RFC_INDEX_ZH.md](./RFC_INDEX_ZH.md)
 
 Status: `document-only`, `index`, `non-runtime`.
 
-P68 indexes the foundation RFC, policy, review, audit, and matrix documents
-created during P54-P67. It does not add runtime behavior, schemas, CLI
-commands, validation rules, adapters, product surfaces, event writes, reducers,
-payload capture, identity mutation, memory rewrite, or growth execution.
+P68 started the index for foundation RFC, policy, review, audit, and matrix
+documents created during P54-P67. Later maintenance phases add review artifacts
+without changing the index rule. This file does not add runtime behavior,
+schemas, CLI commands, validation rules, adapters, product surfaces, event
+writes, reducers, payload capture, identity mutation, memory rewrite, or growth
+execution.
 
 ## Index Rule
 
@@ -32,6 +34,7 @@ implementation approval.
 | P57 | [OPEN_QUESTIONS_TRIAGE.md](./OPEN_QUESTIONS_TRIAGE.md) / [ZH](./OPEN_QUESTIONS_TRIAGE_ZH.md) | triage | active routing | Sorts open questions into safe RFCs, watch items, and blocked runtime work. | closing the questions |
 | P67 | [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [ZH](./FOUNDATION_ROADMAP_ZH.md) | roadmap | active guidance | Synthesizes stable foundation, blocked runtime work, future dependencies, and low-risk backlog. | runtime authorization |
 | P76 | [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [ZH](./FOUNDATION_REVIEW_CHECKLIST_ZH.md) | manual checklist | phase review gate | Converts boundary, risk, RFC, bilingual, verification, and commit checks into a human review gate. | automated executor |
+| P79 | [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) / [ZH](./BILINGUAL_CONSISTENCY_REVIEW_ZH.md) | review | manual consistency record | Records paired-document, status, link, summary, and blocked-boundary alignment. | automated translation checker |
 
 ## Stateful Memory And Growth Semantics
 
@@ -84,6 +87,9 @@ The current dependency order is:
     low-risk consolidation until implementation is explicitly approved.
 11. [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) provides
     a manual gate for later document-only phases without approving execution.
+12. [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
+    records the latest manual bilingual consistency baseline without automating
+    review.
 
 ## Runtime-Blocked Topics
 

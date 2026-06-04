@@ -141,6 +141,11 @@ P78 is satisfied by [RESEARCH_NOTES_INDEX.md](./RESEARCH_NOTES_INDEX.md) and
 its Chinese pair. The index maps origin notes to current foundation artifacts;
 it does not add new theory or implementation approval.
 
+P79 is satisfied by
+[BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) and its
+Chinese pair. The review records paired-document consistency and boundary
+alignment; it does not automate translation checks or approve runtime work.
+
 ## Completion Definition For Foundation Layer
 
 The foundation layer is not complete because all ideas are implemented. It is

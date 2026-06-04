@@ -4,8 +4,9 @@ English version: [RFC_INDEX.md](./RFC_INDEX.md)
 
 状态：`document-only`、`index`、`non-runtime`。
 
-P68 索引 P54-P67 期间形成的 foundation RFC、policy、review、audit 和 matrix 文档。
-它不新增 runtime behavior、schemas、CLI commands、validation rules、adapters、
+P68 启动了对 P54-P67 期间形成的 foundation RFC、policy、review、audit 和 matrix
+文档的索引。后续 maintenance phases 会加入 review artifacts，但不改变 index rule。本文件
+不新增 runtime behavior、schemas、CLI commands、validation rules、adapters、
 product surfaces、event writes、reducers、payload capture、identity mutation、
 memory rewrite 或 growth execution。
 
@@ -31,6 +32,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P57 | [OPEN_QUESTIONS_TRIAGE.md](./OPEN_QUESTIONS_TRIAGE.md) / [ZH](./OPEN_QUESTIONS_TRIAGE_ZH.md) | triage | active routing | 把 open questions 分为 safe RFC、watch items 和 blocked runtime work。 | closing the questions |
 | P67 | [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [ZH](./FOUNDATION_ROADMAP_ZH.md) | roadmap | active guidance | 综合 stable foundation、blocked runtime work、future dependencies 和 low-risk backlog。 | runtime authorization |
 | P76 | [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) / [ZH](./FOUNDATION_REVIEW_CHECKLIST_ZH.md) | manual checklist | phase review gate | 把 boundary、risk、RFC、bilingual、verification 和 commit checks 转成 human review gate。 | automated executor |
+| P79 | [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md) / [ZH](./BILINGUAL_CONSISTENCY_REVIEW_ZH.md) | review | manual consistency record | 记录 paired-document、status、link、summary 和 blocked-boundary alignment。 | automated translation checker |
 
 ## Stateful Memory And Growth Semantics / 状态化记忆与成长语义
 
@@ -83,6 +85,8 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     low-risk consolidation，直到 implementation 被明确批准。
 11. [FOUNDATION_REVIEW_CHECKLIST.md](./FOUNDATION_REVIEW_CHECKLIST.md) 为后续
     document-only phases 提供 manual gate，但不批准执行。
+12. [BILINGUAL_CONSISTENCY_REVIEW.md](./BILINGUAL_CONSISTENCY_REVIEW.md)
+    记录最新 manual bilingual consistency baseline，但不自动执行 review。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
