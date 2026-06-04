@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P131。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P132。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -138,3 +138,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P129 | 加入 Contamination False Positive Review。 | detection 必须保持 suspicion，并在讨论任何 future enforcement 前包含 false-positive review。 | Core Lockdown |
 | P130 | 加入 Core Lockdown Cycle Review。 | lockdown block 必须用 readiness、gaps、risks 和下一条安全 planning boundary 收口。 | Core Lockdown |
 | P131 | 加入 Founder Console Boundary RFC。 | 第一个接近应用层的表面必须是 local、founder-only、no-write visibility，而不是 product behavior。 | Founder Console |
+| P132 | 加入 Founder Console User Flow。 | founder console flow 必须从看见到预览再到人工决定，不能自动行动。 | Founder Console |

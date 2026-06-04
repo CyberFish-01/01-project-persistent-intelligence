@@ -87,6 +87,7 @@ implementation approval.
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P131 | [FOUNDER_CONSOLE_BOUNDARY_RFC.md](./FOUNDER_CONSOLE_BOUNDARY_RFC.md) / [ZH](./FOUNDER_CONSOLE_BOUNDARY_RFC_ZH.md) | boundary RFC | RFC-only console boundary | Defines the future Thin Founder Console as local, founder-only, no-write visibility rather than product behavior. | console implementation, Web UI, Companion, adapter integration, model call, tool execution, write path, policy executor, or rebuild |
+| P132 | [FOUNDER_CONSOLE_USER_FLOW.md](./FOUNDER_CONSOLE_USER_FLOW.md) / [ZH](./FOUNDER_CONSOLE_USER_FLOW_ZH.md) | user flow | document-only flow | Defines the future founder-console path from status visibility to dry-run preview to manual next-step decision. | console implementation, automatic roadmap, Web UI, Companion, adapter integration, model call, write path, or rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming
 

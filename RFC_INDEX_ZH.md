@@ -85,6 +85,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | Phase | Artifact | Type | Status | Purpose | Explicitly Not |
 |---|---|---|---|---|---|
 | P131 | [FOUNDER_CONSOLE_BOUNDARY_RFC.md](./FOUNDER_CONSOLE_BOUNDARY_RFC.md) / [ZH](./FOUNDER_CONSOLE_BOUNDARY_RFC_ZH.md) | boundary RFC | RFC-only console boundary | 把 future Thin Founder Console 定义为 local、founder-only、no-write visibility，而不是 product behavior。 | console implementation、Web UI、Companion、adapter integration、model call、tool execution、write path、policy executor 或 rebuild |
+| P132 | [FOUNDER_CONSOLE_USER_FLOW.md](./FOUNDER_CONSOLE_USER_FLOW.md) / [ZH](./FOUNDER_CONSOLE_USER_FLOW_ZH.md) | user flow | document-only flow | 定义 future founder-console 从 status visibility 到 dry-run preview 再到 manual next-step decision 的路径。 | console implementation、automatic roadmap、Web UI、Companion、adapter integration、model call、write path 或 rebuild |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
