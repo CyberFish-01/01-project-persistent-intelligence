@@ -427,6 +427,15 @@ gate would be required later.
 Boundary: specialized candidate preview is still preview-only. It is not
 persistence, promotion, lifecycle creation, tool authorization, or execution.
 
+## Specialized Review Queue Preview
+
+The P107 review-gate format for `harness-dry-run`. Each gate explains queue
+intent, why the candidate would route there, why a lifecycle is blocked, and that
+the next allowed action is manual review only.
+
+Boundary: specialized review queue preview is not a real queue, lifecycle,
+authorization, policy executor, or execution surface.
+
 ## Fixture-First Harness
 
 A possible future harness approach that uses local deterministic fixture inputs

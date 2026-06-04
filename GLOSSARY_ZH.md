@@ -350,6 +350,14 @@ P106 为 `harness-dry-run` 加入的 candidate-row 格式。每个 candidate 会
 边界：specialized candidate preview 仍是 preview-only。它不是 persistence、promotion、lifecycle
 creation、tool authorization 或 execution。
 
+## Specialized Review Queue Preview / 专门化审查队列预览
+
+P107 为 `harness-dry-run` 加入的 review-gate 格式。每个 gate 会说明 queue intent、candidate
+为什么路由到这里、为什么 lifecycle 被阻止，以及下一步只允许 manual review。
+
+边界：specialized review queue preview 不是真实 queue、lifecycle、authorization、policy executor
+或 execution surface。
+
 ## Fixture-First Harness / Fixture 优先试验台
 
 一种可能的 future harness approach：在任何 live input、adapter、cloud 或 product surface 前，先使用

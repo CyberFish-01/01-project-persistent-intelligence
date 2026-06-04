@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P106. It is not a release log. It records how the system
+This index covers P0-P107. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -114,3 +114,4 @@ foundation evolved.
 | P104 | Added Scenario Profile Test Matrix. | Harness pressure profiles need a documented expected-output matrix before further specialization. | Harness Evaluation |
 | P105 | Hardened harness boundary monitor. | The dry-run boundary monitor should explicitly show disabled capabilities, unchanged state, and zero active violations. | Harness Boundary |
 | P106 | Specialized harness candidate previews. | Candidate rows should explain intent, selection reason, blocked promotion, and required manual review while remaining preview-only. | Harness Preview |
+| P107 | Specialized harness review queue previews. | Review gate rows should explain queue intent, gate routing, blocked lifecycle, and manual-review-only next action without creating a lifecycle. | Harness Preview |

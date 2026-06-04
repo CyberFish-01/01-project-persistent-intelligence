@@ -1014,6 +1014,11 @@ def _review_queue_preview(lang: str, profile: dict[str, Any]) -> list[dict[str, 
                 "review_gate": gate,
                 "display_name": zh_name,
                 "candidate_type": candidate_type,
+                "queue_intent": _review_queue_intent(gate, candidate_type, lang),
+                "why_this_gate": _review_queue_why_this_gate(profile, gate, candidate_type, lang),
+                "blocked_lifecycle_reason": _review_queue_blocked_lifecycle_reason(gate, candidate_type, lang),
+                "manual_review_required": True,
+                "next_allowed_action": "manual_review_only",
                 "gate_status": "preview_only",
                 "lifecycle_created": False,
                 "execution_allowed": False,
@@ -1026,6 +1031,11 @@ def _review_queue_preview(lang: str, profile: dict[str, Any]) -> list[dict[str, 
             "review_gate": gate,
             "display_name": en_name,
             "candidate_type": candidate_type,
+            "queue_intent": _review_queue_intent(gate, candidate_type, lang),
+            "why_this_gate": _review_queue_why_this_gate(profile, gate, candidate_type, lang),
+            "blocked_lifecycle_reason": _review_queue_blocked_lifecycle_reason(gate, candidate_type, lang),
+            "manual_review_required": True,
+            "next_allowed_action": "manual_review_only",
             "gate_status": "preview_only",
             "lifecycle_created": False,
             "execution_allowed": False,
@@ -1033,6 +1043,91 @@ def _review_queue_preview(lang: str, profile: dict[str, Any]) -> list[dict[str, 
         }
         for gate, en_name, _zh_name, candidate_type in profile["review_gates"]
     ]
+
+
+def _review_queue_intent(gate: str, candidate_type: str, lang: str) -> str:
+    key = f"{gate}:{candidate_type}"
+    if lang == "zh":
+        if "task" in key:
+            return "把可能的任务压力送到人工审查，不创建任务。"
+        if "governance" in key:
+            return "把跨层边界压力送到人工治理审查，不执行 policy。"
+        if "adapter" in key:
+            return "把接入压力送到人工边界审查，不批准接入。"
+        if "tool" in key or "capability" in key or "procedural" in key:
+            return "把能力或工具压力送到人工审查，不授权工具。"
+        if "growth" in key or "meaning_shift" in key or "identity" in key:
+            return "把成长或解释变化压力送到人工审查，不提升成长、不改身份。"
+        if "product" in key or "observatory" in key:
+            return "把产品或可见性压力送到人工审查，不进入产品层。"
+        if "temporal" in key or "recall" in key:
+            return "把时间或回忆压力送到人工策略审查，不写 event。"
+        if "reconstruction" in key or "payload" in key or "replay" in key:
+            return "把重建证据压力送到人工审查，不执行 reducer。"
+        return "把未分类压力保留给人工澄清，不自动行动。"
+    if "task" in key:
+        return "Route possible task pressure to manual review without creating a task."
+    if "governance" in key:
+        return "Route cross-layer boundary pressure to manual governance review without executing policy."
+    if "adapter" in key:
+        return "Route integration pressure to manual boundary review without approving integration."
+    if "tool" in key or "capability" in key or "procedural" in key:
+        return "Route capability or tool pressure to manual review without authorizing tools."
+    if "growth" in key or "meaning_shift" in key or "identity" in key:
+        return "Route growth or interpretation pressure to manual review without promoting growth or mutating identity."
+    if "product" in key or "observatory" in key:
+        return "Route product or visibility pressure to manual review without entering the product layer."
+    if "temporal" in key or "recall" in key:
+        return "Route temporal or recall pressure to manual policy review without writing events."
+    if "reconstruction" in key or "payload" in key or "replay" in key:
+        return "Route reconstruction evidence pressure to manual review without executing reducers."
+    return "Hold unknown pressure for manual clarification without automatic action."
+
+
+def _review_queue_why_this_gate(profile: dict[str, Any], gate: str, candidate_type: str, lang: str) -> str:
+    display_name = _localized(profile, "display_name", lang)
+    if lang == "zh":
+        return f"因为输入被分类为{display_name}，{candidate_type} 只适合进入 {gate} 的 preview。"
+    return f"Because the input was classified as {display_name}, {candidate_type} only belongs in {gate} preview."
+
+
+def _review_queue_blocked_lifecycle_reason(gate: str, candidate_type: str, lang: str) -> str:
+    key = f"{gate}:{candidate_type}"
+    if lang == "zh":
+        if "task" in key:
+            return "任务审查不是 task write；preview 不能创建或更新任务。"
+        if "governance" in key:
+            return "治理审查不是 policy executor；preview 不能执行跨层决策。"
+        if "tool" in key or "capability" in key:
+            return "验证结果不是授权；审查队列预览不能创建 tool lifecycle。"
+        if "growth" in key or "identity" in key:
+            return "成长审查不是成长执行；identity high gate 不能被 dry-run 打开。"
+        if "adapter" in key:
+            return "接入审查不是 adapter integration；平台不能从 preview 获得所有权。"
+        if "product" in key:
+            return "产品边界审查不是产品实现；preview 不能进入应用层。"
+        if "temporal" in key or "recall" in key:
+            return "时间/回忆审查不是 temporal 或 recall event write。"
+        if "reconstruction" in key or "payload" in key or "replay" in key:
+            return "重建审查不是 reducer execution，也不是 event compaction。"
+        return "review queue preview 不是 lifecycle；下一步只能人工判断。"
+    if "task" in key:
+        return "Task review is not a task write; preview cannot create or update tasks."
+    if "governance" in key:
+        return "Governance review is not a policy executor; preview cannot execute cross-layer decisions."
+    if "tool" in key or "capability" in key:
+        return "Verification is not authorization; review queue preview cannot create a tool lifecycle."
+    if "growth" in key or "identity" in key:
+        return "Growth review is not growth execution; identity high gate cannot be opened by dry-run."
+    if "adapter" in key:
+        return "Adapter review is not adapter integration; a platform gains no ownership from preview."
+    if "product" in key:
+        return "Product boundary review is not product implementation; preview cannot enter the application layer."
+    if "temporal" in key or "recall" in key:
+        return "Temporal/recall review is not temporal or recall event write."
+    if "reconstruction" in key or "payload" in key or "replay" in key:
+        return "Reconstruction review is not reducer execution or event compaction."
+    return "Review queue preview is not a lifecycle; the next step can only be manual judgment."
 
 
 def _boundary_monitor(lang: str, profile: dict[str, Any]) -> dict[str, Any]:

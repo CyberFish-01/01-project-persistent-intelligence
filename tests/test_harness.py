@@ -153,6 +153,19 @@ class HarnessDryRunTests(unittest.TestCase):
             self.assertIn("blocked_promotion_reason", candidate)
             self.assertIn("required_manual_review", candidate)
 
+    def test_review_queue_remains_preview_only_with_manual_review_fields(self):
+        report = build_harness_dry_run_report(user_message="这个想法可能是一次成长吗？", lang="zh")
+
+        for row in report["review_queue_preview"]:
+            self.assertIn("queue_intent", row)
+            self.assertIn("why_this_gate", row)
+            self.assertIn("blocked_lifecycle_reason", row)
+            self.assertTrue(row["manual_review_required"])
+            self.assertEqual(row["next_allowed_action"], "manual_review_only")
+            self.assertFalse(row["lifecycle_created"])
+            self.assertFalse(row["execution_allowed"])
+            self.assertIn("不", row["blocked_lifecycle_reason"])
+
     def test_forbidden_boundaries_are_disabled(self):
         report = build_harness_dry_run_report(user_message="Hello 01")
 
@@ -289,6 +302,21 @@ class HarnessDryRunTests(unittest.TestCase):
         self.assertNotEqual(adapter_candidate["candidate_intent"], temporal_candidate["candidate_intent"])
         self.assertIn("不批准接入", adapter_candidate["candidate_intent"])
         self.assertIn("不写 temporal/recall event", temporal_candidate["candidate_intent"])
+
+    def test_review_queue_specialization_fields_change_by_pressure(self):
+        adapter_report = build_harness_dry_run_report(user_message="我想把这个接进 AstrBot", lang="zh")
+        capability_report = build_harness_dry_run_report(
+            user_message="这个工具候选验证成功了，能不能直接加入工具库？",
+            lang="zh",
+        )
+
+        adapter_gate = adapter_report["review_queue_preview"][0]
+        capability_gate = capability_report["review_queue_preview"][0]
+        self.assertNotEqual(adapter_gate["queue_intent"], capability_gate["queue_intent"])
+        self.assertIn("不批准接入", adapter_gate["queue_intent"])
+        self.assertIn("不授权工具", capability_gate["queue_intent"])
+        self.assertIn("不是 adapter integration", adapter_gate["blocked_lifecycle_reason"])
+        self.assertIn("不是授权", capability_gate["blocked_lifecycle_reason"])
 
     def test_founder_summary_is_human_readable_and_non_executing(self):
         report = build_harness_dry_run_report(
