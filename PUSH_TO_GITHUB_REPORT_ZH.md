@@ -17,9 +17,10 @@ P160 记录 P159 通过之后的 GitHub push。它不创建 tags，不创建 bra
 | Local `origin` | 本机文件路径，不是 GitHub |
 | 使用的 push command | `git push https://github.com/CyberFish-01/01-project-persistent-intelligence.git main` |
 | Push 前 remote `main` | `b7abfa1` |
-| Push 后 remote `main` | `34ce833` |
+| 第一次 push 后 remote `main` | `34ce833` |
 | 第一次 push 的 commit | `34ce833 Add final pre-rebuild push readiness` |
-| Push result | success |
+| 第一次 push result | success |
+| 最终报告同步预期 | 本报告提交后，GitHub `main` 应等于由 `git ls-remote` 验证的本地 `HEAD` |
 | 是否 push tags | `false` |
 | 是否创建 tags | `false` |
 | 是否创建 branches | `false` |
@@ -31,8 +32,10 @@ P160 记录 P159 通过之后的 GitHub push。它不创建 tags，不创建 bra
 34ce833b513163836e1af18fcc3be1f97c39e9d1 refs/heads/main
 ```
 
-本报告是 post-push artifact。因为它在第一次 push 后才被提交，所以需要最后一次 `main`-only sync，
-让报告本身也进入 GitHub。这次后续同步仍然不是 tag creation、branch creation、tag push 或 rebuild。
+本报告是 post-push artifact。第一次 P160 push 已把 pre-report readiness state 同步到 `34ce833`；
+随后本报告 commit 本身会通过最后一次 `main`-only push 同步。最终 GitHub commit 需要在报告提交后，
+用本地 `HEAD` 和 `refs/heads/main` 对比验证。这次后续同步仍然不是 tag creation、branch creation、
+tag push 或 rebuild。
 
 ## Remote Caution / Remote 注意事项
 
@@ -73,4 +76,3 @@ GitHub `main` 确认同步后，founder 可以人工决定：
 - tags/branches 创建后，是否启动 local-only 01 rebuild trial。
 
 这些都是人工决策。P160 不执行它们。
-

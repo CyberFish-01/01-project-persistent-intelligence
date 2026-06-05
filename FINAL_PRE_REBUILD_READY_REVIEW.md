@@ -10,16 +10,14 @@ can be prepared. It does not execute either step.
 
 ## 1. Is GitHub `main` Synced?
 
-Yes for the first P160 push: GitHub `main` was updated from `b7abfa1` to
-`34ce833`.
-
-Because this report and [PUSH_TO_GITHUB_REPORT.md](./PUSH_TO_GITHUB_REPORT.md)
-are post-push artifacts, they require one final `main`-only sync after their
-commit. That sync must still avoid tags and branch creation.
+Yes. The first P160 push updated GitHub `main` from `b7abfa1` to `34ce833`.
+The final report commit is then synchronized by a final `main`-only push, and
+completion is proven by verifying that GitHub `refs/heads/main` equals local
+`HEAD`.
 
 ## 2. Can The Founder Enter Manual Baseline Tags / Branches?
 
-Yes, after final GitHub `main` sync is confirmed.
+Yes, after GitHub `main` is confirmed to equal local `HEAD`.
 
 Allowed next manual operation:
 
@@ -38,7 +36,7 @@ Yes, but only as preparation after manual tags/branches are created.
 
 The recommended sequence is:
 
-1. Confirm GitHub `main` sync.
+1. Confirm GitHub `main` equals local `HEAD`.
 2. Founder confirms exact baseline tags and branch set.
 3. Manually create baseline tags.
 4. Manually create `core/pre-rebuild-ready`.
@@ -60,7 +58,7 @@ P160 does not start rebuild.
 
 ## 5. Recommended Next Commands
 
-After final GitHub sync and founder confirmation, manual command drafts are in
+After GitHub `main` is synced and founder confirmation is recorded, manual command drafts are in
 [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md).
 
 Minimum likely sequence:
@@ -100,9 +98,8 @@ Still forbidden:
 
 ## Final Decision
 
-The repository is ready for final GitHub `main` sync and then manual baseline
-tag / branch creation review.
+The repository is ready for manual baseline tag / branch creation review once
+GitHub `main` is verified equal to local `HEAD`.
 
 It is not yet in local rebuild execution. The next move is founder-confirmed
 manual lineage operation, not automatic rebuild.
-

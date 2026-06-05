@@ -9,14 +9,13 @@ English version: [FINAL_PRE_REBUILD_READY_REVIEW.md](./FINAL_PRE_REBUILD_READY_R
 
 ## 1. GitHub `main` 是否已同步？
 
-第一次 P160 push 已同步：GitHub `main` 已从 `b7abfa1` 更新到 `34ce833`。
-
-因为本报告和 [PUSH_TO_GITHUB_REPORT_ZH.md](./PUSH_TO_GITHUB_REPORT_ZH.md) 是 post-push
-artifacts，它们提交后还需要最后一次 `main`-only sync。该 sync 仍不得 push tags，也不得创建 branches。
+已同步。第一次 P160 push 已把 GitHub `main` 从 `b7abfa1` 更新到 `34ce833`。随后 final report commit
+会通过最后一次 `main`-only push 同步；完成状态需要通过验证 GitHub `refs/heads/main` 等于本地 `HEAD`
+来证明。
 
 ## 2. 是否可以进入手动 baseline tags / branches？
 
-可以，但必须在 final GitHub `main` sync 确认之后。
+可以，但必须在 GitHub `main` 已确认等于本地 `HEAD` 之后。
 
 允许的下一步人工操作：
 
@@ -34,7 +33,7 @@ artifacts，它们提交后还需要最后一次 `main`-only sync。该 sync 仍
 
 推荐顺序：
 
-1. 确认 GitHub `main` sync。
+1. 确认 GitHub `main` 等于本地 `HEAD`。
 2. Founder 确认准确 baseline tags 和 branch set。
 3. 手动创建 baseline tags。
 4. 手动创建 `core/pre-rebuild-ready`。
@@ -56,7 +55,7 @@ P160 不启动 rebuild。
 
 ## 5. 推荐下一步命令是什么？
 
-final GitHub sync 和 founder confirmation 之后，manual command drafts 在
+GitHub `main` 同步且 founder confirmation 记录之后，manual command drafts 在
 [MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md)。
 
 可能的最小顺序：
@@ -95,7 +94,6 @@ git checkout -b instance/01-local-rebuild-trial core-v1-pre-rebuild-ready
 
 ## Final Decision / 最终判断
 
-仓库已经可以完成 final GitHub `main` sync，然后进入 manual baseline tag / branch creation review。
+仓库在 GitHub `main` 验证等于本地 `HEAD` 后，可以进入 manual baseline tag / branch creation review。
 
 它还没有进入 local rebuild execution。下一步是 founder-confirmed manual lineage operation，不是自动重构。
-

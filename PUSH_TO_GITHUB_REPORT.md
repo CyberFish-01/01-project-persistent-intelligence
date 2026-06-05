@@ -18,9 +18,10 @@ a model, write state, or modify Identity Core.
 | Local `origin` | local filesystem path, not GitHub |
 | Push command used | `git push https://github.com/CyberFish-01/01-project-persistent-intelligence.git main` |
 | Remote `main` before push | `b7abfa1` |
-| Remote `main` after push | `34ce833` |
+| Remote `main` after first push | `34ce833` |
 | First pushed commit | `34ce833 Add final pre-rebuild push readiness` |
-| Push result | success |
+| First push result | success |
+| Final report sync expectation | after this report commit, GitHub `main` should equal the local `HEAD` verified by `git ls-remote` |
 | Tags pushed | `false` |
 | Tags created | `false` |
 | Branches created | `false` |
@@ -32,10 +33,12 @@ Verification after the first push:
 34ce833b513163836e1af18fcc3be1f97c39e9d1 refs/heads/main
 ```
 
-This report is a post-push artifact. Because it is committed after the first
-push, it requires one final `main`-only sync to include the report itself on
-GitHub. That follow-up sync is still not tag creation, branch creation, tag
-push, or rebuild.
+This report is a post-push artifact. The first P160 push synchronized the
+pre-report readiness state to `34ce833`; the report commit itself is then
+synchronized by a final `main`-only push. The exact final GitHub commit is
+verified after the report commit by comparing local `HEAD` to
+`refs/heads/main`. That follow-up sync is still not tag creation, branch
+creation, tag push, or rebuild.
 
 ## Remote Caution
 
@@ -77,4 +80,3 @@ After GitHub `main` is confirmed synced, the founder may manually decide:
 - whether to start local-only 01 rebuild trial after tags/branches are created.
 
 These are manual decisions. P160 does not execute them.
-
