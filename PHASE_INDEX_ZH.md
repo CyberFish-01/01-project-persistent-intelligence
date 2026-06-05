@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P158。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P159。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -165,3 +165,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P156 | 加入 Baseline Tagging and Branch Creation Plan。 | 任何 Git object 被创建或 rebuild 开始前，tag 与 branch choices 必须先作为 plan 被审查。 | Lineage Governance |
 | P157 | 加入 Baseline Tagging Founder Review。 | founder-facing review 必须区分 recommended tags/branches 和 confirmed Git execution。 | Lineage Governance |
 | P158 | 加入 Manual Tag and Branch Command Sheet。 | manual commands 可以为未来人类记录，但现在不能被执行。 | Lineage Governance |
+| P159 | 加入 Final Pre-Rebuild Push Readiness。 | final push readiness 必须在任何 rebuild 前检查 remote、secrets、boundaries、links、tests 和 GitHub push command。 | Pre-Rebuild Verification |

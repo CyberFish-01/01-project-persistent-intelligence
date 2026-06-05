@@ -52,6 +52,7 @@ origin ideas are not implementation approval.
 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [BASELINE_TAGGING_PLAN_ZH.md](./BASELINE_TAGGING_PLAN_ZH.md) | Baseline tagging plan | 提出 candidate baseline tags、milestone tags、branch fork points 和 manual command drafts，同时不创建 tags、branches 或 rebuild work。 |
 | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md) | Founder review | 审查 tag 和 branch candidates 的 confidence、risk、founder confirmation 与 recommendation，同时不执行 Git。 |
 | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) / [MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md) | Manual command sheet | 记录 future human tag/branch command drafts、pre-checks、post-checks、rollback drafts 和 confirmation requirements，同时不运行 commands，也不创建 Git objects。 |
+| [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md) / [FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md](./FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md) | Final push-readiness audit | 确认 final pre-rebuild push readiness 和 remote caution，同时不 push、不创建 tags、不创建 branches，也不启动 rebuild。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -105,6 +106,7 @@ origin ideas are not implementation approval.
 | Baseline Tagging and Branch Creation | 创建任何 Git objects 前，lineage governance 需要 founder-readable candidate tags 和 branch fork points。 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md), [RFC_INDEX.md](./RFC_INDEX.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `planning-only`, not Git execution |
 | Baseline Tagging Founder Review | 运行任何 manual commands 前，candidate tag 和 branch choices 需要 founder-facing confidence 与 risk review。 | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `review-only`, not Git execution |
 | Manual Tag and Branch Command Sheet | future human operations 需要准确 command drafts，但 command drafts 必须与 Git execution 分离。 | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md), [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `manual-command-draft`, not tag creation、branch creation、push 或 rebuild |
+| Final Pre-Rebuild Push Readiness | 当前 `main` 在任何 manual tag/branch operation 或 rebuild trial 前，需要最后一次 push-readiness audit。 | [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md), [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `audit-only`, not push execution、tag creation、branch creation 或 rebuild |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -212,6 +214,9 @@ Research notes 是 source material，不是当前 implementation plan。
 26. 阅读 [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md)
     时，只把它当作 future human command drafts，不要当作运行 commands、创建 tags、创建 branches、
     push tags、push main、修改 Git history 或启动 rebuild 的许可。
+27. 阅读 [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md)
+    时，只把它当作 final push-readiness evidence 和 remote caution，不要当作 tag、branch、rebuild
+    或 push-tag approval。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 

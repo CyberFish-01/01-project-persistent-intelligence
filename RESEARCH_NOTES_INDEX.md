@@ -54,6 +54,7 @@ current documents carry it, and what is still only long-term vision?"
 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [BASELINE_TAGGING_PLAN_ZH.md](./BASELINE_TAGGING_PLAN_ZH.md) | Baseline tagging plan | Proposes candidate baseline tags, milestone tags, branch fork points, and manual command drafts without creating tags, branches, or rebuild work. |
 | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md) | Founder review | Reviews tag and branch candidates for confidence, risk, founder confirmation, and recommendation without Git execution. |
 | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) / [MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md) | Manual command sheet | Records future human tag/branch command drafts, pre-checks, post-checks, rollback drafts, and confirmation requirements without running commands or creating Git objects. |
+| [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md) / [FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md](./FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md) | Final push-readiness audit | Confirms final pre-rebuild push readiness and remote caution without pushing, creating tags, creating branches, or starting rebuild. |
 
 ## Original Idea Chains
 
@@ -107,6 +108,7 @@ current documents carry it, and what is still only long-term vision?"
 | Baseline Tagging and Branch Creation | Lineage governance needs founder-readable candidate tags and branch fork points before any Git objects are created. | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md), [RFC_INDEX.md](./RFC_INDEX.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `planning-only`, not Git execution |
 | Baseline Tagging Founder Review | Candidate tag and branch choices need founder-facing confidence and risk review before any manual commands are run. | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `review-only`, not Git execution |
 | Manual Tag and Branch Command Sheet | Future human operations need exact command drafts, but command drafts must remain separate from Git execution. | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md), [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `manual-command-draft`, not tag creation, branch creation, push, or rebuild |
+| Final Pre-Rebuild Push Readiness | Current `main` needs one last push-readiness audit before any manual tag/branch operation or rebuild trial. | [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md), [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `audit-only`, not push execution, tag creation, branch creation, or rebuild |
 
 ## Second Chain Map: Artificial Life History
 
@@ -225,6 +227,9 @@ For origin tracing:
     only as future human command drafts, not as permission to run commands,
     create tags, create branches, push tags, push main, modify Git history, or
     start rebuild.
+27. Read [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md)
+    only as final push-readiness evidence and remote caution, not as tag,
+    branch, rebuild, or push-tag approval.
 
 ## P78 Non-Execution Statement
 
