@@ -55,7 +55,7 @@ foundation layer 保持清醒，同时不批准 runtime work。
 | R24 | Reusable procedure mistaken for trusted tool | high | repeatable workflow 被当成 safe executable capability | 使用 P92 规则：reusable procedure does not imply trusted tool | trusted tool promotion without review |
 | R25 | Self-modifying runtime pressure | high | capability work 提议修改 runtime、prompts、code、memory 或 identity | self-modifying runtime 保持 forbidden，直到 explicit future architecture 和 founder approval 存在 | self-modifying runtime |
 | R26 | Lineage contamination | high | instance output、synthetic history、adapter context 或 model self-claims 开始看起来像 Core 原生内容 | 使用 [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md)：不允许 direct instance/research/quarantine merge；只能 candidate -> quarantine -> review -> manual selected return | direct branch merge into Core、tag/branch creation as authorization、synthetic autobiography as Core history |
-| R27 | Tagging plan mistaken for Git execution | high | candidate tags、branch names 或 manual command drafts 被当成已经创建的 Git objects | 使用 [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md)：先 plan，之后 founder confirmation，且只能在单独操作中执行 | git tag creation、git branch creation、git history modification、rebuild start |
+| R27 | Tagging plan or review mistaken for Git execution | high | candidate tags、branch names、founder-review recommendations 或 manual command drafts 被当成已经创建的 Git objects | 使用 [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) 和 [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md)：先 plan/review，之后 founder confirmation，且只能在单独操作中执行 | git tag creation、git branch creation、git history modification、rebuild start |
 
 ## Risk Clusters / 风险簇
 

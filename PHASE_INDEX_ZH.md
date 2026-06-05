@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P156。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P157。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -163,3 +163,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P154 | 更新 Push Readiness Report。 | push readiness 必须与 rebuild approval 分开审计，并且 push 仍需要人类确认。 | Pre-Rebuild Verification |
 | P155 | 加入 Lineage and Branch Governance RFC。 | 实例可以生长，内核不可僭越；任何本地重构前必须先规划 lineage、branch、tag 和 checkpoint 规则。 | Lineage Governance |
 | P156 | 加入 Baseline Tagging and Branch Creation Plan。 | 任何 Git object 被创建或 rebuild 开始前，tag 与 branch choices 必须先作为 plan 被审查。 | Lineage Governance |
+| P157 | 加入 Baseline Tagging Founder Review。 | founder-facing review 必须区分 recommended tags/branches 和 confirmed Git execution。 | Lineage Governance |

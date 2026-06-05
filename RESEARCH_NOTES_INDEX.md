@@ -52,6 +52,7 @@ current documents carry it, and what is still only long-term vision?"
 | [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | Reviews whether the P100 dry-run helps the founder understand input flow and keeps real routing, retrieval, adapters, and product work blocked. |
 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | Lineage governance RFC | Defines branch, tag, checkpoint, instance sandbox, quarantine, and selected-return planning before future rebuild without creating Git objects or starting rebuild. |
 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [BASELINE_TAGGING_PLAN_ZH.md](./BASELINE_TAGGING_PLAN_ZH.md) | Baseline tagging plan | Proposes candidate baseline tags, milestone tags, branch fork points, and manual command drafts without creating tags, branches, or rebuild work. |
+| [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md) | Founder review | Reviews tag and branch candidates for confidence, risk, founder confirmation, and recommendation without Git execution. |
 
 ## Original Idea Chains
 
@@ -103,6 +104,7 @@ current documents carry it, and what is still only long-term vision?"
 | Minimal CLI Harness Dry-Run | Interaction pressure now has a local no-write preview command with deterministic scenario routing, but no runtime, adapter, model call, retrieval, or product surface. | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, `scenario-routing`, not harness runtime |
 | Lineage and Branch Governance | Future instances may explore, but Core history needs recoverable lineage, branch, tag, checkpoint, quarantine, and selected-return rules before rebuild. | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `governance-rfc`, not tag creation, branch creation, push, merge, or rebuild |
 | Baseline Tagging and Branch Creation | Lineage governance needs founder-readable candidate tags and branch fork points before any Git objects are created. | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md), [RFC_INDEX.md](./RFC_INDEX.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `planning-only`, not Git execution |
+| Baseline Tagging Founder Review | Candidate tag and branch choices need founder-facing confidence and risk review before any manual commands are run. | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `review-only`, not Git execution |
 
 ## Second Chain Map: Artificial Life History
 
@@ -214,6 +216,9 @@ For origin tracing:
 24. Read [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) only as a
     founder-review plan for candidate tags, branch fork points, and manual
     command drafts, not as permission to run those commands.
+25. Read [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md)
+    only as founder-facing confidence and risk review, not as tag, branch,
+    push, or rebuild approval.
 
 ## P78 Non-Execution Statement
 

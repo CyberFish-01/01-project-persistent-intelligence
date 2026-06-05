@@ -127,6 +127,7 @@ implementation approval.
 | P154 | [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) / [ZH](./PUSH_READINESS_REPORT_ZH.md) | push audit | audit-only report | Audits local `main` for clean status, ahead commits, file types, sensitive information, forbidden boundaries, links, tests, and push recommendation. | push execution, rebuild approval, cloud/server update, AstrBot upload, old 01 read, model call, adapter integration, or automatic next phase |
 | P155 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [ZH](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | lineage governance RFC | governance-only planning | Defines future lineage, branch, tag, checkpoint, sandbox, quarantine, and manual selected-return rules before any local rebuild. | git tag creation, git branch creation, push execution, rebuild start, direct instance merge, quarantine merge, old 01 read, model call, adapter integration, or automatic selected return |
 | P156 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [ZH](./BASELINE_TAGGING_PLAN_ZH.md) | baseline tagging plan | planning-only report | Proposes candidate baseline tags, milestone tags, branch fork points, manual commands, and rebuild safety gates for founder review. | git tag creation, git branch creation, push execution, git history modification, rebuild start, branch merge, old 01 read, model call, adapter integration, or automatic selected return |
+| P157 | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [ZH](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md) | founder review | review-only report | Reviews P156 tag and branch candidates with confidence, risks, founder-confirmation needs, and recommendations. | git tag creation, git branch creation, push execution, git history modification, rebuild start, branch merge, old 01 read, model call, adapter integration, or automatic selected return |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
@@ -273,6 +274,10 @@ The current dependency order is:
     planning-only tag and branch proposal: candidate commits and branch fork
     points are visible for founder review, but no Git object is created and
     rebuild remains blocked.
+39. [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md)
+    and [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md)
+    record the P157 founder review: recommendations are clearer, but tag and
+    branch execution still waits for manual founder confirmation.
 
 ## Runtime-Blocked Topics
 

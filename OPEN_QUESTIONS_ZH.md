@@ -49,7 +49,7 @@ capabilities 被关闭。
 | Reconstruction Reducer Contract | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md) | accepted reducer contract、deterministic validation 和 target-path capture policy 未实现 | reducer execution、state rebuild |
 | Payload / Diff Capture Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md) | privacy/redaction、schema review、compatibility plan 和 capture mechanics 缺失 | payload capture、event schema mutation |
 | Lineage and Branch Governance | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) | lineage report schema、tag advisor、branch policy validation、instance diff、quarantine return preview 和 selected-return mechanics 尚未实现 | git tag creation、git branch creation、automatic merge、rebuild start |
-| Baseline Tagging and Branch Creation | `plan-drafted`, `indexed`, `future-founder-confirmation-needed`, `blocked-runtime` | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) | candidate commits 和 fork points 已提出，但 founder 尚未确认 tag choices、branch choices 或 rebuild start | git tag creation、git branch creation、git history modification、rebuild start |
+| Baseline Tagging and Branch Creation | `plan-drafted`, `review-drafted`, `indexed`, `future-founder-confirmation-needed`, `blocked-runtime` | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) | candidate commits 和 fork points 已审查，但 founder 尚未确认 tag choices、branch choices 或 rebuild start | git tag creation、git branch creation、git history modification、rebuild start |
 | Productive Drift vs Random Drift Evaluation | `watch`, `future-contract-needed` | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) | evaluation cases 尚未设计 | growth engine execution |
 
 ## Updated Open Items / 更新后的开放项
@@ -425,8 +425,9 @@ Lineage governance 仍是任何 local rebuild 前的 planning boundary。
 
 ### Baseline Tagging and Branch Creation / 基线 Tag 与分支创建
 
-已由 [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) 规划。它仍然 open，因为 P156 只提出
-candidate tags、branch names、fork points 和 manual command drafts。
+已由 [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) 规划，并由
+[BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) 审查。它仍然 open，
+因为 P157 只澄清 recommendations，不创建 tags 或 branches。
 
 仍开放：
 
