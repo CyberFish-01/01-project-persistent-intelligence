@@ -19,13 +19,14 @@ This repository now has two layers:
 - earlier prototype references for the local 01 Core runtime and adapter
   surfaces.
 
-Current work status: P159 Final Pre-Rebuild Push Readiness is complete locally.
+Current work status: P160 main-only GitHub sync is complete.
 The P154 audit found the project push-ready; P155 added lineage governance;
 P156 proposed candidate tags/branches; P157 reviewed those choices; P158 adds
 manual command drafts for a later human operation; P159 confirms final
 pre-rebuild push readiness and warns that current `origin` is a local path, not
-GitHub. Push, tag creation, branch creation, and rebuild remain blocked until
-explicit founder/operator confirmation.
+GitHub; P160 pushed `main` to GitHub without tags or branch creation. Tag
+creation, branch creation, and rebuild remain blocked until explicit
+founder/operator confirmation.
 
 The runtime and adapter references below are historical/engineering references;
 they are not approval to enter P103, build dashboard runtime, Web UI,
@@ -41,7 +42,7 @@ Read these first when joining the project or handing it to another agent:
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md): project-level boundaries, invariants, and stage order.
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md): what the foundation has, what is missing, and what remains exploratory or pushed back.
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md): stable foundation, blocked runtime work, future contracts, and low-risk consolidation.
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P159 foundation phase index by proposition and main line.
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md): P0-P160 foundation phase index by proposition and main line.
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md): current foundation concept map and cross-layer relationships.
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md): P73 architecture boundary refresh across identity, memory, growth, temporal, reconstruction, governance, and product layers.
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md): P74 deduplicated shared terms and boundaries for growth, drift, stateful memory, governance, reconstruction, and temporal awareness.
@@ -106,6 +107,8 @@ Read these first when joining the project or handing it to another agent:
 - [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md): P157 founder review of P156 tag and branch candidates, including confidence, risk, confirmation needs, and recommendations; it does not create tags, branches, or rebuild work.
 - [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) / [MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md): P158 manual command draft sheet for future human tag/branch operations; it does not run commands, create tags, create branches, push tags, push main, or start rebuild.
 - [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md) / [FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md](./FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md): P159 final push-readiness audit before any rebuild; it recommends GitHub `main` push only and does not push, create tags, create branches, or start rebuild.
+- [PUSH_TO_GITHUB_REPORT.md](./PUSH_TO_GITHUB_REPORT.md) / [PUSH_TO_GITHUB_REPORT_ZH.md](./PUSH_TO_GITHUB_REPORT_ZH.md): P160 report for the main-only GitHub push; it records no tag creation, no branch creation, no tag push, and no rebuild.
+- [FINAL_PRE_REBUILD_READY_REVIEW.md](./FINAL_PRE_REBUILD_READY_REVIEW.md) / [FINAL_PRE_REBUILD_READY_REVIEW_ZH.md](./FINAL_PRE_REBUILD_READY_REVIEW_ZH.md): final review of whether manual baseline tags/branches and local-only rebuild trial preparation may proceed after founder confirmation.
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md): P104 expected pressure profiles, candidates, boundaries, and next steps for `harness-dry-run`.
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md): latest autonomous foundation work summary and next safe direction.
 
@@ -250,7 +253,7 @@ python3 -m one_core.cli pre-rebuild-verification --lang zh
 This command checks required P112-P151 artifacts, README/index coverage, local
 Markdown links, active forbidden true flags, existing read-only report builders,
 CTM boundaries, Tool-First boundaries, and rebuild boundaries. It does not run
-rebuild, call a model, connect adapters, write state, or approve P152/P153/P154/P155/P156/P157/P158/P159.
+rebuild, call a model, connect adapters, write state, or approve P152/P153/P154/P155/P156/P157/P158/P159/P160.
 
 Local API reference:
 

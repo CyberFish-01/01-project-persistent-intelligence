@@ -130,6 +130,7 @@ implementation approval.
 | P157 | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [ZH](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md) | founder review | review-only report | Reviews P156 tag and branch candidates with confidence, risks, founder-confirmation needs, and recommendations. | git tag creation, git branch creation, push execution, git history modification, rebuild start, branch merge, old 01 read, model call, adapter integration, or automatic selected return |
 | P158 | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) / [ZH](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md) | command sheet | manual-command draft | Provides future manual tag/branch command drafts, pre-checks, post-checks, rollback drafts, and confirmation requirements. | command execution, git tag creation, git branch creation, push tags, push main, git history modification, rebuild start, branch merge, old 01 read, model call, or adapter integration |
 | P159 | [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md) / [ZH](./FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md) | final push audit | audit-only report | Audits final pre-rebuild push readiness, including remote caution, secret scan, file scan, forbidden boundaries, links, tests, and smoke checks. | push execution, tag creation, branch creation, rebuild start, old 01 read, model call, adapter integration, or Git history modification |
+| P160 | [PUSH_TO_GITHUB_REPORT.md](./PUSH_TO_GITHUB_REPORT.md) / [ZH](./PUSH_TO_GITHUB_REPORT_ZH.md), [FINAL_PRE_REBUILD_READY_REVIEW.md](./FINAL_PRE_REBUILD_READY_REVIEW.md) / [ZH](./FINAL_PRE_REBUILD_READY_REVIEW_ZH.md) | push report and final review | post-push report | Records main-only GitHub sync and final manual next-step readiness. | tag creation, branch creation, tag push, rebuild start, old 01 read, model call, adapter integration, or Git history modification |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
@@ -288,6 +289,11 @@ The current dependency order is:
     and [FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md](./FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md)
     record P159 final push readiness; it recommends a GitHub `main` push command
     but does not push, create tags, create branches, or start rebuild.
+42. [PUSH_TO_GITHUB_REPORT.md](./PUSH_TO_GITHUB_REPORT.md),
+    [PUSH_TO_GITHUB_REPORT_ZH.md](./PUSH_TO_GITHUB_REPORT_ZH.md),
+    [FINAL_PRE_REBUILD_READY_REVIEW.md](./FINAL_PRE_REBUILD_READY_REVIEW.md),
+    and [FINAL_PRE_REBUILD_READY_REVIEW_ZH.md](./FINAL_PRE_REBUILD_READY_REVIEW_ZH.md)
+    record P160 main-only GitHub sync and final manual-readiness review.
 
 ## Runtime-Blocked Topics
 

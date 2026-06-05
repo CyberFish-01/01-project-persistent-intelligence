@@ -17,11 +17,11 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P159 Final Pre-Rebuild Push Readiness 已在本地完成。P154 audit 已确认仓库
+当前工作状态：P160 main-only GitHub sync 已完成。P154 audit 已确认仓库
 push-ready；P155 加入 lineage governance；P156 提出 candidate tags/branches；P157 审查这些选择；
 P158 加入供未来人工操作使用的 command drafts；P159 确认 final pre-rebuild push readiness，并提醒当前
-`origin` 是本机路径，不是 GitHub。push、创建 tag、创建 branch 和 rebuild 仍需要 founder / operator
-明确确认。
+`origin` 是本机路径，不是 GitHub；P160 已将 `main` push 到 GitHub，且没有 push tags 或创建 branches。
+创建 tag、创建 branch 和 rebuild 仍需要 founder / operator 明确确认。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -35,7 +35,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P159 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P160 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -100,6 +100,8 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md)：P157 founder review，审查 P156 tag 和 branch candidates 的 confidence、risk、confirmation needs 和 recommendations；它不创建 tags、branches 或 rebuild work。
 - [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) / [MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md)：P158 manual command draft sheet，用于 future human tag/branch operations；它不运行命令、不创建 tags、不创建 branches、不 push tags、不 push main，也不启动 rebuild。
 - [FINAL_PRE_REBUILD_PUSH_READINESS.md](./FINAL_PRE_REBUILD_PUSH_READINESS.md) / [FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md](./FINAL_PRE_REBUILD_PUSH_READINESS_ZH.md)：P159 final push-readiness audit，位于任何 rebuild 前；它只建议 GitHub `main` push，不执行 push、不创建 tags、不创建 branches，也不启动 rebuild。
+- [PUSH_TO_GITHUB_REPORT.md](./PUSH_TO_GITHUB_REPORT.md) / [PUSH_TO_GITHUB_REPORT_ZH.md](./PUSH_TO_GITHUB_REPORT_ZH.md)：P160 main-only GitHub push report；记录没有 tag creation、没有 branch creation、没有 tag push，也没有 rebuild。
+- [FINAL_PRE_REBUILD_READY_REVIEW.md](./FINAL_PRE_REBUILD_READY_REVIEW.md) / [FINAL_PRE_REBUILD_READY_REVIEW_ZH.md](./FINAL_PRE_REBUILD_READY_REVIEW_ZH.md)：最终复盘：founder confirmation 后是否可以进入 manual baseline tags/branches 和 local-only rebuild trial preparation。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 
@@ -237,7 +239,7 @@ python3 -m one_core.cli pre-rebuild-verification --lang zh
 
 这个命令检查 P112-P151 必需文档、README/index coverage、local Markdown links、active forbidden
 true flags、既有只读 report builders、CTM boundaries、Tool-First boundaries 和 rebuild boundaries。
-它不运行 rebuild、不调用模型、不连接 adapter、不写 state，也不批准 P152/P153/P154/P155/P156/P157/P158/P159。
+它不运行 rebuild、不调用模型、不连接 adapter、不写 state，也不批准 P152/P153/P154/P155/P156/P157/P158/P159/P160。
 
 本地 API 参考：
 

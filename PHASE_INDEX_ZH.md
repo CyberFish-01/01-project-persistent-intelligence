@@ -2,7 +2,7 @@
 
 English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 
-本索引覆盖 P0-P159。它不是提交记录，而是系统地基如何演化的索引。
+本索引覆盖 P0-P160。它不是提交记录，而是系统地基如何演化的索引。
 
 | Phase | 一句话总结 | 核心命题 | 所属主线 |
 |---|---|---|---|
@@ -166,3 +166,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P157 | 加入 Baseline Tagging Founder Review。 | founder-facing review 必须区分 recommended tags/branches 和 confirmed Git execution。 | Lineage Governance |
 | P158 | 加入 Manual Tag and Branch Command Sheet。 | manual commands 可以为未来人类记录，但现在不能被执行。 | Lineage Governance |
 | P159 | 加入 Final Pre-Rebuild Push Readiness。 | final push readiness 必须在任何 rebuild 前检查 remote、secrets、boundaries、links、tests 和 GitHub push command。 | Pre-Rebuild Verification |
+| P160 | 已将 `main` push 到 GitHub，并加入 final pre-rebuild ready review。 | GitHub sync 可以不创建 tags、branches 或 rebuild；manual lineage operation 仍是下一道 gate。 | Pre-Rebuild Verification |

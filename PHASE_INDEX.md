@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P159. It is not a release log. It records how the system
+This index covers P0-P160. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -167,3 +167,4 @@ foundation evolved.
 | P157 | Added Baseline Tagging Founder Review. | Founder-facing review must separate recommended tags and branches from confirmed Git execution. | Lineage Governance |
 | P158 | Added Manual Tag and Branch Command Sheet. | Manual commands can be documented for future humans without being executed now. | Lineage Governance |
 | P159 | Added Final Pre-Rebuild Push Readiness. | Final push readiness must check remotes, secrets, boundaries, links, tests, and GitHub push command before any rebuild. | Pre-Rebuild Verification |
+| P160 | Pushed `main` to GitHub and added final pre-rebuild ready review. | GitHub sync can happen without tags, branches, or rebuild; manual lineage operation remains the next gate. | Pre-Rebuild Verification |
