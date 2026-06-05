@@ -55,7 +55,7 @@ foundation layer 保持清醒，同时不批准 runtime work。
 | R24 | Reusable procedure mistaken for trusted tool | high | repeatable workflow 被当成 safe executable capability | 使用 P92 规则：reusable procedure does not imply trusted tool | trusted tool promotion without review |
 | R25 | Self-modifying runtime pressure | high | capability work 提议修改 runtime、prompts、code、memory 或 identity | self-modifying runtime 保持 forbidden，直到 explicit future architecture 和 founder approval 存在 | self-modifying runtime |
 | R26 | Lineage contamination | high | instance output、synthetic history、adapter context 或 model self-claims 开始看起来像 Core 原生内容 | 使用 [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md)：不允许 direct instance/research/quarantine merge；只能 candidate -> quarantine -> review -> manual selected return | direct branch merge into Core、tag/branch creation as authorization、synthetic autobiography as Core history |
-| R27 | Tagging plan or review mistaken for Git execution | high | candidate tags、branch names、founder-review recommendations 或 manual command drafts 被当成已经创建的 Git objects | 使用 [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) 和 [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md)：先 plan/review，之后 founder confirmation，且只能在单独操作中执行 | git tag creation、git branch creation、git history modification、rebuild start |
+| R27 | Tagging plan、review 或 command sheet mistaken for Git execution | high | candidate tags、branch names、founder-review recommendations 或 manual command drafts 被当成已经创建的 Git objects，或被当成运行命令的授权 | 使用 [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md)、[BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) 和 [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md)：先 plan/review/command drafts，之后 founder confirmation，且只能在单独操作中执行 | git tag creation、git branch creation、push tags、git history modification、rebuild start |
 
 ## Risk Clusters / 风险簇
 
@@ -109,8 +109,9 @@ identity growth。Verification evidence 不是 authorization。Candidate review 
 
 主要控制：保持 Core trunk、baseline、milestone、pre-rebuild checkpoint、instance sandbox、
 research、quarantine 和 release/verification branches 分离。selected return 必须经过 quarantine
-和 manual review。Tag 和 branch plans 在单独 founder-approved operation 创建 Git objects 前，
-都只是 review material。
+和 manual review。Tag 和 branch plans、founder reviews、manual command sheets 在单独
+founder-approved operation 创建 Git objects 前，都只是 review material。Command drafts 不会创建
+tags、branches、pushes、history changes 或 rebuild starts。
 
 ### Documentation Operations / 文档运维
 

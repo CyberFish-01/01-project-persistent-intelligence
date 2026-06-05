@@ -126,6 +126,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P155 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [ZH](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | lineage governance RFC | governance-only planning | 在任何 local rebuild 前，定义 future lineage、branch、tag、checkpoint、sandbox、quarantine 和 manual selected-return 规则。 | git tag creation、git branch creation、push execution、rebuild start、direct instance merge、quarantine merge、old 01 read、model call、adapter integration 或 automatic selected return |
 | P156 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [ZH](./BASELINE_TAGGING_PLAN_ZH.md) | baseline tagging plan | planning-only report | 提出 candidate baseline tags、milestone tags、branch fork points、manual commands 和 rebuild safety gates，供 founder review。 | git tag creation、git branch creation、push execution、git history modification、rebuild start、branch merge、old 01 read、model call、adapter integration 或 automatic selected return |
 | P157 | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [ZH](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md) | founder review | review-only report | 用 confidence、risks、founder-confirmation needs 和 recommendations 审查 P156 tag 与 branch candidates。 | git tag creation、git branch creation、push execution、git history modification、rebuild start、branch merge、old 01 read、model call、adapter integration 或 automatic selected return |
+| P158 | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) / [ZH](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md) | command sheet | manual-command draft | 提供 future manual tag/branch command drafts、pre-checks、post-checks、rollback drafts 和 confirmation requirements。 | command execution、git tag creation、git branch creation、push tags、push main、git history modification、rebuild start、branch merge、old 01 read、model call 或 adapter integration |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
@@ -262,6 +263,9 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     和 [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md)
     记录 P157 founder review：recommendations 更清楚，但 tag 和 branch execution 仍等待 manual
     founder confirmation。
+40. [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md)
+    和 [MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md)
+    记录 P158 给 future humans 的 manual command drafts；commands 未执行，tags/branches 仍未创建。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 

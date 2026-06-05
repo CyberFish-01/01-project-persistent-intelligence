@@ -128,6 +128,7 @@ implementation approval.
 | P155 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [ZH](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | lineage governance RFC | governance-only planning | Defines future lineage, branch, tag, checkpoint, sandbox, quarantine, and manual selected-return rules before any local rebuild. | git tag creation, git branch creation, push execution, rebuild start, direct instance merge, quarantine merge, old 01 read, model call, adapter integration, or automatic selected return |
 | P156 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [ZH](./BASELINE_TAGGING_PLAN_ZH.md) | baseline tagging plan | planning-only report | Proposes candidate baseline tags, milestone tags, branch fork points, manual commands, and rebuild safety gates for founder review. | git tag creation, git branch creation, push execution, git history modification, rebuild start, branch merge, old 01 read, model call, adapter integration, or automatic selected return |
 | P157 | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) / [ZH](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md) | founder review | review-only report | Reviews P156 tag and branch candidates with confidence, risks, founder-confirmation needs, and recommendations. | git tag creation, git branch creation, push execution, git history modification, rebuild start, branch merge, old 01 read, model call, adapter integration, or automatic selected return |
+| P158 | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) / [ZH](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md) | command sheet | manual-command draft | Provides future manual tag/branch command drafts, pre-checks, post-checks, rollback drafts, and confirmation requirements. | command execution, git tag creation, git branch creation, push tags, push main, git history modification, rebuild start, branch merge, old 01 read, model call, or adapter integration |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
@@ -278,6 +279,10 @@ The current dependency order is:
     and [BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md](./BASELINE_TAGGING_FOUNDER_REVIEW_ZH.md)
     record the P157 founder review: recommendations are clearer, but tag and
     branch execution still waits for manual founder confirmation.
+40. [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md)
+    and [MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET_ZH.md)
+    record P158 manual command drafts for future humans; the commands are not
+    executed, and tags/branches remain uncreated.
 
 ## Runtime-Blocked Topics
 

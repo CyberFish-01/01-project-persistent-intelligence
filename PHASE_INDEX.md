@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P157. It is not a release log. It records how the system
+This index covers P0-P158. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -165,3 +165,4 @@ foundation evolved.
 | P155 | Added Lineage and Branch Governance RFC. | Instance may grow, but Core must remain sovereign; lineage, branch, tag, and checkpoint rules must be planned before any local rebuild. | Lineage Governance |
 | P156 | Added Baseline Tagging and Branch Creation Plan. | Tag and branch choices must be reviewed as a plan before any Git object is created or rebuild begins. | Lineage Governance |
 | P157 | Added Baseline Tagging Founder Review. | Founder-facing review must separate recommended tags and branches from confirmed Git execution. | Lineage Governance |
+| P158 | Added Manual Tag and Branch Command Sheet. | Manual commands can be documented for future humans without being executed now. | Lineage Governance |

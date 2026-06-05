@@ -56,7 +56,7 @@ planning phases discuss capability evolution without approving runtime work.
 | R24 | Reusable procedure mistaken for trusted tool | high | a repeatable workflow is treated as safe executable capability | use the P92 rule: reusable procedure does not imply trusted tool | trusted tool promotion without review |
 | R25 | Self-modifying runtime pressure | high | capability work proposes changing runtime, prompts, code, memory, or identity | keep self-modifying runtime forbidden until explicit future architecture and founder approval exist | self-modifying runtime |
 | R26 | Lineage contamination | high | instance output, synthetic history, adapter context, or model self-claims start looking native to Core | use [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md): no direct instance/research/quarantine merge; candidate -> quarantine -> review -> manual selected return | direct branch merge into Core, tag/branch creation as authorization, synthetic autobiography as Core history |
-| R27 | Tagging plan or review mistaken for Git execution | high | candidate tags, branch names, founder-review recommendations, or manual command drafts are treated as already-created Git objects | use [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) and [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md): plan/review first, founder confirmation later, separate operation only | git tag creation, git branch creation, git history modification, rebuild start |
+| R27 | Tagging plan, review, or command sheet mistaken for Git execution | high | candidate tags, branch names, founder-review recommendations, or manual command drafts are treated as already-created Git objects or authorization to run commands | use [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md), [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md), and [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md): plan/review/command drafts first, founder confirmation later, separate operation only | git tag creation, git branch creation, push tags, git history modification, rebuild start |
 
 ## Risk Clusters
 
@@ -116,8 +116,9 @@ Risks: R26, R27.
 Primary control: keep Core trunk, baseline, milestone, pre-rebuild checkpoint,
 instance sandbox, research, quarantine, and release/verification branches
 separate. Use selected return only after quarantine and manual review. Treat tag
-and branch plans as review material until a separate founder-approved operation
-creates Git objects.
+and branch plans, founder reviews, and manual command sheets as review material
+until a separate founder-approved operation creates Git objects. Command drafts
+do not create tags, branches, pushes, history changes, or rebuild starts.
 
 ### Documentation Operations
 

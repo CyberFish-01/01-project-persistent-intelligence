@@ -49,7 +49,7 @@ not implemented, and not closed as runtime capabilities.
 | Reconstruction Reducer Contract | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md) | accepted reducer contract, deterministic validation, and target-path capture policy are not implemented | reducer execution, state rebuild |
 | Payload / Diff Capture Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md) | privacy/redaction, schema review, compatibility plan, and capture mechanics are missing | payload capture, event schema mutation |
 | Lineage and Branch Governance | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) | lineage report schema, tag advisor, branch policy validation, instance diff, quarantine return preview, and selected-return mechanics are not implemented | git tag creation, git branch creation, automatic merge, rebuild start |
-| Baseline Tagging and Branch Creation | `plan-drafted`, `review-drafted`, `indexed`, `future-founder-confirmation-needed`, `blocked-runtime` | [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md) | candidate commits and fork points are reviewed, but founder has not confirmed tag choices, branch choices, or rebuild start | git tag creation, git branch creation, git history modification, rebuild start |
+| Baseline Tagging and Branch Creation | `plan-drafted`, `review-drafted`, `command-sheet-drafted`, `indexed`, `future-founder-confirmation-needed`, `blocked-runtime` | [MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md) | command drafts exist, but founder has not confirmed tag choices, branch choices, command execution, or rebuild start | git tag creation, git branch creation, push tags, git history modification, rebuild start |
 | Productive Drift vs Random Drift Evaluation | `watch`, `future-contract-needed` | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) | evaluation cases are not designed yet | growth engine execution |
 
 ## Updated Open Items
@@ -483,10 +483,12 @@ Still open:
 
 ### Baseline Tagging and Branch Creation
 
-Planned by [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) and reviewed
-by [BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md).
-It remains open because P157 clarifies recommendations but does not create tags
-or branches.
+Planned by [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md), reviewed by
+[BASELINE_TAGGING_FOUNDER_REVIEW.md](./BASELINE_TAGGING_FOUNDER_REVIEW.md), and
+converted into command drafts by
+[MANUAL_TAG_BRANCH_COMMAND_SHEET.md](./MANUAL_TAG_BRANCH_COMMAND_SHEET.md).
+It remains open because P158 does not execute commands, create tags, create
+branches, or approve rebuild.
 
 Still open:
 
@@ -498,6 +500,8 @@ Still open:
   until actual work starts;
 - what exact manual confirmation record is required before creating any Git
   object.
+- whether P158 command drafts should be run exactly as written or reduced to a
+  smaller first tag set.
 
 ## Runtime-Blocked Items
 
