@@ -712,3 +712,24 @@ synthetic autobiographical material 的 containment branch。
 baseline 或 milestone tags 的 candidate commits。
 
 边界：advisor 不创建 tag，也不自动选择 commit。
+
+## Baseline Tagging Plan / 基线 Tag 计划
+
+P156 planning-only document，用于向 founder review 提出 candidate baseline tags、milestone tags、
+branch fork points、manual command drafts 和 rebuild safety gates。
+
+边界：plan 不是 Git execution。它不创建 tags、不创建 branches、不 push、不修改 git history，也不启动
+rebuild。
+
+## Candidate Baseline Tag / 候选基线 Tag
+
+一个 proposed tag name 和 commit pair。只有在 founder confirmation 后，它未来才可能成为真实 Git tag。
+
+边界：candidate tag 不是 existing tag，也不授权 rebuild、merge、branch creation 或 selected return。
+
+## Manual Command Draft / 人工命令草案
+
+作为 future operator guidance 展示的命令，例如 `git tag <tag> <commit>` 或
+`git checkout -b <branch> <tag>`。
+
+边界：draft 不是 execution permission。除非进入单独 founder-approved operation，否则必须保持不执行。

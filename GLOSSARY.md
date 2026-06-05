@@ -847,3 +847,28 @@ or milestone tags based on phase index, verification evidence, and founder
 criteria.
 
 Boundary: an advisor does not create tags or choose commits automatically.
+
+## Baseline Tagging Plan
+
+The P156 planning-only document that proposes candidate baseline tags,
+milestone tags, branch fork points, manual command drafts, and rebuild safety
+gates for founder review.
+
+Boundary: the plan is not Git execution. It does not create tags, create
+branches, push, modify git history, or start rebuild.
+
+## Candidate Baseline Tag
+
+A proposed tag name and commit pair that may later become a real Git tag after
+founder confirmation.
+
+Boundary: a candidate tag is not an existing tag and does not authorize rebuild,
+merge, branch creation, or selected return.
+
+## Manual Command Draft
+
+A command shown as future operator guidance, such as `git tag <tag> <commit>` or
+`git checkout -b <branch> <tag>`.
+
+Boundary: a draft is not execution permission. It must stay unexecuted until a
+separate founder-approved operation.

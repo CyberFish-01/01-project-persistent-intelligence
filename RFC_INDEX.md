@@ -126,6 +126,7 @@ implementation approval.
 | P153 | [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md) / [ZH](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md) | founder checkpoint | review-only checkpoint | Records that verification passed enough to ask the founder, while rebuild remains blocked without explicit approval. | founder approval fabrication, rebuild start, old 01 read, migration, model call, adapter integration, or automatic roadmap execution |
 | P154 | [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) / [ZH](./PUSH_READINESS_REPORT_ZH.md) | push audit | audit-only report | Audits local `main` for clean status, ahead commits, file types, sensitive information, forbidden boundaries, links, tests, and push recommendation. | push execution, rebuild approval, cloud/server update, AstrBot upload, old 01 read, model call, adapter integration, or automatic next phase |
 | P155 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [ZH](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | lineage governance RFC | governance-only planning | Defines future lineage, branch, tag, checkpoint, sandbox, quarantine, and manual selected-return rules before any local rebuild. | git tag creation, git branch creation, push execution, rebuild start, direct instance merge, quarantine merge, old 01 read, model call, adapter integration, or automatic selected return |
+| P156 | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [ZH](./BASELINE_TAGGING_PLAN_ZH.md) | baseline tagging plan | planning-only report | Proposes candidate baseline tags, milestone tags, branch fork points, manual commands, and rebuild safety gates for founder review. | git tag creation, git branch creation, push execution, git history modification, rebuild start, branch merge, old 01 read, model call, adapter integration, or automatic selected return |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
@@ -267,6 +268,11 @@ The current dependency order is:
     record the P155 governance-only lineage boundary: future Core, instance,
     research, quarantine, tag, and checkpoint decisions need explicit review;
     P155 does not create tags, create branches, push, or start rebuild.
+38. [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) and
+    [BASELINE_TAGGING_PLAN_ZH.md](./BASELINE_TAGGING_PLAN_ZH.md) record the P156
+    planning-only tag and branch proposal: candidate commits and branch fork
+    points are visible for founder review, but no Git object is created and
+    rebuild remains blocked.
 
 ## Runtime-Blocked Topics
 
@@ -310,6 +316,7 @@ The indexed documents do not approve:
 - automatic next phase creation;
 - git tag creation;
 - git branch creation;
+- git history modification;
 - automatic merge;
 - automatic selected return;
 - lineage executor;

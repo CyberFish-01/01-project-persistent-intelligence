@@ -49,6 +49,7 @@ not implemented, and not closed as runtime capabilities.
 | Reconstruction Reducer Contract | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md) | accepted reducer contract, deterministic validation, and target-path capture policy are not implemented | reducer execution, state rebuild |
 | Payload / Diff Capture Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md) | privacy/redaction, schema review, compatibility plan, and capture mechanics are missing | payload capture, event schema mutation |
 | Lineage and Branch Governance | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) | lineage report schema, tag advisor, branch policy validation, instance diff, quarantine return preview, and selected-return mechanics are not implemented | git tag creation, git branch creation, automatic merge, rebuild start |
+| Baseline Tagging and Branch Creation | `plan-drafted`, `indexed`, `future-founder-confirmation-needed`, `blocked-runtime` | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) | candidate commits and fork points are proposed, but founder has not confirmed tag choices, branch choices, or rebuild start | git tag creation, git branch creation, git history modification, rebuild start |
 | Productive Drift vs Random Drift Evaluation | `watch`, `future-contract-needed` | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) | evaluation cases are not designed yet | growth engine execution |
 
 ## Updated Open Items
@@ -480,6 +481,23 @@ Still open:
 - what exact manual selected-return mechanics are safe;
 - how to record branch lineage without creating automatic merge authority.
 
+### Baseline Tagging and Branch Creation
+
+Planned by [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md). It remains
+open because P156 only proposes candidate tags, branch names, fork points, and
+manual command drafts.
+
+Still open:
+
+- whether `core-v0-baseline` should point to `5e5fe21` or `83bede1`;
+- whether `core-v1-pre-rebuild-ready` should point to P155 or the future P156
+  commit;
+- whether all proposed milestone tags are useful or too many;
+- whether research and quarantine branches should be created now or delayed
+  until actual work starts;
+- what exact manual confirmation record is required before creating any Git
+  object.
+
 ## Runtime-Blocked Items
 
 The following remain blocked until a future explicit implementation phase:
@@ -531,6 +549,7 @@ The following remain blocked until a future explicit implementation phase:
 - automatic next phase creation;
 - git tag creation;
 - git branch creation;
+- git history modification;
 - automatic merge;
 - automatic selected return;
 - quarantine direct merge;

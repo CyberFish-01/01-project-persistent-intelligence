@@ -51,6 +51,7 @@ current documents carry it, and what is still only long-term vision?"
 | `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | Implements P100 local interaction-path preview and P102 deterministic scenario routing without state writes, model calls, external APIs, adapters, retrieval, or product behavior. |
 | [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | Reviews whether the P100 dry-run helps the founder understand input flow and keeps real routing, retrieval, adapters, and product work blocked. |
 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | Lineage governance RFC | Defines branch, tag, checkpoint, instance sandbox, quarantine, and selected-return planning before future rebuild without creating Git objects or starting rebuild. |
+| [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) / [BASELINE_TAGGING_PLAN_ZH.md](./BASELINE_TAGGING_PLAN_ZH.md) | Baseline tagging plan | Proposes candidate baseline tags, milestone tags, branch fork points, and manual command drafts without creating tags, branches, or rebuild work. |
 
 ## Original Idea Chains
 
@@ -101,6 +102,7 @@ current documents carry it, and what is still only long-term vision?"
 | Minimal Observatory CLI | A generated observatory report now needs to stay read-only and founder-facing. | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
 | Minimal CLI Harness Dry-Run | Interaction pressure now has a local no-write preview command with deterministic scenario routing, but no runtime, adapter, model call, retrieval, or product surface. | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, `scenario-routing`, not harness runtime |
 | Lineage and Branch Governance | Future instances may explore, but Core history needs recoverable lineage, branch, tag, checkpoint, quarantine, and selected-return rules before rebuild. | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `governance-rfc`, not tag creation, branch creation, push, merge, or rebuild |
+| Baseline Tagging and Branch Creation | Lineage governance needs founder-readable candidate tags and branch fork points before any Git objects are created. | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md), [RFC_INDEX.md](./RFC_INDEX.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `planning-only`, not Git execution |
 
 ## Second Chain Map: Artificial Life History
 
@@ -112,6 +114,7 @@ current documents carry it, and what is still only long-term vision?"
 | Over-complete history risk | Too much assigned biography can trap identity. | [NON_CLAIMS.md](./NON_CLAIMS.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `watch` |
 | History earns identity change | Only experience that passes through state, conflict, Dream, and review should change "Who am I?" | [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md), [DECISIONS.md](./DECISIONS.md) | `accepted-boundary` |
 | Core lineage sovereignty | Instance history, synthetic autobiography, adapter context, and model self-claims must stay distinguishable from Core history. | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `governance-boundary`, not automatic merge |
+| Baseline preservation | Original Core references should be marked only after careful founder-confirmed commit selection. | [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `planning-boundary`, not tag creation |
 
 ## Current Interpretation
 
@@ -208,6 +211,9 @@ For origin tracing:
     only as lineage, branch, tag, checkpoint, sandbox, quarantine, and
     selected-return governance, not as approval to create a tag, create a
     branch, push, merge instance output, or start local rebuild.
+24. Read [BASELINE_TAGGING_PLAN.md](./BASELINE_TAGGING_PLAN.md) only as a
+    founder-review plan for candidate tags, branch fork points, and manual
+    command drafts, not as permission to run those commands.
 
 ## P78 Non-Execution Statement
 
@@ -239,6 +245,7 @@ P78 does not implement:
 - automatic next phase creation;
 - git tag creation;
 - git branch creation;
+- git history modification;
 - automatic merge;
 - automatic selected return;
 - lineage executor;

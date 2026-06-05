@@ -2,7 +2,7 @@
 
 Chinese version: [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)
 
-This index covers P0-P150. It is not a release log. It records how the system
+This index covers P0-P156. It is not a release log. It records how the system
 foundation evolved.
 
 | Phase | One-line Summary | Core Proposition | Main Line |
@@ -163,3 +163,4 @@ foundation evolved.
 | P153 | Added Final Pre-Rebuild Founder Checkpoint. | Founder approval is the gate between verification pass and any future rebuild. | Pre-Rebuild Verification |
 | P154 | Updated Push Readiness Report. | Push readiness must be audited separately from rebuild approval, and push must remain a human-confirmed action. | Pre-Rebuild Verification |
 | P155 | Added Lineage and Branch Governance RFC. | Instance may grow, but Core must remain sovereign; lineage, branch, tag, and checkpoint rules must be planned before any local rebuild. | Lineage Governance |
+| P156 | Added Baseline Tagging and Branch Creation Plan. | Tag and branch choices must be reviewed as a plan before any Git object is created or rebuild begins. | Lineage Governance |
