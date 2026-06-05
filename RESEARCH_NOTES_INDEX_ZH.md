@@ -48,6 +48,7 @@ origin ideas are not implementation approval.
 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | 规划 no-write dry-run CLI pressure test，之后在 P100 中窄范围实现。 |
 | `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | 实现 P100 local interaction-path preview 和 P102 deterministic scenario routing，不写 state、不调用模型、不调用外部 API、不接 adapter、不执行 retrieval、不进入产品层。 |
 | [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | 审查 P100 dry-run 是否帮助 founder 看懂 input flow，并继续阻塞 real routing、retrieval、adapters 和 product work。 |
+| [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | Lineage governance RFC | 在 future rebuild 前定义 branch、tag、checkpoint、instance sandbox、quarantine 和 selected-return planning，同时不创建 Git objects，也不启动 rebuild。 |
 
 ## Original Idea Chains / 原始思想链
 
@@ -97,6 +98,7 @@ origin ideas are not implementation approval.
 | Foundation Observatory Report | 任何 dashboard 或 CLI plan 前，创始人需要一份可读 Markdown snapshot。 | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
 | Minimal Observatory CLI | generated observatory report 现在需要保持 read-only 和 founder-facing。 | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
 | Minimal CLI Harness Dry-Run | interaction pressure 现在有 local no-write preview command 和 deterministic scenario routing，但没有 runtime、adapter、model call、retrieval 或 product surface。 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, `scenario-routing`, not harness runtime |
+| Lineage and Branch Governance | future instances 可以探索，但 Core history 在 rebuild 前需要 recoverable lineage、branch、tag、checkpoint、quarantine 和 selected-return rules。 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `governance-rfc`, not tag creation、branch creation、push、merge 或 rebuild |
 
 ## Second Chain Map: Artificial Life History / 第二条思想链
 
@@ -107,6 +109,7 @@ origin ideas are not implementation approval.
 | Identity Seed | 起点应是 seed，不是 complete fictional life。 | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md), [FOUNDATION.md](./FOUNDATION.md) | `accepted-foundation` |
 | Over-complete history risk | 过度完整的 assigned biography 会困住 identity。 | [NON_CLAIMS.md](./NON_CLAIMS.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `watch` |
 | History earns identity change | 只有穿过 state、conflict、Dream 和 review 的 experience 才有资格改变“我是谁”。 | [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md), [DECISIONS.md](./DECISIONS.md) | `accepted-boundary` |
+| Core lineage sovereignty | Instance history、synthetic autobiography、adapter context 和 model self-claims 必须能与 Core history 区分。 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `governance-boundary`, not automatic merge |
 
 ## Current Interpretation / 当前解释
 
@@ -191,6 +194,9 @@ Research notes 是 source material，不是当前 implementation plan。
 22. 阅读 [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md)
     时，把它当作 P100/P102 read-only `harness-dry-run` command 背后的 boundary plan，不要当作
     harness runtime、model calls、external API calls、retrieval、adapter integration、product layer 或 P103 approval。
+23. 阅读 [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md)
+    时，只把它当作 lineage、branch、tag、checkpoint、sandbox、quarantine 和 selected-return
+    governance，不要当作创建 tag、创建 branch、push、merge instance output 或启动 local rebuild 的许可。
 
 ## P78 Non-Execution Statement / P78 非执行声明
 
@@ -220,6 +226,12 @@ P78 不实现：
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
+- git tag creation；
+- git branch creation；
+- automatic merge；
+- automatic selected return；
+- lineage executor；
+- 从 lineage planning 直接启动 rebuild；
 - 超出 P102 read-only dry-run scenario routing 的 harness implementation；
 - 超出 P102 read-only dry-run scenario routing 的 harness runtime；
 - model calls from harness work；

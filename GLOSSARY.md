@@ -790,3 +790,60 @@ report-only, future-only, or dangerously early.
 
 Boundary: boundary status is not runtime enforcement and does not replace
 review.
+
+## Lineage Governance
+
+The P155 governance layer for keeping Core history, instance branches,
+research branches, quarantine branches, baseline references, tags, and
+checkpoints traceable before any future local rebuild.
+
+Boundary: lineage governance is planning and review vocabulary. It does not
+create tags, create branches, push, merge, start rebuild, or authorize selected
+return.
+
+## Core Trunk
+
+The protected main continuity line for reviewed Core history and stable project
+state.
+
+Boundary: Core trunk must not receive direct instance, research, quarantine,
+adapter, synthetic-history, or tool-candidate merges.
+
+## Core Baseline
+
+A recoverable known-good Core reference used for rollback, comparison, and
+future rebuild planning.
+
+Boundary: a baseline is an anchor, not mutable experiment space or rebuild
+approval.
+
+## Instance Sandbox Branch
+
+A contained branch for exploring possible 01 instance behavior, style,
+self-hypotheses, synthetic history, tool candidates, or local behavior.
+
+Boundary: instance output is candidate or evidence material only. Instance
+memory is not Core memory, and instance identity is not Core identity.
+
+## Quarantine Branch
+
+A containment branch for untrusted, suspicious, imported, adapter-shaped,
+model-claimed, contaminated, or synthetic autobiographical material.
+
+Boundary: quarantine branches do not merge directly into Core trunk.
+
+## Manual Selected Return
+
+A human-reviewed, small, source-attributed return from candidate or quarantine
+material back into Core.
+
+Boundary: selected return is not automatic merge, branch promotion, identity
+adoption, memory adoption, or tool trust update.
+
+## Baseline Tag Advisor
+
+A possible future read-only report that suggests candidate commits for baseline
+or milestone tags based on phase index, verification evidence, and founder
+criteria.
+
+Boundary: an advisor does not create tags or choose commits automatically.

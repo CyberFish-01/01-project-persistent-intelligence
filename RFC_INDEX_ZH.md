@@ -123,6 +123,7 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 | P152 | [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) / [ZH](./VERIFICATION_REPORT_ZH.md) | verification report | read-only evidence report | 记录 final verification evidence 和 pass status，用于 founder checkpoint。 | rebuild approval、rebuild start、migration、import、write path、model call、adapter integration 或 automatic next phase |
 | P153 | [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md) / [ZH](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md) | founder checkpoint | review-only checkpoint | 记录 verification 已足够向 founder 提问，但没有 explicit approval 时 rebuild 仍 blocked。 | founder approval fabrication、rebuild start、old 01 read、migration、model call、adapter integration 或 automatic roadmap execution |
 | P154 | [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) / [ZH](./PUSH_READINESS_REPORT_ZH.md) | push audit | audit-only report | 审计本地 `main` 的 clean status、ahead commits、file types、sensitive information、forbidden boundaries、links、tests 和 push recommendation。 | push execution、rebuild approval、cloud/server update、AstrBot upload、old 01 read、model call、adapter integration 或 automatic next phase |
+| P155 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [ZH](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | lineage governance RFC | governance-only planning | 在任何 local rebuild 前，定义 future lineage、branch、tag、checkpoint、sandbox、quarantine 和 manual selected-return 规则。 | git tag creation、git branch creation、push execution、rebuild start、direct instance merge、quarantine merge、old 01 read、model call、adapter integration 或 automatic selected return |
 
 ## Founder-Facing Vocabulary And Visual Naming / 创始人可读词汇与视觉命名
 
@@ -246,6 +247,11 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
     [PUSH_READINESS_REPORT_ZH.md](./PUSH_READINESS_REPORT_ZH.md) 记录 P154 push
     readiness audit：本地 `main` 在 report commit 后已检查且 push-ready，但 push 仍需要人类确认，
     rebuild 仍 blocked。
+37. [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) 和
+    [LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md)
+    记录 P155 governance-only lineage boundary：future Core、instance、research、
+    quarantine、tag 和 checkpoint decisions 都需要 explicit review；P155 不创建 tag、不创建
+    branch、不 push，也不启动 rebuild。
 
 ## Runtime-Blocked Topics / Runtime 阻塞项
 
@@ -287,6 +293,11 @@ P68 存在的原因是：foundation layer 已经有许多 review artifacts。如
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
+- git tag creation；
+- git branch creation；
+- automatic merge；
+- automatic selected return；
+- lineage executor；
 - pre-rebuild verification as rebuild approval；
 - 超出 P100 read-only dry-run command 的 harness implementation；
 - 超出 P100 read-only dry-run command 的 harness runtime；

@@ -162,3 +162,4 @@ foundation evolved.
 | P152 | Added Verification Report. | Passing verification allows a founder checkpoint, not automatic rebuild. | Pre-Rebuild Verification |
 | P153 | Added Final Pre-Rebuild Founder Checkpoint. | Founder approval is the gate between verification pass and any future rebuild. | Pre-Rebuild Verification |
 | P154 | Updated Push Readiness Report. | Push readiness must be audited separately from rebuild approval, and push must remain a human-confirmed action. | Pre-Rebuild Verification |
+| P155 | Added Lineage and Branch Governance RFC. | Instance may grow, but Core must remain sovereign; lineage, branch, tag, and checkpoint rules must be planned before any local rebuild. | Lineage Governance |

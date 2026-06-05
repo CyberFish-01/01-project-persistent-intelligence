@@ -50,6 +50,7 @@ current documents carry it, and what is still only long-term vision?"
 | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md) / [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN_ZH.md) | Harness implementation plan | Plans the no-write dry-run CLI pressure test later implemented narrowly in P100. |
 | `python3 -m one_core.cli harness-dry-run` | Read-only harness dry-run CLI | Implements P100 local interaction-path preview and P102 deterministic scenario routing without state writes, model calls, external APIs, adapters, retrieval, or product behavior. |
 | [HARNESS_USABILITY_REVIEW.md](./HARNESS_USABILITY_REVIEW.md) / [HARNESS_USABILITY_REVIEW_ZH.md](./HARNESS_USABILITY_REVIEW_ZH.md) | Harness usability review | Reviews whether the P100 dry-run helps the founder understand input flow and keeps real routing, retrieval, adapters, and product work blocked. |
+| [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | Lineage governance RFC | Defines branch, tag, checkpoint, instance sandbox, quarantine, and selected-return planning before future rebuild without creating Git objects or starting rebuild. |
 
 ## Original Idea Chains
 
@@ -99,6 +100,7 @@ current documents carry it, and what is still only long-term vision?"
 | Foundation Observatory Report | The founder needs a readable Markdown snapshot before any dashboard or CLI plan. | [FOUNDATION_OBSERVATORY_REPORT.md](./FOUNDATION_OBSERVATORY_REPORT.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `report-only`, not runtime observability |
 | Minimal Observatory CLI | A generated observatory report now needs to stay read-only and founder-facing. | [MINIMAL_OBSERVATORY_CLI_PLAN.md](./MINIMAL_OBSERVATORY_CLI_PLAN.md), [OBSERVATORY_USABILITY_REVIEW.md](./OBSERVATORY_USABILITY_REVIEW.md), [GLOSSARY.md](./GLOSSARY.md) | `implemented-static-report`, `readability-improved`, not dashboard runtime |
 | Minimal CLI Harness Dry-Run | Interaction pressure now has a local no-write preview command with deterministic scenario routing, but no runtime, adapter, model call, retrieval, or product surface. | [MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md](./MINIMAL_CLI_HARNESS_IMPLEMENTATION_PLAN.md), [CORE_INTERACTION_HARNESS_ROADMAP.md](./CORE_INTERACTION_HARNESS_ROADMAP.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `implemented-static-dry-run`, `scenario-routing`, not harness runtime |
+| Lineage and Branch Governance | Future instances may explore, but Core history needs recoverable lineage, branch, tag, checkpoint, quarantine, and selected-return rules before rebuild. | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md), [OPEN_QUESTIONS.md](./OPEN_QUESTIONS.md) | `governance-rfc`, not tag creation, branch creation, push, merge, or rebuild |
 
 ## Second Chain Map: Artificial Life History
 
@@ -109,6 +111,7 @@ current documents carry it, and what is still only long-term vision?"
 | Identity Seed | The beginning should be a seed, not a complete fictional life. | [IDENTITY_SEED_AND_LIFE_HISTORY.md](./IDENTITY_SEED_AND_LIFE_HISTORY.md), [FOUNDATION.md](./FOUNDATION.md) | `accepted-foundation` |
 | Over-complete history risk | Too much assigned biography can trap identity. | [NON_CLAIMS.md](./NON_CLAIMS.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `watch` |
 | History earns identity change | Only experience that passes through state, conflict, Dream, and review should change "Who am I?" | [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md), [DECISIONS.md](./DECISIONS.md) | `accepted-boundary` |
+| Core lineage sovereignty | Instance history, synthetic autobiography, adapter context, and model self-claims must stay distinguishable from Core history. | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md), [RISK_REGISTER.md](./RISK_REGISTER.md) | `governance-boundary`, not automatic merge |
 
 ## Current Interpretation
 
@@ -201,6 +204,10 @@ For origin tracing:
     as the boundary plan behind the P100/P102 read-only `harness-dry-run` command,
     not as approval for harness runtime, model calls, external API calls,
     retrieval, adapter integration, product layer, or P103.
+23. Read [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md)
+    only as lineage, branch, tag, checkpoint, sandbox, quarantine, and
+    selected-return governance, not as approval to create a tag, create a
+    branch, push, merge instance output, or start local rebuild.
 
 ## P78 Non-Execution Statement
 
@@ -230,6 +237,12 @@ P78 does not implement:
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
+- git tag creation;
+- git branch creation;
+- automatic merge;
+- automatic selected return;
+- lineage executor;
+- rebuild start from lineage planning;
 - harness implementation beyond the P102 read-only dry-run scenario routing;
 - harness runtime beyond the P102 read-only dry-run scenario routing;
 - model calls from harness work;

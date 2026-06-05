@@ -662,3 +662,53 @@ report-style view。
 的可见标签。
 
 边界：boundary status 不是 runtime enforcement，也不能替代 review。
+
+## Lineage Governance / 谱系治理
+
+P155 governance layer，用于在任何 future local rebuild 前，让 Core history、instance branches、
+research branches、quarantine branches、baseline references、tags 和 checkpoints 可追溯。
+
+边界：lineage governance 只是 planning 和 review vocabulary。它不创建 tag、不创建 branch、不 push、
+不 merge、不启动 rebuild，也不授权 selected return。
+
+## Core Trunk / 内核主干
+
+保存 reviewed Core history 和稳定项目状态的受保护主连续性线。
+
+边界：Core trunk 不应接收 direct instance、research、quarantine、adapter、synthetic-history 或
+tool-candidate merges。
+
+## Core Baseline / 内核基线
+
+用于 rollback、comparison 和 future rebuild planning 的 recoverable known-good Core reference。
+
+边界：baseline 是锚点，不是 mutable experiment space，也不是 rebuild approval。
+
+## Instance Sandbox Branch / 实例沙盒分支
+
+用于探索可能的 01 instance behavior、style、self-hypotheses、synthetic history、tool candidates
+或 local behavior 的受控分支。
+
+边界：instance output 只能作为 candidate 或 evidence material。Instance memory 不是 Core memory，
+instance identity 不是 Core identity。
+
+## Quarantine Branch / 隔离分支
+
+用于容纳 untrusted、suspicious、imported、adapter-shaped、model-claimed、contaminated 或
+synthetic autobiographical material 的 containment branch。
+
+边界：quarantine branches 不得 direct merge 到 Core trunk。
+
+## Manual Selected Return / 人工选择回流
+
+经过 human review 的、小范围、有来源标注的 candidate 或 quarantine material 回流到 Core。
+
+边界：selected return 不是 automatic merge、branch promotion、identity adoption、memory adoption
+或 tool trust update。
+
+## Baseline Tag Advisor / 基线 Tag 建议器
+
+可能的 future read-only report，根据 phase index、verification evidence 和 founder criteria 建议
+baseline 或 milestone tags 的 candidate commits。
+
+边界：advisor 不创建 tag，也不自动选择 commit。

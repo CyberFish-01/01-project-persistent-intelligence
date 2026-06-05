@@ -55,6 +55,7 @@ planning phases discuss capability evolution without approving runtime work.
 | R23 | Dependency / network / filesystem risk | high | tool candidates require packages, APIs, files, credentials, or network access | require dependency check, safety boundary check, human review, and explicit authorization before any future execution | dependency installation, network calls, filesystem mutation |
 | R24 | Reusable procedure mistaken for trusted tool | high | a repeatable workflow is treated as safe executable capability | use the P92 rule: reusable procedure does not imply trusted tool | trusted tool promotion without review |
 | R25 | Self-modifying runtime pressure | high | capability work proposes changing runtime, prompts, code, memory, or identity | keep self-modifying runtime forbidden until explicit future architecture and founder approval exist | self-modifying runtime |
+| R26 | Lineage contamination | high | instance output, synthetic history, adapter context, or model self-claims start looking native to Core | use [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md): no direct instance/research/quarantine merge; candidate -> quarantine -> review -> manual selected return | direct branch merge into Core, tag/branch creation as authorization, synthetic autobiography as Core history |
 
 ## Risk Clusters
 
@@ -91,12 +92,13 @@ Primary control: Reconstruction Evidence is not reconstruction. Reducer
 Contract is not reducer execution. Capture Policy is not payload capture. Event
 Log remains append-only.
 
-### Identity And Platform Boundary
+### Identity, Platform, And Lineage Boundary
 
-Risks: R10, R12, R18.
+Risks: R10, R12, R18, R26.
 
 Primary control: Identity Core stays high-gated. Subject Kernel / World Seed
 remain conceptual. Platforms and adapters translate; they do not own identity.
+Instances may grow, but Core remains sovereign.
 
 ### Capability Evolution And Tools
 
@@ -105,6 +107,14 @@ Risks: R19, R20, R21, R22, R23, R24, R25.
 Primary control: tool-first self-evolution remains a review-only capability
 boundary. Tool improvement is not identity growth. Verification evidence is not
 authorization. Candidate review is not promotion.
+
+### Lineage And Branch Governance
+
+Risks: R26.
+
+Primary control: keep Core trunk, baseline, milestone, pre-rebuild checkpoint,
+instance sandbox, research, quarantine, and release/verification branches
+separate. Use selected return only after quarantine and manual review.
 
 ### Documentation Operations
 
@@ -139,6 +149,12 @@ P72 does not implement:
 - automatic tool promotion;
 - tool library mutation;
 - self-modifying runtime;
+- git tag creation;
+- git branch creation;
+- automatic merge;
+- automatic selected return;
+- lineage executor;
+- rebuild start from lineage planning;
 - unreviewed dependency installation;
 - uncontrolled filesystem or network access;
 - identity mutation;

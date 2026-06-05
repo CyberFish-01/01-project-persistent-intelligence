@@ -48,6 +48,7 @@ not implemented, and not closed as runtime capabilities.
 | Subject Kernel / World Seed Direction | `rfc-drafted`, `indexed`, `mapped`, `watch` | [SUBJECT_KERNEL_WORLD_SEED_RFC.md](./SUBJECT_KERNEL_WORLD_SEED_RFC.md) | identity boundary review and reconstruction path distinction remain future work | Identity Core rewrite, runtime split |
 | Reconstruction Reducer Contract | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md) | accepted reducer contract, deterministic validation, and target-path capture policy are not implemented | reducer execution, state rebuild |
 | Payload / Diff Capture Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md) | privacy/redaction, schema review, compatibility plan, and capture mechanics are missing | payload capture, event schema mutation |
+| Lineage and Branch Governance | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) | lineage report schema, tag advisor, branch policy validation, instance diff, quarantine return preview, and selected-return mechanics are not implemented | git tag creation, git branch creation, automatic merge, rebuild start |
 | Productive Drift vs Random Drift Evaluation | `watch`, `future-contract-needed` | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) | evaluation cases are not designed yet | growth engine execution |
 
 ## Updated Open Items
@@ -464,6 +465,21 @@ Still open:
 - target-path acceptance gates;
 - migration plan for future event compatibility.
 
+### Lineage and Branch Governance
+
+Clarified by [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md).
+Lineage governance remains a planning boundary before any local rebuild.
+
+Still open:
+
+- what a future lineage report schema should contain;
+- how a baseline tag advisor should choose candidate commits without guessing;
+- how branch policy validation can remain read-only;
+- how to compare instance branches without deciding which instance is "more real";
+- how quarantine return preview should separate evidence from adoption;
+- what exact manual selected-return mechanics are safe;
+- how to record branch lineage without creating automatic merge authority.
+
 ## Runtime-Blocked Items
 
 The following remain blocked until a future explicit implementation phase:
@@ -513,6 +529,13 @@ The following remain blocked until a future explicit implementation phase:
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
+- git tag creation;
+- git branch creation;
+- automatic merge;
+- automatic selected return;
+- quarantine direct merge;
+- lineage executor;
+- rebuild start from lineage planning;
 - product-layer visual surface;
 - harness implementation beyond P102 read-only dry-run scenario routing;
 - harness runtime beyond P102 read-only dry-run scenario routing;

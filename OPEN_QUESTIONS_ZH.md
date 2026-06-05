@@ -48,6 +48,7 @@ capabilities 被关闭。
 | Subject Kernel / World Seed Direction | `rfc-drafted`, `indexed`, `mapped`, `watch` | [SUBJECT_KERNEL_WORLD_SEED_RFC.md](./SUBJECT_KERNEL_WORLD_SEED_RFC.md) | identity boundary review 和 reconstruction path distinction 仍是 future work | Identity Core rewrite、runtime split |
 | Reconstruction Reducer Contract | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [RECONSTRUCTION_REDUCER_CONTRACT_RFC.md](./RECONSTRUCTION_REDUCER_CONTRACT_RFC.md) | accepted reducer contract、deterministic validation 和 target-path capture policy 未实现 | reducer execution、state rebuild |
 | Payload / Diff Capture Policy | `rfc-drafted`, `indexed`, `mapped`, `blocked-runtime` | [PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md](./PAYLOAD_DIFF_CAPTURE_POLICY_RFC.md) | privacy/redaction、schema review、compatibility plan 和 capture mechanics 缺失 | payload capture、event schema mutation |
+| Lineage and Branch Governance | `rfc-drafted`, `indexed`, `future-contract-needed`, `blocked-runtime` | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) | lineage report schema、tag advisor、branch policy validation、instance diff、quarantine return preview 和 selected-return mechanics 尚未实现 | git tag creation、git branch creation、automatic merge、rebuild start |
 | Productive Drift vs Random Drift Evaluation | `watch`, `future-contract-needed` | [PRODUCTIVE_DRIFT_VS_COLLAPSE.md](./PRODUCTIVE_DRIFT_VS_COLLAPSE.md) | evaluation cases 尚未设计 | growth engine execution |
 
 ## Updated Open Items / 更新后的开放项
@@ -406,6 +407,21 @@ policy 仍与 payload capture 分离。
 - target-path acceptance gates；
 - future event compatibility 的 migration plan。
 
+### Lineage and Branch Governance / 谱系与分支治理
+
+已由 [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) 澄清。
+Lineage governance 仍是任何 local rebuild 前的 planning boundary。
+
+仍开放：
+
+- future lineage report schema 应包含什么；
+- baseline tag advisor 如何在不猜 commit 的情况下选择候选；
+- branch policy validation 如何保持 read-only；
+- 如何比较 instance branches，同时不决定哪个 instance “更真实”；
+- quarantine return preview 如何区分 evidence 和 adoption；
+- 什么样的 manual selected-return mechanics 是安全的；
+- 如何记录 branch lineage，同时不创建 automatic merge authority。
+
 ## Runtime-Blocked Items / Runtime 阻塞项
 
 除非未来明确进入 implementation phase，否则以下仍然 blocked：
@@ -455,6 +471,13 @@ policy 仍与 payload capture 分离。
 - observability executor；
 - automatic roadmap execution；
 - automatic next phase creation；
+- git tag creation；
+- git branch creation；
+- automatic merge；
+- automatic selected return；
+- quarantine direct merge；
+- lineage executor；
+- 从 lineage planning 直接启动 rebuild；
 - product-layer visual surface；
 - 超出 P102 read-only dry-run scenario routing 的 harness implementation；
 - 超出 P102 read-only dry-run scenario routing 的 harness runtime；

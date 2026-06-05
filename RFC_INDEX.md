@@ -125,6 +125,7 @@ implementation approval.
 | P152 | [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) / [ZH](./VERIFICATION_REPORT_ZH.md) | verification report | read-only evidence report | Records final verification evidence and pass status for founder checkpoint. | rebuild approval, rebuild start, migration, import, write path, model call, adapter integration, or automatic next phase |
 | P153 | [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md) / [ZH](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md) | founder checkpoint | review-only checkpoint | Records that verification passed enough to ask the founder, while rebuild remains blocked without explicit approval. | founder approval fabrication, rebuild start, old 01 read, migration, model call, adapter integration, or automatic roadmap execution |
 | P154 | [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) / [ZH](./PUSH_READINESS_REPORT_ZH.md) | push audit | audit-only report | Audits local `main` for clean status, ahead commits, file types, sensitive information, forbidden boundaries, links, tests, and push recommendation. | push execution, rebuild approval, cloud/server update, AstrBot upload, old 01 read, model call, adapter integration, or automatic next phase |
+| P155 | [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [ZH](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md) | lineage governance RFC | governance-only planning | Defines future lineage, branch, tag, checkpoint, sandbox, quarantine, and manual selected-return rules before any local rebuild. | git tag creation, git branch creation, push execution, rebuild start, direct instance merge, quarantine merge, old 01 read, model call, adapter integration, or automatic selected return |
 
 ## Founder-Facing Vocabulary And Visual Naming
 
@@ -261,6 +262,11 @@ The current dependency order is:
     push readiness audit: local `main` is checked and push-ready after the
     report commit, but push still requires human confirmation and rebuild
     remains blocked.
+37. [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) and
+    [LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md)
+    record the P155 governance-only lineage boundary: future Core, instance,
+    research, quarantine, tag, and checkpoint decisions need explicit review;
+    P155 does not create tags, create branches, push, or start rebuild.
 
 ## Runtime-Blocked Topics
 
@@ -302,6 +308,11 @@ The indexed documents do not approve:
 - observability executor;
 - automatic roadmap execution;
 - automatic next phase creation;
+- git tag creation;
+- git branch creation;
+- automatic merge;
+- automatic selected return;
+- lineage executor;
 - pre-rebuild verification as rebuild approval;
 - harness implementation beyond the P100 read-only dry-run command;
 - harness runtime beyond the P100 read-only dry-run command;

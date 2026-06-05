@@ -161,3 +161,4 @@ English version: [PHASE_INDEX.md](./PHASE_INDEX.md)
 | P152 | 加入 Verification Report。 | verification 通过只允许进入 founder checkpoint，不自动批准 rebuild。 | Pre-Rebuild Verification |
 | P153 | 加入 Final Pre-Rebuild Founder Checkpoint。 | founder approval 是 verification pass 和任何 future rebuild 之间的 gate。 | Pre-Rebuild Verification |
 | P154 | 更新 Push Readiness Report。 | push readiness 必须与 rebuild approval 分开审计，并且 push 仍需要人类确认。 | Pre-Rebuild Verification |
+| P155 | 加入 Lineage and Branch Governance RFC。 | 实例可以生长，内核不可僭越；任何本地重构前必须先规划 lineage、branch、tag 和 checkpoint 规则。 | Lineage Governance |

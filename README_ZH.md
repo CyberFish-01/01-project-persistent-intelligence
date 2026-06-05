@@ -17,9 +17,9 @@
 - foundation documents：定义 continuity、identity、event sourcing、review、reconstruction readiness 和 blocked future work；
 - earlier prototype references：记录本地 01 Core runtime 和 adapter surfaces 的早期工程参考。
 
-当前工作状态：P154 Push Readiness Audit 已在本地完成。P154 report commit 之后，仓库处于
-push-ready 状态，但 push 本身仍需要 founder / operator 明确确认。在 founder 明确批准前，rebuild
-仍保持 blocked。
+当前工作状态：P155 Lineage and Branch Governance 已在本地完成。P154 audit 已确认仓库
+push-ready，P155 额外加入 future lineage、branch、tag 和 checkpoint decisions 的 governance-only
+安全门。push、创建 tag、创建 branch 和 rebuild 仍需要 founder / operator 明确确认。
 
 下面的 runtime 和 adapter references 是历史/工程参考；它们不是进入 P103、建设 dashboard
 runtime、Web UI、observability executor、status API、进入应用层、扩展 UI、AstrBot、product、
@@ -33,7 +33,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [FOUNDATION.md](./FOUNDATION.md) / [FOUNDATION_ZH.md](./FOUNDATION_ZH.md)：项目级边界、不变量和阶段顺序。
 - [FOUNDATION_STATUS.md](./FOUNDATION_STATUS.md) / [FOUNDATION_STATUS_ZH.md](./FOUNDATION_STATUS_ZH.md)：基础层已具备什么、缺什么、哪些仍在探索或需要后推。
 - [FOUNDATION_ROADMAP.md](./FOUNDATION_ROADMAP.md) / [FOUNDATION_ROADMAP_ZH.md](./FOUNDATION_ROADMAP_ZH.md)：稳定地基、blocked runtime work、future contracts 和低风险 consolidation。
-- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P154 foundation phase index，按核心命题和所属主线整理。
+- [PHASE_INDEX.md](./PHASE_INDEX.md) / [PHASE_INDEX_ZH.md](./PHASE_INDEX_ZH.md)：P0-P155 foundation phase index，按核心命题和所属主线整理。
 - [CONCEPT_MAP.md](./CONCEPT_MAP.md) / [CONCEPT_MAP_ZH.md](./CONCEPT_MAP_ZH.md)：当前 foundation concept map 和跨层关系。
 - [ARCHITECTURE_BOUNDARIES.md](./ARCHITECTURE_BOUNDARIES.md) / [ARCHITECTURE_BOUNDARIES_ZH.md](./ARCHITECTURE_BOUNDARIES_ZH.md)：P73 architecture boundary refresh，覆盖 identity、memory、growth、temporal、reconstruction、governance 和 product layers。
 - [GLOSSARY.md](./GLOSSARY.md) / [GLOSSARY_ZH.md](./GLOSSARY_ZH.md)：P74 去重后的共享术语和边界，覆盖 growth、drift、stateful memory、governance、reconstruction 和 temporal awareness。
@@ -93,6 +93,7 @@ automatic tool promotion、growth execution、memory rewrite 或 reconstruction 
 - [VERIFICATION_REPORT.md](./VERIFICATION_REPORT.md) / [VERIFICATION_REPORT_ZH.md](./VERIFICATION_REPORT_ZH.md)：P152 read-only verification report；通过表示可进入 founder checkpoint，不表示批准 rebuild。
 - [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT.md) / [FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md](./FINAL_PRE_REBUILD_FOUNDER_CHECKPOINT_ZH.md)：P153 final founder checkpoint；记录 rebuild 需要 founder 明确批准，且尚未开始。
 - [PUSH_READINESS_REPORT.md](./PUSH_READINESS_REPORT.md) / [PUSH_READINESS_REPORT_ZH.md](./PUSH_READINESS_REPORT_ZH.md)：P154 audit，确认本地 `main` 在 report commit 后干净、已检查、可 push；它不执行 push，也不批准 rebuild。
+- [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md) / [LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md](./LINEAGE_BRANCH_GOVERNANCE_RFC_ZH.md)：P155 governance-only 规则，定义 future lineage、branch、tag、checkpoint、sandbox、quarantine 和 selected-return decisions；它不创建 tag、不创建 branch、不 push，也不启动 rebuild。
 - [SCENARIO_PROFILE_TEST_MATRIX.md](./SCENARIO_PROFILE_TEST_MATRIX.md) / [SCENARIO_PROFILE_TEST_MATRIX_ZH.md](./SCENARIO_PROFILE_TEST_MATRIX_ZH.md)：P104 `harness-dry-run` expected pressure profiles、candidates、boundaries 和 next steps。
 - [AUTONOMOUS_WORK_SUMMARY.md](./AUTONOMOUS_WORK_SUMMARY.md) / [AUTONOMOUS_WORK_SUMMARY_ZH.md](./AUTONOMOUS_WORK_SUMMARY_ZH.md)：最新 autonomous foundation work summary 和下一步安全方向。
 
@@ -230,7 +231,7 @@ python3 -m one_core.cli pre-rebuild-verification --lang zh
 
 这个命令检查 P112-P151 必需文档、README/index coverage、local Markdown links、active forbidden
 true flags、既有只读 report builders、CTM boundaries、Tool-First boundaries 和 rebuild boundaries。
-它不运行 rebuild、不调用模型、不连接 adapter、不写 state，也不批准 P152/P153/P154。
+它不运行 rebuild、不调用模型、不连接 adapter、不写 state，也不批准 P152/P153/P154/P155。
 
 本地 API 参考：
 

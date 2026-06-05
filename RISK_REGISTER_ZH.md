@@ -54,6 +54,7 @@ foundation layer 保持清醒，同时不批准 runtime work。
 | R23 | Dependency / network / filesystem risk | high | tool candidates 需要 packages、APIs、files、credentials 或 network access | future execution 前要求 dependency check、safety boundary check、human review 和 explicit authorization | dependency installation、network calls、filesystem mutation |
 | R24 | Reusable procedure mistaken for trusted tool | high | repeatable workflow 被当成 safe executable capability | 使用 P92 规则：reusable procedure does not imply trusted tool | trusted tool promotion without review |
 | R25 | Self-modifying runtime pressure | high | capability work 提议修改 runtime、prompts、code、memory 或 identity | self-modifying runtime 保持 forbidden，直到 explicit future architecture 和 founder approval 存在 | self-modifying runtime |
+| R26 | Lineage contamination | high | instance output、synthetic history、adapter context 或 model self-claims 开始看起来像 Core 原生内容 | 使用 [LINEAGE_BRANCH_GOVERNANCE_RFC.md](./LINEAGE_BRANCH_GOVERNANCE_RFC.md)：不允许 direct instance/research/quarantine merge；只能 candidate -> quarantine -> review -> manual selected return | direct branch merge into Core、tag/branch creation as authorization、synthetic autobiography as Core history |
 
 ## Risk Clusters / 风险簇
 
@@ -86,12 +87,13 @@ Growth Candidate Lifecycle 分离。Review objects 不执行 subject-state trans
 主要控制：Reconstruction Evidence 不是 reconstruction。Reducer Contract 不是 reducer
 execution。Capture Policy 不是 payload capture。Event Log 保持 append-only。
 
-### Identity And Platform Boundary / 身份与平台边界
+### Identity, Platform, And Lineage Boundary / 身份、平台与谱系边界
 
-风险：R10、R12、R18。
+风险：R10、R12、R18、R26。
 
 主要控制：Identity Core 保持 high-gated。Subject Kernel / World Seed 保持 conceptual。
-Platforms and adapters translate; they do not own identity.
+Platforms and adapters translate; they do not own identity. Instances may grow, but Core remains
+sovereign.
 
 ### Capability Evolution And Tools / 能力演化与工具
 
@@ -99,6 +101,14 @@ Platforms and adapters translate; they do not own identity.
 
 主要控制：tool-first self-evolution 保持 review-only capability boundary。Tool improvement 不是
 identity growth。Verification evidence 不是 authorization。Candidate review 不是 promotion。
+
+### Lineage And Branch Governance / 谱系与分支治理
+
+风险：R26。
+
+主要控制：保持 Core trunk、baseline、milestone、pre-rebuild checkpoint、instance sandbox、
+research、quarantine 和 release/verification branches 分离。selected return 必须经过 quarantine
+和 manual review。
 
 ### Documentation Operations / 文档运维
 
@@ -131,6 +141,12 @@ P72 不实现：
 - automatic tool promotion；
 - tool library mutation；
 - self-modifying runtime；
+- git tag creation；
+- git branch creation；
+- automatic merge；
+- automatic selected return；
+- lineage executor；
+- 从 lineage planning 直接启动 rebuild；
 - unreviewed dependency installation；
 - uncontrolled filesystem 或 network access；
 - identity mutation；
